@@ -6,9 +6,13 @@ alignBit = 1;
 
 exptName = [animal '_u' unit '_' expt];
 physDir = fullfile(dataFold,'AL',animal,exptName);
-load(fullfile(physDir,[exptName '_p' num2str(probe) '_data.mat']))
+if strcmp(animal,'FEAQ7')
+    load(fullfile(physDir,[exptName '_data.mat']))
+else
+    load(fullfile(physDir,[exptName '_p' num2str(probe) '_data.mat']))
+end
 data = Data{1,1}; clear Data
-nUnits = size(UnitType{1,1},1);
+nUnits = size(UnitType{1,1},1)
 
 c = CondInfo;
 r = data.RespMean';
@@ -30,6 +34,8 @@ for u = 1:nUnits
     rNull(u,1) = r(c==cNull(u,1),u);
 
     dsi(u,1) = abs(rPref(u,1)-rNull(u,1))/rPref(u,1);
+    mv = meanvec(c,r(:,u));
+    dcv(u,1) = mv.cv;
 
     if alignBit == 1
         [tOut,rOut,i] = alignDirTuning(c',r(:,u)');
@@ -40,11 +46,14 @@ for u = 1:nUnits
         tuningY{u,1} = r(:,u);
     end
 
+    isAct = rPref(u,1) > 2;
+    isVis = anova1([data.AllBResp(:,u) squeeze(data.AllResp(u,:,:))],[],"off")<0.05;
+    goodUnit(u,1) = isAct&isVis;
 
 
 end
 
-varNames = {'dsi','rPref','cPref','tuningX','tuningY'};
-sumStats = table(dsi,rPref,cPref,tuningX,tuningY,'VariableNames',varNames);
+varNames = {'goodUnit','dsi','dcv','rPref','cPref','tuningX','tuningY'};
+sumStats = table(goodUnit,dsi,dcv,rPref,cPref,tuningX,tuningY,'VariableNames',varNames);
 
 end

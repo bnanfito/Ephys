@@ -8,17 +8,18 @@ svePlt = 0;
 if ispc
     dataFold = 'D:\data'; 
 elseif ismac
-    dataFold = '/Users/brandonnanfito/Library/CloudStorage/OneDrive-JohnsHopkins/Documents/data/Ephys';
+%     dataFold = '/Users/brandonnanfito/Library/CloudStorage/OneDrive-JohnsHopkins/Documents/data/Ephys';
+    dataFold = '/Volumes/Lab drive/Brandon/data';
 end
 physDir = fullfile(dataFold,'Ephys');
 figDir = fullfile(dataFold,'Figures');
 sumDir = fullfile(dataFold,'SummaryStats');
 anaMode = 'MU';
 
-% % V1 COOLED
-% animals{1} = 'febh2';
-% animals{2} = 'febh3';
-% animals{3} = 'febj3';
+% V1 COOLED
+animals{1} = 'febh2';
+animals{2} = 'febh3';
+animals{3} = 'febj3';
 
 % % CONTROL
 % animals{1} = 'febj2';
@@ -31,11 +32,11 @@ anaMode = 'MU';
 % animals{4} = 'FEAT1';
 % animals{5} = 'FEAN6';
 
-% CONTROL GRAY SCREEN (AUGUSTO)
-animals{1} = 'FEAQ2';
-animals{2} = 'FEAQ3';
-animals{3} = 'FEAQ4';
-animals{4} = 'FEAQ7';
+% % CONTROL GRAY SCREEN (AUGUSTO)
+% animals{1} = 'FEAQ2';
+% animals{2} = 'FEAQ3';
+% animals{3} = 'FEAQ4';
+% animals{4} = 'FEAQ7';
 
 nAnimals = length(animals);
 for a = 1:nAnimals
@@ -127,9 +128,11 @@ for tr = 1:2 % tr = 1 = before; tr = 2 = after training
             else
                 sumStats = plotUnits(animals{a},unit,expt,p,anaMode,visTest,alpha,0,1,0,dataFold);close all
             end
+%             sumStats = convertAL(animals{a},unit,expt,p,dataFold);
             sumStats = sumStats(sumStats.goodUnit == 1,:);
             sumStats.dsi(sumStats.dsi>1) = 1;
             sumStats.dcv(sumStats.dcv>1) = 1;
+            sumStats.dcv(sumStats.dcv<0) = 0;
 
             if ~isempty(trainAx)
                 trainAxID = sum(abs(sumStats.cPref-trainAx)<=30,2)==1;
@@ -165,17 +168,17 @@ v1af{nAnimals+1} = vertcat(v1af{1:nAnimals});
 pssbf{nAnimals+1} = vertcat(pssbf{1:nAnimals});
 pssaf{nAnimals+1} = vertcat(pssaf{1:nAnimals});
 
-DS = 'dsi';
-if strcmp(DS,'dsi')
+DS = 'dcv';
+% if strcmp(DS,'dsi')
 
 for f = 1:nFig % all units; pref trained; pref orth
-    figure(f)
+    figure
     if f == 1
-        ttl = 'all units';
+        ttl{f} = 'all units';
     elseif f == 2
-        ttl = 'pref train';
+        ttl{f} = 'pref train';
     elseif f == 3
-        ttl = 'pref orth';
+        ttl{f} = 'pref orth';
     end
 
     for a = 1:nAnimals+1
@@ -185,10 +188,9 @@ for f = 1:nFig % all units; pref trained; pref orth
         
             if t == 1 % V1 before training
                 if isempty(v1bf{a})
-                    lbl{t} = '';
+                    lbl{a,t,f} = '';
                     continue
                 end
-                lbl{t} = 'V1 before; n=';
                 linStyl = '--';
                 col = 'b';
                 mrk = 'o';
@@ -199,13 +201,19 @@ for f = 1:nFig % all units; pref trained; pref orth
                     tbl = v1bf{a}(v1bf{a}.trainAx==1,:);
                 elseif f == 3 % pref orth
                     tbl = v1bf{a}(v1bf{a}.orthAx==1,:);
+                end
+                nU = height(tbl); 
+                if nU == 0
+                    lbl{a,t,f} = '';
+                    continue
+                else
+                    lbl{a,t,f} = ['V1 before; n=' num2str(nU)];
                 end
             elseif t == 2 % V1 after training
                 if isempty(v1af{a})
-                    lbl{t} = '';
+                    lbl{a,t,f} = '';
                     continue
                 end
-                lbl{t} = 'V1 after; n=';
                 linStyl = '-';
                 col = 'b';
                 mrk = '.';
@@ -216,13 +224,19 @@ for f = 1:nFig % all units; pref trained; pref orth
                     tbl = v1af{a}(v1af{a}.trainAx==1,:);
                 elseif f == 3
                     tbl = v1af{a}(v1af{a}.orthAx==1,:);
+                end
+                nU = height(tbl); 
+                if nU == 0
+                    lbl{a,t,f} = '';
+                    continue
+                else
+                    lbl{a,t,f} = ['V1 after; n=' num2str(nU)];
                 end
             elseif t == 3 % PSS before training
                 if isempty(pssbf{a})
-                    lbl{t} = '';
+                    lbl{a,t,f} = '';
                     continue
                 end
-                lbl{t} = 'PSS before; n=';
                 linStyl = '--';
                 col = 'r';
                 mrk = 'o';
@@ -233,13 +247,19 @@ for f = 1:nFig % all units; pref trained; pref orth
                     tbl = pssbf{a}(pssbf{a}.trainAx==1,:);
                 elseif f == 3
                     tbl = pssbf{a}(pssbf{a}.orthAx==1,:);
+                end
+                nU = height(tbl);
+                if nU == 0
+                    lbl{a,t,f} = '';
+                    continue
+                else
+                    lbl{a,t,f} = ['PSS before; n=' num2str(nU)];
                 end
             elseif t == 4 % PSS after training
                 if isempty(pssaf{a})
-                    lbl{t} = '';
+                    lbl{a,t,f} = '';
                     continue
                 end
-                lbl{t} = 'PSS after; n=';
                 linStyl = '-';
                 col = 'r';
                 mrk = '.';
@@ -251,29 +271,38 @@ for f = 1:nFig % all units; pref trained; pref orth
                 elseif f == 3
                     tbl = pssaf{a}(pssaf{a}.orthAx==1,:);
                 end
+                nU = height(tbl); 
+                if nU == 0
+                    lbl{a,t,f} = '';
+                    continue
+                else
+                    lbl{a,t,f} = ['PSS after; n=' num2str(nU)];
+                end
             end
         
-            nU = height(tbl); 
-            lbl{t} = [lbl{t} num2str(nU)];
-            if nU == 0
-                continue
+            if strcmp(DS,'dsi')
+                dist{a,t,f} = tbl.dsi;
+                xLbl = 'DSI';
+            elseif strcmp(DS,'dcv')
+                dist{a,t,f} = 1-tbl.dcv;
+                xLbl = '1-DCV';
             end
-        
+
             subplot(nAnimals+1,4,1+(4*(a-1))); hold on
-            c = cdfplot(tbl.dsi);
+            c = cdfplot(dist{a,t,f});
             c.LineStyle = linStyl;
             c.Color = col;
             c.LineWidth = 2;
             title(animals{a})
-            xlabel('dsi'); xlim([0 1])
+            xlabel(xLbl); xlim([0 1])
             ylabel('percentile')
         
             subplot(nAnimals+1,4,2+(4*(a-1))); hold on
-            plot(tbl.dsi,tbl.rPref,[col mrk],'MarkerSize',mrkSz)
-            xlabel('dsi')
+            plot(dist{a,t,f},tbl.rPref,[col mrk],'MarkerSize',mrkSz)
+            xlabel(xLbl)
             ylabel('rPref')
             if t == 4
-                legend(lbl)
+                legend(lbl{a,t,f})
             end
         
             subplot(nAnimals+1,4,3+(4*(a-1))); hold on
@@ -295,13 +324,12 @@ for f = 1:nFig % all units; pref trained; pref orth
             clear tbl
         end
     
-        clear lbl
     end
     
-    sgtitle(ttl)
+    sgtitle(ttl{f})
     set(gcf,'Position',[10 10 1010 1010])
     if svePlt == 1
-        saveas(gcf,fullfile(figDir,['anaTrainDSI ' ttl]),'fig')
+        saveas(gcf,fullfile(figDir,['anaTrainDSI ' ttl{f}]),'fig')
     end
 
 end
@@ -309,319 +337,279 @@ end
 
 %% Stats
 
-varNames = {'test','h','p'};
+varNames = {'dist','test1','h1','p1','test2','h2','p2'};
 for a = 1:nAnimals+1
 
-    compCount = 1;
-    tst{compCount} = 'kstest2';
-    compNames{compCount} = 'allUnits v1bfVSv1af';
-    if ~isempty(v1bf{a})
-        n = v1bf{a}.dsi;
-    else
-        n = [];
-    end
-    if ~isempty(v1af{a})
-        m = v1af{a}.dsi;
-    else
-        m = [];
-    end
-    if ~isempty(n) && ~isempty(m)
-        [h(compCount),p(compCount)] = kstest2(n,m);
-    else
-        h(compCount) = 0;
-        p(compCount) = -1;
-    end
+    for f = 1:nFig
 
-    compCount = 2;
-    tst{compCount} = 'kstest2';
-    compNames{compCount} = 'allUnits pssbfVSpssaf';
-    if ~isempty(pssbf{a})
-        n = pssbf{a}.dsi;
-    else
-        n = [];
-    end
-    if ~isempty(pssaf{a})
-        m = pssaf{a}.dsi;
-    else
-        m = [];
-    end
-    if ~isempty(n) && ~isempty(m)
-        [h(compCount),p(compCount)] = kstest2(n,m);
-    else
-        h(compCount) = 0;
-        p(compCount) = -1;
-    end
-
-    if nFig>1
-
-        compCount = 3;
-        tst{compCount} = 'kstest2';
-        compNames{compCount} = 'prefTrain v1bfVSv1af';
-        n = v1bf{a}.dsi(v1bf{a}.trainAx==1);
-        m = v1af{a}.dsi(v1af{a}.trainAx==1);
-        if ~isempty(n) && ~isempty(m)
-            [h(compCount),p(compCount)] = kstest2(n,m);
+        compCount = 1+(2*(f-1));
+        tst1{compCount,1} = 'kstest2';
+        tst2{compCount,1} = 'ranksum';
+        compNames{compCount,1} = [ttl{f} 'v1bfVSv1af'];
+        if ~isempty(v1bf{a})
+            n = dist{a,1,f};
         else
-            h(compCount) = 0;
-            p(compCount) = -1;
+            n = [];
+        end
+        if ~isempty(v1af{a})
+            m = dist{a,2,f};
+        else
+            m = [];
+        end
+        if ~isempty(n) && ~isempty(m)
+            [h1(compCount),p1(compCount)] = kstest2(n,m);
+            [p2(compCount),h2(compCount)] = ranksum(n,m);
+        else
+            h1(compCount) = 0;
+            p1(compCount) = -1;
+            h2(compCount) = 0;
+            p2(compCount) = -1;
         end
     
-        compCount = 4;
-        tst{compCount} = 'kstest2';
-        compNames{compCount} = 'prefTrain pssbfVSpssaf';
-        n = pssbf{a}.dsi(pssbf{a}.trainAx==1);
-        m = pssaf{a}.dsi(pssaf{a}.trainAx==1);
-        if ~isempty(n) && ~isempty(m)
-            [h(compCount),p(compCount)] = kstest2(n,m);
+        compCount = 2+(2*(f-1));
+        tst1{compCount,1} = 'kstest2';
+        tst2{compCount,1} = 'rankSum';
+        compNames{compCount,1} = [ttl{f} 'pssbfVSpssaf'];
+        if ~isempty(pssbf{a})
+            n = dist{a,3,f};
         else
-            h(compCount) = 0;
-            p(compCount) = -1;
+            n = [];
         end
-    
-        compCount = 5;
-        tst{compCount} = 'kstest2';
-        compNames{compCount} = 'prefOrth v1bfVSv1af';
-        n = v1bf{a}.dsi(v1bf{a}.orthAx==1);
-        m = v1af{a}.dsi(v1af{a}.orthAx==1);
-        if ~isempty(n) && ~isempty(m)
-            [h(compCount),p(compCount)] = kstest2(n,m);
+        if ~isempty(pssaf{a})
+            m = dist{a,4,f};
         else
-            h(compCount) = 0;
-            p(compCount) = -1;
+            m = [];
         end
-    
-        compCount = 6;
-        tst{compCount} = 'kstest2';
-        compNames{compCount} = 'prefOrth pssbfVSpssaf';
-        n = pssbf{a}.dsi(pssbf{a}.orthAx==1);
-        m = pssaf{a}.dsi(pssaf{a}.orthAx==1);
         if ~isempty(n) && ~isempty(m)
-            [h(compCount),p(compCount)] = kstest2(n,m);
+            [h1(compCount),p1(compCount)] = kstest2(n,m);
+            [p2(compCount),h2(compCount)] = ranksum(n,m);
         else
-            h(compCount) = 0;
-            p(compCount) = -1;
+            h1(compCount) = 0;
+            p1(compCount) = -1;
+            h2(compCount) = 0;
+            p2(compCount) = -1;
         end
 
     end
 
-    stats{a} = table(tst',h',p','VariableNames',varNames,'RowNames',compNames);
+    stats{a} = table(compNames,tst1,h1',p1',tst2,h2',p2','VariableNames',varNames,'RowNames',compNames);
 
 
 end
 
-elseif strcmp(DS,'dcv')
+% elseif strcmp(DS,'dcv')
 
 
-for f = 1:nFig % all units; pref trained; pref orth
-    figure(f)
-    if f == 1
-        ttl = 'all units';
-    elseif f == 2
-        ttl = 'pref train';
-    elseif f == 3
-        ttl = 'pref orth';
-    end
-
-    for a = 1:nAnimals+1
-
-        for t = 1:4 % each area/before and after
-        
-            if t == 1 % V1 before training
-                lbl{t} = 'V1 before; n=';
-                linStyl = '--';
-                col = 'b';
-                mrk = 'o';
-                mrkSz = 5;
-                if f == 1 % all units
-                    tbl = v1bf{a};
-                elseif f == 2 % pref train
-                    tbl = v1bf{a}(v1bf{a}.trainAx==1,:);
-                elseif f == 3 % pref orth
-                    tbl = v1bf{a}(v1bf{a}.orthAx==1,:);
-                end
-            elseif t == 2 % V1 after training
-                lbl{t} = 'V1 after; n=';
-                linStyl = '-';
-                col = 'b';
-                mrk = '.';
-                mrkSz = 20;
-                if f == 1
-                    tbl = v1af{a};
-                elseif f == 2
-                    tbl = v1af{a}(v1af{a}.trainAx==1,:);
-                elseif f == 3
-                    tbl = v1af{a}(v1af{a}.orthAx==1,:);
-                end
-            elseif t == 3 % PSS before training
-                lbl{t} = 'PSS before; n=';
-                linStyl = '--';
-                col = 'r';
-                mrk = 'o';
-                mrkSz = 5;
-                if f == 1
-                    tbl = pssbf{a};
-                elseif f == 2
-                    tbl = pssbf{a}(pssbf{a}.trainAx==1,:);
-                elseif f == 3
-                    tbl = pssbf{a}(pssbf{a}.orthAx==1,:);
-                end
-            elseif t == 4 % PSS after training
-                lbl{t} = 'PSS after; n=';
-                linStyl = '-';
-                col = 'r';
-                mrk = '.';
-                mrkSz = 20;
-                if f == 1
-                    tbl = pssaf{a};
-                elseif f == 2
-                    tbl = pssaf{a}(pssaf{a}.trainAx==1,:);
-                elseif f == 3
-                    tbl = pssaf{a}(pssaf{a}.orthAx==1,:);
-                end
-            end
-        
-            nU = height(tbl); 
-            lbl{t} = [lbl{t} num2str(nU)];
-            if nU == 0
-                continue
-            end
-        
-            subplot(nAnimals+1,4,1+(4*(a-1))); hold on
-            c = cdfplot(1-tbl.dcv);
-            c.LineStyle = linStyl;
-            c.Color = col;
-            c.LineWidth = 2;
-            title(animals{a})
-            xlabel('1-dcv'); xlim([0 1])
-            ylabel('percentile')
-        
-            subplot(nAnimals+1,4,2+(4*(a-1))); hold on
-            plot(1-tbl.dcv,tbl.rPref,[col mrk],'MarkerSize',mrkSz)
-            xlabel('1-dcv')
-            ylabel('rPref')
-            if t == 4
-                legend(lbl)
-            end
-        
-            subplot(nAnimals+1,4,3+(4*(a-1))); hold on
-            x = mean(vertcat(tbl.tuningX{:}));
-            y = mean(vertcat(tbl.tuningY{:}));
-            sem = std(vertcat(tbl.tuningY{:}))/sqrt(nU);
-            plot( x , y , [col linStyl] , 'LineWidth' , 2)
-            plot( repmat(x,2,1) , y+([-1;1]*sem) , col , 'LineWidth' , 2)
-            xlabel('ori (deg) relative to pref'); xticks([-180 -90 0 90 180])
-            ylabel('BCFR (Hz)')
-        
-            subplot(nAnimals+1,4,4+(4*(a-1))); hold on
-%             y = mean(vertcat(tbl.tuningY{:})./max(vertcat(tbl.tuningY{:}),[],2));
-            y = y/max(y);
-            plot( x , y , [col linStyl] , 'LineWidth' , 2)
-            xlabel('ori (deg) relative to pref'); xticks([-180 -90 0 90 180])
-            ylabel('norm BCFR (Hz)')
-        
-            clear tbl
-        end
-    
-        clear lbl
-    end
-    
-    sgtitle(ttl)
-    set(gcf,'Position',[10 10 1010 1010])
-    if svePlt == 1
-        saveas(gcf,fullfile(figDir,['anaTrainDCV ' ttl]),'fig')
-    end
-
-end
-
-%% Stats
-
-varNames = {'test','h','p'};
-for a = 1:nAnimals+1
-
-    compCount = 1;
-    tst{compCount} = 'kstest2';
-    compNames{compCount} = 'allUnits v1bfVSv1af';
-    n = v1bf{a}.dcv;
-    m = v1af{a}.dcv;
-    if ~isempty(n) && ~isempty(m)
-        [h(compCount),p(compCount)] = kstest2(n,m);
-    else
-        h(compCount) = 0;
-        p(compCount) = -1;
-    end
-
-    compCount = 2;
-    tst{compCount} = 'kstest2';
-    compNames{compCount} = 'allUnits pssbfVSpssaf';
-    n = pssbf{a}.dcv;
-    m = pssaf{a}.dcv;
-    if ~isempty(n) && ~isempty(m)
-        [h(compCount),p(compCount)] = kstest2(n,m);
-    else
-        h(compCount) = 0;
-        p(compCount) = -1;
-    end
-
-    if nFig>1
-
-        compCount = 3;
-        tst{compCount} = 'kstest2';
-        compNames{compCount} = 'prefTrain v1bfVSv1af';
-        n = v1bf{a}.dcv(v1bf{a}.trainAx==1);
-        m = v1af{a}.dcv(v1af{a}.trainAx==1);
-        if ~isempty(n) && ~isempty(m)
-            [h(compCount),p(compCount)] = kstest2(n,m);
-        else
-            h(compCount) = 0;
-            p(compCount) = -1;
-        end
-    
-        compCount = 4;
-        tst{compCount} = 'kstest2';
-        compNames{compCount} = 'prefTrain pssbfVSpssaf';
-        n = pssbf{a}.dcv(pssbf{a}.trainAx==1);
-        m = pssaf{a}.dcv(pssaf{a}.trainAx==1);
-        if ~isempty(n) && ~isempty(m)
-            [h(compCount),p(compCount)] = kstest2(n,m);
-        else
-            h(compCount) = 0;
-            p(compCount) = -1;
-        end
-    
-        compCount = 5;
-        tst{compCount} = 'kstest2';
-        compNames{compCount} = 'prefOrth v1bfVSv1af';
-        n = v1bf{a}.dcv(v1bf{a}.orthAx==1);
-        m = v1af{a}.dcv(v1af{a}.orthAx==1);
-        if ~isempty(n) && ~isempty(m)
-            [h(compCount),p(compCount)] = kstest2(n,m);
-        else
-            h(compCount) = 0;
-            p(compCount) = -1;
-        end
-    
-        compCount = 6;
-        tst{compCount} = 'kstest2';
-        compNames{compCount} = 'prefOrth pssbfVSpssaf';
-        n = pssbf{a}.dcv(pssbf{a}.orthAx==1);
-        m = pssaf{a}.dcv(pssaf{a}.orthAx==1);
-        if ~isempty(n) && ~isempty(m)
-            [h(compCount),p(compCount)] = kstest2(n,m);
-        else
-            h(compCount) = 0;
-            p(compCount) = -1;
-        end
-
-    end
-
-    stats{a} = table(tst',h',p','VariableNames',varNames,'RowNames',compNames);
-
-
-end
-
-
+% for f = 1:nFig % all units; pref trained; pref orth
+%     figure(f)
+%     if f == 1
+%         ttl = 'all units';
+%     elseif f == 2
+%         ttl = 'pref train';
+%     elseif f == 3
+%         ttl = 'pref orth';
+%     end
+% 
+%     for a = 1:nAnimals+1
+% 
+%         for t = 1:4 % each area/before and after
+%         
+%             if t == 1 % V1 before training
+%                 lbl{t} = 'V1 before; n=';
+%                 linStyl = '--';
+%                 col = 'b';
+%                 mrk = 'o';
+%                 mrkSz = 5;
+%                 if f == 1 % all units
+%                     tbl = v1bf{a};
+%                 elseif f == 2 % pref train
+%                     tbl = v1bf{a}(v1bf{a}.trainAx==1,:);
+%                 elseif f == 3 % pref orth
+%                     tbl = v1bf{a}(v1bf{a}.orthAx==1,:);
+%                 end
+%             elseif t == 2 % V1 after training
+%                 lbl{t} = 'V1 after; n=';
+%                 linStyl = '-';
+%                 col = 'b';
+%                 mrk = '.';
+%                 mrkSz = 20;
+%                 if f == 1
+%                     tbl = v1af{a};
+%                 elseif f == 2
+%                     tbl = v1af{a}(v1af{a}.trainAx==1,:);
+%                 elseif f == 3
+%                     tbl = v1af{a}(v1af{a}.orthAx==1,:);
+%                 end
+%             elseif t == 3 % PSS before training
+%                 lbl{t} = 'PSS before; n=';
+%                 linStyl = '--';
+%                 col = 'r';
+%                 mrk = 'o';
+%                 mrkSz = 5;
+%                 if f == 1
+%                     tbl = pssbf{a};
+%                 elseif f == 2
+%                     tbl = pssbf{a}(pssbf{a}.trainAx==1,:);
+%                 elseif f == 3
+%                     tbl = pssbf{a}(pssbf{a}.orthAx==1,:);
+%                 end
+%             elseif t == 4 % PSS after training
+%                 lbl{t} = 'PSS after; n=';
+%                 linStyl = '-';
+%                 col = 'r';
+%                 mrk = '.';
+%                 mrkSz = 20;
+%                 if f == 1
+%                     tbl = pssaf{a};
+%                 elseif f == 2
+%                     tbl = pssaf{a}(pssaf{a}.trainAx==1,:);
+%                 elseif f == 3
+%                     tbl = pssaf{a}(pssaf{a}.orthAx==1,:);
+%                 end
+%             end
+%         
+%             nU = height(tbl); 
+%             lbl{t} = [lbl{t} num2str(nU)];
+%             if nU == 0
+%                 continue
+%             end
+%         
+%             subplot(nAnimals+1,4,1+(4*(a-1))); hold on
+%             c = cdfplot(1-tbl.dcv);
+%             c.LineStyle = linStyl;
+%             c.Color = col;
+%             c.LineWidth = 2;
+%             title(animals{a})
+%             xlabel('1-dcv'); xlim([0 1])
+%             ylabel('percentile')
+%         
+%             subplot(nAnimals+1,4,2+(4*(a-1))); hold on
+%             plot(1-tbl.dcv,tbl.rPref,[col mrk],'MarkerSize',mrkSz)
+%             xlabel('1-dcv')
+%             ylabel('rPref')
+%             if t == 4
+%                 legend(lbl)
+%             end
+%         
+%             subplot(nAnimals+1,4,3+(4*(a-1))); hold on
+%             x = mean(vertcat(tbl.tuningX{:}));
+%             y = mean(vertcat(tbl.tuningY{:}));
+%             sem = std(vertcat(tbl.tuningY{:}))/sqrt(nU);
+%             plot( x , y , [col linStyl] , 'LineWidth' , 2)
+%             plot( repmat(x,2,1) , y+([-1;1]*sem) , col , 'LineWidth' , 2)
+%             xlabel('ori (deg) relative to pref'); xticks([-180 -90 0 90 180])
+%             ylabel('BCFR (Hz)')
+%         
+%             subplot(nAnimals+1,4,4+(4*(a-1))); hold on
+% %             y = mean(vertcat(tbl.tuningY{:})./max(vertcat(tbl.tuningY{:}),[],2));
+%             y = y/max(y);
+%             plot( x , y , [col linStyl] , 'LineWidth' , 2)
+%             xlabel('ori (deg) relative to pref'); xticks([-180 -90 0 90 180])
+%             ylabel('norm BCFR (Hz)')
+%         
+%             clear tbl
+%         end
+%     
+%         clear lbl
+%     end
+%     
+%     sgtitle(ttl)
+%     set(gcf,'Position',[10 10 1010 1010])
+%     if svePlt == 1
+%         saveas(gcf,fullfile(figDir,['anaTrainDCV ' ttl]),'fig')
+%     end
+% 
+% end
+% 
+% %% Stats
+% 
+% varNames = {'test','h','p'};
+% for a = 1:nAnimals+1
+% 
+%     compCount = 1;
+%     tst{compCount} = 'kstest2';
+%     compNames{compCount} = 'allUnits v1bfVSv1af';
+%     n = v1bf{a}.dcv;
+%     m = v1af{a}.dcv;
+%     if ~isempty(n) && ~isempty(m)
+%         [h(compCount),p(compCount)] = kstest2(n,m);
+%     else
+%         h(compCount) = 0;
+%         p(compCount) = -1;
+%     end
+% 
+%     compCount = 2;
+%     tst{compCount} = 'kstest2';
+%     compNames{compCount} = 'allUnits pssbfVSpssaf';
+%     n = pssbf{a}.dcv;
+%     m = pssaf{a}.dcv;
+%     if ~isempty(n) && ~isempty(m)
+%         [h(compCount),p(compCount)] = kstest2(n,m);
+%     else
+%         h(compCount) = 0;
+%         p(compCount) = -1;
+%     end
+% 
+%     if nFig>1
+% 
+%         compCount = 3;
+%         tst{compCount} = 'kstest2';
+%         compNames{compCount} = 'prefTrain v1bfVSv1af';
+%         n = v1bf{a}.dcv(v1bf{a}.trainAx==1);
+%         m = v1af{a}.dcv(v1af{a}.trainAx==1);
+%         if ~isempty(n) && ~isempty(m)
+%             [h(compCount),p(compCount)] = kstest2(n,m);
+%         else
+%             h(compCount) = 0;
+%             p(compCount) = -1;
+%         end
+%     
+%         compCount = 4;
+%         tst{compCount} = 'kstest2';
+%         compNames{compCount} = 'prefTrain pssbfVSpssaf';
+%         n = pssbf{a}.dcv(pssbf{a}.trainAx==1);
+%         m = pssaf{a}.dcv(pssaf{a}.trainAx==1);
+%         if ~isempty(n) && ~isempty(m)
+%             [h(compCount),p(compCount)] = kstest2(n,m);
+%         else
+%             h(compCount) = 0;
+%             p(compCount) = -1;
+%         end
+%     
+%         compCount = 5;
+%         tst{compCount} = 'kstest2';
+%         compNames{compCount} = 'prefOrth v1bfVSv1af';
+%         n = v1bf{a}.dcv(v1bf{a}.orthAx==1);
+%         m = v1af{a}.dcv(v1af{a}.orthAx==1);
+%         if ~isempty(n) && ~isempty(m)
+%             [h(compCount),p(compCount)] = kstest2(n,m);
+%         else
+%             h(compCount) = 0;
+%             p(compCount) = -1;
+%         end
+%     
+%         compCount = 6;
+%         tst{compCount} = 'kstest2';
+%         compNames{compCount} = 'prefOrth pssbfVSpssaf';
+%         n = pssbf{a}.dcv(pssbf{a}.orthAx==1);
+%         m = pssaf{a}.dcv(pssaf{a}.orthAx==1);
+%         if ~isempty(n) && ~isempty(m)
+%             [h(compCount),p(compCount)] = kstest2(n,m);
+%         else
+%             h(compCount) = 0;
+%             p(compCount) = -1;
+%         end
+% 
+%     end
+% 
+%     stats{a} = table(tst',h',p','VariableNames',varNames,'RowNames',compNames);
+% 
+% 
+% end
 
 
 
-end
+
+
+% end
 

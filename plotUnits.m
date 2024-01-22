@@ -2,7 +2,7 @@
 
 function [sumStats,spks] = plotUnits(animal,unit,expt,probe,anaMode,visTest,alpha,onlyGoodUnits,saveSum,saveFigs,dataFold)
 
-close all
+% close all
 % clear all
 % animal = 'FEAO4';
 % unit = '001';
@@ -13,7 +13,7 @@ close all
 % saveSum = 0;
 % saveFigs = 0;
 
-plt = 1;
+plt = 0;
 split = 0; splitInd = 35;
 polar = 0;
 alignBit = 1;
