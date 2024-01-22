@@ -16,9 +16,9 @@ figDir = fullfile(dataFold,'Figures');
 sumDir = fullfile(dataFold,'SummaryStats');
 anaMode = 'MU';
 
-animals = {'FEAO4','FEAN6','FEAS6','FEAT1','FEAQ5'};
+% animals = {'FEAO4','FEAN6','FEAS6','FEAT1','FEAQ5'};
 % animals = {'febj4'};
-% animals = {'febh2','febh3','febj3'};
+animals = {'febh2','febh3','febj3'};
 nAnimals = length(animals);
 figure;hold on
 for a = 1:nAnimals
