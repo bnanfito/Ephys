@@ -12,7 +12,7 @@ else
     load(fullfile(physDir,[exptName '_p' num2str(probe) '_data.mat']))
 end
 data = Data{1,1}; clear Data
-nUnits = size(UnitType{1,1},1)
+nUnits = size(UnitType{1,1},1);
 
 c = CondInfo;
 r = data.RespMean';
