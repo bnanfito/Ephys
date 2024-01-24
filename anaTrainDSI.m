@@ -2,7 +2,7 @@
 clear all
 close all
 
-visTest = 'ranksum'; alpha = 0.01;
+visTest = 'anova'; alpha = 0.05;
 svePlt = 0;
 
 if ispc
@@ -22,9 +22,9 @@ anaMode = 'MU';
 % animals{2} = 'febh3';
 % animals{3} = 'febj3';
 
-% CONTROL
-animals{1} = 'febj2';
-animals{2} = 'febj4';
+% % CONTROL
+% animals{1} = 'febj2';
+% animals{2} = 'febj4';
 
 % % CONTROL (AUGUSTO)
 % animals{1} = 'FEAO4';
@@ -33,11 +33,11 @@ animals{2} = 'febj4';
 % animals{4} = 'FEAT1';
 % animals{5} = 'FEAN6';
 
-% % CONTROL GRAY SCREEN (AUGUSTO)
-% animals{1} = 'FEAQ2';
-% animals{2} = 'FEAQ3';
-% animals{3} = 'FEAQ4';
-% animals{4} = 'FEAQ7';
+% CONTROL GRAY SCREEN (AUGUSTO)
+animals{1} = 'FEAQ2';
+animals{2} = 'FEAQ3';
+animals{3} = 'FEAQ4';
+animals{4} = 'FEAQ7';
 
 nAnimals = length(animals);
 for a = 1:nAnimals
@@ -124,13 +124,13 @@ for tr = 1:2 % tr = 1 = before; tr = 2 = after training
         load(fullfile(physDir,animals{a},exptName,[exptName '_id.mat']))
         for p = 1:length(id.probes)
             sumFile = fullfile(sumDir,animals{a},exptName,[exptName '_p' num2str(p) '_sumStats' anaMode '.mat']);
-            if isfile(sumFile)
-                load(sumFile)
-            else
+%             if isfile(sumFile)
+%                 load(sumFile)
+%             else
                 sumStats = plotUnits(animals{a},unit,expt,p,anaMode,visTest,alpha,0,1,0,dataFold);close all
-            end
+%             end
 %             sumStats = convertAL(animals{a},unit,expt,p,dataFold);
-            sumStats = sumStats(sumStats.goodUnit == 1,:);
+%             sumStats = sumStats(sumStats.goodUnit == 1,:);
             sumStats.dsi(sumStats.dsi>1) = 1;
             sumStats.dcv(sumStats.dcv>1) = 1;
             sumStats.dcv(sumStats.dcv<0) = 0;
@@ -189,6 +189,7 @@ for f = 1:nFig % all units; pref trained; pref orth
             if t == 1 % V1 before training
                 if isempty(v1bf{a})
                     lbl{a,t,f} = '';
+                    lblBit(t) = false;
                     continue
                 end
                 linStyl = '--';
@@ -202,16 +203,11 @@ for f = 1:nFig % all units; pref trained; pref orth
                 elseif f == 3 % pref orth
                     tbl = v1bf{a}(v1bf{a}.orthAx==1,:);
                 end
-                nU = height(tbl); 
-                if nU == 0
-                    lbl{a,t,f} = '';
-                    continue
-                else
-                    lbl{a,t,f} = ['V1 before; n=' num2str(nU)];
-                end
+                lbl{a,t,f} = 'V1 before; n=';
             elseif t == 2 % V1 after training
                 if isempty(v1af{a})
                     lbl{a,t,f} = '';
+                    lblBit(t) = false;
                     continue
                 end
                 linStyl = '-';
@@ -225,16 +221,11 @@ for f = 1:nFig % all units; pref trained; pref orth
                 elseif f == 3
                     tbl = v1af{a}(v1af{a}.orthAx==1,:);
                 end
-                nU = height(tbl); 
-                if nU == 0
-                    lbl{a,t,f} = '';
-                    continue
-                else
-                    lbl{a,t,f} = ['V1 after; n=' num2str(nU)];
-                end
+                lbl{a,t,f} = 'V1 after; n=';
             elseif t == 3 % PSS before training
                 if isempty(pssbf{a})
                     lbl{a,t,f} = '';
+                    lblBit(t) = false;
                     continue
                 end
                 linStyl = '--';
@@ -248,16 +239,11 @@ for f = 1:nFig % all units; pref trained; pref orth
                 elseif f == 3
                     tbl = pssbf{a}(pssbf{a}.orthAx==1,:);
                 end
-                nU = height(tbl);
-                if nU == 0
-                    lbl{a,t,f} = '';
-                    continue
-                else
-                    lbl{a,t,f} = ['PSS before; n=' num2str(nU)];
-                end
+                lbl{a,t,f} = 'PSS before; n=';
             elseif t == 4 % PSS after training
                 if isempty(pssaf{a})
                     lbl{a,t,f} = '';
+                    lblBit(t) = false;
                     continue
                 end
                 linStyl = '-';
@@ -271,13 +257,17 @@ for f = 1:nFig % all units; pref trained; pref orth
                 elseif f == 3
                     tbl = pssaf{a}(pssaf{a}.orthAx==1,:);
                 end
-                nU = height(tbl); 
-                if nU == 0
-                    lbl{a,t,f} = '';
-                    continue
-                else
-                    lbl{a,t,f} = ['PSS after; n=' num2str(nU)];
-                end
+                lbl{a,t,f} = 'PSS after; n=';
+            end
+
+            tbl = tbl(tbl.goodUnit == 1,:);
+            nU = height(tbl); 
+            lbl{a,t,f} = [lbl{a,t,f} num2str(nU)];
+            if nU == 0
+                lblBit(t) = false;
+                continue
+            else
+                lblBit(t) = true;
             end
         
             if strcmp(DS,'dsi')
@@ -289,10 +279,10 @@ for f = 1:nFig % all units; pref trained; pref orth
             end
 
             subplot(nAnimals+1,4,1+(4*(a-1))); hold on
-            c = cdfplot(dist{a,t,f});
-            c.LineStyle = linStyl;
-            c.Color = col;
-            c.LineWidth = 2;
+            c(t) = cdfplot(dist{a,t,f});
+            c(t).LineStyle = linStyl;
+            c(t).Color = col;
+            c(t).LineWidth = 2;
             title(animals{a})
             xlabel(xLbl); xlim([0 1])
             ylabel('percentile')
@@ -302,7 +292,8 @@ for f = 1:nFig % all units; pref trained; pref orth
             xlabel(xLbl)
             ylabel('rPref')
             if t == 4
-                legend(lbl{a,:,f})
+                legend(c(lblBit),lbl{a,lblBit,f})
+                clear c lblBit
             end
         
             subplot(nAnimals+1,4,3+(4*(a-1))); hold on
