@@ -1,6 +1,6 @@
 %plotUnits3
 
-function [sumStats,spks] = plotUnits(animal,unit,expt,probe,anaMode,visTest,alpha,onlyGoodUnits,saveSum,saveFigs,dataFold)
+function [sumStats,spks] = plotUnits(animal,unit,expt,probe,anaMode,visTest,alpha,plt,saveSum,saveFigs,dataFold)
 
 % close all
 % clear all
@@ -12,8 +12,8 @@ function [sumStats,spks] = plotUnits(animal,unit,expt,probe,anaMode,visTest,alph
 % onlyGoodUnits = 0;
 % saveSum = 0;
 % saveFigs = 0;
+% plt = 0;
 
-plt = 0;
 split = 0; splitInd = 35;
 polar = 0;
 alignBit = 1;
@@ -281,9 +281,6 @@ for u = 1:length(spks)
             saveas(gcf,fullfile(figDir,[baseName '_p' num2str(probe) '_' anaMode num2str(u)]),'jpeg')
         end
     
-        if ~ismember(u,find(goodUnits)) && onlyGoodUnits == 1
-            close(gcf)
-        end
      end
 
 end
