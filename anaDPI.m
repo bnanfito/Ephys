@@ -18,7 +18,7 @@ anaMode = 'MU';
 
 % animals = {'FEAO4','FEAN6','FEAS6','FEAT1','FEAQ5'};
 % animals = {'febj4'};
-animals = {'febh2','febh3','febj3'};
+animals = {'febj3'};
 nAnimals = length(animals);
 figure;hold on
 for a = 1:nAnimals
@@ -237,7 +237,7 @@ for a = 1:nAnimals
                 if isfile(sumFile)
                     load(sumFile,'sumStats')
                 else
-                    [sumStats,spks] = plotUnits(animal,unit,expt,p,anaMode,'ranksum',0.01,0,0,0,dataFold);
+                    [sumStats,spks] = plotUnits(animal,unit,expt,p,anaMode,'ranksum',0.01,0,1,0,dataFold);
                 end
                 if strcmp(id.probes(p).area,'V1')
                     v1{b,a} = sumStats;
@@ -290,14 +290,17 @@ for a = 1:length(animals)
                 area = 'PSS';
                 tbl = vertcat(pss{b,a},pss{b+1,a});
             end
+
+            nU(hr,a,p) = sum(tbl.goodUnit);
     
-            if isempty(tbl) || sum(tbl.goodUnit)==0
+            if isempty(tbl) || nU(hr,a,p)==0
                 continue
             else
                 countLbl = countLbl+1;
             end
 
             dist = tbl.dpi(tbl.goodUnit==1);
+            D{hr,a,p} = dist;
             if strcmp(area,'V1')
                 dpiV1{a} = vertcat(dpiV1{a},[dist repmat(hr,length(dist),1)]);
             elseif strcmp(area,'PSS')
@@ -332,6 +335,11 @@ end
 figure;hold on
 for hr = 1:hr
 
+    if nU()
+
+    end
+
+    if hr~=4 && hr ~=7
     subplot(2,1,1);hold on
     x = v1Violin{end,hr}.kdeX;
     y = v1Violin{end,hr}.kdeY;
@@ -341,6 +349,7 @@ for hr = 1:hr
     plot(hr+[0.5,-0.5],repmat(meanV1(end,hr),1,2),'k','LineWidth',2)
     plot(hr+[0.5,-0.5],repmat(medV1(end,hr),1,2),'Color',[0.5 0.5 0.5],'LineWidth',2)
     ylabel('DPI')
+    end
 
     subplot(2,1,2);hold on
     x = pssViolin{end,hr}.kdeX;
