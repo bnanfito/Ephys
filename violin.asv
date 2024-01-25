@@ -11,8 +11,7 @@ rng = [min(dist) max(dist)];
 if n == 0
     v.gX = linspace(lims(1),lims(2),lims(3));
     v.g = zeros(size(v.gX));
-    v.kdeX = v.g;
-    v.kdeY = v.gX;
+    v.
 else
 
     for dp = 1:n

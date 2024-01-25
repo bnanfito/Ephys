@@ -26,7 +26,7 @@ function [spks] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
     else
         blank = (1:nConds)==trialInfo.blankId;
     end
-    partL = 2;
+    partL = 1;
 
     predelay = getparam('predelay',Analyzer);
     stimTime = getparam('stim_time',Analyzer);

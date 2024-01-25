@@ -7,8 +7,8 @@ close all
 
 if ispc
 %     dataFold = 'D:\data';
-%     dataFold = 'D:\OneDrive - Johns Hopkins\Documents\data';
-    dataFold = 'F:\Brandon\data';
+    dataFold = 'D:\OneDrive - Johns Hopkins\Documents\data';
+%     dataFold = 'F:\Brandon\data';
 elseif ismac
     dataFold = '/Volumes/Lab drive/Brandon/data';
 end
@@ -295,9 +295,7 @@ for a = 1:length(animals)
             end
 
             nU(hr,a,p) = sum(tbl.goodUnit);
-
-            dist = tbl.dpi(tbl.goodUnit==1);
-            D{hr,a,p} = dist;
+    
             if isempty(tbl) || nU(hr,a,p)==0
                 if strcmp(area,'V1')
                     medV1(a,hr) = nan;
@@ -308,16 +306,11 @@ for a = 1:length(animals)
                 end
                 continue
             else
-                if strcmp(area,'V1')
-                    medV1(a,hr) = median(dist);
-                    meanV1(a,hr) = mean(dist);
-                elseif strcmp(area,'PSS')
-                    medPSS(a,hr) = median(dist);
-                    meanPSS(a,hr) = mean(dist);
-                end
                 countLbl = countLbl+1;
             end
 
+            dist = tbl.dpi(tbl.goodUnit==1);
+            D{hr,a,p} = dist;
             if strcmp(area,'V1')
                 dpiV1{a} = vertcat(dpiV1{a},[dist repmat(hr,length(dist),1)]);
             elseif strcmp(area,'PSS')
