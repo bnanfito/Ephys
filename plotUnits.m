@@ -20,7 +20,9 @@ alignBit = 1;
 stat = 'sem';
 baseName = [animal '_u' unit '_' expt];
 
-physDir = fullfile(dataFold,'Ephys',animal,baseName); 
+% physDir = fullfile(dataFold,'Ephys',animal,baseName); 
+% physDir = fullfile(dataFold,'sf4rs01',animal,baseName);
+physDir = fullfile(dataFold,'sf5rs01',animal,baseName);
 figDir = fullfile(dataFold,'Figures',animal,baseName); 
 sumDir = fullfile(dataFold,'SummaryStats',animal,baseName); 
 
@@ -77,6 +79,7 @@ end
 
 
 %% PLOT
+sdf = zeros(size(spks(1).train,1),length(spks));
 for u = 1:length(spks)
     
     exptNames{u,1} = baseName;

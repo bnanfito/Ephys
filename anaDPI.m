@@ -12,7 +12,9 @@ if ispc
 elseif ismac
     dataFold = '/Volumes/Lab drive/Brandon/data';
 end
-physDir = fullfile(dataFold,'Ephys');
+% physDir = fullfile(dataFold,'Ephys');
+% physDir = fullfile(dataFold,'sf4rs01');
+physDir = fullfile(dataFold,'sf5rs01');
 figDir = fullfile(dataFold,'Figures');
 sumDir = fullfile(dataFold,'SummaryStats');
 anaMode = 'MU';
@@ -22,7 +24,6 @@ anaMode = 'MU';
 animals = {'febj3'};
 nAnimals = length(animals);
 
-figure;hold on
 nBlocks = 16;
 nHr = nBlocks/2;
 blocks{nBlocks,nAnimals} = '';
@@ -240,12 +241,13 @@ for a = 1:nAnimals
         for p = 1:length(id.probes)
             load(fullfile(physDir,animal,exptName,[exptName '_p' num2str(p) '_MUthreshold.mat']))
             disp(MUthresholding.threshlevel)
-            sumFile = fullfile(sumDir,animal,exptName,[exptName '_p' num2str(p) '_sumStats' anaMode '.mat']);
-            if isfile(sumFile)
-                load(sumFile,'sumStats')
-            else
-                [sumStats,spks] = plotUnits(animal,unit,expt,p,anaMode,'ranksum',0.01,0,1,0,dataFold);
-            end
+%             sumFile = fullfile(sumDir,animal,exptName,[exptName '_p' num2str(p) '_sumStats' anaMode '.mat']);
+%             if isfile(sumFile)
+%                 load(sumFile,'sumStats')
+%             else
+                [sumStats,spks] = plotUnits(animal,unit,expt,p,anaMode,'ranksum',0.01,0,0,0,dataFold);
+                close all
+%             end
             if strcmp(id.probes(p).area,'V1')
                 v1{b,a} = sumStats;
             elseif strcmp(id.probes(p).area,'PSS')
@@ -259,14 +261,19 @@ for a = 1:nAnimals
 
 end
 
-animals{nAnimals+1} = 'all Animals';
-for b = 1:nBlocks
-    v1{b,nAnimals+1} = vertcat(v1{b,1:nAnimals});
-    pss{b,nAnimals+1} = vertcat(pss{b,1:nAnimals});
+if nAnimals>1
+    animals{nAnimals+1} = 'all Animals';
+    for b = 1:nBlocks
+        v1{b,nAnimals+1} = vertcat(v1{b,1:nAnimals});
+        pss{b,nAnimals+1} = vertcat(pss{b,1:nAnimals});
+    end
 end
+
+%% PLOT
 
 dpiV1{length(animals)} = [];
 dpiPSS{length(animals)} = [];
+figure;hold on
 for a = 1:length(animals)
 
     for p = 1:2
@@ -274,9 +281,9 @@ for a = 1:length(animals)
         countLbl = 0;
 
         if p ==1 %index for V1
-            sp = subplot(nAnimals+1,2,1+(2*(a-1)));hold on
+            sp = subplot(length(animals),2,1+(2*(a-1)));hold on
         elseif p == 2 % index for PSS
-            sp = subplot(nAnimals+1,2,2+(2*(a-1)));hold on
+            sp = subplot(length(animals),2,2+(2*(a-1)));hold on
         end
 
         for b = 1:2:nBlocks
