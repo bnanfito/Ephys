@@ -6,8 +6,8 @@ visTest = 'ranksum'; alpha = 0.01;
 svePlt = 0;
 
 if ispc
-    dataFold = 'D:\data'; 
-%     dataFold = 'F:\Brandon\data';
+%     dataFold = 'D:\data'; 
+    dataFold = 'F:\Brandon\data';
 elseif ismac
     dataFold = '/Volumes/Lab drive/Brandon/data';
 %     dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
@@ -17,21 +17,21 @@ figDir = fullfile(dataFold,'Figures');
 sumDir = fullfile(dataFold,'SummaryStats');
 anaMode = 'MU';
 
-% V1 COOLED
-animals{1} = 'febh2';
-animals{2} = 'febh3';
-animals{3} = 'febj3';
+% % V1 COOLED
+% animals{1} = 'febh2';
+% animals{2} = 'febh3';
+% animals{3} = 'febj3';
 
 % % CONTROL
 % animals{1} = 'febj2';
 % animals{2} = 'febj4';
 
-% % CONTROL (AUGUSTO)
-% animals{1} = 'FEAO4';
-% animals{2} = 'FEAQ5';
-% animals{3} = 'FEAS6';
-% animals{4} = 'FEAT1';
-% animals{5} = 'FEAN6';
+% CONTROL (AUGUSTO)
+animals{1} = 'FEAO4';
+animals{2} = 'FEAQ5';
+animals{3} = 'FEAS6';
+animals{4} = 'FEAT1';
+animals{5} = 'FEAN6';
 
 % % CONTROL GRAY SCREEN (AUGUSTO)
 % animals{1} = 'FEAQ2';
@@ -124,11 +124,13 @@ for tr = 1:2 % tr = 1 = before; tr = 2 = after training
         load(fullfile(physDir,animals{a},exptName,[exptName '_id.mat']))
         for p = 1:length(id.probes)
             sumFile = fullfile(sumDir,animals{a},exptName,[exptName '_p' num2str(p) '_sumStats' anaMode '.mat']);
-%             if isfile(sumFile)
-%                 load(sumFile)
-%             else
+            if isfile(sumFile)
+                disp(['loading sumStats for ' exptName])
+                load(sumFile,'sumStats')
+            else
+                disp(['generating sumStats for' exptName])
                 sumStats = plotUnits(animals{a},unit,expt,p,anaMode,visTest,alpha,0,1,0,dataFold);close all
-%             end
+            end
 %             sumStats = convertAL(animals{a},unit,expt,p,dataFold);
 %             sumStats = sumStats(sumStats.goodUnit == 1,:);
             sumStats.dsi(sumStats.dsi>1) = 1;
@@ -274,21 +276,21 @@ for f = 1:nFig % all units; pref trained; pref orth
             end
         
             if strcmp(metric,'dsi')
-                dist{a,t,f} = tbl.dsi;
+                dist{a,t,f}(:,m) = tbl.dsi;
                 xLbl = 'DSI';
             elseif strcmp(metric,'dcv')
-                dist{a,t,f} = 1-tbl.dcv;
+                dist{a,t,f}(:,m) = 1-tbl.dcv;
                 xLbl = '1-DCV';
             elseif strcmp(metric,'rPref')
-                dist{a,t,f} = tbl.rPref;
+                dist{a,t,f}(:,m) = tbl.rPref;
                 xLbl = 'rPref';
             elseif strcmp(metric,'osi')
-                dist{a,t,f} = tbl.osi;
+                dist{a,t,f}(:,m) = tbl.osi;
                 xLbl = 'osi';
             end
 
             subplot(nAnimals+1,4,m+(4*(a-1))); hold on
-            c(t) = cdfplot(dist{a,t,f});
+            c(t) = cdfplot(dist{a,t,f}(:,m));
             c(t).LineStyle = linStyl;
             c(t).Color = col;
             c(t).LineWidth = 2;
@@ -300,14 +302,14 @@ for f = 1:nFig % all units; pref trained; pref orth
             ylabel('percentile')
         
 %             subplot(nAnimals+1,4,2+(4*(a-1))); hold on
-%             plot(dist{a,t,f},tbl.rPref,[col mrk],'MarkerSize',mrkSz)
+%             plot(dist{a,t,f}(:,m),tbl.rPref,[col mrk],'MarkerSize',mrkSz)
 %             xlabel(xLbl)
 %             ylabel('rPref')
             if t == 4 && m==1
-                legend(c(lblBit),lbl{a,lblBit,f})
+                legend(c(lblBit),lbl{a,lblBit,f},'Location','southeast')
                 clear c lblBit
             end
-%         
+        
 %             subplot(nAnimals+1,4,3+(4*(a-1))); hold on
 %             x = mean(vertcat(tbl.tuningX{:}));
 %             y = mean(vertcat(tbl.tuningY{:}));
@@ -339,63 +341,68 @@ end
 
 %% Stats
 
-varNames = {'dist','test1','h1','p1','test2','h2','p2'};
+varNames = {'animal','units','metric','area/training','test1','h1','p1','test2','h2','p2'};
+compCount = 0;
 for a = 1:nAnimals+1
-
     for f = 1:nFig
+        for m = 1:nMet
+        
+            compCount = compCount+1;
+            tst1{compCount,1} = 'kstest2';
+            tst2{compCount,1} = 'ranksum';
+            if ~isempty(v1bf{a})
+                i = dist{a,1,f}(:,m);
+            else
+                i = [];
+            end
+            if ~isempty(v1af{a})
+                j = dist{a,2,f}(:,m);
+            else
+                j = [];
+            end
+            if ~isempty(i) && ~isempty(j)
+                [h1(compCount),p1(compCount)] = kstest2(i,j);
+                [p2(compCount),h2(compCount)] = ranksum(i,j);
+            else
+                h1(compCount) = 0;
+                p1(compCount) = -1;
+                h2(compCount) = 0;
+                p2(compCount) = -1;
+            end
+            aID{compCount,1} = animals{a};
+            fID{compCount,1} = ttl{f};
+            mID{compCount,1} = metrics{m};
+            tID{compCount,1} = 'v1bf VS v1af';
+        
+            compCount = compCount+1;
+            tst1{compCount,1} = 'kstest2';
+            tst2{compCount,1} = 'rankSum';
+            if ~isempty(pssbf{a})
+                i = dist{a,3,f}(:,m);
+            else
+                i = [];
+            end
+            if ~isempty(pssaf{a})
+                j = dist{a,4,f}(:,m);
+            else
+                j = [];
+            end
+            if ~isempty(i) && ~isempty(j)
+                [h1(compCount),p1(compCount)] = kstest2(i,j);
+                [p2(compCount),h2(compCount)] = ranksum(i,j);
+            else
+                h1(compCount) = 0;
+                p1(compCount) = -1;
+                h2(compCount) = 0;
+                p2(compCount) = -1;
+            end
+            aID{compCount,1} = animals{a};
+            fID{compCount,1} = ttl{f};
+            mID{compCount,1} = metrics{m};
+            tID{compCount,1} = 'pssbf VS pssaf';
 
-        compCount = 1+(2*(f-1));
-        tst1{compCount,1} = 'kstest2';
-        tst2{compCount,1} = 'ranksum';
-        compNames{compCount,1} = [ttl{f} 'v1bfVSv1af'];
-        if ~isempty(v1bf{a})
-            n = dist{a,1,f};
-        else
-            n = [];
-        end
-        if ~isempty(v1af{a})
-            m = dist{a,2,f};
-        else
-            m = [];
-        end
-        if ~isempty(n) && ~isempty(m)
-            [h1(compCount),p1(compCount)] = kstest2(n,m);
-            [p2(compCount),h2(compCount)] = ranksum(n,m);
-        else
-            h1(compCount) = 0;
-            p1(compCount) = -1;
-            h2(compCount) = 0;
-            p2(compCount) = -1;
-        end
-    
-        compCount = 2+(2*(f-1));
-        tst1{compCount,1} = 'kstest2';
-        tst2{compCount,1} = 'rankSum';
-        compNames{compCount,1} = [ttl{f} 'pssbfVSpssaf'];
-        if ~isempty(pssbf{a})
-            n = dist{a,3,f};
-        else
-            n = [];
-        end
-        if ~isempty(pssaf{a})
-            m = dist{a,4,f};
-        else
-            m = [];
-        end
-        if ~isempty(n) && ~isempty(m)
-            [h1(compCount),p1(compCount)] = kstest2(n,m);
-            [p2(compCount),h2(compCount)] = ranksum(n,m);
-        else
-            h1(compCount) = 0;
-            p1(compCount) = -1;
-            h2(compCount) = 0;
-            p2(compCount) = -1;
-        end
 
+        end
     end
-
-    stats{a} = table(compNames,tst1,h1',p1',tst2,h2',p2','VariableNames',varNames,'RowNames',compNames);
-
-
 end
-
+stats = table(aID,fID,mID,tID,tst1,h1',p1',tst2,h2',p2','VariableNames',varNames);
