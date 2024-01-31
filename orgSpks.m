@@ -27,7 +27,7 @@ function [spks] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
         blank = (1:nConds)==trialInfo.blankId;
     end
     stimPartL = 2; %if stimTime>2seconds --> only use stimPartL seconds of the stim
-    stimPart = 1; %which stimPartL seconds to use
+    stimPart = 1; %which stimPartL seconds to use; 1 = 1st stimPartL seconds
 
     predelay = getparam('predelay',Analyzer);
     stimTime = getparam('stim_time',Analyzer);

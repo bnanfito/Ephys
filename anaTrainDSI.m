@@ -9,7 +9,7 @@ if ispc
     dataFold = 'D:\data'; 
 %     dataFold = 'F:\Brandon\data';
 elseif ismac
-%     dataFold = '/Volumes/Lab drive/Brandon/data';
+    dataFold = '/Volumes/Lab drive/Brandon/data';
 %     dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
 end
 physDir = fullfile(dataFold,'Ephys');
@@ -17,10 +17,10 @@ figDir = fullfile(dataFold,'Figures');
 sumDir = fullfile(dataFold,'SummaryStats');
 anaMode = 'MU';
 
-% % V1 COOLED
-% animals{1} = 'febh2';
-% animals{2} = 'febh3';
-% animals{3} = 'febj3';
+% V1 COOLED
+animals{1} = 'febh2';
+animals{2} = 'febh3';
+animals{3} = 'febj3';
 
 % % CONTROL
 % animals{1} = 'febj2';
@@ -33,11 +33,11 @@ anaMode = 'MU';
 % animals{4} = 'FEAT1';
 % animals{5} = 'FEAN6';
 
-% CONTROL GRAY SCREEN (AUGUSTO)
-animals{1} = 'FEAQ2';
-animals{2} = 'FEAQ3';
-animals{3} = 'FEAQ4';
-animals{4} = 'FEAQ7';
+% % CONTROL GRAY SCREEN (AUGUSTO)
+% animals{1} = 'FEAQ2';
+% animals{2} = 'FEAQ3';
+% animals{3} = 'FEAQ4';
+% animals{4} = 'FEAQ7';
 
 nAnimals = length(animals);
 for a = 1:nAnimals
@@ -134,6 +134,7 @@ for tr = 1:2 % tr = 1 = before; tr = 2 = after training
             sumStats.dsi(sumStats.dsi>1) = 1;
             sumStats.dcv(sumStats.dcv>1) = 1;
             sumStats.dcv(sumStats.dcv<0) = 0;
+            sumStats.osi(sumStats.osi>1) = 1;
 
             if ~isempty(trainAx)
                 trainAxID = sum(abs(sumStats.cPref-trainAx)<=30,2)==1;
@@ -169,7 +170,8 @@ v1af{nAnimals+1} = vertcat(v1af{1:nAnimals});
 pssbf{nAnimals+1} = vertcat(pssbf{1:nAnimals});
 pssaf{nAnimals+1} = vertcat(pssaf{1:nAnimals});
 
-DS = 'dsi';
+metrics = {'rPref','dsi','dcv','osi'};
+nMet = length(metrics);
 
 for f = 1:nFig % all units; pref trained; pref orth
     figure
@@ -182,7 +184,8 @@ for f = 1:nFig % all units; pref trained; pref orth
     end
 
     for a = 1:nAnimals+1
-
+    for m = 1:nMet
+        metric = metrics{m};
     
         for t = 1:4 % each area/before and after
         
@@ -270,51 +273,59 @@ for f = 1:nFig % all units; pref trained; pref orth
                 lblBit(t) = true;
             end
         
-            if strcmp(DS,'dsi')
+            if strcmp(metric,'dsi')
                 dist{a,t,f} = tbl.dsi;
                 xLbl = 'DSI';
-            elseif strcmp(DS,'dcv')
+            elseif strcmp(metric,'dcv')
                 dist{a,t,f} = 1-tbl.dcv;
                 xLbl = '1-DCV';
+            elseif strcmp(metric,'rPref')
+                dist{a,t,f} = tbl.rPref;
+                xLbl = 'rPref';
+            elseif strcmp(metric,'osi')
+                dist{a,t,f} = tbl.osi;
+                xLbl = 'osi';
             end
 
-            subplot(nAnimals+1,4,1+(4*(a-1))); hold on
+            subplot(nAnimals+1,4,m+(4*(a-1))); hold on
             c(t) = cdfplot(dist{a,t,f});
             c(t).LineStyle = linStyl;
             c(t).Color = col;
             c(t).LineWidth = 2;
             title(animals{a})
-            xlabel(xLbl); xlim([0 1])
+            xlabel(xLbl); 
+            if strcmp(metric,'dsi') || strcmp(metric,'dcv') || strcmp(metric,'osi')
+                xlim([0 1])
+            end
             ylabel('percentile')
         
-            subplot(nAnimals+1,4,2+(4*(a-1))); hold on
-            plot(dist{a,t,f},tbl.rPref,[col mrk],'MarkerSize',mrkSz)
-            xlabel(xLbl)
-            ylabel('rPref')
-            if t == 4
+%             subplot(nAnimals+1,4,2+(4*(a-1))); hold on
+%             plot(dist{a,t,f},tbl.rPref,[col mrk],'MarkerSize',mrkSz)
+%             xlabel(xLbl)
+%             ylabel('rPref')
+            if t == 4 && m==1
                 legend(c(lblBit),lbl{a,lblBit,f})
                 clear c lblBit
             end
-        
-            subplot(nAnimals+1,4,3+(4*(a-1))); hold on
-            x = mean(vertcat(tbl.tuningX{:}));
-            y = mean(vertcat(tbl.tuningY{:}));
-            sem = std(vertcat(tbl.tuningY{:}))/sqrt(nU);
-            plot( x , y , [col linStyl] , 'LineWidth' , 2)
-            plot( repmat(x,2,1) , y+([-1;1]*sem) , col , 'LineWidth' , 2)
-            xlabel('ori (deg) relative to pref'); xticks([-180 -90 0 90 180])
-            ylabel('BCFR (Hz)')
-        
-            subplot(nAnimals+1,4,4+(4*(a-1))); hold on
-%             y = mean(vertcat(tbl.tuningY{:})./max(vertcat(tbl.tuningY{:}),[],2));
-            y = y/max(y);
-            plot( x , y , [col linStyl] , 'LineWidth' , 2)
-            xlabel('ori (deg) relative to pref'); xticks([-180 -90 0 90 180])
-            ylabel('norm BCFR (Hz)')
+%         
+%             subplot(nAnimals+1,4,3+(4*(a-1))); hold on
+%             x = mean(vertcat(tbl.tuningX{:}));
+%             y = mean(vertcat(tbl.tuningY{:}));
+%             sem = std(vertcat(tbl.tuningY{:}))/sqrt(nU);
+%             plot( x , y , [col linStyl] , 'LineWidth' , 2)
+%             plot( repmat(x,2,1) , y+([-1;1]*sem) , col , 'LineWidth' , 2)
+%             xlabel('ori (deg) relative to pref'); xticks([-180 -90 0 90 180])
+%             ylabel('BCFR (Hz)')
+%         
+%             subplot(nAnimals+1,4,4+(4*(a-1))); hold on
+%             y = y/max(y);
+%             plot( x , y , [col linStyl] , 'LineWidth' , 2)
+%             xlabel('ori (deg) relative to pref'); xticks([-180 -90 0 90 180])
+%             ylabel('norm BCFR (Hz)')
         
             clear tbl
         end
-    
+    end
     end
     
     sgtitle(ttl{f})
