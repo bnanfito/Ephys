@@ -21,7 +21,7 @@ anaMode = 'MU';
 
 % animals = {'FEAO4','FEAN6','FEAS6','FEAT1','FEAQ5'};
 % animals = {'febj4'};
-animals = {'febj3'};
+animals = {'febh3','febj3'};
 nAnimals = length(animals);
 
 nBlocks = 16;

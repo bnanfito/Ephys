@@ -2,15 +2,15 @@
 clear all
 close all
 
-visTest = 'anova'; alpha = 0.05;
+visTest = 'ranksum'; alpha = 0.01;
 svePlt = 0;
 
 if ispc
-%     dataFold = 'D:\data'; 
-    dataFold = 'F:\Brandon\data';
+    dataFold = 'D:\data'; 
+%     dataFold = 'F:\Brandon\data';
 elseif ismac
 %     dataFold = '/Volumes/Lab drive/Brandon/data';
-    dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
+%     dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
 end
 physDir = fullfile(dataFold,'Ephys');
 figDir = fullfile(dataFold,'Figures');

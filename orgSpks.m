@@ -2,9 +2,7 @@
 function [spks] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
 
     baseName = [animal '_u' unit '_' expt];
-%     physDir = fullfile(dataFold,'Ephys',animal,baseName);
-%     physDir = fullfile(dataFold,'sf4rs01',animal,baseName);
-    physDir = fullfile(dataFold,'sf5rs01',animal,baseName);
+    physDir = fullfile(dataFold,'Ephys',animal,baseName);
     load(fullfile(physDir,[baseName '_id.mat']),'id');
     load(fullfile(physDir,[baseName '_trialInfo.mat']),'trialInfo');
     load(fullfile(physDir,[baseName '.analyzer']),'-mat','Analyzer');
@@ -28,7 +26,8 @@ function [spks] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
     else
         blank = (1:nConds)==trialInfo.blankId;
     end
-    partL = 1; %second of stimulus to calculate FR from if stimTimes>2sec (avoid habituated period)
+    stimPartL = 2; %if stimTime>2seconds --> only use stimPartL seconds of the stim
+    stimPart = 1; %which stimPartL seconds to use
 
     predelay = getparam('predelay',Analyzer);
     stimTime = getparam('stim_time',Analyzer);
@@ -65,7 +64,7 @@ function [spks] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
                 % time vectors for different trial epochs
                 tvPre       = stimStart(t)-(predelay*sf):stimStart(t)-1;
                 tvStim      = stimStart(t):stimStart(t)+(stimTime*sf)-1;
-                tvStim_part = stimStart(t)+((partL-1)*sf):stimStart(t)+(partL*sf)-1;
+                tvStim_part = stimStart(t) + ((stimPartL*(stimPart-1))*sf) : stimStart(t) +((stimPartL*stimPart)*sf) -1;
                 tvPost      = stimStart(t)+(stimTime*sf):stimStart(t)+((stimTime+postdelay)*sf)-1;
                 tvTrial     = [tvPre tvStim tvPost];
 
@@ -78,7 +77,7 @@ function [spks] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
 
                 if stimTime>2
                     stimSpkCount = sum(ismember(tvStim_part,spks(u).times));
-                    stimFR = stimSpkCount/1;
+                    stimFR = stimSpkCount/stimPartL;
                     spks(u).fr.stim(r,c) = stimFR;
                 else
                     stimSpkCount = sum(ismember(tvStim,spks(u).times));

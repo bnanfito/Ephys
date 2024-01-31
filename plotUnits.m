@@ -20,9 +20,7 @@ alignBit = 1;
 stat = 'sem';
 baseName = [animal '_u' unit '_' expt];
 
-% physDir = fullfile(dataFold,'Ephys',animal,baseName); 
-% physDir = fullfile(dataFold,'sf4rs01',animal,baseName);
-physDir = fullfile(dataFold,'sf5rs01',animal,baseName);
+physDir = fullfile(dataFold,'Ephys',animal,baseName); 
 figDir = fullfile(dataFold,'Figures',animal,baseName); 
 sumDir = fullfile(dataFold,'SummaryStats',animal,baseName); 
 
@@ -188,6 +186,29 @@ for u = 1:length(spks)
 
         elseif length(c) > 2 %%% ori12 / ori16 experiment %%%
 
+            c_ori = mod(c,180);
+            oris = unique(c_ori);
+            for o = 1:length(oris)
+                rTemp = r(:,c_ori == oris(o));
+                r_ori(:,o) = rTemp(:);
+                clear rTemp
+            end
+            rPref_ori = max(mean(r_ori));
+            cPref_ori = oris(mean(r_ori)==rPref_ori);
+            if length(cPref_ori)>1
+                rIn = mean(r_ori);
+                pks = rIn == rPref_ori;
+                rConv = rIn([end 1:end 1]);
+                rConv = conv(rConv,ones(1,3)*(1/3),'same');
+                rConv = rConv(1+1:end-1);
+                rConv(~pks) = 0;
+                cPref_ori = oris(find(rConv==max(rConv),1,'first'));
+                clear rIn pks rConv 
+            end
+            cNull_ori = mod(cPref_ori+90,180);
+            rNull_ori = mean(r_ori(:,oris==cNull_ori));
+            osi(u,1) = abs(rPref_ori-rNull_ori)/rPref_ori;
+
             if length(cPref)>1 % if there is more than one pk with rPref
                 rIn = mean(r);
                 pks = rIn == rPref;
@@ -196,6 +217,7 @@ for u = 1:length(spks)
                 rConv = rConv(1+1:end-1);
                 rConv(~pks) = 0;
                 cPref = c(find(rConv==max(rConv),1,'first'));
+                clear rIn pks rConv 
             end
             cP(u,1) = cPref;
 
@@ -254,15 +276,15 @@ for u = 1:length(spks)
 
     elseif length(trialInfo.dom) ==2  % for experiments where another variable changes in addition to ori/dir (e.g. contrast experiments, spatial frequency, etc)
 
-        oriInd = find(strcmp(trialInfo.dom,'ori'));
-        notOriInd = find(~((1:2)==oriInd));
-        oris = unique(trialInfo.domval(:,oriInd));
-        for o = 1:length(oris)
-
-%             c{o} = 
-%             r{o} = 
-
-        end
+%         oriInd = find(strcmp(trialInfo.dom,'ori'));
+%         notOriInd = find(~((1:2)==oriInd));
+%         oris = unique(trialInfo.domval(:,oriInd));
+%         for o = 1:length(oris)
+% 
+% %             c{o} = 
+% %             r{o} = 
+% 
+%         end
 
     end
 
@@ -300,6 +322,7 @@ sumStats.tuningY = tuningY;
 if exist('dsi','var')
     sumStats.dsi = dsi;
     sumStats.dcv = dcv;
+    sumStats.osi = osi;
 end
 if exist('dpi','var')
     sumStats.dpi = dpi;
