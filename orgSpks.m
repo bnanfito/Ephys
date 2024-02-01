@@ -69,7 +69,8 @@ function [spks] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
                 tvTrial     = [tvPre tvStim tvPost];
 
                 spks(u).train(:,t) = ismember(tvTrial,spks(u).times);
-                spks(u).stimCent = [spks(u).stimCent vertcat((tvTrial(spks(u).train(:,t))-stimStart(t))/sf,repmat(t,1,length(find(spks(u).train(:,t)))))];
+                spks(u).stimCent = [spks(u).stimCent vertcat( (tvTrial( spks(u).train(:,t))-stimStart(t))/sf , ...
+                                                                repmat(t,1,length(find(spks(u).train(:,t)))) ) ];
 
                 baseSpkCount = length(find(ismember(tvPre,spks(u).times)));
                 baseFR = baseSpkCount/predelay;
@@ -86,6 +87,17 @@ function [spks] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
                 end
 
                 spks(u).fr.bc(r,c) = stimFR-baseFR;
+
+                s = spks(u).stimCent(1,:);
+                tID = spks(u).stimCent(2,:);
+                [values,edges] = histcounts(s(s<=1 & tID==t),-predelay:0.05:1);
+                values = zscore(values);
+                values = values(end-19:end);
+                edges = edges(end-19:end);
+                spks(u).psth_stim.values(r,:,c) = values;
+                spks(u).psth_stim.binEdges(r,:,c) = edges;
+                clear s tID values edges
+
 
             end
         end
