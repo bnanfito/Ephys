@@ -91,7 +91,7 @@ function [spks] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
                 s = spks(u).stimCent(1,:);
                 tID = spks(u).stimCent(2,:);
                 [values,edges] = histcounts(s(s<=1 & tID==t),-predelay:0.05:1);
-                values = zscore(values);
+%                 values = zscore(values);
                 values = values(end-19:end);
                 edges = edges(end-19:end);
                 spks(u).psth_stim.values(r,:,c) = values;

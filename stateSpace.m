@@ -1,6 +1,6 @@
 %state space
 
-function [X,X_condID] = stateSpace(animal,unit,expt,probe)
+function [X,X_condID] = stateSpace(animal,unit,expt,probe,plt)
 
 if ispc
 %     dataFold = 'D:\data'; 
@@ -57,28 +57,30 @@ for t = 1:size(popAct,1)
 
 end
 
-% [COEFF, SCORE] = pca(X);
-% 
-% figure; hold on
-% oris = [0 90 180 270];
-% % colors = {[0 0.4470 0.7410],[0.8500 0.3250 0.0980],[0.9290 0.6940 0.1250],[0.4940 0.1840 0.5560],[0.4660 0.6740 0.1880],[0.3010 0.7450 0.9330],[0.6350 0.0780 0.1840],[0 0.4470 0.7410],[0.8500 0.3250 0.0980],[0.9290 0.6940 0.1250],[0.4940 0.1840 0.5560],[0.4660 0.6740 0.1880],[0.3010 0.7450 0.9330],[0.6350 0.0780 0.1840],[0 0.4470 0.7410],[0.8500 0.3250 0.0980],[0.9290 0.6940 0.1250],[0.4940 0.1840 0.5560],[0.4660 0.6740 0.1880],[0.3010 0.7450 0.9330],[0.6350 0.0780 0.1840]};
-% colors = {'r','g','b','y'};
-% countC = 0;
-% if isempty(trialInfo.blankId)
-%     conds = trialInfo.domval;
-% else
-%     conds = [trialInfo.domval;-1];
-% end
-% for c = 1:length(conds)
-%     cond = conds(c);
-%     if ~ismember(cond,oris)
-%         continue
-%     end
-%     countC = countC+1;
-%     plot3(SCORE(X_condID==c,1),SCORE(X_condID==c,2),SCORE(X_condID==c,3),'-o','Color',colors{countC})
-% 
-% end
 
+[COEFF, SCORE] = pca(X);
+
+if plt == 1
+    figure; hold on
+    oris = [0 90 180 270];
+    % colors = {[0 0.4470 0.7410],[0.8500 0.3250 0.0980],[0.9290 0.6940 0.1250],[0.4940 0.1840 0.5560],[0.4660 0.6740 0.1880],[0.3010 0.7450 0.9330],[0.6350 0.0780 0.1840],[0 0.4470 0.7410],[0.8500 0.3250 0.0980],[0.9290 0.6940 0.1250],[0.4940 0.1840 0.5560],[0.4660 0.6740 0.1880],[0.3010 0.7450 0.9330],[0.6350 0.0780 0.1840],[0 0.4470 0.7410],[0.8500 0.3250 0.0980],[0.9290 0.6940 0.1250],[0.4940 0.1840 0.5560],[0.4660 0.6740 0.1880],[0.3010 0.7450 0.9330],[0.6350 0.0780 0.1840]};
+    colors = {'r','g','b','y'};
+    countC = 0;
+    if isempty(trialInfo.blankId)
+        conds = trialInfo.domval;
+    else
+        conds = [trialInfo.domval;-1];
+    end
+    for c = 1:length(conds)
+        cond = conds(c);
+        if ~ismember(cond,oris)
+            continue
+        end
+        countC = countC+1;
+        plot3(SCORE(X_condID==cond,1),SCORE(X_condID==cond,2),SCORE(X_condID==cond,3),'-o','Color',colors{countC})
+    
+    end
+end
 
 
 end
