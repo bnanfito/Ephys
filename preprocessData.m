@@ -14,7 +14,6 @@ scaleFactor = 4;
 legacyFlag = 0;
 
 baseName = [animal '_u' unit '_' expt];
-cd(fullfile(physDir,animal,baseName))
 
 load(fullfile(physDir,animal,baseName,[baseName '_id.mat']),'id');
 nChannels=sum([id.probes.nChannels]);
