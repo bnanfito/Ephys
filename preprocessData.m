@@ -1,5 +1,5 @@
 
-function preprocessData(animal,unit,expt,probe,nJobs,anaMode,copyToZ,dataFold)
+function preprocessData(animal,unit,expt,probe,anaMode,copyToZ,dataFold)
 
 if strcmp(anaMode,'SU')
     MUflag = 0;
@@ -11,6 +11,7 @@ physDir = fullfile(dataFold,'Ephys');
 extractTrials(physDir,physDir,physDir,animal,unit,expt)
 name = 'BRN';
 scaleFactor = 4;
+nJobs = 100;
 legacyFlag = 0;
 
 baseName = [animal '_u' unit '_' expt];

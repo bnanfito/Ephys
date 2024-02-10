@@ -6,22 +6,22 @@ clear
 close all
 
 if ispc
-%     dataFold = 'D:\data';
+    dataFold = 'D:\data';
 %     dataFold = 'D:\OneDrive - Johns Hopkins\Documents\data';
-    dataFold = 'F:\Brandon\data';
+%     dataFold = 'F:\Brandon\data';
 elseif ismac
     dataFold = '/Volumes/Lab drive/Brandon/data';
 end
 % physDir = fullfile(dataFold,'Ephys');
 % physDir = fullfile(dataFold,'sf4rs01');
-physDir = fullfile(dataFold,'sf5rs01');
+physDir = fullfile(dataFold,'Ephys');
 figDir = fullfile(dataFold,'Figures');
 sumDir = fullfile(dataFold,'SummaryStats');
 anaMode = 'MU';
 
-% animals = {'FEAO4','FEAN6','FEAS6','FEAT1','FEAQ5'};
+animals = {'FEAO4','FEAN6','FEAS6','FEAT1','FEAQ5'};
 % animals = {'febj4'};
-animals = {'febh3','febj3'};
+% animals = {'febh3','febj3'};
 nAnimals = length(animals);
 
 nBlocks = 16;
@@ -236,18 +236,16 @@ for a = 1:nAnimals
         end
     
         disp(exptName)
-        load(fullfile(physDir,animal,exptName,[exptName '_id.mat']),'id')
-        load(fullfile(physDir,animal,exptName,[exptName '_trialInfo.mat']),'trialInfo')
+        load(fullfile('D:\data\Ephys',animal,exptName,[exptName '_id.mat']),'id')
+        load(fullfile('D:\data\Ephys',animal,exptName,[exptName '_trialInfo.mat']),'trialInfo')
         for p = 1:length(id.probes)
-            load(fullfile(physDir,animal,exptName,[exptName '_p' num2str(p) '_MUthreshold.mat']))
-            disp(MUthresholding.threshlevel)
-%             sumFile = fullfile(sumDir,animal,exptName,[exptName '_p' num2str(p) '_sumStats' anaMode '.mat']);
-%             if isfile(sumFile)
-%                 load(sumFile,'sumStats')
-%             else
-                [sumStats,spks] = plotUnits(animal,unit,expt,p,anaMode,'ranksum',0.01,0,0,0,dataFold);
+            sumFile = fullfile(sumDir,animal,exptName,[exptName '_p' num2str(p) '_sumStats' anaMode '.mat']);
+            if isfile(sumFile)
+                load(sumFile,'sumStats')
+            else
+                [sumStats,spks] = plotUnits(animal,unit,expt,p,anaMode,'ranksum',0.01,0,1,0,dataFold);
                 close all
-%             end
+            end
             if strcmp(id.probes(p).area,'V1')
                 v1{b,a} = sumStats;
             elseif strcmp(id.probes(p).area,'PSS')
@@ -299,6 +297,9 @@ for a = 1:length(animals)
                 color = [colorScl 0 0];
                 area = 'PSS';
                 tbl = vertcat(pss{b,a},pss{b+1,a});
+            end
+            if isempty(tbl)
+                continue
             end
 
             nU(hr,a,p) = sum(tbl.goodUnit);

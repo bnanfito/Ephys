@@ -6,8 +6,8 @@ visTest = 'ranksum'; alpha = 0.01;
 svePlt = 0;
 
 if ispc
-%     dataFold = 'D:\data'; 
-    dataFold = 'F:\Brandon\data';
+    dataFold = 'D:\data'; 
+%     dataFold = 'F:\Brandon\data';
 elseif ismac
     dataFold = '/Volumes/Lab drive/Brandon/data';
 %     dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
@@ -26,18 +26,27 @@ anaMode = 'MU';
 % animals{1} = 'febj2';
 % animals{2} = 'febj4';
 
-% CONTROL (AUGUSTO)
-animals{1} = 'FEAO4';
-animals{2} = 'FEAQ5';
-animals{3} = 'FEAS6';
-animals{4} = 'FEAT1';
-animals{5} = 'FEAN6';
+% % CONTROL (AUGUSTO)
+% animals{1} = 'FEAO4';
+% animals{2} = 'FEAQ5';
+% animals{3} = 'FEAS6';
+% animals{4} = 'FEAT1';
+% animals{5} = 'FEAN6';
 
 % % CONTROL GRAY SCREEN (AUGUSTO)
 % animals{1} = 'FEAQ2';
 % animals{2} = 'FEAQ3';
 % animals{3} = 'FEAQ4';
 % animals{4} = 'FEAQ7';
+
+% STATIC (AUGUSTO)
+animals{1} = 'FEAS9';
+animals{2} = 'FEAT2';
+animals{3} = 'FEAU5';
+animals{4} = 'FEAU8';
+animals{5} = 'FEAU9';
+animals{6} = 'FEAV0';
+animals{7} = 'FEAV1';
 
 nAnimals = length(animals);
 for a = 1:nAnimals
@@ -98,6 +107,34 @@ elseif strcmp(animals{a},'FEAQ7')
     before = {'_u000_000'};
     after = {'_u002_001'};
     trainAx = [];
+elseif strcmp(animals{a},'FEAS9')
+    before = {'_u000_000'};
+    after = {'_u002_001'};
+    trainAx = [120];
+elseif strcmp(animals{a},'FEAT2')
+    before = {'_u000_000'};
+    after = {'_u002_002'};
+    trainAx = [60];
+elseif strcmp(animals{a},'FEAU5')
+    before = {'_u000_000'};
+    after = {'_u002_001','_u002_002'};
+    trainAx = [120];
+elseif strcmp(animals{a},'FEAU8')
+    before = {'_u000_002'};
+    after = {'_u002_000','_u002_001','_u002_003'};
+    trainAx = [0];
+elseif strcmp(animals{a},'FEAU9')
+    before = {'_u000_000'};
+    after = {'_u002_000','_u002_003','_u002_004'};
+    trainAx = [90];
+elseif strcmp(animals{a},'FEAV0')
+    before = {'_u000_000'};
+    after = {'_u002_000','_u002_002'};
+    trainAx = [60];
+elseif strcmp(animals{a},'FEAV1')
+    before = {'_u000_001'};
+    after = {'_u002_000','_u002_002'};
+    trainAx = [150];
 end
 if isempty(trainAx)
     nFig = 1;
@@ -112,6 +149,7 @@ pssbf{a} = [];
 pssaf{a} = [];
 
 %% Extract summary statistics 
+
 for tr = 1:2 % tr = 1 = before; tr = 2 = after training
     if tr == 1
         exptList = before;
@@ -171,6 +209,8 @@ v1bf{nAnimals+1} = vertcat(v1bf{1:nAnimals});
 v1af{nAnimals+1} = vertcat(v1af{1:nAnimals});
 pssbf{nAnimals+1} = vertcat(pssbf{1:nAnimals});
 pssaf{nAnimals+1} = vertcat(pssaf{1:nAnimals});
+
+%% PLOT
 
 metrics = {'rPref','dsi','dcv','osi'};
 nMet = length(metrics);
@@ -350,12 +390,12 @@ for a = 1:nAnimals+1
             compCount = compCount+1;
             tst1{compCount,1} = 'kstest2';
             tst2{compCount,1} = 'ranksum';
-            if ~isempty(v1bf{a})
+            if ~isempty(v1bf{a}) && ~isempty(dist{a,1,f})
                 i = dist{a,1,f}(:,m);
             else
                 i = [];
             end
-            if ~isempty(v1af{a})
+            if ~isempty(v1af{a}) && ~isempty(dist{a,2,f})
                 j = dist{a,2,f}(:,m);
             else
                 j = [];
@@ -377,12 +417,12 @@ for a = 1:nAnimals+1
             compCount = compCount+1;
             tst1{compCount,1} = 'kstest2';
             tst2{compCount,1} = 'rankSum';
-            if ~isempty(pssbf{a})
+            if ~isempty(pssbf{a}) && ~isempty(dist{a,3,f})
                 i = dist{a,3,f}(:,m);
             else
                 i = [];
             end
-            if ~isempty(pssaf{a})
+            if ~isempty(pssaf{a}) && ~isempty(dist{a,4,f}) 
                 j = dist{a,4,f}(:,m);
             else
                 j = [];
