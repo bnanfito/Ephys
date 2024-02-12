@@ -4,6 +4,8 @@ close all
 
 visTest = 'ranksum'; alpha = 0.01;
 svePlt = 0;
+chkSum = 0;
+sveSum = 0;
 
 if ispc
     dataFold = 'D:\data'; 
@@ -26,12 +28,12 @@ anaMode = 'MU';
 % animals{1} = 'febj2';
 % animals{2} = 'febj4';
 
-% % CONTROL (AUGUSTO)
-% animals{1} = 'FEAO4';
-% animals{2} = 'FEAQ5';
-% animals{3} = 'FEAS6';
-% animals{4} = 'FEAT1';
-% animals{5} = 'FEAN6';
+% CONTROL (AUGUSTO)
+animals{1} = 'FEAO4';
+animals{2} = 'FEAQ5';
+animals{3} = 'FEAS6';
+animals{4} = 'FEAT1';
+animals{5} = 'FEAN6';
 
 % % CONTROL GRAY SCREEN (AUGUSTO)
 % animals{1} = 'FEAQ2';
@@ -39,14 +41,14 @@ anaMode = 'MU';
 % animals{3} = 'FEAQ4';
 % animals{4} = 'FEAQ7';
 
-% STATIC (AUGUSTO)
-animals{1} = 'FEAS9';
-animals{2} = 'FEAT2';
-animals{3} = 'FEAU5';
-animals{4} = 'FEAU8';
-animals{5} = 'FEAU9';
-animals{6} = 'FEAV0';
-animals{7} = 'FEAV1';
+% % STATIC (AUGUSTO)
+% animals{1} = 'FEAS9';
+% animals{2} = 'FEAT2';
+% animals{3} = 'FEAU5';
+% animals{4} = 'FEAU8';
+% animals{5} = 'FEAU9';
+% animals{6} = 'FEAV0';
+% animals{7} = 'FEAV1';
 
 nAnimals = length(animals);
 for a = 1:nAnimals
@@ -162,12 +164,12 @@ for tr = 1:2 % tr = 1 = before; tr = 2 = after training
         load(fullfile(physDir,animals{a},exptName,[exptName '_id.mat']))
         for p = 1:length(id.probes)
             sumFile = fullfile(sumDir,animals{a},exptName,[exptName '_p' num2str(p) '_sumStats' anaMode '.mat']);
-            if isfile(sumFile)
+            if isfile(sumFile) && chkSum == 1
                 disp(['loading sumStats for ' exptName])
                 load(sumFile,'sumStats')
             else
                 disp(['generating sumStats for' exptName])
-                sumStats = plotUnits(animals{a},unit,expt,p,anaMode,visTest,alpha,0,1,0,dataFold);close all
+                sumStats = plotUnits(animals{a},unit,expt,p,anaMode,visTest,alpha,0,sveSum,0,dataFold);close all
             end
 %             sumStats = convertAL(animals{a},unit,expt,p,dataFold);
 %             sumStats = sumStats(sumStats.goodUnit == 1,:);
@@ -177,10 +179,14 @@ for tr = 1:2 % tr = 1 = before; tr = 2 = after training
             sumStats.osi(sumStats.osi>1) = 1;
 
             if ~isempty(trainAx)
-                trainAxID = sum(abs(sumStats.cPref-trainAx)<=30,2)==1;
+                oriDiff = abs(sumStats.cPref-trainAx);
+                oriDiff(oriDiff>180) = 360-oriDiff(oriDiff>180);
+                trainAxID = sum(oriDiff<=30,2)==1;
                 sumStats.trainAx = trainAxID;
                 
-                orthAxID = sum(abs(sumStats.cPref-orthAx)<=30,2)==1;
+                oriDiff = abs(sumStats.cPref-orthAx);
+                oriDiff(oriDiff>180) = 360-oriDiff(oriDiff>180);
+                orthAxID = sum(oriDiff<=30,2)==1;
                 sumStats.orthAx = orthAxID;
             end
 

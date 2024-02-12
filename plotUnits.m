@@ -28,6 +28,12 @@ load(fullfile(physDir,[baseName '_id.mat']),'id')
 load(fullfile(physDir,[baseName '_trialInfo']),'trialInfo')
 load(fullfile(physDir,[baseName '.analyzer']),'-mat')
 
+varInfo = whos('probe');
+if strcmp(varInfo.class,'char')
+    area = probe;
+    probe = find(strcmp({id.probes(:).area}',area));
+end
+
 area = id.probes(probe).area;
 sf = id.sampleFreq;
 % kernel = ones(1,0.1*sf)*(1/(0.1*sf));
