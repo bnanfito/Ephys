@@ -26,7 +26,7 @@ function [spks] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
     else
         blank = (1:nConds)==trialInfo.blankId;
     end
-    stimPartL = 1; %if stimTime>2seconds --> only use stimPartL seconds of the stim
+    stimPartL = 1; %if stimTime>1second --> only use stimPartL seconds of the stim
     stimPart = 1; %which stimPartL seconds to use; 1 = 1st stimPartL seconds
 
     predelay = getparam('predelay',Analyzer);
@@ -74,10 +74,10 @@ function [spks] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
                                                                 repmat(t,1,length(find(spks(u).train(:,t)))) ) ];
 
                 baseSpkCount = length(find(ismember(tvPre_oneSec,spks(u).times)));
-                baseFR = baseSpkCount/1;
+                baseFR = baseSpkCount/(length(tvPre_oneSec)/sf);
                 spks(u).fr.base(r,c) = baseFR;
 
-                if stimTime>2
+                if stimTime>1
                     stimSpkCount = sum(ismember(tvStim_part,spks(u).times));
                     stimFR = stimSpkCount/stimPartL;
                     spks(u).fr.stim(r,c) = stimFR;

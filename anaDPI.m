@@ -5,6 +5,10 @@
 clear
 close all
 
+visTest = 'ranksum'; alpha = 0.01;
+chkSum = 0;
+sveSum = 0;
+
 if ispc
     dataFold = 'D:\data';
 %     dataFold = 'D:\OneDrive - Johns Hopkins\Documents\data';
@@ -240,10 +244,10 @@ for a = 1:nAnimals
         load(fullfile('D:\data\Ephys',animal,exptName,[exptName '_trialInfo.mat']),'trialInfo')
         for p = 1:length(id.probes)
             sumFile = fullfile(sumDir,animal,exptName,[exptName '_p' num2str(p) '_sumStats' anaMode '.mat']);
-            if isfile(sumFile)
+            if isfile(sumFile) && chkSum == 1
                 load(sumFile,'sumStats')
             else
-                [sumStats,spks] = plotUnits(animal,unit,expt,p,anaMode,'ranksum',0.01,0,1,0,dataFold);
+                [sumStats,spks] = plotUnits(animal,unit,expt,p,anaMode,visTest,alpha,0,sveSum,0,dataFold);
                 close all
             end
             if strcmp(id.probes(p).area,'V1')
