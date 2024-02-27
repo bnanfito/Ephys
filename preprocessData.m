@@ -10,7 +10,7 @@ end
 physDir = fullfile(dataFold,'Ephys');
 extractTrials(physDir,physDir,physDir,animal,unit,expt)
 name = 'BRN';
-scaleFactor = 4;
+scaleFactor = 5;
 nJobs = 100;
 legacyFlag = 0;
 

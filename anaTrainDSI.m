@@ -4,7 +4,7 @@ close all
 
 visTest = 'ranksum'; alpha = 0.01;
 svePlt = 0;
-chkSum = 0;
+chkSum = 1;
 sveSum = 0;
 
 if ispc
@@ -19,32 +19,20 @@ figDir = fullfile(dataFold,'Figures');
 sumDir = fullfile(dataFold,'SummaryStats');
 anaMode = 'MU';
 
-% V1 COOLED
-animals{1} = 'febh2';
-animals{2} = 'febh3';
-animals{3} = 'febj3';
+% % V1 COOLED
+% animals = {'febh2','febh3','febj3'};
 
 % % CONTROL
-% animals{1} = 'febj2';
-% animals{2} = 'febj4';
+% animals = {'febj2','febj4'};
 
 % % CONTROL (AUGUSTO)
 % animals = {'FEAO4','FEAQ5','FEAS6','FEAT1','FEAN6'};
 
 % % CONTROL GRAY SCREEN (AUGUSTO)
-% animals{1} = 'FEAQ2';
-% animals{2} = 'FEAQ3';
-% animals{3} = 'FEAQ4';
-% animals{4} = 'FEAQ7';
+% animals = {'FEAQ2','FEAQ3','FEAQ4','FEAQ7'};
 
-% % STATIC (AUGUSTO)
-% animals{1} = 'FEAS9';
-% animals{2} = 'FEAT2';
-% animals{3} = 'FEAU5';
-% animals{4} = 'FEAU8';
-% animals{5} = 'FEAU9';
-% animals{6} = 'FEAV0';
-% animals{7} = 'FEAV1';
+% STATIC (AUGUSTO)
+animals = {'FEAS9','FEAT2','FEAU5','FEAU8','FEAU9','FEAV0','FEAV1'};
 
 nAnimals = length(animals);
 for a = 1:nAnimals
@@ -115,23 +103,23 @@ elseif strcmp(animals{a},'FEAT2')
     trainAx = [60];
 elseif strcmp(animals{a},'FEAU5')
     before = {'_u000_000'};
-    after = {'_u002_001','_u002_002'};
+    after = {'_u002_002'};
     trainAx = [120];
 elseif strcmp(animals{a},'FEAU8')
     before = {'_u000_002'};
-    after = {'_u002_000','_u002_001','_u002_003'};
+    after = {'_u002_003'};
     trainAx = [0];
 elseif strcmp(animals{a},'FEAU9')
     before = {'_u000_000'};
-    after = {'_u002_000','_u002_003','_u002_004'};
+    after = {'_u002_003'};
     trainAx = [90];
 elseif strcmp(animals{a},'FEAV0')
     before = {'_u000_000'};
-    after = {'_u002_000','_u002_002'};
+    after = {'_u002_000'};
     trainAx = [60];
 elseif strcmp(animals{a},'FEAV1')
     before = {'_u000_001'};
-    after = {'_u002_000','_u002_002'};
+    after = {'_u002_002'};
     trainAx = [150];
 end
 if isempty(trainAx)
@@ -228,9 +216,7 @@ for f = 1:nFig % all units; pref trained; pref orth
     end
 
     for a = 1:nAnimals+1
-    for m = 1:nMet
-        metric = metrics{m};
-    
+    for m = 1:nMet+1
         for t = 1:4 % each area/before and after
         
             if t == 1 % V1 before training
@@ -316,45 +302,46 @@ for f = 1:nFig % all units; pref trained; pref orth
             else
                 lblBit(t) = true;
             end
-        
-            if strcmp(metric,'dsi')
-                dist{a,t,f}(:,m) = tbl.dsi;
-                xLbl = 'DSI';
-            elseif strcmp(metric,'dcv')
-                dist{a,t,f}(:,m) = 1-tbl.dcv;
-                xLbl = '1-DCV';
-            elseif strcmp(metric,'rPref')
-                dist{a,t,f}(:,m) = tbl.rPref;
-                xLbl = 'rPref';
-            elseif strcmp(metric,'osi')
-                dist{a,t,f}(:,m) = tbl.osi;
-                xLbl = 'osi';
-            end
 
-            subplot(nAnimals+1,4,m+(4*(a-1))); hold on
-            c(t) = cdfplot(dist{a,t,f}(:,m));
-            c(t).LineStyle = linStyl;
-            c(t).Color = col;
-            c(t).LineWidth = 2;
-            title(animals{a})
-            xlabel(xLbl); 
-            if strcmp(metric,'dsi') || strcmp(metric,'dcv') || strcmp(metric,'osi')
-                xlim([0 1])
-            end
-            ylabel('percentile')
+            subplot(nAnimals+1,nMet+1,m+((nMet+1)*(a-1))); hold on
+
+            if m<nMet+1
+
+                metric = metrics{m};
+                if strcmp(metric,'dsi')
+                    dist{a,t,f}(:,m) = tbl.dsi;
+                    xLbl = 'DSI';
+                elseif strcmp(metric,'dcv')
+                    dist{a,t,f}(:,m) = 1-tbl.dcv;
+                    xLbl = '1-DCV';
+                elseif strcmp(metric,'rPref')
+                    dist{a,t,f}(:,m) = tbl.rPref;
+                    xLbl = 'rPref';
+                elseif strcmp(metric,'osi')
+                    dist{a,t,f}(:,m) = tbl.osi;
+                    xLbl = 'osi';
+                end
+
+                c(t) = cdfplot(dist{a,t,f}(:,m));
+                c(t).LineStyle = linStyl;
+                c(t).Color = col;
+                c(t).LineWidth = 2;
+                title(animals{a})
+                xlabel(xLbl); 
+                if strcmp(metric,'dsi') || strcmp(metric,'dcv') || strcmp(metric,'osi')
+                    xlim([0 1])
+                end
+                ylabel('percentile')
+            
+                if t == 4 && m==1
+                    legend(c(lblBit),lbl{a,lblBit,f},'Location','southeast')
+                    clear c lblBit
+                end
+
+            elseif m == nMet+1
         
-%             subplot(nAnimals+1,4,2+(4*(a-1))); hold on
-%             plot(dist{a,t,f}(:,m),tbl.rPref,[col mrk],'MarkerSize',mrkSz)
-%             xlabel(xLbl)
-%             ylabel('rPref')
-            if t == 4 && m==1
-                legend(c(lblBit),lbl{a,lblBit,f},'Location','southeast')
-                clear c lblBit
-            end
-        
-%             subplot(nAnimals+1,4,3+(4*(a-1))); hold on
-%             x = mean(vertcat(tbl.tuningX{:}));
-%             y = mean(vertcat(tbl.tuningY{:}));
+                x = mean(vertcat(tbl.tuningX{:}));
+                y = mean(vertcat(tbl.tuningY{:}));
 %             sem = std(vertcat(tbl.tuningY{:}))/sqrt(nU);
 %             plot( x , y , [col linStyl] , 'LineWidth' , 2)
 %             plot( repmat(x,2,1) , y+([-1;1]*sem) , col , 'LineWidth' , 2)
@@ -362,10 +349,12 @@ for f = 1:nFig % all units; pref trained; pref orth
 %             ylabel('BCFR (Hz)')
 %         
 %             subplot(nAnimals+1,4,4+(4*(a-1))); hold on
-%             y = y/max(y);
-%             plot( x , y , [col linStyl] , 'LineWidth' , 2)
-%             xlabel('ori (deg) relative to pref'); xticks([-180 -90 0 90 180])
-%             ylabel('norm BCFR (Hz)')
+                y = y/max(y);
+                plot( x , y , [col linStyl] , 'LineWidth' , 2)
+                xlabel('ori (deg) relative to pref'); xticks([-180 -90 0 90 180])
+                ylabel('norm BCFR (Hz)')
+
+            end
         
             clear tbl
         end

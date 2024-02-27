@@ -5,6 +5,7 @@
 clear
 close all
 
+anaMode = 'MU';
 visTest = 'ranksum'; alpha = 0.01;
 chkSum = 0;
 sveSum = 0;
@@ -16,16 +17,19 @@ if ispc
 elseif ismac
     dataFold = '/Volumes/Lab drive/Brandon/data';
 end
-% physDir = fullfile(dataFold,'Ephys');
-% physDir = fullfile(dataFold,'sf4rs01');
 physDir = fullfile(dataFold,'Ephys');
 figDir = fullfile(dataFold,'Figures');
 sumDir = fullfile(dataFold,'SummaryStats');
-anaMode = 'MU';
 
+% CONTROL (AUGUSTO)
 animals = {'FEAO4','FEAN6','FEAS6','FEAT1','FEAQ5'};
-% animals = {'febj4'};
-% animals = {'febh3','febj3'};
+
+% CONTROL
+% % animals = {'febj4'};
+
+% V1 COOLED
+% % animals = {'febh3','febj3'};
+
 nAnimals = length(animals);
 
 nBlocks = 16;
