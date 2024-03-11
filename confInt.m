@@ -34,9 +34,9 @@ for g = 1:nGroups
     conf = 0.95;
     alpha = 1 - conf;
     pLo = alpha/2;
-    pUp = 1 - alpha/2;
+    pHi = 1 - alpha/2;
     
-    crit = tinv([pLo pUp], nu);
+    crit = tinv([pLo pHi], nu);
     
     ci(:,g) = xbar + crit*se;
 
