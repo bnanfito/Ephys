@@ -104,6 +104,8 @@ function [spks] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
 
             end
         end
+
+        spks(u).fr.bc(isoutlier(spks(u).fr.bc))=nan;
     
     end
 

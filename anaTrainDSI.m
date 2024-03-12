@@ -2,9 +2,9 @@
 clear all
 close all
 
-visTest = 'ranksum'; alpha = 0.01;
+visTest = 'anova'; alpha = 0.01;
 svePlt = 0;
-chkSum = 1;
+chkSum = 0;
 sveSum = 0;
 
 if ispc
@@ -19,8 +19,8 @@ figDir = fullfile(dataFold,'Figures');
 sumDir = fullfile(dataFold,'SummaryStats');
 anaMode = 'MU';
 
-% % V1 COOLED
-% animals = {'febh2','febh3','febj3'};
+% V1 COOLED
+animals = {'febh2','febh3','febj3'};
 
 % % CONTROL
 % animals = {'febj2','febj4'};
@@ -31,8 +31,8 @@ anaMode = 'MU';
 % % CONTROL GRAY SCREEN (AUGUSTO)
 % animals = {'FEAQ2','FEAQ3','FEAQ4','FEAQ7'};
 
-% STATIC (AUGUSTO)
-animals = {'FEAS9','FEAT2','FEAU5','FEAU8','FEAU9','FEAV0','FEAV1'};
+% % STATIC (AUGUSTO)
+% animals = {'FEAS9','FEAT2','FEAU5','FEAU8','FEAU9','FEAV0','FEAV1'};
 
 nAnimals = length(animals);
 for a = 1:nAnimals

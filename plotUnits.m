@@ -131,7 +131,7 @@ for u = 1:length(spks)
         c = trialInfo.domval; % vectors of conditions (x axis of tuning curve; e.g. orientations)
         r = spks(u).fr.bc(:,~blank);
         rBlank = spks(u).fr.bc(:,blank);
-        sem = std(r)/sqrt(size(r,1)); % nConds long vector of standard error of the mean for each condition
+        sem = std(r,'omitnan')/sqrt(size(r,1)); % nConds long vector of standard error of the mean for each condition
         ci95 = confInt(r); % nConds long vector of 95% confidence interval for each condition
         
         if split == 1
@@ -147,8 +147,8 @@ for u = 1:length(spks)
         end
         end
 
-        rPref = max(mean(r)); rP(u,1) = rPref;
-        cPref = c(mean(r)==rPref);
+        rPref = max(mean(r,'omitnan')); rP(u,1) = rPref;
+        cPref = c(mean(r,'omitnan')==rPref);
 
         if length(c) == 2 %%% bidirectional training %%%
 
@@ -158,7 +158,7 @@ for u = 1:length(spks)
             cP(u,1) = cPref;
             
             x = c; tuningX{u,1} = x;
-            y = mean(r); tuningY{u,1} = y; 
+            y = mean(r,'omitnan'); tuningY{u,1} = y; 
 
             dpi(u,1) = abs(diff(y))/max(y);
 
@@ -192,6 +192,7 @@ for u = 1:length(spks)
 
         elseif length(c) > 2 %%% ori12 / ori16 experiment %%%
 
+            % ori space (mod 180)
             c_ori = mod(c,180);
             oris = unique(c_ori);
             for o = 1:length(oris)
@@ -199,10 +200,10 @@ for u = 1:length(spks)
                 r_ori(:,o) = rTemp(:);
                 clear rTemp
             end
-            rPref_ori = max(mean(r_ori));
-            cPref_ori = oris(mean(r_ori)==rPref_ori);
+            rPref_ori = max(mean(r_ori,'omitnan'));
+            cPref_ori = oris(mean(r_ori,'omitnan')==rPref_ori);
             if length(cPref_ori)>1
-                rIn = mean(r_ori);
+                rIn = mean(r_ori,'omitnan');
                 pks = rIn == rPref_ori;
                 rConv = rIn([end 1:end 1]);
                 rConv = conv(rConv,ones(1,3)*(1/3),'same');
@@ -212,11 +213,11 @@ for u = 1:length(spks)
                 clear rIn pks rConv 
             end
             cNull_ori = mod(cPref_ori+90,180);
-            rNull_ori = mean(r_ori(:,oris==cNull_ori));
+            rNull_ori = mean(r_ori(:,oris==cNull_ori),'omitnan');
             osi(u,1) = abs(rPref_ori-rNull_ori)/rPref_ori;
 
             if length(cPref)>1 % if there is more than one pk with rPref
-                rIn = mean(r);
+                rIn = mean(r,'omitnan');
                 pks = rIn == rPref;
                 rConv = rIn([end 1:end 1]);
                 rConv = conv(rConv,ones(1,3)*(1/3),'same');
@@ -228,18 +229,18 @@ for u = 1:length(spks)
             cP(u,1) = cPref;
 
             cNull = c(c==mod(cPref + 180,360)); cN(u,1) = cNull;
-            rNull = mean(r(:,c==cNull)); rN(u,1) = rNull;
+            rNull = mean(r(:,c==cNull),'omitnan'); rN(u,1) = rNull;
             dsi(u,1) = abs(rPref-rNull)/rPref;
-            mv = meanvec(c,mean(r));
+            mv = meanvec(c,mean(r,'omitnan'));
             dcv(u,1) = mv.cv;
             
             if alignBit == 1
-                [x,y,cMap] = alignDirTuning(c',mean(r)); 
+                [x,y,cMap] = alignDirTuning(c',mean(r,'omitnan')); 
                 tuningX{u,1} = x; 
                 tuningY{u,1} = y;
             elseif alignBit == 0
                 x = c'; tuningX{u,1} = x;
-                y = mean(r); tuningY{u,1} = y;
+                y = mean(r,'omitnan'); tuningY{u,1} = y;
                 cMap = 1:length(c);
             end
             
