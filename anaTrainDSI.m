@@ -4,8 +4,8 @@ close all
 
 visTest = 'anova'; alpha = 0.01;
 svePlt = 0;
-chkSum = 0;
-sveSum = 0;
+chkSum = 1;
+sveSum = 1;
 
 if ispc
     dataFold = 'D:\data'; 
@@ -20,7 +20,7 @@ sumDir = fullfile(dataFold,'SummaryStats');
 anaMode = 'MU';
 
 % V1 COOLED
-animals = {'febh2','febh3','febj3'};
+animals = {'febh2','febh3','febj3','febk8'};
 
 % % CONTROL
 % animals = {'febj2','febj4'};
@@ -49,6 +49,10 @@ elseif strcmp(animals{a},'febj3')
     before = {'_u000_001'};
     after = {'_u000_038'};
     trainAx = [0 180];
+elseif strcmp(animals{a},'febk8')
+    before = {'_u000_000'};
+    after = {'_u002_033'};
+    trainAx = [45 225];
 elseif strcmp(animals{a},'febj2')
     before = {'_u000_003'};
     after = {'_u000_023'};
