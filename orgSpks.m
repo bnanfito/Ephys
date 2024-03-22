@@ -105,9 +105,20 @@ function [spks] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
             end
         end
 
-        spks(u).fr.bc(isoutlier(spks(u).fr.bc))=nan;
+%         spks(u).fr.bc(isoutlier(spks(u).fr.bc)) = nan;
+        spks(u).fr.out = isoutlier(spks(u).fr.bc) ;
     
     end
 
+    % remove outlier trials
+    outProbe = sum(cat(3,vertcat(spks(:).fr).out),3)>32;
+    for u = 1:nUnits
+        if strcmp(anaMode,'SU')
+            spks(u).fr.bc(spks(u).fr.out) = nan;
+        elseif strcmp(anaMode,'MU')
+            spks(u).fr.bc(spks(u).fr.out) = nan;
+            spks(u).fr.bc(outProbe) = nan;
+        end
+    end
 
 end

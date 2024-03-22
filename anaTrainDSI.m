@@ -1,11 +1,11 @@
 %process units
 clear all
-close all
+% close all
 
-visTest = 'anova'; alpha = 0.01;
+visTest = 'ranksum'; alpha = 0.01;
 svePlt = 0;
-chkSum = 1;
-sveSum = 1;
+chkSum = 0;
+sveSum = 0;
 
 if ispc
     dataFold = 'D:\data'; 
@@ -157,7 +157,7 @@ for tr = 1:2 % tr = 1 = before; tr = 2 = after training
                 load(sumFile,'sumStats')
             else
                 disp(['generating sumStats for' exptName])
-                sumStats = plotUnits(animals{a},unit,expt,p,anaMode,visTest,alpha,0,sveSum,0,dataFold);close all
+                sumStats = plotUnits(animals{a},unit,expt,p,anaMode,visTest,alpha,0,sveSum,0,dataFold);
             end
 %             sumStats = convertAL(animals{a},unit,expt,p,dataFold);
 %             sumStats = sumStats(sumStats.goodUnit == 1,:);
