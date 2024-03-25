@@ -1,6 +1,6 @@
 %plotUnits3
 
-function [sumStats,spks] = plotUnits(animal,unit,expt,probe,anaMode,visTest,alpha,plt,saveSum,saveFigs,dataFold)
+function [sumStats,spks,trialInclude] = plotUnits(animal,unit,expt,probe,anaMode,visTest,alpha,plt,saveSum,saveFigs,dataFold)
 
 % close all
 % clear all
@@ -67,7 +67,7 @@ end
 % (are 'goodUnits')
 
 
-spks = orgSpks(animal,unit,expt,probe,anaMode,dataFold);
+[spks,trialInclude,outTrial] = orgSpks(animal,unit,expt,probe,anaMode,dataFold);
 [goodUnits,pVis] = screenUnits(spks,anaMode,blank,visTest,alpha);
 
 
@@ -95,6 +95,11 @@ for u = 1:length(spks)
     subplot(1,3,1);hold on
     [x,y] = find(spks(u).train);
     patch([0 stimTime stimTime 0],[0 0 nTrials+1 nTrials+1],'k','EdgeColor','none','FaceAlpha',0.2)
+    for t = 1:nTrials
+        if ismember(t,outTrial)
+            patch([-predelay stimTime+postdelay stimTime+postdelay -predelay],[t-0.5 t-0.5 t+0.5 t+0.5],'r','EdgeColor','none','FaceAlpha',0.2)
+        end
+    end
     plot((x-(predelay*sf))/sf,y,'k.')
     axis tight
     xlim([-predelay stimTime+postdelay])

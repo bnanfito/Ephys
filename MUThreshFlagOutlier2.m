@@ -1,4 +1,4 @@
-function trialInclude=MUThreshFlagOutlier2(MUThresh,MUThreshInfo,plotOpt)
+function [trialInclude,outTrials]=MUThreshFlagOutlier2(MUThresh,MUThreshInfo,plotOpt)
 
 %flag trials as outliers; outliers based on probe-wide metric
 
@@ -24,8 +24,15 @@ trialSum=sum(spkMat,2);
 trialSum=trialSum(sortTrial);
 
 %find outliers
-outProbe=isoutlier(trialSum);
+% outProbe=isoutlier(trialSum,'median');
+for c = 1:size(trialSum,2)
+    r = trialSum(:,c);
+    scale = -1/(sqrt(2)*erfcinv(3/2));
+    scaledMad = scale*median(abs(r-median(r)));
+    outProbe(:,c) = r>(median(r)+(scaledMad*3));
+end
 trialInclude=~outProbe(:); %outliers = 0
+outTrials = sortTrial(outProbe);
 
 %plot if selected
 if plotOpt==1

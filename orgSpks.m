@@ -1,5 +1,5 @@
 % Written by Brandon Nanfito
-function [spks] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
+function [spks,trialInclude,outTrial] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
 
 
 
@@ -23,6 +23,7 @@ function [spks] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
     nConds = length(unique(trialInfo.triallist));
     nReps = nTrials/nConds;
     nEpochs = length(trialInfo.eventTimes)/nTrials;
+    [~,sortTrialIdx]=sort(trialInfo.triallist);
     if isempty(trialInfo.blankId)
         blank = zeros(1,nConds)==1;
     else
@@ -45,6 +46,10 @@ function [spks] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
     elseif strcmp(anaMode,'MU')
         nUnits = id.probes(probe).nChannels;
     end
+
+    MUThreshTrialData(fullfile(dataFold,'Ephys'),animal,unit,expt,probe,'id',3,1,1)
+    load(fullfile(physDir,[baseName '_p' num2str(probe) '_MUThreshTrial.mat']))
+    [trialInclude,outTrial] = MUThreshFlagOutlier2(MUThresh,MUThreshInfo,0);
 
     for u = 1:nUnits 
     
@@ -75,21 +80,33 @@ function [spks] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
                 spks(u).stimCent = [spks(u).stimCent vertcat( (tvTrial( spks(u).train(:,t))-stimStart(t))/sf , ...
                                                                 repmat(t,1,length(find(spks(u).train(:,t)))) ) ];
 
-                baseSpkCount = length(find(ismember(tvPre_oneSec,spks(u).times)));
-                baseFR = baseSpkCount/(length(tvPre_oneSec)/sf);
-                spks(u).fr.base(r,c) = baseFR;
 
-                if stimTime>1
-                    stimSpkCount = sum(ismember(tvStim_part,spks(u).times));
-                    stimFR = stimSpkCount/stimPartL;
-                    spks(u).fr.stim(r,c) = stimFR;
+
+                if ismember(t,trialInclude(:))
+                    
+                    baseSpkCount = length(find(ismember(tvPre_oneSec,spks(u).times)));
+                    baseFR = baseSpkCount/(length(tvPre_oneSec)/sf);
+                    spks(u).fr.base(r,c) = baseFR;
+    
+                    if stimTime>1
+                        stimSpkCount = sum(ismember(tvStim_part,spks(u).times));
+                        stimFR = stimSpkCount/stimPartL;
+                        spks(u).fr.stim(r,c) = stimFR;
+                    else
+                        stimSpkCount = sum(ismember(tvStim,spks(u).times));
+                        stimFR = stimSpkCount/stimTime;
+                        spks(u).fr.stim(r,c) = stimFR;
+                    end
+    
+                    spks(u).fr.bc(r,c) = stimFR-baseFR;
+
                 else
-                    stimSpkCount = sum(ismember(tvStim,spks(u).times));
-                    stimFR = stimSpkCount/stimTime;
-                    spks(u).fr.stim(r,c) = stimFR;
-                end
+                    
+                    spks(u).fr.base(r,c) = nan;
+                    spks(u).fr.stim(r,c) = nan;
+                    spks(u).fr.bc(r,c) = nan;
 
-                spks(u).fr.bc(r,c) = stimFR-baseFR;
+                end
 
                 s = spks(u).stimCent(1,:);
                 tID = spks(u).stimCent(2,:);
@@ -105,20 +122,19 @@ function [spks] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
             end
         end
 
-%         spks(u).fr.bc(isoutlier(spks(u).fr.bc)) = nan;
         spks(u).fr.out = isoutlier(spks(u).fr.bc) ;
     
     end
 
     % remove outlier trials
-    outProbe = sum(cat(3,vertcat(spks(:).fr).out),3)>32;
-    for u = 1:nUnits
-        if strcmp(anaMode,'SU')
-            spks(u).fr.bc(spks(u).fr.out) = nan;
-        elseif strcmp(anaMode,'MU')
-            spks(u).fr.bc(spks(u).fr.out) = nan;
-            spks(u).fr.bc(outProbe) = nan;
-        end
-    end
+%     outProbe = sum(cat(3,vertcat(spks(:).fr).out),3)>32;
+%     for u = 1:nUnits
+%         if strcmp(anaMode,'SU')
+%             spks(u).fr.bc(spks(u).fr.out) = nan;
+%         elseif strcmp(anaMode,'MU')
+%             spks(u).fr.bc(spks(u).fr.out) = nan;
+%             spks(u).fr.bc(outProbe) = nan;
+%         end
+%     end
 
 end
