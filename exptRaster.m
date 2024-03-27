@@ -50,7 +50,7 @@ for p = 1:length(id.probes)
         end
         MUThreshTrialData(fullfile(dataFold,'Ephys'),animal,unit,expt,p,'id',3,1,1)
         load(fullfile(physDir,[baseName '_p' num2str(p) '_MUThreshTrial.mat']),'MUThresh','MUThreshInfo')
-        [trialInclude,outTrial] = MUThreshFlagOutlier2(MUThresh,MUThreshInfo,0);
+        trialExclude = MUThreshFlagOutlier3(MUThresh,MUThreshInfo,0);
         clear MUspkMerge MUThresh MUThreshInfo
     elseif strcmp(anaMode,'SU')
         load(fullfile(physDir,[baseName '_p' num2str(p) '_spkSort.mat']))
@@ -65,8 +65,8 @@ for p = 1:length(id.probes)
         clear spkSort
     end
 
-nSamps = max(spks.spktimes);
-nT = (1:nSamps)/sf;
+    nSamps = max(spks.spktimes);
+    nT = (1:nSamps)/sf;
 
 %% Plot Probe
     fig{p} = figure('Position',[0 0 1800 1050]);
@@ -79,11 +79,11 @@ nT = (1:nSamps)/sf;
             sStart = stimStart(t);
             sEnd = stimEnd(t);
             tEnd = trialEnd(t);
-            if ismember(t,outTrial)
-                patch([tStart tEnd tEnd tStart]/sf,y,'r','EdgeColor','none','FaceAlpha',0.2)
-            end
             x = [sStart sEnd sEnd sStart]/sf;
             y = [0 0 65 65];
+            if ismember(t,find(trialExclude))
+                patch([tStart tEnd tEnd tStart]/sf,y,'r','EdgeColor','none','FaceAlpha',0.2)
+            end
             if ~isempty(trialInfo.blankId) && ismember(t, find(trialInfo.triallist==trialInfo.blankId)) 
                 continue
             end
@@ -106,19 +106,19 @@ nT = (1:nSamps)/sf;
 %         end
 %         h = max(mean(sdf{p}))+(max(mean(sdf{p}))/10);
         for t = 1:nTrials
-            if ~isempty(trialInfo.blankId) && ismember(t, find(trialInfo.triallist==trialInfo.blankId)) 
-                continue
-            end
             tStart = trialStart(t);
             sStart = stimStart(t);
             sEnd = stimEnd(t);
             tEnd = trialEnd(t);
             x = [sStart sEnd sEnd sStart]/sf;
             y = [0 0 h h];
-            patch(x,y,'k','EdgeColor','none','FaceAlpha',0.2) %%% stimulus %%%
-            if ismember(t,outTrial)
+            if ismember(t,find(trialExclude))
                 patch([tStart tEnd tEnd tStart]/sf,y,'r','EdgeColor','none','FaceAlpha',0.2)
             end
+            if ~isempty(trialInfo.blankId) && ismember(t, find(trialInfo.triallist==trialInfo.blankId)) 
+                continue
+            end
+            patch(x,y,'k','EdgeColor','none','FaceAlpha',0.2) %%% stimulus %%%
         end
 %         plot(nT,mean(sdf{p}),curColor,'LineWidth',2); %%% SDF plot %%%
 %         ylim([0 h])

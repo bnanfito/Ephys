@@ -1,5 +1,5 @@
 % Written by Brandon Nanfito
-function [spks,trialInclude,outTrial] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
+function [spks,trialExclude] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
 
 
 
@@ -49,7 +49,7 @@ function [spks,trialInclude,outTrial] = orgSpks(animal,unit,expt,probe,anaMode,d
 
     MUThreshTrialData(fullfile(dataFold,'Ephys'),animal,unit,expt,probe,'id',3,1,1)
     load(fullfile(physDir,[baseName '_p' num2str(probe) '_MUThreshTrial.mat']))
-    [trialInclude,outTrial] = MUThreshFlagOutlier2(MUThresh,MUThreshInfo,0);
+    trialExclude = MUThreshFlagOutlier3(MUThresh,MUThreshInfo,0);
 
     for u = 1:nUnits 
     
@@ -80,7 +80,7 @@ function [spks,trialInclude,outTrial] = orgSpks(animal,unit,expt,probe,anaMode,d
                 spks(u).stimCent = [spks(u).stimCent vertcat( (tvTrial( spks(u).train(:,t))-stimStart(t))/sf , ...
                                                                 repmat(t,1,length(find(spks(u).train(:,t)))) ) ];
 
-                if ismember(t,outTrial)
+                if ismember(t,find(trialExclude))
                     
                     spks(u).fr.base(r,c) = nan;
                     spks(u).fr.stim(r,c) = nan;
