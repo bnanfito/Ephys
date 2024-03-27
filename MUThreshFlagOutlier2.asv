@@ -1,4 +1,4 @@
-function trialInclude=MUThreshFlagOutlier2(MUThresh,MUThreshInfo,plotOpt)
+function [trialInclude,outTrials,sortIdx]=MUThreshFlagOutlier2(MUThresh,MUThreshInfo,plotOpt)
 
 %flag trials as outliers; outliers based on probe-wide metric
 
@@ -16,7 +16,7 @@ sortTrial=reshape(sortIdx,nRep,nCond);
 
 
 %compute summary metric for every trial
-spkMat=[MUThresh.Nspk]; %all sites for all trials
+spkMat=[MUThresh.baseNspk]; %all sites for all trials
 spkMat=reshape(spkMat,nTrial,nCh);
 trialSum=sum(spkMat,2);
 
@@ -28,9 +28,11 @@ trialSum=trialSum(sortTrial);
 for c = 1:size(trialSum,2)
     r = trialSum(:,c);
     scale = -1/(sqrt(2)*erfcinv(3/2));
-    outProbe(:,c) = r>(median(r)+(mad(r)*3));
+    scaledMad = scale*median(abs(r-median(r)));
+    outProbe(:,c) = r>(median(r)+(scaledMad*3));
 end
 trialInclude=~outProbe(:); %outliers = 0
+outTrials = sortTrial(outProbe);
 
 %plot if selected
 if plotOpt==1
@@ -38,7 +40,7 @@ if plotOpt==1
     for c=1:nCh
         chTmp=NaN(nRep,nCond);
         for i=1:length(condId)
-            chTmp(:,i)=MUThresh(c).Nspk(sortTrial(:,i));
+            chTmp(:,i)=MUThresh(c).baseNspk(sortTrial(:,i));
         end
         chAll(:,c)=chTmp(:); %cond 1, all rep; cond 2, all rep etc
     end

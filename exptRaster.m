@@ -48,7 +48,10 @@ for p = 1:length(id.probes)
         else
             continue
         end
-        clear MUspkMerge
+        MUThreshTrialData(fullfile(dataFold,'Ephys'),animal,unit,expt,p,'id',3,1,1)
+        load(fullfile(physDir,[baseName '_p' num2str(p) '_MUThreshTrial.mat']),'MUThresh','MUThreshInfo')
+        [trialInclude,outTrial] = MUThreshFlagOutlier2(MUThresh,MUThreshInfo,0);
+        clear MUspkMerge MUThresh MUThreshInfo
     elseif strcmp(anaMode,'SU')
         load(fullfile(physDir,[baseName '_p' num2str(p) '_spkSort.mat']))
         spks = spkSort;
@@ -72,13 +75,18 @@ nT = (1:nSamps)/sf;
 
         ax1 = subplot(2,1,1); hold on 
         for t = 1:nTrials 
+            tStart = trialStart(t);
+            sStart = stimStart(t);
+            sEnd = stimEnd(t);
+            tEnd = trialEnd(t);
+            if ismember(t,outTrial)
+                patch([tStart tEnd tEnd tStart]/sf,y,'r','EdgeColor','none','FaceAlpha',0.2)
+            end
+            x = [sStart sEnd sEnd sStart]/sf;
+            y = [0 0 65 65];
             if ~isempty(trialInfo.blankId) && ismember(t, find(trialInfo.triallist==trialInfo.blankId)) 
                 continue
             end
-            sStart = stimStart(t);
-            sEnd = stimEnd(t);
-            x = [sStart sEnd sEnd sStart]/sf;
-            y = [0 0 65 65];
             patch(x,y,'k','EdgeColor','none','FaceAlpha',0.2) %%% stimulus %%%
         end
         x = spks.spktimes/sf;
@@ -88,26 +96,33 @@ nT = (1:nSamps)/sf;
         ylabel([id.probes(p).area ' det Ch sort'])
 
         ax2 = subplot(2,1,2); hold on
-        MUs = unique(spks.detCh);
-        sdf{p} = zeros(length(MUs),length(nT));
-        for u = 1:length(MUs)
-            disp(['computing sdf for MU#' num2str(u)])
-            sdf{p}(u,:) = conv(ismember(nT,x(spks.detCh==MUs(u))),kernel,'same');
-        end
-        h = max(mean(sdf{p}))+(max(mean(sdf{p}))/10);
+        hist = histogram(x,[0:0.1:nT(end)]);
+        h = max(hist.Values)+10;
+%         MUs = unique(spks.detCh);
+%         sdf{p} = zeros(length(MUs),length(nT));
+%         for u = 1:length(MUs)
+%             disp(['computing sdf for MU#' num2str(u)])
+%             sdf{p}(MUs(u),:) = conv(ismember(nT,x(spks.detCh==MUs(u))),kernel,'same');
+%         end
+%         h = max(mean(sdf{p}))+(max(mean(sdf{p}))/10);
         for t = 1:nTrials
             if ~isempty(trialInfo.blankId) && ismember(t, find(trialInfo.triallist==trialInfo.blankId)) 
                 continue
             end
+            tStart = trialStart(t);
             sStart = stimStart(t);
             sEnd = stimEnd(t);
+            tEnd = trialEnd(t);
             x = [sStart sEnd sEnd sStart]/sf;
             y = [0 0 h h];
             patch(x,y,'k','EdgeColor','none','FaceAlpha',0.2) %%% stimulus %%%
+            if ismember(t,outTrial)
+                patch([tStart tEnd tEnd tStart]/sf,y,'r','EdgeColor','none','FaceAlpha',0.2)
+            end
         end
-        plot(nT,mean(sdf{p}),curColor,'LineWidth',2); %%% SDF plot %%%
-        ylim([0 h])
-        xlabel('time (sec)')
+%         plot(nT,mean(sdf{p}),curColor,'LineWidth',2); %%% SDF plot %%%
+%         ylim([0 h])
+%         xlabel('time (sec)')
 
         linkaxes([ax1 ax2],'x')
 

@@ -1,5 +1,5 @@
 % Written by Brandon Nanfito
-function [spks,trialInclude] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
+function [spks,trialInclude,outTrial] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
 
 
 
@@ -49,7 +49,7 @@ function [spks,trialInclude] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
 
     MUThreshTrialData(fullfile(dataFold,'Ephys'),animal,unit,expt,probe,'id',3,1,1)
     load(fullfile(physDir,[baseName '_p' num2str(probe) '_MUThreshTrial.mat']))
-    trialInclude = MUThreshFlagOutlier2(MUThresh,MUThreshInfo,0);
+    [trialInclude,outTrial] = MUThreshFlagOutlier2(MUThresh,MUThreshInfo,0);
 
     for u = 1:nUnits 
     
@@ -82,8 +82,14 @@ function [spks,trialInclude] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
 
 
 
-                if ismember(t,trialInclude)
-                    
+%                 if ismember(t,outTrial)
+%                     
+%                     spks(u).fr.base(r,c) = nan;
+%                     spks(u).fr.stim(r,c) = nan;
+%                     spks(u).fr.bc(r,c) = nan;
+% 
+%                 else
+
                     baseSpkCount = length(find(ismember(tvPre_oneSec,spks(u).times)));
                     baseFR = baseSpkCount/(length(tvPre_oneSec)/sf);
                     spks(u).fr.base(r,c) = baseFR;
@@ -100,13 +106,7 @@ function [spks,trialInclude] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
     
                     spks(u).fr.bc(r,c) = stimFR-baseFR;
 
-                else
-                    
-                    spks(u).fr.base(r,c) = nan;
-                    spks(u).fr.stim(r,c) = nan;
-                    spks(u).fr.bc(r,c) = nan;
-
-                end
+%                 end
 
                 s = spks(u).stimCent(1,:);
                 tID = spks(u).stimCent(2,:);
@@ -127,14 +127,14 @@ function [spks,trialInclude] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
     end
 
     % remove outlier trials
-%     outProbe = sum(cat(3,vertcat(spks(:).fr).out),3)>32;
-%     for u = 1:nUnits
-%         if strcmp(anaMode,'SU')
-%             spks(u).fr.bc(spks(u).fr.out) = nan;
-%         elseif strcmp(anaMode,'MU')
-%             spks(u).fr.bc(spks(u).fr.out) = nan;
-%             spks(u).fr.bc(outProbe) = nan;
-%         end
-%     end
+    outProbe = sum(cat(3,vertcat(spks(:).fr).out),3)>32;
+    for u = 1:nUnits
+        if strcmp(anaMode,'SU')
+            spks(u).fr.bc(spks(u).fr.out) = nan;
+        elseif strcmp(anaMode,'MU')
+            spks(u).fr.bc(spks(u).fr.out) = nan;
+            spks(u).fr.bc(outProbe) = nan;
+        end
+    end
 
 end

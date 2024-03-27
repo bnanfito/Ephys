@@ -80,10 +80,14 @@ function [spks,trialInclude,outTrial] = orgSpks(animal,unit,expt,probe,anaMode,d
                 spks(u).stimCent = [spks(u).stimCent vertcat( (tvTrial( spks(u).train(:,t))-stimStart(t))/sf , ...
                                                                 repmat(t,1,length(find(spks(u).train(:,t)))) ) ];
 
-
-
-                if ismember(t,trialInclude(:))
+                if ismember(t,outTrial)
                     
+                    spks(u).fr.base(r,c) = nan;
+                    spks(u).fr.stim(r,c) = nan;
+                    spks(u).fr.bc(r,c) = nan;
+
+                else
+
                     baseSpkCount = length(find(ismember(tvPre_oneSec,spks(u).times)));
                     baseFR = baseSpkCount/(length(tvPre_oneSec)/sf);
                     spks(u).fr.base(r,c) = baseFR;
@@ -99,12 +103,6 @@ function [spks,trialInclude,outTrial] = orgSpks(animal,unit,expt,probe,anaMode,d
                     end
     
                     spks(u).fr.bc(r,c) = stimFR-baseFR;
-
-                else
-                    
-                    spks(u).fr.base(r,c) = nan;
-                    spks(u).fr.stim(r,c) = nan;
-                    spks(u).fr.bc(r,c) = nan;
 
                 end
 
