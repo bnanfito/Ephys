@@ -14,7 +14,6 @@ trialSum=mean(spkMat,2);
 
 
 %find outliers
-% outProbe=isoutlier(trialSum,'percentiles',[0 95]);
 outProbe=isoutlier(trialSum);
 % outProbe = trialSum > mean(trialSum)+(2*std(trialSum));
 trialExclude=outProbe(:); %outliers = 1
