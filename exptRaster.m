@@ -50,7 +50,7 @@ for p = 1:length(id.probes)
         end
         MUThreshTrialData(fullfile(dataFold,'Ephys'),animal,unit,expt,p,'id',3,1,1)
         load(fullfile(physDir,[baseName '_p' num2str(p) '_MUThreshTrial.mat']),'MUThresh','MUThreshInfo')
-        trialExclude = MUThreshFlagOutlier3(MUThresh,MUThreshInfo,0);
+        trialExclude = MUThreshInfo.trialExclude;
         clear MUspkMerge MUThresh MUThreshInfo
     elseif strcmp(anaMode,'SU')
         load(fullfile(physDir,[baseName '_p' num2str(p) '_spkSort.mat']))
@@ -81,7 +81,7 @@ for p = 1:length(id.probes)
             tEnd = trialEnd(t);
             x = [sStart sEnd sEnd sStart]/sf;
             y = [0 0 65 65];
-            if ismember(t,find(trialExclude))
+            if strcmp(anaMode,'MU') && ismember(t,find(trialExclude))
                 patch([tStart tEnd tEnd tStart]/sf,y,'r','EdgeColor','none','FaceAlpha',0.2)
             end
             if ~isempty(trialInfo.blankId) && ismember(t, find(trialInfo.triallist==trialInfo.blankId)) 
@@ -112,7 +112,7 @@ for p = 1:length(id.probes)
             tEnd = trialEnd(t);
             x = [sStart sEnd sEnd sStart]/sf;
             y = [0 0 h h];
-            if ismember(t,find(trialExclude))
+            if strcmp(anaMode,'MU') && ismember(t,find(trialExclude))
                 patch([tStart tEnd tEnd tStart]/sf,y,'r','EdgeColor','none','FaceAlpha',0.2)
             end
             if ~isempty(trialInfo.blankId) && ismember(t, find(trialInfo.triallist==trialInfo.blankId)) 

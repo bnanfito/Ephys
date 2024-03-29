@@ -1,29 +1,17 @@
 % Written by Brandon Nanfito
 function [spks,trialExclude] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
 
-
-
     baseName = [animal '_u' unit '_' expt];
     physDir = fullfile(dataFold,'Ephys',animal,baseName);
     load(fullfile(physDir,[baseName '_id.mat']),'id');
     load(fullfile(physDir,[baseName '_trialInfo.mat']),'trialInfo');
     load(fullfile(physDir,[baseName '.analyzer']),'-mat','Analyzer');
-    if strcmp(anaMode,'SU')
-        load(fullfile(physDir,[baseName '_p' num2str(probe) '_spkSort.mat']),'spkSort');
-        spkStruct = spkSort; 
-        clear spkSort
-    elseif strcmp(anaMode,'MU')
-        load(fullfile(physDir,[baseName '_p' num2str(probe) '_MUspkMerge.mat']),'MUspkMerge');
-        spkStruct = MUspkMerge;
-        clear MUspkMerge
-    end
 
     sf = id.sampleFreq;
     nTrials = length(trialInfo.triallist);
     nConds = length(unique(trialInfo.triallist));
     nReps = nTrials/nConds;
     nEpochs = length(trialInfo.eventTimes)/nTrials;
-    [~,sortTrialIdx]=sort(trialInfo.triallist);
     if isempty(trialInfo.blankId)
         blank = zeros(1,nConds)==1;
     else
@@ -35,26 +23,39 @@ function [spks,trialExclude] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
     predelay = getparam('predelay',Analyzer);
     stimTime = getparam('stim_time',Analyzer);
     postdelay = getparam('postdelay',Analyzer);
-
+    if stimTime < 1
+        st = stimTime;
+    else
+        st = 1;
+    end
     trialStart = downsample(trialInfo.eventTimes,nEpochs);
     stimStart = downsample(trialInfo.eventTimes,nEpochs,1);
     stimEnd = downsample(trialInfo.eventTimes,nEpochs,2);
     trialEnd = downsample(trialInfo.eventTimes,nEpochs,3);
 
+
     if strcmp(anaMode,'SU')
-        nUnits = max(spkStruct.unitid);
+        load(fullfile(physDir,[baseName '_p' num2str(probe) '_spkSort.mat']),'spkSort');
+        spkStruct = spkSort; 
+        clear spkSort
+        SUTrialData(fullfile(dataFold,'Ephys'),animal,unit,expt,probe,'id',3,st,st)
+        load(fullfile(physDir,[baseName '_p' num2str(probe) '_SUTrial.mat']),'SU','SUinfo')
+        nUnits = length(SU);
     elseif strcmp(anaMode,'MU')
-        nUnits = id.probes(probe).nChannels;
+        load(fullfile(physDir,[baseName '_p' num2str(probe) '_MUspkMerge.mat']),'MUspkMerge');
+        spkStruct = MUspkMerge;
+        clear MUspkMerge
+        MUThreshTrialData(fullfile(dataFold,'Ephys'),animal,unit,expt,probe,'id',3,st,st)
+        load(fullfile(physDir,[baseName '_p' num2str(probe) '_MUThreshTrial.mat']),'MUThresh','MUThreshInfo')
+        nUnits = length(MUThresh);
+        trialExclude = MUThreshInfo.trialExclude;
     end
 
-    MUThreshTrialData(fullfile(dataFold,'Ephys'),animal,unit,expt,probe,'id',3,1,1)
-    load(fullfile(physDir,[baseName '_p' num2str(probe) '_MUThreshTrial.mat']))
-    trialExclude = MUThreshFlagOutlier3(MUThresh,MUThreshInfo,0);
 
     for u = 1:nUnits 
     
         if strcmp(anaMode,'SU')
-            spks(u).info = spkStruct.unitinfo{u};
+            spks(u).info = SU(u).unitClass;
             spks(u).times = spkStruct.spktimes(spkStruct.unitid == u);
         elseif strcmp(anaMode,'MU')
             spks(u).info = 'MU';
@@ -70,9 +71,7 @@ function [spks,trialExclude] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
                 
                 % time vectors for different trial epochs
                 tvPre       = stimStart(t)-(predelay*sf):stimStart(t)-1;
-                tvPre_oneSec= stimStart(t)-(1*sf):stimStart(t)-1;
                 tvStim      = stimStart(t):stimStart(t)+(stimTime*sf)-1;
-                tvStim_part = stimStart(t) + ((stimPartL*(stimPart-1))*sf) : stimStart(t) +((stimPartL*stimPart)*sf) -1;
                 tvPost      = stimStart(t)+(stimTime*sf):stimStart(t)+((stimTime+postdelay)*sf)-1;
                 tvTrial     = [tvPre tvStim tvPost];
 
@@ -80,29 +79,23 @@ function [spks,trialExclude] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
                 spks(u).stimCent = [spks(u).stimCent vertcat( (tvTrial( spks(u).train(:,t))-stimStart(t))/sf , ...
                                                                 repmat(t,1,length(find(spks(u).train(:,t)))) ) ];
 
-                if ismember(t,find(trialExclude))
+                if strcmp(anaMode,'MU') 
                     
-                    spks(u).fr.base(r,c) = nan;
-                    spks(u).fr.stim(r,c) = nan;
-                    spks(u).fr.bc(r,c) = nan;
-
-                else
-
-                    baseSpkCount = length(find(ismember(tvPre_oneSec,spks(u).times)));
-                    baseFR = baseSpkCount/(length(tvPre_oneSec)/sf);
-                    spks(u).fr.base(r,c) = baseFR;
-    
-                    if stimTime>1
-                        stimSpkCount = sum(ismember(tvStim_part,spks(u).times));
-                        stimFR = stimSpkCount/stimPartL;
-                        spks(u).fr.stim(r,c) = stimFR;
+                    if ismember(t,find(trialExclude))
+                        spks(u).fr.base(r,c) = nan;
+                        spks(u).fr.stim(r,c) = nan;
+                        spks(u).fr.bc(r,c) = nan;
                     else
-                        stimSpkCount = sum(ismember(tvStim,spks(u).times));
-                        stimFR = stimSpkCount/stimTime;
-                        spks(u).fr.stim(r,c) = stimFR;
+                        spks(u).fr.base(r,c) =  MUThresh([MUThresh.detCh]==u).baseFrate(t);
+                        spks(u).fr.stim(r,c) = MUThresh([MUThresh.detCh]==u).stimFrate(t);
+                        spks(u).fr.bc(r,c) = spks(u).fr.stim(r,c)-spks(u).fr.base(r,c);
                     end
-    
-                    spks(u).fr.bc(r,c) = stimFR-baseFR;
+
+                elseif strcmp(anaMode,'SU')
+
+                    spks(u).fr.base(r,c) =  SU(u).baseFrate(t);
+                    spks(u).fr.stim(r,c) = SU(u).stimFrate(t);
+                    spks(u).fr.bc(r,c) = spks(u).fr.stim(r,c)-spks(u).fr.base(r,c);
 
                 end
 

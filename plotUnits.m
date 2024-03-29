@@ -16,7 +16,7 @@ function [sumStats,spks,trialExclude] = plotUnits(animal,unit,expt,probe,anaMode
 
 split = 0; splitInd = 35;
 polar = 0;
-alignBit = 1;
+alignBit = 0;
 stat = 'sem';
 baseName = [animal '_u' unit '_' expt];
 
@@ -244,8 +244,9 @@ for u = 1:length(spks)
                 tuningX{u,1} = x; 
                 tuningY{u,1} = y;
             elseif alignBit == 0
-                x = c'; tuningX{u,1} = x;
-                y = mean(r,'omitnan'); tuningY{u,1} = y;
+                x = c'; y = mean(r,'omitnan');
+                tuningX{u,1} = x;
+                tuningY{u,1} = y;
                 cMap = 1:length(c);
             end
             
