@@ -41,6 +41,7 @@ function [spks,trialExclude] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
         SUTrialData(fullfile(dataFold,'Ephys'),animal,unit,expt,probe,'id',3,st,st)
         load(fullfile(physDir,[baseName '_p' num2str(probe) '_SUTrial.mat']),'SU','SUinfo')
         nUnits = length(SU);
+        trialExclude = zeros(1,nTrials) == 1;
     elseif strcmp(anaMode,'MU')
         load(fullfile(physDir,[baseName '_p' num2str(probe) '_MUspkMerge.mat']),'MUspkMerge');
         spkStruct = MUspkMerge;
