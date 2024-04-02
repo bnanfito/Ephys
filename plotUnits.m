@@ -74,7 +74,7 @@ end
 if sum(goodUnits) == 0
 disp('no good units')
 end
-uID = 1:length(spks);
+uID = vertcat(spks.unitId);
 
 if split == 1
     half{1} = 1:splitInd-1;
@@ -303,7 +303,7 @@ for u = 1:length(spks)
 
 
      if plt == 1
-        ttl = [baseName ' p' num2str(probe) ' (' id.probes(probe).area ') ' anaMode '#' num2str(u)];
+        ttl = [baseName ' p' num2str(probe) ' (' id.probes(probe).area ') ' anaMode '#' num2str(uID(u))];
         if ~ismember(u,find(goodUnits))
             ttl = [ttl ' (BAD UNIT)'];
         end
@@ -329,7 +329,7 @@ end
 %% Make Summary Stats Table
 
 varNames = {'exptName','uID','goodUnit','fr','rPref','cPref','pVis'};
-sumStats = table(exptNames,uID',goodUnits',vertcat(spks.fr),rP,cP,pVis(uID),'VariableNames',varNames);
+sumStats = table(exptNames,uID,goodUnits',vertcat(spks.fr),rP,cP,pVis,'VariableNames',varNames);
 sumStats.tuningX = tuningX;
 sumStats.tuningY = tuningY;
 if exist('dsi','var')
