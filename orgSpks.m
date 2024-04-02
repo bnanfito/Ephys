@@ -58,7 +58,7 @@ function [spks,trialExclude] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
         if strcmp(anaMode,'SU')
             spks(u).unitId = SU(u).unitId;
             spks(u).info = SU(u).unitClass;
-            spks(u).times = spkStruct.spktimes(spkStruct.unitid == SU(u).unitId);
+            spks(u).times = spkStruct.spktimes(spkStruct.unitid == spks(u).unitId);
         elseif strcmp(anaMode,'MU')
             spks(u).unitId = MUThresh(u).detCh;
             spks(u).info = 'MU';
