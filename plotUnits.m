@@ -16,7 +16,8 @@ function [sumStats,spks,trialExclude] = plotUnits(animal,unit,expt,probe,anaMode
 
 split = 0; splitInd = 35;
 polar = 0;
-alignBit = 0;
+alignBit = 1;
+sortTrialBit = 0;
 stat = 'sem';
 baseName = [animal '_u' unit '_' expt];
 
@@ -51,6 +52,7 @@ if isempty(trialInfo.blankId)
 else
     blank = (1:nConds)==trialInfo.blankId;
 end
+[~,sortTrialInd] = sort(trialInfo.triallist);
 nT = ((1:(trialL*sf))-(predelay*sf))/sf;
 colors = {[0 0.4470 0.7410],[0.8500 0.3250 0.0980],[0.9290 0.6940 0.1250],[0.4940 0.1840 0.5560],[0.4660 0.6740 0.1880],[0.3010 0.7450 0.9330],[0.6350 0.0780 0.1840]};
 
@@ -94,9 +96,15 @@ for u = 1:length(spks)
     % RASTER PLOT
     subplot(1,3,1);hold on
     [x,y] = find(spks(u).train);
+    if sortTrialBit == 1
+        [y,~] = find(sortTrialInd==y');
+    end
     patch([0 stimTime stimTime 0],[0 0 nTrials+1 nTrials+1],'k','EdgeColor','none','FaceAlpha',0.2)
     for t = 1:nTrials
         if ismember(t,find(trialExclude))
+            if sortTrialBit == 1
+                [t,~] = find(sortTrialInd==t);
+            end
             patch([-predelay stimTime+postdelay stimTime+postdelay -predelay],[t-0.5 t-0.5 t+0.5 t+0.5],'r','EdgeColor','none','FaceAlpha',0.2)
         end
     end

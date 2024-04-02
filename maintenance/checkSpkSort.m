@@ -1,7 +1,7 @@
 clear all;close all
 
 if ispc
-    dataFold = 'D:\OneDrive - Johns Hopkins\Documents\data\Ephys';
+    dataFold = 'D:\data\Ephys';
 elseif ismac
     dataFold = '/Users/brandonnanfito/Library/CloudStorage/OneDrive-JohnsHopkins/Documents/data/Ephys';
 end
@@ -10,7 +10,7 @@ countHas = 0;
 countNeeds = 0;
 dualRecOnly = 1;
 
-animal = 'febg7';
+animal = 'febh3';
 cd(fullfile(dataFold,animal))
 exptList = dir;
 exptList  = {exptList.name}';

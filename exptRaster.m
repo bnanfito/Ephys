@@ -92,6 +92,7 @@ for p = 1:length(id.probes)
         x = spks.spktimes/sf;
         y = spks.detChSort;
         plot(x,y,[curColor '.']) %%% raster plot %%%
+        xlabel('time (seconds)')
         ylim([0 max(y)+1])
         ylabel([id.probes(p).area ' det Ch sort'])
 
@@ -122,7 +123,9 @@ for p = 1:length(id.probes)
         end
 %         plot(nT,mean(sdf{p}),curColor,'LineWidth',2); %%% SDF plot %%%
 %         ylim([0 h])
-%         xlabel('time (sec)')
+        xticks(trialStart/sf);
+        xticklabels([1:nTrials]);
+        xlabel('trial')
 
         linkaxes([ax1 ax2],'x')
 

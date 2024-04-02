@@ -62,7 +62,9 @@ function [spks,trialExclude] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
         elseif strcmp(anaMode,'MU')
             spks(u).unitId = MUThresh(u).detCh;
             spks(u).info = 'MU';
-            spks(u).times = spkStruct.spktimes(spkStruct.detCh== MUThresh(u).detCh);
+            spks(u).times = spkStruct.spktimes(spkStruct.detCh== spks(u).unitId);
+            spks(u).xPos = id.probes(probe).x(spks(u).unitId);
+            spks(u).zPos = id.probes(probe).z(spks(u).unitId);
         end
 
         spks(u).stimCent = [];
@@ -71,6 +73,7 @@ function [spks,trialExclude] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
             trials = find(trialInfo.triallist == c);
             for r = 1:nReps
                 t = trials(r);
+
                 
                 % time vectors for different trial epochs
                 tvPre       = stimStart(t)-(predelay*sf):stimStart(t)-1;
@@ -89,8 +92,8 @@ function [spks,trialExclude] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
                         spks(u).fr.stim(r,c) = nan;
                         spks(u).fr.bc(r,c) = nan;
                     else
-                        spks(u).fr.base(r,c) =  MUThresh([MUThresh.detCh]==u).baseFrate(t);
-                        spks(u).fr.stim(r,c) = MUThresh([MUThresh.detCh]==u).stimFrate(t);
+                        spks(u).fr.base(r,c) =  MUThresh(u).baseFrate(t);
+                        spks(u).fr.stim(r,c) = MUThresh(u).stimFrate(t);
                         spks(u).fr.bc(r,c) = spks(u).fr.stim(r,c)-spks(u).fr.base(r,c);
                     end
 
