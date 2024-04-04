@@ -32,6 +32,9 @@ function [spks,trialExclude] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
     stimStart = downsample(trialInfo.eventTimes,nEpochs,1);
     stimEnd = downsample(trialInfo.eventTimes,nEpochs,2);
     trialEnd = downsample(trialInfo.eventTimes,nEpochs,3);
+    [sortTrialCond,sortTrialInd] = sort(trialInfo.triallist);
+    sortTrialCond = reshape(sortTrialCond,nReps,nConds);
+    sortTrialInd = reshape(sortTrialInd,nReps,nConds);
 
 
     if strcmp(anaMode,'SU')
@@ -68,6 +71,8 @@ function [spks,trialExclude] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
         end
 
         spks(u).stimCent = [];
+        spks(u).fr.trialNum = sortTrialInd;
+        spks(u).fr.trialCond = sortTrialCond;
 
         for c = 1:nConds
             trials = find(trialInfo.triallist == c);

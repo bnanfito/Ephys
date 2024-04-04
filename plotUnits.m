@@ -340,6 +340,10 @@ varNames = {'exptName','uID','goodUnit','fr','rPref','cPref','pVis'};
 sumStats = table(exptNames,uID,goodUnits',vertcat(spks.fr),rP,cP,pVis,'VariableNames',varNames);
 sumStats.tuningX = tuningX;
 sumStats.tuningY = tuningY;
+if strcmp(anaMode,'MU')
+    sumStats.xPos = vertcat(spks.xPos);
+    sumStats.zPos = vertcat(spks.zPos);
+end
 if exist('dsi','var')
     sumStats.dsi = dsi;
     sumStats.dcv = dcv;
