@@ -41,13 +41,6 @@ for p = 1:length(id.probes)
     if strcmp(anaMode,'MU')
         load(fullfile(physDir,[baseName '_p' num2str(p) '_MUspkMerge.mat']))
         spks = MUspkMerge;
-        if strcmp (id.probes(p).area,'V1')
-            curColor = 'b';
-        elseif strcmp (id.probes(p).area,'PSS')
-            curColor = 'r';
-        else
-            continue
-        end
         MUThreshTrialData(fullfile(dataFold,'Ephys'),animal,unit,expt,p,'id',3,1,1)
         load(fullfile(physDir,[baseName '_p' num2str(p) '_MUThreshTrial.mat']),'MUThresh','MUThreshInfo')
         trialExclude = MUThreshInfo.trialExclude;
@@ -55,14 +48,15 @@ for p = 1:length(id.probes)
     elseif strcmp(anaMode,'SU')
         load(fullfile(physDir,[baseName '_p' num2str(p) '_spkSort.mat']))
         spks = spkSort;
-        if strcmp(id.probes(p).area,'V1')
-            curColor = 'b';
-        elseif strcmp(id.probes(p).area,'PSS')
-            curColor = 'r';
-        else
-            continue
-        end
         clear spkSort
+    end
+
+    if strcmp(id.probes(p).area,'V1')
+        curColor = 'b';
+    elseif strcmp(id.probes(p).area,'PSS')
+        curColor = 'r';
+    else
+        continue
     end
 
     nSamps = max(spks.spktimes);

@@ -89,6 +89,8 @@ sdf = zeros(size(spks(1).train,1),length(spks));
 for u = 1:length(spks)
     
     exptNames{u,1} = baseName;
+    probeIDs(u,1) = probe;
+    areaIDs{u,1} = area;
 
     if plt==1
 
@@ -336,8 +338,8 @@ end
 
 %% Make Summary Stats Table
 
-varNames = {'exptName','uID','goodUnit','fr','rPref','cPref','pVis'};
-sumStats = table(exptNames,uID,goodUnits',vertcat(spks.fr),rP,cP,pVis,'VariableNames',varNames);
+varNames = {'exptName','probe','area','uID','goodUnit','fr','rPref','cPref','pVis'};
+sumStats = table(exptNames,probeIDs,areaIDs,uID,goodUnits',vertcat(spks.fr),rP,cP,pVis,'VariableNames',varNames);
 sumStats.tuningX = tuningX;
 sumStats.tuningY = tuningY;
 if strcmp(anaMode,'MU')

@@ -4,7 +4,7 @@ close all
 % dataFold = 'D:\OneDrive - Johns Hopkins\Documents\data';
 dataFold = 'D:\data';
 % dataFold = 'F:\Brandon\data\sf5';
-animalList = {'FEAS9','FEAT2','FEAU5','FEAU8','FEAU9','FEAV0','FEAV1'};
+animalList = {'FEAO4','FEAQ5','FEAS6','FEAT1','FEAN6'};
 count = 0;
 for a = 1:length(animalList)
     animal = animalList{a};
@@ -36,12 +36,10 @@ for a = 1:length(animalList)
             s(count).predelay = predelay;
             s(count).stimTime = stimTime;
             s(count).postdelay = postdelay;
-%             if isfield(id.MUthreshold,'settings')
-%                 s(count).scaleFactor = id.MUthreshold.settings{p}.scaleFactor;
-%             else
-                load(fullfile(dataFold,'Ephys',animal,exptName,[exptName '_p' num2str(p) '_MUthreshold.mat']))
-                s(count).scaleFactor = MUthresholding.threshlevel;
-%             end
+
+            load(fullfile(dataFold,'Ephys',animal,exptName,[exptName '_p' num2str(p) '_MUthreshold.mat']))
+            s(count).scaleFactor = MUthresholding.threshlevel;
+
             load(fullfile(dataFold,'Ephys',animal,exptName,[exptName '_p' num2str(p) '_MUspkMerge.mat']))
             s(count).nSpks = length(MUspkMerge.spktimes);
 
