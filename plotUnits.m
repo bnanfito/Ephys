@@ -1,6 +1,6 @@
 %plotUnits3
 
-function [sumStats,spks,trialExclude] = plotUnits(animal,unit,expt,probe,anaMode,visTest,alpha,plt,saveSum,saveFigs,dataFold)
+function [sumStats,spks] = plotUnits(animal,unit,expt,probe,anaMode,visTest,alpha,plt,saveSum,saveFigs,dataFold)
 
 % close all
 % clear all

@@ -21,14 +21,14 @@ physDir = fullfile(dataFold,'Ephys');
 figDir = fullfile(dataFold,'Figures');
 sumDir = fullfile(dataFold,'SummaryStats');
 
-% CONTROL (AUGUSTO)
-animals = {'FEAO4','FEAN6','FEAS6','FEAT1','FEAQ5'};
+% % CONTROL (AUGUSTO)
+% animals = {'FEAO4','FEAN6','FEAS6','FEAT1','FEAQ5'};
 
 % CONTROL
 % % animals = {'febj4'};
 
 % V1 COOLED
-% % animals = {'febh3','febj3'};
+animals = {'febh3','febj3','febk6','febk7','febk8'};
 
 nAnimals = length(animals);
 
@@ -205,6 +205,69 @@ for a = 1:nAnimals
         blocks{14,a} = 'febj3_u000_032';
         blocks{15,a} = 'febj3_u000_034';
         blocks{16,a} = 'febj3_u000_036';
+
+        flagBlocks = [];
+
+    elseif strcmp(animal,'febk6')
+
+        blocks{1,a} = 'febk6_u000_008';
+        blocks{2,a} = 'febk6_u000_010';
+        blocks{3,a} = 'febk6_u000_012';
+        blocks{4,a} = 'febk6_u000_014';
+        blocks{5,a} = 'febk6_u000_017';
+        blocks{6,a} = 'febk6_u000_019';
+        blocks{7,a} = 'febk6_u000_021';
+        blocks{8,a} = 'febk6_u000_023';
+        blocks{9,a} = 'febk6_u000_027';
+        blocks{10,a} = 'febk6_u000_029';
+        blocks{11,a} = 'febk6_u000_031';
+        blocks{12,a} = 'febk6_u000_033';
+        blocks{13,a} = 'febk6_u000_036';
+        blocks{14,a} = 'febk6_u000_038';
+        blocks{15,a} = 'febk6_u000_040';
+        blocks{16,a} = 'febk6_u000_043';
+
+        flagBlocks = [1,15];
+
+    elseif strcmp(animal,'febk7')
+
+        blocks{1,a} = 'febk7_u000_009';
+        blocks{2,a} = 'febk7_u000_011';
+        blocks{3,a} = 'febk7_u000_013';
+        blocks{4,a} = 'febk7_u000_015';
+        blocks{5,a} = 'febk7_u000_018';
+        blocks{6,a} = 'febk7_u000_020';
+        blocks{7,a} = 'febk7_u000_022';
+        blocks{8,a} = 'febk7_u000_024';
+        blocks{9,a} = 'febk7_u000_026';
+        blocks{10,a} = 'febk7_u000_028';
+        blocks{11,a} = 'febk7_u000_030';
+        blocks{12,a} = 'febk7_u000_032';
+        blocks{13,a} = 'febk7_u000_034';
+        blocks{14,a} = 'febk7_u000_036';
+        blocks{15,a} = 'febk7_u000_038';
+        blocks{16,a} = 'febk7_u000_040';
+
+        flagBlocks = 1;
+
+    elseif strcmp(animal,'febk8')
+
+        blocks{1,a} = 'febk8_u002_001';
+        blocks{2,a} = 'febk8_u002_003';
+        blocks{3,a} = 'febk8_u002_005';
+        blocks{4,a} = 'febk8_u002_007';
+        blocks{5,a} = 'febk8_u002_009';
+        blocks{6,a} = 'febk8_u002_011';
+        blocks{7,a} = 'febk8_u002_013';
+        blocks{8,a} = 'febk8_u002_015';
+        blocks{9,a} = 'febk8_u002_017';
+        blocks{10,a} = 'febk8_u002_020';
+        blocks{11,a} = 'febk8_u002_022';
+        blocks{12,a} = 'febk8_u002_024';
+        blocks{13,a} = 'febk8_u002_026';
+        blocks{14,a} = 'febk8_u002_028';
+        blocks{15,a} = 'febk8_u002_030';
+        blocks{16,a} = 'febk8_u002_032';
 
         flagBlocks = [];
 
@@ -444,8 +507,16 @@ alpha = 0.05;
 alphaBFC = alpha/(nHr-1);
 varNames = {'hrA','hrB','p','h','bonferroni h'};
 for a = 1:length(animals)
-    anovaStat_V1(a) = anova1(dpiV1{a}(:,1),dpiV1{a}(:,2),'off');
-    anovaStat_PSS(a) = anova1(dpiPSS{a}(:,1),dpiPSS{a}(:,2),'off');
+    if isempty(dpiV1{a})
+        anovaStat_V1(a) = nan;
+    else
+        anovaStat_V1(a) = anova1(dpiV1{a}(:,1),dpiV1{a}(:,2),'off');
+    end
+    if isempty(dpiPSS{a})
+        anovaStat_PSS(a) = nan;
+    else
+        anovaStat_PSS(a) = anova1(dpiPSS{a}(:,1),dpiPSS{a}(:,2),'off');
+    end
     count = 0;
 
     for b = 2:nHr
@@ -453,24 +524,28 @@ for a = 1:length(animals)
         count = count+1;
         hrA(count,1) = 1;
         hrB(count,1) = b;
-
-        x = dpiV1{a}(dpiV1{a}(:,2)==hrA(count),1);
-        y = dpiV1{a}(dpiV1{a}(:,2)==hrB(count),1);
-        if isempty(x) || isempty(y)
+        if isempty(dpiV1{a})
             rankP_V1(count,a) = nan;
         else
-            rankP_V1(count,a) = ranksum(x,y);
+            x = dpiV1{a}(dpiV1{a}(:,2)==hrA(count),1);
+            y = dpiV1{a}(dpiV1{a}(:,2)==hrB(count),1);
+            if isempty(x)||isempty(y)
+                rankP_V1(count,a) = nan;
+            else
+                rankP_V1(count,a) = ranksum(x,y);
+            end
         end
-
-
-        x = dpiPSS{a}(dpiPSS{a}(:,2)==hrA(count),1);
-        y = dpiPSS{a}(dpiPSS{a}(:,2)==hrB(count),1);
-        if isempty(x) || isempty(y)
+        if isempty(dpiPSS{a})
             rankP_PSS(count,a) = nan;
         else
-            rankP_PSS(count,a) = ranksum(x,y);
+            x = dpiPSS{a}(dpiPSS{a}(:,2)==hrA(count),1);
+            y = dpiPSS{a}(dpiPSS{a}(:,2)==hrB(count),1);
+            if isempty(x)||isempty(y)
+                rankP_PSS(count,a) = nan;
+            else
+                rankP_PSS(count,a) = ranksum(x,y);
+            end
         end
-
 
     end
     stats.dpi.v1{a} = table(hrA,hrB,rankP_V1(:,a),rankP_V1(:,a)<alpha,rankP_V1(:,a)<alphaBFC,'VariableNames',varNames);

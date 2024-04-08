@@ -92,13 +92,11 @@ function [spks,trialExclude] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
 
                 if strcmp(anaMode,'MU') 
                     
+                    spks(u).fr.base(r,c) =  MUThresh(u).baseFrate(t);
+                    spks(u).fr.stim(r,c) = MUThresh(u).stimFrate(t);
                     if ismember(t,find(trialExclude))
-                        spks(u).fr.base(r,c) = nan;
-                        spks(u).fr.stim(r,c) = nan;
                         spks(u).fr.bc(r,c) = nan;
                     else
-                        spks(u).fr.base(r,c) =  MUThresh(u).baseFrate(t);
-                        spks(u).fr.stim(r,c) = MUThresh(u).stimFrate(t);
                         spks(u).fr.bc(r,c) = spks(u).fr.stim(r,c)-spks(u).fr.base(r,c);
                     end
 
@@ -123,8 +121,6 @@ function [spks,trialExclude] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
 
             end
         end
-
-        spks(u).fr.out = isoutlier(spks(u).fr.bc) ;
     
     end
 

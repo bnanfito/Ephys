@@ -1,10 +1,8 @@
 clear
 close all
 
-% dataFold = 'D:\OneDrive - Johns Hopkins\Documents\data';
 dataFold = 'D:\data';
-% dataFold = 'F:\Brandon\data\sf5';
-animalList = {'FEAO4','FEAQ5','FEAS6','FEAT1','FEAN6'};
+animalList = {'FEAS9','FEAT2','FEAU5','FEAU8','FEAU9','FEAV0','FEAV1'};
 count = 0;
 for a = 1:length(animalList)
     animal = animalList{a};

@@ -19,14 +19,14 @@ figDir = fullfile(dataFold,'Figures');
 sumDir = fullfile(dataFold,'SummaryStats');
 anaMode = 'MU';
 
-% % V1 COOLED
-% animals = {'febh2','febh3','febj3','febk8'};
+% V1 COOLED
+animals = {'febh2','febh3','febj3','febk7','febk8'};
 
 % % CONTROL
 % animals = {'febj2','febj4'};
 
-% CONTROL (AUGUSTO)
-animals = {'FEAO4','FEAQ5','FEAS6','FEAT1','FEAN6'};
+% % CONTROL (AUGUSTO)
+% animals = {'FEAO4','FEAQ5','FEAS6','FEAT1','FEAN6'};
 
 % % CONTROL GRAY SCREEN (AUGUSTO)
 % animals = {'FEAQ2','FEAQ3','FEAQ4','FEAQ7'};
@@ -38,20 +38,24 @@ nAnimals = length(animals);
 for a = 1:nAnimals
 %% Define experiments and training parameters
 if strcmp(animals{a},'febh2')
-    before = {'_u000_001'};
-    after = {'_u000_040','_u000_041','_u002_000'};
+    before = {'_u000_001'}; %binocular FF
+    after = {'_u000_040','_u000_041','_u002_000'}; %binocular FF
     trainAx = [90 270];
 elseif strcmp(animals{a},'febh3')
-    before = {'_u000_002'};
-    after = {'_u000_043','_u001_000','_u002_002','_u003_000'};
+    before = {'_u000_002'}; %binocular FF
+    after = {'_u000_043','_u001_000','_u002_002','_u003_000'}; %binocular FF
     trainAx = [0 180];
 elseif strcmp(animals{a},'febj3')
-    before = {'_u000_001'};
-    after = {'_u000_038'};
+    before = {'_u000_001'}; %monocular (contra) FF; (ipsi eye never opened)
+    after = {'_u000_038'}; %monocular (contra) FF
     trainAx = [0 180];
+elseif strcmp(animals{a},'febk7')
+    before = {'_u000_001'}; %binocular FF
+    after = {'_u000_042'}; %binocular FF
+    trainAx = [90 270];
 elseif strcmp(animals{a},'febk8')
-    before = {'_u000_000'};
-    after = {'_u002_033'};
+    before = {'_u000_000'}; %binocular FF
+    after = {'_u002_033'}; %monocular (contra) train stim
     trainAx = [45 225];
 elseif strcmp(animals{a},'febj2')
     before = {'_u000_003'};
@@ -441,3 +445,98 @@ for a = 1:nAnimals+1
     end
 end
 stats = table(aID,fID,mID,tID,tst1,h1',p1',tst2,h2',p2','VariableNames',varNames);
+
+
+
+
+
+figure;hold on;
+c = cdfplot(v1bf{end}(v1bf{end}.goodUnit==1,:).dsi);
+c.LineStyle = '--';c.Color = 'b';
+c = cdfplot(v1af{end}(v1af{end}.goodUnit==1,:).dsi);
+c.LineStyle = '-';c.Color = 'b';
+c = cdfplot(pssbf{end}(pssbf{end}.goodUnit==1,:).dsi);
+c.LineStyle = '--';c.Color = 'r';
+c = cdfplot(pssaf{end}(pssaf{end}.goodUnit==1,:).dsi);
+c.LineStyle = '-';c.Color = 'r';
+lbls = {['V1 before; n=' num2str(length(find(v1bf{end}.goodUnit==1)))],...
+    ['V1 after; n=' num2str(length(find(v1af{end}.goodUnit==1)))],...
+    ['PSS before; n=' num2str(length(find(pssbf{end}.goodUnit==1)))],...
+    ['PSS after; n=' num2str(length(find(pssaf{end}.goodUnit==1)))]};
+legend(lbls,'Location','southeast')
+xlabel('DSI')
+ylabel('Percentile')
+title('MU Before vs After BiDir Training')
+
+
+
+figure;hold on;
+c = cdfplot(1-v1bf{end}(v1bf{end}.goodUnit==1,:).dcv);
+c.LineStyle = '--';c.Color = 'b';
+c = cdfplot(1-v1af{end}(v1af{end}.goodUnit==1,:).dcv);
+c.LineStyle = '-';c.Color = 'b';
+c = cdfplot(1-pssbf{end}(pssbf{end}.goodUnit==1,:).dcv);
+c.LineStyle = '--';c.Color = 'r';
+c = cdfplot(1-pssaf{end}(pssaf{end}.goodUnit==1,:).dcv);
+c.LineStyle = '-';c.Color = 'r';
+lbls = {['V1 before; n=' num2str(length(find(v1bf{end}.goodUnit==1)))],...
+    ['V1 after; n=' num2str(length(find(v1af{end}.goodUnit==1)))],...
+    ['PSS before; n=' num2str(length(find(pssbf{end}.goodUnit==1)))],...
+    ['PSS after; n=' num2str(length(find(pssaf{end}.goodUnit==1)))]};
+legend(lbls,'Location','southeast')
+xlabel('1-DCV')
+ylabel('Percentile')
+title('MU Before vs After BiDir Training')
+
+
+
+figure;hold on;
+c = cdfplot(v1bf{end}(v1bf{end}.goodUnit==1,:).rPref);
+c.LineStyle = '--';c.Color = 'b';
+c = cdfplot(v1af{end}(v1af{end}.goodUnit==1,:).rPref);
+c.LineStyle = '-';c.Color = 'b';
+c = cdfplot(pssbf{end}(pssbf{end}.goodUnit==1,:).rPref);
+c.LineStyle = '--';c.Color = 'r';
+c = cdfplot(pssaf{end}(pssaf{end}.goodUnit==1,:).rPref);
+c.LineStyle = '-';c.Color = 'r';
+lbls = {['V1 before; n=' num2str(length(find(v1bf{end}.goodUnit==1)))],...
+    ['V1 after; n=' num2str(length(find(v1af{end}.goodUnit==1)))],...
+    ['PSS before; n=' num2str(length(find(pssbf{end}.goodUnit==1)))],...
+    ['PSS after; n=' num2str(length(find(pssaf{end}.goodUnit==1)))]};
+legend(lbls,'Location','southeast')
+xlabel('Response to pref. (BCFR; Hz)')
+ylabel('Percentile')
+title('MU Before vs After BiDir Training')
+
+
+figure
+for i = 1:4
+    if i == 1
+        dat = v1bf{end};
+        linStyl = '--';
+        linCol = 'b';
+    elseif i == 2
+        dat = v1af{end};
+        linStyl = '-';
+        linCol = 'b';
+    elseif i == 3
+        dat = pssbf{end};
+        linStyl = '--';
+        linCol = 'r';
+    elseif i == 4
+        dat = pssaf{end};
+        linStyl = '-';
+        linCol = 'r';
+    end
+    tCurves = vertcat(dat(dat.goodUnit==1,:).tuningY{:});
+    tCurves_norm = tCurves./max(tCurves,[],2);
+    oris = vertcat(dat(dat.goodUnit==1,:).tuningX{:});
+    y = mean(tCurves_norm);
+%     y = mean(tCurves)/max(mean(tCurves));
+    x = mean(oris);
+    plot(x,y,[linCol linStyl])
+%     polarplot(deg2rad(x),y,[linCol linStyl])
+%     set(gca,'ThetaZeroLocation','top')
+    hold on
+end
+
