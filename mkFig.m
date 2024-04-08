@@ -2,7 +2,7 @@
 clear
 close all
 
-anaMode = 'MU';
+anaMode = 'SU';
 animal = 'febk8';
 expts = {[animal '_u000_000'],[animal '_u002_016'],[animal '_u002_033']};
 
@@ -25,6 +25,7 @@ for e = 1:length(expts)
     load(fullfile(physDir,animal,expts{e},[expts{e} '_id.mat']))
     for p = 1:length(id.probes)
         load(fullfile(sumDir,animal,expts{e},[expts{e} '_p' num2str(p) '_sumStats' anaMode '.mat']))
+        sumStats.dsi(sumStats.dsi>1)=1;
         if strcmp(id.probes(p).area,'V1')
             v1{e} = sumStats;
             area = 'V1';
@@ -39,7 +40,7 @@ for e = 1:length(expts)
         cdf.LineStyle = linStyl{e};
         cdf.LineWidth = 2;
         cdf.Color = clr;
-        lbl{countCDF} = [area ' ' exptLbls{e}];
+        lbl{countCDF} = [area ' ' exptLbls{e} '; n=' num2str(length(find(sumStats.goodUnit==1)))];
 
         clear sumStats spks
     end
