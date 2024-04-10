@@ -8,7 +8,9 @@ elseif strcmp(anaMode,'MU')
 end
 
 physDir = fullfile(dataFold,'Ephys');
-extractTrials(physDir,physDir,physDir,animal,unit,expt)
+if ~strcmp(unit,'MMM')
+    extractTrials(physDir,physDir,physDir,animal,unit,expt)
+end
 name = 'BRN';
 scaleFactor = 4;
 nJobs = 100;

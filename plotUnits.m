@@ -207,7 +207,7 @@ for u = 1:length(spks)
 
         elseif length(c) > 2 %%% ori12 / ori16 experiment %%%
 
-            % ori space (mod 180)
+            % calculare summary metrics in ori space (mod 180)
             c_ori = mod(c,180);
             oris = unique(c_ori);
             for o = 1:length(oris)
@@ -217,7 +217,7 @@ for u = 1:length(spks)
             end
             rPref_ori = max(mean(r_ori,'omitnan'));
             cPref_ori = oris(mean(r_ori,'omitnan')==rPref_ori);
-            if length(cPref_ori)>1
+            if length(cPref_ori)>1 % if there is more than one pk with rPref
                 rIn = mean(r_ori,'omitnan');
                 pks = rIn == rPref_ori;
                 rConv = rIn([end 1:end 1]);
@@ -231,6 +231,7 @@ for u = 1:length(spks)
             rNull_ori = mean(r_ori(:,oris==cNull_ori),'omitnan');
             osi(u,1) = abs(rPref_ori-rNull_ori)/rPref_ori;
 
+            % calculate summary metrics in dir space (mod 360)
             if length(cPref)>1 % if there is more than one pk with rPref
                 rIn = mean(r,'omitnan');
                 pks = rIn == rPref;
@@ -242,13 +243,13 @@ for u = 1:length(spks)
                 clear rIn pks rConv 
             end
             cP(u,1) = cPref;
-
             cNull = c(c==mod(cPref + 180,360)); cN(u,1) = cNull;
             rNull = mean(r(:,c==cNull),'omitnan'); rN(u,1) = rNull;
             dsi(u,1) = abs(rPref-rNull)/rPref;
             mv = meanvec(c,mean(r,'omitnan'));
             dcv(u,1) = mv.cv;
             
+            % align tuning curves relative to cPref
             if alignBit == 1
                 [x,y,cMap] = alignDirTuning(c',mean(r,'omitnan')); 
                 tuningX{u,1} = x; 
@@ -259,7 +260,6 @@ for u = 1:length(spks)
                 tuningY{u,1} = y;
                 cMap = 1:length(c);
             end
-            
             sem = sem(cMap);
             ci95 = ci95(:,cMap);
             if split == 1
@@ -273,24 +273,20 @@ for u = 1:length(spks)
                 else
                     subplot(1,3,3);hold on
                 end
-    
-                plot([min(x) max(x)],[0 0],'k--') % zero (y axis)
-                for rep = 1:nReps
-                    plot(x,r(rep,cMap),'--','Color',[0.8 0.8 0.8])
-                end
+                
+                patch([min(x) max(x) max(x) min(x)],[min(rBlank) min(rBlank) max(rBlank) max(rBlank)],'r','EdgeColor','none','FaceAlpha',0.1)
+                yline(mean(rBlank),'r--')
+                plot(x,r(:,cMap)','--.','Color',[0.8 0.8 0.8],'MarkerSize',10)
                 plot(x,y,'-o','Color','k','LineWidth',2) % tuning curve (mean across reps)
-                for o = 1:length(cMap)
-                    xdot = repmat(x(o),1,nReps);
-                    ydot = r(:,cMap(o));
-                    plot(xdot,ydot,'.','MarkerSize',10,'MarkerEdgeColor',[0.8 0.8 0.8]) % individual trial responses
-                    plot(repmat(x(o),2,1),y(o)+(sem(o)*[-1;1]),'k','LineWidth',2) % SEM bars 
-                end
+                plot(repmat(x,2,1),y+([-1;1]*sem),'k','LineWidth',2)
+                yline(0,'k--')
                 if alignBit == 1
                     xticks([-180 -90 0 90 180])
                 elseif alignBit == 0
                     xticks([0 90 180 270])
                 end
                 xlabel('direction of motion (deg)')
+                xlim([min(x) max(x)])
                 ylabel('BCFR (Hz.)')
                 title(['dsi = ' num2str(dsi(u,1)) ', 1-dcv = ' num2str(1-dcv(u,1))])
             end
@@ -399,6 +395,22 @@ if plt == 1
         p6 = cdfplot(1-sumStats.dcv); p6.LineStyle = '--'; p6.Color = 'k'; p6.LineWidth = 2;
         xlabel('1-dcv'); xlim([0 1])
         ylabel('percentile')
+
+        subplot(2,3,4); hold on
+        x = mean(vertcat(sumStats.tuningX{:}));
+        y = vertcat(sumStats.tuningY{:});
+        sem = std(y)/sqrt(size(y,1));
+        plot(x,mean(y),'k--o','LineWidth',2)
+        plot(repmat(x,2,1),mean(y)+([-1;1]*sem),'k','LineWidth',2)
+        y = vertcat(sumStats(goodInd,:).tuningY{:});
+        sem = std(y)/sqrt(size(y,1));
+        plot(x,mean(y),'k-o','LineWidth',2)
+        plot(repmat(x,2,1),mean(y)+([-1;1]*sem),'k','LineWidth',2)
+        if alignBit == 1
+            xticks([-180 -90 0 90 180])
+        else
+            xticks([0 90 180 270])
+        end
     
         subplot(2,3,5); hold on
         x = sumStats.dsi(goodInd); x(x>1) = 1;

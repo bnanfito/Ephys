@@ -2,23 +2,24 @@
 clear
 close all
 
-anaMode = 'SU';
-
+anaMode = 'MU';
+metric = 'DSI';
 animals = {'febk7','febk8'};
+ckSum = 1;
 
 figure;
 for a = 1:length(animals)
 
     animal = animals{a};
 
-    if strcmp(animal,'febk8')
-        expts = {[animal '_u000_000'],...
-            [animal '_u002_016'],....
-            [animal '_u002_033']};
-    elseif strcmp(animal,'febk7')
+    if strcmp(animal,'febk7')
         expts = {[animal '_u000_001'],...
             [animal '_u000_025'],...
             [animal '_u000_042']};
+    elseif strcmp(animal,'febk8')
+        expts = {[animal '_u000_000'],...
+            [animal '_u002_016'],....
+            [animal '_u002_033']};
     end
 
     if ispc
@@ -41,7 +42,11 @@ for a = 1:length(animals)
         load(fullfile(physDir,animal,expts{e},[expts{e} '_id.mat']))
         for p = 1:length(id.probes)
             fileName = fullfile(sumDir,animal,expts{e},[expts{e} '_p' num2str(p) '_sumStats' anaMode '.mat']);
-            load(fileName)
+            if ckSum == 1 && isfile(fileName)
+                load(fileName)
+            else
+                [sumStats,spks] = plotUnits(animal,unit,expt,probe,anaMode,visTest,alpha,plt,saveSum,saveFigs,dataFold);
+            end
             sumStats.dsi(sumStats.dsi>1)=1;
             sumStats = sumStats(sumStats.goodUnit==1,:);
             if strcmp(id.probes(p).area,'V1')
@@ -54,14 +59,16 @@ for a = 1:length(animals)
                 clr = 'r';
             end
             if ~isempty(sumStats)
-            cdf = cdfplot(1-sumStats.dcv);
-            countCDF = countCDF+1;
-            cdf.LineStyle = linStyl{e};
-            cdf.LineWidth = 2;
-            cdf.Color = clr;
-            lbl{countCDF} = [areas{p} ' ' exptLbls{e} '; n=' num2str(height(sumStats))];
-            else
-    
+                if strcmp(metric,'DCV') || strcmp(metric,'dcv')
+                    cdf = cdfplot(1-sumStats.dcv);
+                elseif strcmp(metric,'DSI') || strcmp(metric,'dsi')
+                    cdf = cdfplot(sumStats.dsi);
+                end
+                countCDF = countCDF+1;
+                cdf.LineStyle = linStyl{e};
+                cdf.LineWidth = 2;
+                cdf.Color = clr;
+                lbl{countCDF} = [areas{p} ' ' exptLbls{e} '; n=' num2str(height(sumStats))];
             end
     
             clear sumStats spks
@@ -71,7 +78,11 @@ for a = 1:length(animals)
     legend(lbl,'Location','southeast')
     title(animal)
     ylabel('percentile')
-    xlabel('1-DCV')
+    if strcmp(metric,'DCV') || strcmp(metric,'dcv')
+        xlabel('1-DCV')
+    elseif strcmp(metric,'DSI') || strcmp(metric,'dsi')
+        xlabel('DSI')
+    end
 
     clear lbl
 end
