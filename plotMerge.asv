@@ -124,7 +124,6 @@ for f = 1:length(expts)
         uDat{f}(u).tCurveX = mean(x);
         uDat{f}(u).tCurveY = y;
         uDat{f}(u).rBlank = rBlank;
-        uDat{f}(u).dsi = dsi;
 
     end
 
@@ -132,20 +131,7 @@ for f = 1:length(expts)
 end
 
 figure;
-
 subplot(2,2,1);hold on
 plot([uDat{1}.rPref],[uDat{2}.rPref],'k.')
 plot([0 20],[0 20],'k--')
-
-subplot(2,2,2);hold on
-plot([uDat{1}.cPref],[uDat{2}.cPref],'k.')
-plot([0 360],[0 360],'k--')
-
-subplot(2,2,3);hold on
-plot([uDat{1}.dsi],[uDat{2}.dsi],'k.')
-plot([0 1],[0 1],'k--')
-
-
-
-
 
