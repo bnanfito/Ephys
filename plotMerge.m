@@ -2,10 +2,11 @@
 clear all
 close all
 
-dataFold = 'C:\Users\brand\Documents\data';
+% dataFold = 'C:\Users\brand\Documents\data';
+dataFold = 'D:\data';
 animal = 'febg9';
-units = {'000','000'};
-expts = {'006','011'};
+units = {'000','000','000','000','000','000'};
+expts = {'002','006','007','010','011','014'};
 probe = 1;
 mergeID = [];
 for f = 1:length(expts)
@@ -15,7 +16,7 @@ end
 mergeName = [animal '_uMMM_' mergeID];
 
 physDir = fullfile(dataFold,'Ephys');
-clr = {'k','m'};
+clr = {'k','k','c','c','m','m'};
 for f = 1:length(expts)
 
     exptName = [animal '_u' units{f} '_' expts{f}];
@@ -106,7 +107,7 @@ for f = 1:length(expts)
 %         plot(x,y,[clr{f} '.'],'MarkerSize',10)
         patch([x(1,1) x(1,end) x(1,end) x(1,1)],[min(rBlank) min(rBlank) max(rBlank) max(rBlank)],...
             'r','EdgeColor','none','FaceAlpha',0.2)
-        plot(xMdl,g.auss(xMdl),'-','LineWidth',2,'Color',clr{f})
+%         plot(xMdl,g.auss(xMdl),'-','LineWidth',2,'Color',clr{f})
         plot(mean(x),mean(y),'--o','LineWidth',1,'Color',clr{f})
         plot(repmat(mean(x),2,1) , mean(y)+([-1;1]*(std(y)/sqrt(size(y,1)))) ,'-','LineWidth',2,'Color',clr{f})
         plot(cPref,rPref,'*','MarkerSize',10,'LineWidth',2,'Color',clr{f})

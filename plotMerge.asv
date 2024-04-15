@@ -2,10 +2,11 @@
 clear all
 close all
 
-dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
+% dataFold = 'C:\Users\brand\Documents\data';
+dataFold = 'D:\data';
 animal = 'febg9';
-units = {'000','000'};
-expts = {'006','007'};
+units = {'000','000','000','000','000','000'};
+expts = {'002','006','007','010','011','014'};
 probe = 1;
 mergeID = [];
 for f = 1:length(expts)
@@ -15,7 +16,7 @@ end
 mergeName = [animal '_uMMM_' mergeID];
 
 physDir = fullfile(dataFold,'Ephys');
-clr = {'g','b'};
+clr = {'k','k','c','c','m','m'};
 for f = 1:length(expts)
 
     exptName = [animal '_u' units{f} '_' expts{f}];
@@ -106,10 +107,12 @@ for f = 1:length(expts)
 %         plot(x,y,[clr{f} '.'],'MarkerSize',10)
         patch([x(1,1) x(1,end) x(1,end) x(1,1)],[min(rBlank) min(rBlank) max(rBlank) max(rBlank)],...
             'r','EdgeColor','none','FaceAlpha',0.2)
-        plot(xMdl,g.auss(xMdl),[clr{f} '-'],'LineWidth',2)
-        plot(mean(x),mean(y),[clr{f} '--o'],'LineWidth',1)
-        plot(repmat(mean(x),2,1) , mean(y)+([-1;1]*(std(y)/sqrt(size(y,1)))) , [clr{f} '-'],'LineWidth',2)
-        plot(cPref,rPref,[clr{f} '*'],'MarkerSize',10)
+        plot(xMdl,g.auss(xMdl),'-','LineWidth',2,'Color',clr{f})
+        plot(mean(x),mean(y),'--o','LineWidth',1,'Color',clr{f})
+        plot(repmat(mean(x),2,1) , mean(y)+([-1;1]*(std(y)/sqrt(size(y,1)))) ,'-','LineWidth',2,'Color',clr{f})
+        plot(cPref,rPref,'*','MarkerSize',10,'LineWidth',2,'Color',clr{f})
+        xlabel('dir. (deg.)')
+        ylabel('BCFR (Hz)')
         yline(0,'k--')
         title(['unit #' num2str(u)])
 
@@ -124,6 +127,7 @@ for f = 1:length(expts)
         uDat{f}(u).tCurveX = mean(x);
         uDat{f}(u).tCurveY = y;
         uDat{f}(u).rBlank = rBlank;
+        uDat{f}(u).dsi = dsi;
 
     end
 
@@ -131,7 +135,26 @@ for f = 1:length(expts)
 end
 
 figure;
+
 subplot(2,2,1);hold on
 plot([uDat{1}.rPref],[uDat{2}.rPref],'k.')
 plot([0 20],[0 20],'k--')
+xlabel('rPref Before (Hz)')
+ylabel('rPref During (Hz)')
+
+subplot(2,2,2);hold on
+plot([uDat{1}.cPref],[uDat{2}.cPref],'k.')
+plot([0 360],[0 360],'k--')
+xlabel('cPref Before (deg)')
+ylabel('cPref During (deg)')
+
+subplot(2,2,3);hold on
+plot([uDat{1}.dsi],[uDat{2}.dsi],'k.')
+plot([0 1],[0 1],'k--')
+xlabel('dsi Before')
+ylabel('dsi During')
+
+
+
+
 
