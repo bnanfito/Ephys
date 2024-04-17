@@ -3,15 +3,17 @@ clear all
 close all
 
 if ispc
-    dataFold = 'D:\data'; 
-%     dataFold = 'F:\Brandon\data';
+%     dataFold = 'D:\data'; 
+    dataFold = 'F:\Brandon\data';
 elseif ismac
 %     dataFold = '/Volumes/Lab drive/Brandon/data';
     dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
 end
 animal = 'febj8';
-units = {'003','003','003','003','003','003','003','003','003','003','003','003','003'};
-expts = {'002','003','004','005','006','008','009','010','016','017','018','019','020'};
+units = {'003','003','003','003','003'};
+expts = {'002','003','004','005','006'};
+grp =   [    1,    1,    1,    1,    1];
+clr = {'k','c','m'};
 probe = 1;
 mergeID = [];
 for f = 1:length(expts)
@@ -19,17 +21,16 @@ for f = 1:length(expts)
     mergeID = [mergeID expts{f}];
 end
 mergeName = [animal '_uMMM_' mergeID];
-
 physDir = fullfile(dataFold,'Ephys');
-grp = {1,1,1,1,1,2,2,2,3,3,3,3,3};
-clr = {'k','k','k','k','k','c','c','c','m','m','m','m','m'};
+
+countU = 0;
 for f = 1:length(expts)
 
-    exptName = [animal '_u' units{f} '_' expts{f}];
-    load(fullfile(physDir,animal,exptName,[exptName '_id.mat']),'id')
-    load(fullfile(physDir,animal,exptName,[exptName '_trialInfo.mat']),'trialInfo')
-    load(fullfile(physDir,animal,exptName,[exptName '.analyzer']),'-mat')
-    load(fullfile(physDir,animal,mergeName,[exptName '_p' num2str(probe) '_' num2str(f) '_spkSort.mat']),'spkSort')
+    exptName{f} = [animal '_u' units{f} '_' expts{f}];
+    load(fullfile(physDir,animal,exptName{f},[exptName{f} '_id.mat']),'id')
+    load(fullfile(physDir,animal,exptName{f},[exptName{f} '_trialInfo.mat']),'trialInfo')
+    load(fullfile(physDir,animal,exptName{f},[exptName{f} '.analyzer']),'-mat')
+    load(fullfile(physDir,animal,mergeName,[exptName{f} '_p' num2str(probe) '_' num2str(f) '_spkSort.mat']),'spkSort')
     
     area = id.probes(probe).area;
     sf = id.sampleFreq;
@@ -67,9 +68,10 @@ for f = 1:length(expts)
     end
 
     for u = 1:length(uIDs)
-        uID = uIDs(u);
-        figure(u);hold on
-        spkTimes = spkSort.spktimes(spkSort.unitid == uID);
+        countU = countU+1;
+        exptID{countU,1} = exptName{f};
+        uID(countU) = uIDs(u);
+        spkTimes = spkSort.spktimes(spkSort.unitid == uID(countU));
         for c = 1:nConds
             trials = find(trialInfo.triallist == c);
             for r = 1:nReps
@@ -88,76 +90,60 @@ for f = 1:length(expts)
             end
 
         end
-        x = trialInfo.domval(sortTrialCond(:,~blank));
-        y = bcfr{f}(:,~blank,u);
-        rBlank = bcfr{f}(:,blank,u);
-        rPref = max(mean(y));
-        cPref = x(1,mean(y) == rPref);
-        if length(cPref)>1 % if there is more than one pk with rPref
-            rIn = mean(y,'omitnan');
-            pks = rIn == rPref;
-            rConv = rIn([end 1:end 1]);
-            rConv = conv(rConv,ones(1,3)*(1/3),'same');
-            rConv = rConv(1+1:end-1);
-            rConv(~pks) = 0;
-            cPref = x(1,find(rConv==max(rConv),1,'first'));
-            clear rIn pks rConv 
-        end
-        cNull = mod(cPref+180,360);
-        rNull = mean(y(:,mean(x)==cNull));
-        dsi = (rPref-rNull)/rPref;
-%         [g] = dirGauss(mean(y),mean(x),0);
-        xMdl = linspace(0,359,360);
-
-
-%         plot(x,y,[clr{f} '.'],'MarkerSize',10)
-        patch([x(1,1) x(1,end) x(1,end) x(1,1)],[min(rBlank) min(rBlank) max(rBlank) max(rBlank)],...
-            'r','EdgeColor','none','FaceAlpha',0.2)
-%         plot(xMdl,g.auss(xMdl),'-','LineWidth',2,'Color',clr{f})
-        plot(mean(x),mean(y),'--o','LineWidth',1,'Color',clr{f})
-        plot(repmat(mean(x),2,1) , mean(y)+([-1;1]*(std(y)/sqrt(size(y,1)))) ,'-','LineWidth',2,'Color',clr{f})
-        plot(cPref,rPref,'*','MarkerSize',10,'LineWidth',2,'Color',clr{f})
-        xlabel('dir. (deg.)')
-        ylabel('BCFR (Hz)')
-        yline(0,'k--')
-        title(['unit #' num2str(u)])
-
-        uDat{f}(u).uID = uID;
-        uDat{f}(u).fr = struct(  'trial',sortTrialInd,...
+        fr{countU,1} = struct(  'trial',sortTrialInd,...
                                 'condition',sortTrialCond,...
                                 'stim',stimFR{f}(:,:,u),...
                                 'base',baseFR{f}(:,:,u),...
                                 'bcfr',bcfr{f}(:,:,u)   );
-        uDat{f}(u).tCurveX = mean(x);
-        uDat{f}(u).tCurveY = y;
-        uDat{f}(u).rPref = rPref;
-        uDat{f}(u).cPref = cPref;
-        uDat{f}(u).rBlank = rBlank;
-        uDat{f}(u).dsi = dsi;
+        x{countU,1} = trialInfo.domval(sortTrialCond(:,~blank));
+        y{countU,1} = bcfr{f}(:,~blank,u);
+        rBlank{countU,1} = bcfr{f}(:,blank,u);
+        rPref(countU) = max(mean(y{countU,1}));
+        cP = x{countU,1}(1,mean(y{countU,1}) == rPref(countU));
+        if length(cP)>1 % if there is more than one pk with rPref
+            rIn = mean(y{countU,1},'omitnan');
+            pks = rIn == rPref(countU);
+            rConv = rIn([end 1:end 1]);
+            rConv = conv(rConv,ones(1,3)*(1/3),'same');
+            rConv = rConv(1+1:end-1);
+            rConv(~pks) = 0;
+            cPref(countU) = x{countU,1}(1,find(rConv==max(rConv),1,'first'));
+            clear rIn pks rConv 
+        elseif length(cP)==1
+            cPref(countU) = cP;
+        end
+        cNull(countU) = mod(cPref(countU)+180,360);
+        rNull(countU) = mean(y{countU,1}(:,mean(x{countU,1})==cNull(countU)));
+        dsi(countU) = (rPref(countU)-rNull(countU))/rPref(countU);
+%         [g] = dirGauss(mean(y),mean(x),0);
+%         xMdl = linspace(0,359,360);
 
     end
 
-
 end
 
-% figure;
-% 
-% subplot(2,2,1);hold on
-% plot([uDat{1}.rPref],[uDat{2}.rPref],'k.')
-% plot([0 20],[0 20],'k--')
-% xlabel('rPref Before Cooling')
-% ylabel('rPref After Cooling')
-% 
-% subplot(2,2,2);hold on
-% cdfplot([uDat{1}.cPref]-[uDat{2}.cPref])
-% xlabel('delta cPref')
-% subplot(2,2,3);hold on
-% plot([uDat{1}.dsi],[uDat{2}.dsi],'k.')
-% plot([0 1],[0 1],'k--')
-% xlabel('dsi Before')
-% ylabel('dsi During')
+varNames = {'exptID','uID','fr','tuningX','tuningY','rBlank','rPref','cPref','DSI'};
+uDat = table(exptID,uID',fr,x,y,rBlank,rPref',cPref',dsi','VariableNames',varNames);
 
+clear x y uIDs uID exptID
 
+uIDs = unique(uDat.uID);
+for u = 1:length(uIDs)
+    figure;hold on
+    for g = unique(grp)
 
+        curDat = uDat(ismember(uDat.exptID,exptName(grp==g)') & uDat.uID==uIDs(u),:);
+        
+        for e = 1:height(curDat)
+            plot(mean(curDat.tuningX{e}),mean(curDat.tuningY{e}),'--','Color',clr{g})
+            plot(repmat(mean(curDat.tuningX{e}),2,1),mean(curDat.tuningY{e})+([-1;1]*(std(curDat.tuningY{e})/size(curDat.tuningY{e},1))),'Color',clr{g})
+        end
+        x = vertcat(curDat.tuningX{:});
+        y = vertcat(curDat.tuningY{:});
+        plot(x(:),y(:),'.','Color',clr{g})
+        plot(mean(x),mean(y),'LineWidth',2,'Color',clr{g})
 
+    end
+    saveas(gcf,fullfile(physDir,animal,mergeName,['u' num2str(u) 'plot']),'fig')
+end
 
