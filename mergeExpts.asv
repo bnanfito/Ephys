@@ -2,13 +2,13 @@
 clear all; close all;
 dataFold = 'D:\data';
 physDir = fullfile(dataFold,'Ephys');
-units = {'000','000'};
-expts = {'006','014'};
+animal = 'febj8';
+units = {'003','003','003','003','003','003','003'};
+expts = {'002','003','004','005','006','008','009'};
 mergeID = [];
-mergeID = zeros(1,6*length());
 files{1,length(expts)} = [];
 for e = 1:length(expts)
     mergeID = [mergeID units{e} expts{e}];
     files{e} = ['u' units{e} '_' expts{e}];
 end
-mergeIntan(physDir,'febg9',files,100,mergeID,'BRN')
+mergeIntan(physDir,animal,files,100,mergeID,'BRN')

@@ -2,11 +2,16 @@
 clear all
 close all
 
-% dataFold = 'C:\Users\brand\Documents\data';
-dataFold = 'D:\data';
-animal = 'febg9';
-units = {'000','000','000','000','000','000'};
-expts = {'002','006','007','010','011','014'};
+if ispc
+    dataFold = 'D:\data'; 
+%     dataFold = 'F:\Brandon\data';
+elseif ismac
+%     dataFold = '/Volumes/Lab drive/Brandon/data';
+    dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
+end
+animal = 'febj8';
+units = {'003','003','003','003','003','003','003','003','003','003','003','003','003'};
+expts = {'002','003','004','005','006','008','009','010','016','017','018','019','020'};
 probe = 1;
 mergeID = [];
 for f = 1:length(expts)
@@ -16,7 +21,8 @@ end
 mergeName = [animal '_uMMM_' mergeID];
 
 physDir = fullfile(dataFold,'Ephys');
-clr = {'k','k','c','c','m','m'};
+grp = {1,1,1,1,1,2,2,2,3,3,3,3,3};
+clr = {'k','k','k','k','k','c','c','c','m','m','m','m','m'};
 for f = 1:length(expts)
 
     exptName = [animal '_u' units{f} '_' expts{f}];
@@ -100,7 +106,7 @@ for f = 1:length(expts)
         cNull = mod(cPref+180,360);
         rNull = mean(y(:,mean(x)==cNull));
         dsi = (rPref-rNull)/rPref;
-        [g] = dirGauss(mean(y),mean(x),0);
+%         [g] = dirGauss(mean(y),mean(x),0);
         xMdl = linspace(0,359,360);
 
 
@@ -122,10 +128,10 @@ for f = 1:length(expts)
                                 'stim',stimFR{f}(:,:,u),...
                                 'base',baseFR{f}(:,:,u),...
                                 'bcfr',bcfr{f}(:,:,u)   );
-        uDat{f}(u).rPref = rPref;
-        uDat{f}(u).cPref = cPref;
         uDat{f}(u).tCurveX = mean(x);
         uDat{f}(u).tCurveY = y;
+        uDat{f}(u).rPref = rPref;
+        uDat{f}(u).cPref = cPref;
         uDat{f}(u).rBlank = rBlank;
         uDat{f}(u).dsi = dsi;
 
@@ -134,25 +140,22 @@ for f = 1:length(expts)
 
 end
 
-figure;
-
-subplot(2,2,1);hold on
-plot([uDat{1}.rPref],[uDat{2}.rPref],'k.')
-plot([0 20],[0 20],'k--')
-xlabel('rPref Before (Hz)')
-ylabel('rPref During (Hz)')
-
-subplot(2,2,2);hold on
-plot([uDat{1}.cPref],[uDat{2}.cPref],'k.')
-plot([0 360],[0 360],'k--')
-xlabel('cPref Before (deg)')
-ylabel('cPref During (deg)')
-
-subplot(2,2,3);hold on
-plot([uDat{1}.dsi],[uDat{2}.dsi],'k.')
-plot([0 1],[0 1],'k--')
-xlabel('dsi Before')
-ylabel('dsi During')
+% figure;
+% 
+% subplot(2,2,1);hold on
+% plot([uDat{1}.rPref],[uDat{2}.rPref],'k.')
+% plot([0 20],[0 20],'k--')
+% xlabel('rPref Before Cooling')
+% ylabel('rPref After Cooling')
+% 
+% subplot(2,2,2);hold on
+% cdfplot([uDat{1}.cPref]-[uDat{2}.cPref])
+% xlabel('delta cPref')
+% subplot(2,2,3);hold on
+% plot([uDat{1}.dsi],[uDat{2}.dsi],'k.')
+% plot([0 1],[0 1],'k--')
+% xlabel('dsi Before')
+% ylabel('dsi During')
 
 
 
