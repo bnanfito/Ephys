@@ -3,20 +3,16 @@ clear all
 close all
 
 if ispc
-    dataFold = 'D:\data'; 
-%     dataFold = 'F:\Brandon\data';
+%     dataFold = 'D:\data'; 
+    dataFold = 'F:\Brandon\data';
 elseif ismac
 %     dataFold = '/Volumes/Lab drive/Brandon/data';
     dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
 end
-% animal = 'febj8';
-% units = {'003','003','003','003','003','003','003','003','003','003','003','003','003'};
-% expts = {'002','003','004','005','006','008','009','010','016','017','018','019','020'};
-% grp =   [    1,    1,    1,    1,    1,    2,    2,    2,    3,    3,    3,    3,    3];
-animal = 'febg9';
-units = {'000','000','000','000','000','000'};
-expts = {'002','006','007','010','011','014'};
-grp =   [    1,    1,    2,    2,    3,    3];
+animal = 'febj8';
+units = {'003','003','003','003','003'};
+expts = {'002','003','004','005','006'};
+grp =   [    1,    1,    1,    1,    1];
 clr = {'k','c','m'};
 probe = 1;
 mergeID = [];
@@ -146,7 +142,7 @@ for u = 1:length(uIDs)
 
         curDat = uDat(ismember(uDat.exptID,exptName(grp==g)') & uDat.uID==uIDs(u),:);
         
-        subplot(2,2,4);hold on
+        subplot(2,2,1);hold on
         for e = 1:height(curDat)
             plot(mean(curDat.tuningX{e}),mean(curDat.tuningY{e}),'--','Color',clr{g})
             plot(repmat(mean(curDat.tuningX{e}),2,1),mean(curDat.tuningY{e})+([-1;1]*sem(curDat.tuningY{e})),'Color',clr{g})
@@ -168,13 +164,12 @@ for u = 1:length(uIDs)
             plot(x,y,'.','Color',clr{g})
         end
 
-        subplot(2,2,1);hold on
-        h = [curDat.raster{:}];h = h(1,:);
-        histogram(h,'BinWidth',.1,'FaceColor',clr{g},'FaceAlpha',0.3,'EdgeColor','none')
+        subplot(2,2,4);hold on
+        histogram()
 
     end
     sgtitle(['unit#' num2str(uIDs(u))])
 
-    saveas(gcf,fullfile(physDir,animal,mergeName,['u' num2str(u) 'plot']),'fig')
+%     saveas(gcf,fullfile(physDir,animal,mergeName,['u' num2str(u) 'plot']),'fig')
 end
 
