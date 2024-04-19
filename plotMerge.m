@@ -9,14 +9,14 @@ elseif ismac
 %     dataFold = '/Volumes/Lab drive/Brandon/data';
     dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
 end
-% animal = 'febj8';
-% units = {'003','003','003','003','003','003','003','003','003','003','003','003','003'};
-% expts = {'002','003','004','005','006','008','009','010','016','017','018','019','020'};
-% grp =   [    1,    1,    1,    1,    1,    2,    2,    2,    3,    3,    3,    3,    3];
-animal = 'febg9';
-units = {'000','000','000','000','000','000'};
-expts = {'002','006','007','010','011','014'};
-grp =   [    1,    1,    2,    2,    3,    3];
+animal = 'febj8';
+units = {'003','003','003','003','003','003','003','003','003','003','003','003','003'};
+expts = {'002','003','004','005','006','008','009','010','016','017','018','019','020'};
+grp =   [    1,    1,    1,    1,    1,    2,    2,    2,    3,    3,    3,    3,    3];
+% animal = 'febg9';
+% units = {'000','000','000','000','000','000'};
+% expts = {'002','006','007','010','011','014'};
+% grp =   [    1,    1,    2,    2,    3,    3];
 clr = {'k','c','m'};
 probe = 1;
 mergeID = [];
@@ -26,6 +26,12 @@ for f = 1:length(expts)
 end
 mergeName = [animal '_uMMM_' mergeID];
 physDir = fullfile(dataFold,'Ephys');
+
+binWidth=0.010; %sec
+% 1sec baseline and 1sec stim period
+startBin=ceil(-1/binWidth)*binWidth; %need multiple of binWidth to make 0 an edge
+stopBin=floor(1/binWidth)*binWidth;
+binVec=[startBin:binWidth:stopBin];
 
 countU = 0;
 for f = 1:length(expts)
@@ -108,7 +114,7 @@ for f = 1:length(expts)
                                 'bcfr',bcfr{f}(:,:,u)   );
         x{countU,1} = trialInfo.domval(sortTrialCond(:,~blank));
         y{countU,1} = bcfr{f}(:,~blank,u);
-        rBlank{countU,1} = bcfr{f}(:,blank,u);
+        rBlank{countU,1} = stimFR{f}(:,blank,u);
         rPref(countU) = max(mean(y{countU,1}));
         cP = x{countU,1}(1,mean(y{countU,1}) == rPref(countU));
         if length(cP)>1 % if there is more than one pk with rPref
@@ -124,24 +130,56 @@ for f = 1:length(expts)
             cPref(countU) = cP;
         end
         cNull(countU) = mod(cPref(countU)+180,360);
-        rNull(countU) = mean(y{countU,1}(:,mean(x{countU,1})==cNull(countU)));
-        dsi(countU) = (rPref(countU)-rNull(countU))/rPref(countU);
+        rNull(countU) = mean(y{countU,1}( : , mean(x{countU,1})==cNull(countU) ));
+        dsi(countU) = abs(rPref(countU)-rNull(countU)) / rPref(countU);
 %         [g] = dirGauss(mean(y),mean(x),0);
 %         xMdl = linspace(0,359,360);
+
+        prefTrials = find(trialInfo.triallist== find(trialInfo.domval == cPref(countU)) );
+        for rep = 1:length(prefTrials)
+            t = prefTrials(rep);
+            spkTs{rep} = raster{countU,1}(1,raster{countU,1}(2,:)==t);
+            N(rep,:) = histcounts(spkTs{rep},binVec);
+        end
+        avgN = mean(N,1)/binWidth;
+        avgBase=mean(avgN(binVec<0));
+        stdBase=std(avgN(binVec<0));
+        cumN=cumsum(avgN-avgBase); %cumsum(1): value 1 in input
+        diffN=diff(cumN);
+        %criterion 1: cumsum over threshold and 2 increasing bins
+        idx=find(cumN(1:end-2)>2*stdBase & diffN(1:end-1)>0 & diffN(2:end)>0 ...
+            & binVec(1:end-3)>0,1);
+        if ~isempty(idx)
+            latCh(countU)=binVec(idx);
+        else
+            latCh(countU)=NaN;
+        end
+
+        %criterion 2: cumsum over threshold and 3 increasing bins
+        idx=find(cumN(1:end-3)>2*stdBase & ...
+            diffN(1:end-2)>0 & diffN(2:end-1)>0 & diffN(3:end)>0 ...
+            & binVec(1:end-4)>0,1);
+        if ~isempty(idx)
+            latCh2(countU)=binVec(idx);
+        else
+            latCh2(countU)=NaN;
+        end
+
 
     end
 
 end
 
-varNames = {'exptID','uID','uInfo','raster','fr','tuningX','tuningY','rBlank','rPref','cPref','DSI'};
-uDat = table(exptID,uID',info,raster,fr,x,y,rBlank,rPref',cPref',dsi','VariableNames',varNames);
+varNames = {'exptID','uID','uInfo','raster','lat1','lat2','fr','tuningX','tuningY','rBlank','rPref','cPref','DSI'};
+uDat = table(exptID,uID',info,raster,latCh',latCh2',fr,x,y,rBlank,rPref',cPref',dsi','VariableNames',varNames);
 
-clear x y uIDs uID exptID
+clear x y uIDs uID exptID h
 
 uIDs = unique(uDat.uID);
 for u = 1:length(uIDs)
     figure;hold on
     countTrial = 0;
+    ttl = [];
     for g = unique(grp)
 
         curDat = uDat(ismember(uDat.exptID,exptName(grp==g)') & uDat.uID==uIDs(u),:);
@@ -154,10 +192,13 @@ for u = 1:length(uIDs)
         x = vertcat(curDat.tuningX{:});
         y = vertcat(curDat.tuningY{:});
         plot(x(:),y(:),'.','Color',clr{g})
+        plot(curDat.cPref,curDat.rPref,'*','Color',clr{g})
 
         subplot(2,2,2);hold on
         plot(mean(x),mean(y),'LineWidth',2,'Color',clr{g})
         plot(repmat(mean(x),2,1),mean(y)+([-1;1]*sem(y)),'LineWidth',2,'Color',clr{g})
+        ttl = [ttl 'DSI(' clr{g} ') = ' num2str(mean(curDat.DSI)) ';'];
+        title(ttl)
 
         subplot(2,2,3);hold on
         for f = 1:height(curDat)
@@ -175,6 +216,35 @@ for u = 1:length(uIDs)
     end
     sgtitle(['unit#' num2str(uIDs(u))])
 
-    saveas(gcf,fullfile(physDir,animal,mergeName,['u' num2str(u) 'plot']),'fig')
+%     saveas(gcf,fullfile(physDir,animal,mergeName,['u' num2str(u) 'plot']),'fig')
 end
 
+
+% figure;hold on
+% for g = unique(grp)
+% 
+%     curDat = uDat(ismember(uDat.exptID,exptName(grp==g)'),:);
+%     for u = unique(curDat.uID)'
+%         LAT(g,u) = mean(curDat(curDat.uID == u,:).lat1,'omitnan');
+%         RP(g,u) = mean(curDat(curDat.uID == u,:).rPref);
+%         RB(g,u) = mean(mean([curDat(curDat.uID == u,:).rBlank{:}],1),2);
+%         DSI(g,u) = mean(curDat(curDat.uID == u,:).DSI);
+%     end
+% 
+%     subplot(2,2,1);hold on
+%     cdf = cdfplot(LAT(g,:));
+%     cdf.Color = clr{g};
+% 
+%     subplot(2,2,2);hold on
+%     cdf = cdfplot(RP(g,:));
+%     cdf.Color = clr{g};
+% 
+%     subplot(2,2,3);hold on
+%     cdf = cdfplot(RB(g,:));
+%     cdf.Color = clr{g};
+% 
+%     subplot(2,2,4);hold on
+%     cdf = cdfplot(DSI(g,:));
+%     cdf.Color = clr{g};
+% 
+% end
