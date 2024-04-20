@@ -9,21 +9,22 @@ elseif ismac
 %     dataFold = '/Volumes/Lab drive/Brandon/data';
     dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
 end
-animal = 'febj8';
-units = {'003','003','003','003','003','003','003','003','003','003','003','003','003'};
-expts = {'002','003','004','005','006','008','009','010','016','017','018','019','020'};
-grp =   [    1,    1,    1,    1,    1,    2,    2,    2,    3,    3,    3,    3,    3];
-% animal = 'febg9';
-% units = {'000','000','000','000','000','000'};
-% expts = {'002','006','007','010','011','014'};
-% grp =   [    1,    1,    2,    2,    3,    3];
+% animal = 'febj8';
+% units = {'003','003','003','003','003','003','003','003','003','003','003','003','003'};
+% expts = {'002','003','004','005','006','008','009','010','016','017','018','019','020'};
+% grp =   [    1,    1,    1,    1,    1,    2,    2,    2,    3,    3,    3,    3,    3];
+animal = 'febg9';
+units = {'000','000','000','000','000','000'};
+expts = {'002','006','007','010','011','014'};
+grp =   [    1,    1,    2,    2,    3,    3];
 clr = {'k','c','m'};
 probe = 1;
-mergeID = [];
-for f = 1:length(expts)
-    mergeID = [mergeID units{f}];
-    mergeID = [mergeID expts{f}];
-end
+mergeID = '000002000006000007000010000011000014';
+% mergeID = [];
+% for f = 1:length(expts)
+%     mergeID = [mergeID units{f}];
+%     mergeID = [mergeID expts{f}];
+% end
 mergeName = [animal '_uMMM_' mergeID];
 physDir = fullfile(dataFold,'Ephys');
 
@@ -32,6 +33,7 @@ binWidth=0.010; %sec
 startBin=ceil(-1/binWidth)*binWidth; %need multiple of binWidth to make 0 an edge
 stopBin=floor(1/binWidth)*binWidth;
 binVec=[startBin:binWidth:stopBin];
+anaMode = 'MU';
 
 countU = 0;
 for f = 1:length(expts)
@@ -40,7 +42,15 @@ for f = 1:length(expts)
     load(fullfile(physDir,animal,exptName{f},[exptName{f} '_id.mat']),'id')
     load(fullfile(physDir,animal,exptName{f},[exptName{f} '_trialInfo.mat']),'trialInfo')
     load(fullfile(physDir,animal,exptName{f},[exptName{f} '.analyzer']),'-mat')
-    load(fullfile(physDir,animal,mergeName,[exptName{f} '_p' num2str(probe) '_' num2str(f) '_spkSort.mat']),'spkSort')
+    if strcmp(anaMode,'SU')
+        load(fullfile(physDir,animal,mergeName,[exptName{f} '_p' num2str(probe) '_' num2str(f) '_spkSort.mat']),'spkSort')
+        spkStrct = spkSort;
+        clear spkSort
+    elseif strcmp(anaMode,'MU')
+        load(fullfile(physDir,animal,exptName{f},[exptName{f} '_p' num2str(probe) '_MUspkMerge.mat']),'MUspkMerge')
+        spkStrct = MUspkMerge;
+        clear MUspkMerge
+    end
     
     area = id.probes(probe).area;
     sf = id.sampleFreq;
@@ -51,8 +61,12 @@ for f = 1:length(expts)
     nConds = length(unique(trialInfo.triallist));
     nDom = length(trialInfo.dom);
     nReps = nTrials/nConds;
-    nU = length(spkSort.unitinfo);
-    uIDs = unique(spkSort.unitid); uIDs = uIDs(uIDs~=0);
+    if strcmp(anaMode,'SU')
+        uIDs = unique(spkStrct.unitid); uIDs = uIDs(uIDs~=0);
+    elseif strcmp(anaMode,'MU')
+        uIDs = unique(spkStrct.detCh);
+    end
+    nU = length(uIDs);
 
     predelay = getparam('predelay',Analyzer);
     stimTime = getparam('stim_time',Analyzer);
@@ -78,12 +92,19 @@ for f = 1:length(expts)
     end
 
     for u = 1:length(uIDs)
+
         stimCent{f,u} = [];
         countU = countU+1;
         exptID{countU,1} = exptName{f};
         uID(countU) = uIDs(u);
-        info{countU,1} = spkSort.unitinfo{uIDs(u)};
-        spkTimes = spkSort.spktimes(spkSort.unitid == uIDs(u));
+        if strcmp(anaMode,'SU')
+            info{countU,1} = spkStrct.unitinfo{uIDs(u)};
+            spkTimes = spkStrct.spktimes(spkStrct.unitid == uIDs(u));
+        elseif strcmp(anaMode,'MU')
+            info{countU,1} = 'MU';
+            spkTimes = spkStrct.spktimes(spkStrct.detCh == uIDs(u));
+        end
+
         for c = 1:nConds
             trials = find(trialInfo.triallist == c);
             for r = 1:nReps
@@ -170,8 +191,8 @@ for f = 1:length(expts)
 
 end
 
-varNames = {'exptID','uID','uInfo','raster','lat1','lat2','fr','tuningX','tuningY','rBlank','rPref','cPref','DSI'};
-uDat = table(exptID,uID',info,raster,latCh',latCh2',fr,x,y,rBlank,rPref',cPref',dsi','VariableNames',varNames);
+varNames = {'exptID','uID','uInfo','raster','lat1','lat2','fr','tuningX','tuningY','rBlank','rPref','cPref','rNull','DSI'};
+uDat = table(exptID,uID',info,raster,latCh',latCh2',fr,x,y,rBlank,rPref',cPref',rNull',dsi','VariableNames',varNames);
 
 clear x y uIDs uID exptID h
 
@@ -197,8 +218,8 @@ for u = 1:length(uIDs)
         subplot(2,2,2);hold on
         plot(mean(x),mean(y),'LineWidth',2,'Color',clr{g})
         plot(repmat(mean(x),2,1),mean(y)+([-1;1]*sem(y)),'LineWidth',2,'Color',clr{g})
-        ttl = [ttl 'DSI(' clr{g} ') = ' num2str(mean(curDat.DSI)) ';'];
-        title(ttl)
+%         ttl = [ttl 'DSI(' clr{g} ') = ' num2str(mean(curDat.DSI)) ';'];
+%         title(ttl)
 
         subplot(2,2,3);hold on
         for f = 1:height(curDat)
@@ -214,37 +235,98 @@ for u = 1:length(uIDs)
         histogram(h,'BinWidth',.1,'FaceColor',clr{g},'FaceAlpha',0.3,'EdgeColor','none')
 
     end
-    sgtitle(['unit#' num2str(uIDs(u))])
+    uTypeTemp = unique(vertcat(curDat.uInfo(curDat.uID==uIDs(u)))); uType{uIDs(u)} = uTypeTemp{:};
+    sgtitle([animal ': unit#' num2str(uIDs(u)) ' (' uType{uIDs(u)} ')'])
 
-%     saveas(gcf,fullfile(physDir,animal,mergeName,['u' num2str(u) 'plot']),'fig')
+    saveas(gcf,fullfile(physDir,animal,mergeName,[anaMode num2str(u) 'plot']),'fig')
 end
 
 
-% figure;hold on
-% for g = unique(grp)
-% 
-%     curDat = uDat(ismember(uDat.exptID,exptName(grp==g)'),:);
-%     for u = unique(curDat.uID)'
-%         LAT(g,u) = mean(curDat(curDat.uID == u,:).lat1,'omitnan');
-%         RP(g,u) = mean(curDat(curDat.uID == u,:).rPref);
-%         RB(g,u) = mean(mean([curDat(curDat.uID == u,:).rBlank{:}],1),2);
-%         DSI(g,u) = mean(curDat(curDat.uID == u,:).DSI);
-%     end
-% 
-%     subplot(2,2,1);hold on
-%     cdf = cdfplot(LAT(g,:));
-%     cdf.Color = clr{g};
-% 
-%     subplot(2,2,2);hold on
-%     cdf = cdfplot(RP(g,:));
-%     cdf.Color = clr{g};
-% 
-%     subplot(2,2,3);hold on
-%     cdf = cdfplot(RB(g,:));
-%     cdf.Color = clr{g};
-% 
-%     subplot(2,2,4);hold on
-%     cdf = cdfplot(DSI(g,:));
-%     cdf.Color = clr{g};
-% 
-% end
+figure;hold on
+for g = unique(grp)
+
+    curDat = uDat(ismember(uDat.exptID,exptName(grp==g)'),:);
+    for u = unique(uDat.uID')
+
+        if ismember(u,curDat.uID)
+            LAT(g,u) = mean(curDat(curDat.uID == u,:).lat1,'omitnan');
+            RP(g,u) = mean(curDat(curDat.uID == u,:).rPref);
+            RB(g,u) = mean(mean([curDat(curDat.uID == u,:).rBlank{:}],1),2);
+            DSI(g,u) = mean(curDat(curDat.uID == u,:).DSI);
+        else
+            LAT(g,u) = nan;
+            RP(g,u) = nan;
+            RB(g,u) = nan;
+            DSI(g,u) = nan;
+        end
+    end
+
+    subplot(2,2,1);hold on
+    cdf = cdfplot(LAT(g,:));
+    cdf.Color = clr{g};
+    title('')
+    ylabel('percentile')
+    xlabel('latency')
+
+    subplot(2,2,2);hold on
+    cdf = cdfplot(RP(g,:));
+    cdf.Color = clr{g};
+    title('')
+    ylabel('percentile')
+    xlabel('rPref')
+
+    subplot(2,2,3);hold on
+    cdf = cdfplot(RB(g,:));
+    cdf.Color = clr{g};
+    title('')
+    ylabel('percentile')
+    xlabel('rBlank')
+
+    subplot(2,2,4);hold on
+    cdf = cdfplot(DSI(g,:));
+    cdf.Color = clr{g};
+    title('')
+    ylabel('percentile')
+    xlabel('DSI')
+    xlim([0 1])
+
+end
+
+figure; hold on
+subplot(2,2,1);hold on
+x = LAT(1,:);
+y = LAT(2,:);
+plot(x,y,'k.')
+ub = max([max(x) max(y)]);
+plot([0 ub],[0 ub],'k--')
+xlabel('latency before cooling V1')
+ylabel('latency during cooling V1')
+
+subplot(2,2,2);hold on
+x = RP(1,:);
+y = RP(2,:);
+plot(x,y,'k.')
+ub = max([max(x) max(y)]);
+plot([0 ub],[0 ub],'k--')
+xlabel('rPref before cooling V1')
+ylabel('rPref during cooling V1')
+
+subplot(2,2,3);hold on
+x = RB(1,:);
+y = RB(2,:);
+plot(x,y,'k.')
+ub = max([max(x) max(y)]);
+plot([0 ub],[0 ub],'k--')
+xlabel('rBlank before cooling V1')
+ylabel('rBlank during cooling V1')
+
+subplot(2,2,4);hold on
+x = DSI(1,:);
+y = DSI(2,:);
+plot(x,y,'k.')
+ub = max([max(x) max(y)]);
+plot([0 ub],[0 ub],'k--')
+xlabel('DSI before cooling V1')
+ylabel('DSI during cooling V1')
+sgtitle([animal ' summary plot'])
+saveas(gcf,fullfile(physDir,animal,mergeName,[anaMode 'summaryPlot']),'fig')
