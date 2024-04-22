@@ -9,22 +9,22 @@ elseif ismac
 %     dataFold = '/Volumes/Lab drive/Brandon/data';
     dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
 end
-% animal = 'febj8';
-% units = {'003','003','003','003','003','003','003','003','003','003','003','003','003'};
-% expts = {'002','003','004','005','006','008','009','010','016','017','018','019','020'};
-% grp =   [    1,    1,    1,    1,    1,    2,    2,    2,    3,    3,    3,    3,    3];
-animal = 'febg9';
-units = {'000','000','000','000','000','000'};
-expts = {'002','006','007','010','011','014'};
-grp =   [    1,    1,    2,    2,    3,    3];
-clr = {'k','c','m'};
+
+animal = 'febj8';
+units = {'003','003','003','003','003','003','003','003','003','003','003','003','003'};
+expts = {'002','003','004','005','006','008','009','010','016','017','018','019','020'};
+grp =   [    1,    1,    1,    1,    1,    2,    2,    2,    3,    3,    3,    3,    3];
+mergeID = '003002003003003004003005003006003008003009003010003016003017003018003019003020';
 probe = 1;
-mergeID = '000002000006000007000010000011000014';
-% mergeID = [];
-% for f = 1:length(expts)
-%     mergeID = [mergeID units{f}];
-%     mergeID = [mergeID expts{f}];
-% end
+
+% animal = 'febg9';
+% units = {'000','000','000','000','000','000'};
+% expts = {'002','006','007','010','011','014'};
+% grp =   [    1,    1,    2,    2,    3,    3];
+% mergeID = '000002000006000007000010000011000014';
+% probe = 1;
+
+clr = {'k','c','m'};
 mergeName = [animal '_uMMM_' mergeID];
 physDir = fullfile(dataFold,'Ephys');
 
@@ -33,7 +33,7 @@ binWidth=0.010; %sec
 startBin=ceil(-1/binWidth)*binWidth; %need multiple of binWidth to make 0 an edge
 stopBin=floor(1/binWidth)*binWidth;
 binVec=[startBin:binWidth:stopBin];
-anaMode = 'MU';
+anaMode = 'SU';
 
 countU = 0;
 for f = 1:length(expts)
@@ -153,6 +153,7 @@ for f = 1:length(expts)
         cNull(countU) = mod(cPref(countU)+180,360);
         rNull(countU) = mean(y{countU,1}( : , mean(x{countU,1})==cNull(countU) ));
         dsi(countU) = abs(rPref(countU)-rNull(countU)) / rPref(countU);
+        mv{countU,1} = meanvec(mean(x{countU,1}),mean(y{countU,1}));
 %         [g] = dirGauss(mean(y),mean(x),0);
 %         xMdl = linspace(0,359,360);
 
@@ -232,7 +233,9 @@ for u = 1:length(uIDs)
 
         subplot(2,2,1);hold on
         h = [curDat.raster{:}];h = h(1,:);
-        histogram(h,'BinWidth',.1,'FaceColor',clr{g},'FaceAlpha',0.3,'EdgeColor','none')
+        binW = 0.1;
+        hist = histogram(h,'BinWidth',binW,'FaceColor',clr{g},'FaceAlpha',0.3,'EdgeColor','none');
+        hist.BinCounts = (hist.BinCounts/nTrial)/binW;
 
     end
     uTypeTemp = unique(vertcat(curDat.uInfo(curDat.uID==uIDs(u)))); uType{uIDs(u)} = uTypeTemp{:};

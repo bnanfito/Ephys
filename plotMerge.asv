@@ -9,22 +9,22 @@ elseif ismac
 %     dataFold = '/Volumes/Lab drive/Brandon/data';
     dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
 end
-% animal = 'febj8';
-% units = {'003','003','003','003','003','003','003','003','003','003','003','003','003'};
-% expts = {'002','003','004','005','006','008','009','010','016','017','018','019','020'};
-% grp =   [    1,    1,    1,    1,    1,    2,    2,    2,    3,    3,    3,    3,    3];
-animal = 'febg9';
-units = {'000','000','000','000','000','000'};
-expts = {'002','006','007','010','011','014'};
-grp =   [    1,    1,    2,    2,    3,    3];
-clr = {'k','c','m'};
+
+animal = 'febj8';
+units = {'003','003','003','003','003','003','003','003','003','003','003','003','003'};
+expts = {'002','003','004','005','006','008','009','010','016','017','018','019','020'};
+grp =   [    1,    1,    1,    1,    1,    2,    2,    2,    3,    3,    3,    3,    3];
+mergeID = '003002003003003004003005003006003008003009003010003016003017003018003019003020';
 probe = 1;
-mergeID = '000002000006000007000010000011000014';
-% mergeID = [];
-% for f = 1:length(expts)
-%     mergeID = [mergeID units{f}];
-%     mergeID = [mergeID expts{f}];
-% end
+
+% animal = 'febg9';
+% units = {'000','000','000','000','000','000'};
+% expts = {'002','006','007','010','011','014'};
+% grp =   [    1,    1,    2,    2,    3,    3];
+% mergeID = '000002000006000007000010000011000014';
+% probe = 1;
+
+clr = {'k','c','m'};
 mergeName = [animal '_uMMM_' mergeID];
 physDir = fullfile(dataFold,'Ephys');
 
@@ -47,7 +47,7 @@ for f = 1:length(expts)
         spkStrct = spkSort;
         clear spkSort
     elseif strcmp(anaMode,'MU')
-        load(fullfile(physDir,animal,exptName{f},[exptName{f} '_p' num2str(probe) '_' num2str(f) '_MUspkMerge.mat']),'MUspkMerge')
+        load(fullfile(physDir,animal,exptName{f},[exptName{f} '_p' num2str(probe) '_MUspkMerge.mat']),'MUspkMerge')
         spkStrct = MUspkMerge;
         clear MUspkMerge
     end
@@ -62,9 +62,9 @@ for f = 1:length(expts)
     nDom = length(trialInfo.dom);
     nReps = nTrials/nConds;
     if strcmp(anaMode,'SU')
-        uIDs = unique(spkSort.unitid); uIDs = uIDs(uIDs~=0);
+        uIDs = unique(spkStrct.unitid); uIDs = uIDs(uIDs~=0);
     elseif strcmp(anaMode,'MU')
-        uIDs = unique(spkSort.detCh);
+        uIDs = unique(spkStrct.detCh);
     end
     nU = length(uIDs);
 
@@ -92,12 +92,19 @@ for f = 1:length(expts)
     end
 
     for u = 1:length(uIDs)
+
         stimCent{f,u} = [];
         countU = countU+1;
         exptID{countU,1} = exptName{f};
         uID(countU) = uIDs(u);
-        info{countU,1} = spkSort.unitinfo{uIDs(u)};
-        spkTimes = spkSort.spktimes(spkSort.unitid == uIDs(u));
+        if strcmp(anaMode,'SU')
+            info{countU,1} = spkStrct.unitinfo{uIDs(u)};
+            spkTimes = spkStrct.spktimes(spkStrct.unitid == uIDs(u));
+        elseif strcmp(anaMode,'MU')
+            info{countU,1} = 'MU';
+            spkTimes = spkStrct.spktimes(spkStrct.detCh == uIDs(u));
+        end
+
         for c = 1:nConds
             trials = find(trialInfo.triallist == c);
             for r = 1:nReps
@@ -146,6 +153,7 @@ for f = 1:length(expts)
         cNull(countU) = mod(cPref(countU)+180,360);
         rNull(countU) = mean(y{countU,1}( : , mean(x{countU,1})==cNull(countU) ));
         dsi(countU) = abs(rPref(countU)-rNull(countU)) / rPref(countU);
+        mv = meanvec(mean(x{countU,1}),y{countU,1})
 %         [g] = dirGauss(mean(y),mean(x),0);
 %         xMdl = linspace(0,359,360);
 
@@ -225,13 +233,15 @@ for u = 1:length(uIDs)
 
         subplot(2,2,1);hold on
         h = [curDat.raster{:}];h = h(1,:);
-        histogram(h,'BinWidth',.1,'FaceColor',clr{g},'FaceAlpha',0.3,'EdgeColor','none')
+        binW = 0.1;
+        hist = histogram(h,'BinWidth',binW,'FaceColor',clr{g},'FaceAlpha',0.3,'EdgeColor','none');
+        hist.BinCounts = (hist.BinCounts/nTrial)/binW;
 
     end
     uTypeTemp = unique(vertcat(curDat.uInfo(curDat.uID==uIDs(u)))); uType{uIDs(u)} = uTypeTemp{:};
     sgtitle([animal ': unit#' num2str(uIDs(u)) ' (' uType{uIDs(u)} ')'])
 
-    saveas(gcf,fullfile(physDir,animal,mergeName,['u' num2str(u) 'plot']),'fig')
+    saveas(gcf,fullfile(physDir,animal,mergeName,[anaMode num2str(u) 'plot']),'fig')
 end
 
 
@@ -322,4 +332,4 @@ plot([0 ub],[0 ub],'k--')
 xlabel('DSI before cooling V1')
 ylabel('DSI during cooling V1')
 sgtitle([animal ' summary plot'])
-saveas(gcf,fullfile(physDir,animal,mergeName,['summaryPlot']),'fig')
+saveas(gcf,fullfile(physDir,animal,mergeName,[anaMode 'summaryPlot']),'fig')
