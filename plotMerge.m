@@ -3,19 +3,27 @@ clear all
 close all
 
 if ispc
-    dataFold = 'D:\data'; 
+%     dataFold = 'D:\data'; 
+    dataFold = 'C:\Users\brand\Documents\data';
 %     dataFold = 'F:\Brandon\data';
 elseif ismac
 %     dataFold = '/Volumes/Lab drive/Brandon/data';
     dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
 end
 
-animal = 'febj8';
-units = {'003','003','003','003','003','003','003','003','003','003','003','003','003'};
-expts = {'002','003','004','005','006','008','009','010','016','017','018','019','020'};
-grp =   [    1,    1,    1,    1,    1,    2,    2,    2,    3,    3,    3,    3,    3];
-mergeID = '003002003003003004003005003006003008003009003010003016003017003018003019003020';
+animal = 'febl0';
+units = {'000','000','000'};
+expts = {'010','012','015'};
+grp = [1 2 3];
+mergeID = '000010000012000015';
 probe = 1;
+
+% animal = 'febj8';
+% units = {'003','003','003','003','003','003','003','003','003','003','003','003','003'};
+% expts = {'002','003','004','005','006','008','009','010','016','017','018','019','020'};
+% grp =   [    1,    1,    1,    1,    1,    2,    2,    2,    3,    3,    3,    3,    3];
+% mergeID = '003002003003003004003005003006003008003009003010003016003017003018003019003020';
+% probe = 1;
 
 % animal = 'febg9';
 % units = {'000','000','000','000','000','000'};
@@ -33,7 +41,7 @@ binWidth=0.010; %sec
 startBin=ceil(-1/binWidth)*binWidth; %need multiple of binWidth to make 0 an edge
 stopBin=floor(1/binWidth)*binWidth;
 binVec=[startBin:binWidth:stopBin];
-anaMode = 'SU';
+anaMode = 'MU';
 
 countU = 0;
 for f = 1:length(expts)
@@ -202,10 +210,14 @@ for u = 1:length(uIDs)
     figure;hold on
     countTrial = 0;
     ttl = [];
+    swtch = 1;
     for g = unique(grp)
 
         curDat = uDat(ismember(uDat.exptID,exptName(grp==g)') & uDat.uID==uIDs(u),:);
-        
+        if height(curDat) == 0
+            continue
+        end
+
         subplot(2,2,4);hold on
         for e = 1:height(curDat)
             plot(mean(curDat.tuningX{e}),mean(curDat.tuningY{e}),'--','Color',clr{g})
@@ -237,9 +249,13 @@ for u = 1:length(uIDs)
         hist = histogram(h,'BinWidth',binW,'FaceColor',clr{g},'FaceAlpha',0.3,'EdgeColor','none');
         hist.BinCounts = (hist.BinCounts/nTrial)/binW;
 
+        if swtch == 1
+            uTypeTemp = unique(vertcat(curDat.uInfo(curDat.uID==uIDs(u)))); uType{uIDs(u)} = uTypeTemp{:};
+            sgtitle([animal ': unit#' num2str(uIDs(u)) ' (' uType{uIDs(u)} ')'])
+            swtch = 0;
+        end
+
     end
-    uTypeTemp = unique(vertcat(curDat.uInfo(curDat.uID==uIDs(u)))); uType{uIDs(u)} = uTypeTemp{:};
-    sgtitle([animal ': unit#' num2str(uIDs(u)) ' (' uType{uIDs(u)} ')'])
 
     saveas(gcf,fullfile(physDir,animal,mergeName,[anaMode num2str(u) 'plot']),'fig')
 end
