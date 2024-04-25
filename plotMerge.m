@@ -7,15 +7,25 @@ if ispc
     dataFold = 'C:\Users\brand\Documents\data';
 %     dataFold = 'F:\Brandon\data';
 elseif ismac
-%     dataFold = '/Volumes/Lab drive/Brandon/data';
-    dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
+    dataFold = '/Volumes/Lab drive/Brandon/data';
+%     dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
 end
 
 animal = 'febl0';
-units = {'000','000','000'};
-expts = {'010','012','015'};
+units = {'001','001','001'};
+expts = {'006','010','016'};
 grp = [1 2 3];
-mergeID = '000010000012000015';
+mergeID = '001006001010001016';
+
+% units = {'001','001'};
+% expts = {'018','019'};
+% grp = [1 2];
+% mergeID = '001018001019';
+
+% units = {'000','000','000'};
+% expts = {'010','012','015'};
+% grp = [1 2 3];
+% mergeID = '000010000012000015';
 probe = 1;
 
 % animal = 'febj8';
@@ -161,9 +171,25 @@ for f = 1:length(expts)
         cNull(countU) = mod(cPref(countU)+180,360);
         rNull(countU) = mean(y{countU,1}( : , mean(x{countU,1})==cNull(countU) ));
         dsi(countU) = abs(rPref(countU)-rNull(countU)) / rPref(countU);
-        mv{countU,1} = meanvec(mean(x{countU,1}),mean(y{countU,1}));
+        mv = meanvec(mean(x{countU,1}),mean(y{countU,1}));
+        dcv(countU) = mv.cv;
 %         [g] = dirGauss(mean(y),mean(x),0);
 %         xMdl = linspace(0,359,360);
+        isAct = rPref(countU)>=2;
+        bfr = fr{countU,1}.base(:,~blank); bfr = bfr(:);
+        sfr = fr{countU,1}.stim(:,~blank); sfr = sfr(:);
+        pVis = ranksum(bfr,sfr);
+        if isnan(pVis)
+            pVis = 1;
+        end
+        isVis = pVis<0.01;
+
+        if strcmp(anaMode,'SU')
+            isSU = strcmp(info{countU,1},'SU');
+            goodUnit(countU) = isAct & isVis & isSU;
+        else
+            goodUnit(countU) = isAct & isVis;
+        end
 
         prefTrials = find(trialInfo.triallist== find(trialInfo.domval == cPref(countU)) );
         for rep = 1:length(prefTrials)
@@ -200,11 +226,12 @@ for f = 1:length(expts)
 
 end
 
-varNames = {'exptID','uID','uInfo','raster','lat1','lat2','fr','tuningX','tuningY','rBlank','rPref','cPref','rNull','DSI'};
-uDat = table(exptID,uID',info,raster,latCh',latCh2',fr,x,y,rBlank,rPref',cPref',rNull',dsi','VariableNames',varNames);
+varNames = {'exptID','uID','uInfo','goodUnit','raster','lat1','lat2','fr','tuningX','tuningY','rBlank','rPref','cPref','rNull','DSI','DCV'};
+uDat = table(exptID,uID',info,goodUnit',raster,latCh',latCh2',fr,x,y,rBlank,rPref',cPref',rNull',dsi',dcv','VariableNames',varNames);
 
 clear x y uIDs uID exptID h
 
+uDat = uDat(uDat.goodUnit == 1,:);
 uIDs = unique(uDat.uID);
 for u = 1:length(uIDs)
     figure;hold on
@@ -272,11 +299,13 @@ for g = unique(grp)
             RP(g,u) = mean(curDat(curDat.uID == u,:).rPref);
             RB(g,u) = mean(mean([curDat(curDat.uID == u,:).rBlank{:}],1),2);
             DSI(g,u) = mean(curDat(curDat.uID == u,:).DSI);
+            DCV(g,u) = mean(curDat(curDat.uID == u,:).DCV);
         else
             LAT(g,u) = nan;
             RP(g,u) = nan;
             RB(g,u) = nan;
             DSI(g,u) = nan;
+            DCV(g,u) = nan;
         end
     end
 
@@ -302,11 +331,11 @@ for g = unique(grp)
     xlabel('rBlank')
 
     subplot(2,2,4);hold on
-    cdf = cdfplot(DSI(g,:));
+    cdf = cdfplot(1-DCV(g,:));
     cdf.Color = clr{g};
     title('')
     ylabel('percentile')
-    xlabel('DSI')
+    xlabel('1-DCV')
     xlim([0 1])
 
 end
