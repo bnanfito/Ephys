@@ -97,7 +97,9 @@ for u = 1:length(spks)
     figure;hold on
     % RASTER PLOT
     subplot(1,3,1);hold on
-    [x,y] = find(spks(u).train);
+%     [x,y] = find(spks(u).train);
+    x = spks(u).stimCent(1,:);
+    y = spks(u).stimCent(2,:);
     if sortTrialBit == 1
         [y,~] = find(sortTrialInd==y');
     end
@@ -110,7 +112,7 @@ for u = 1:length(spks)
             patch([-predelay stimTime+postdelay stimTime+postdelay -predelay],[t-0.5 t-0.5 t+0.5 t+0.5],'r','EdgeColor','none','FaceAlpha',0.2)
         end
     end
-    plot((x-(predelay*sf))/sf,y,'k.')
+    plot(x,y,'k.')
     axis tight
     xlim([-predelay stimTime+postdelay])
     xlabel('time (s) relative to stim onset')
@@ -118,7 +120,7 @@ for u = 1:length(spks)
     
     if split == 1
     for h = 1:2
-        plot((x(ismember(y,half{h}))-(predelay*sf))/sf,y(ismember(y,half{h})),'o','MarkerSize',5,'Color',colors{h})
+        plot(x(ismember(y,half{h})),y(ismember(y,half{h})),'o','MarkerSize',5,'Color',colors{h})
     end
     end
     
@@ -137,7 +139,6 @@ for u = 1:length(spks)
     xlabel('time (s) relative to stim onset')
     ylabel('SDF')
     end
-
     
     % TUNING CURVE
     if (length(trialInfo.dom)==1 && strcmp(trialInfo.dom{1},'ori')) % for experiments where only orientation/direction of motion is changing
@@ -145,7 +146,7 @@ for u = 1:length(spks)
 
         c = trialInfo.domval; % vectors of conditions (x axis of tuning curve; e.g. orientations)
         r = spks(u).fr.bc(:,~blank);
-        rBlank = spks(u).fr.bc(:,blank);
+        rBlank = spks(u).fr.stim(:,blank);
         sem = std(r,'omitnan')/sqrt(size(r,1)); % nConds long vector of standard error of the mean for each condition
         ci95 = confInt(r); % nConds long vector of 95% confidence interval for each condition
         
@@ -307,6 +308,43 @@ for u = 1:length(spks)
 
     end
 
+    %Calculate latency
+    binWidth=0.010; %sec
+    % 1sec baseline and 1sec stim period
+    startBin=ceil(-1/binWidth)*binWidth; %need multiple of binWidth to make 0 an edge
+    stopBin=floor(1/binWidth)*binWidth;
+    binVec=[startBin:binWidth:stopBin];
+    prefTrials = find(trialInfo.triallist== find(trialInfo.domval == cPref) );
+    for rep = 1:length(prefTrials)
+        t = prefTrials(rep);
+        spkTs{rep} = spks(u).stimCent(1,spks(u).stimCent(2,:)==t);
+        N(rep,:) = histcounts(spkTs{rep},binVec);
+    end
+    avgN = mean(N,1)/binWidth;
+    avgBase=mean(avgN(binVec<0));
+    stdBase=std(avgN(binVec<0));
+    cumN=cumsum(avgN-avgBase); %cumsum(1): value 1 in input
+    diffN=diff(cumN);
+    %criterion 1: cumsum over threshold and 2 increasing bins
+    idx=find(cumN(1:end-2)>2*stdBase & diffN(1:end-1)>0 & diffN(2:end)>0 ...
+        & binVec(1:end-3)>0,1);
+    if ~isempty(idx)
+        latCh(u,1)=binVec(idx);
+    else
+        latCh(u,1)=NaN;
+    end
+
+    %criterion 2: cumsum over threshold and 3 increasing bins
+    idx=find(cumN(1:end-3)>2*stdBase & ...
+        diffN(1:end-2)>0 & diffN(2:end-1)>0 & diffN(3:end)>0 ...
+        & binVec(1:end-4)>0,1);
+    if ~isempty(idx)
+        latCh2(u,1)=binVec(idx);
+    else
+        latCh2(u,1)=NaN;
+    end
+
+
 
      if plt == 1
         ttl = [baseName ' p' num2str(probe) ' (' id.probes(probe).area ') ' anaMode '#' num2str(uID(u))];
@@ -334,8 +372,8 @@ end
 
 %% Make Summary Stats Table
 
-varNames = {'exptName','probe','area','uID','goodUnit','fr','rPref','cPref','pVis'};
-sumStats = table(exptNames,probeIDs,areaIDs,uID,goodUnits',vertcat(spks.fr),rP,cP,pVis,'VariableNames',varNames);
+varNames = {'exptName','probe','area','uID','goodUnit','fr','rPref','cPref','pVis','lat1','lat2'};
+sumStats = table(exptNames,probeIDs,areaIDs,uID,goodUnits',vertcat(spks.fr),rP,cP,pVis,latCh,latCh2,'VariableNames',varNames);
 sumStats.tuningX = tuningX;
 sumStats.tuningY = tuningY;
 if strcmp(anaMode,'MU')
