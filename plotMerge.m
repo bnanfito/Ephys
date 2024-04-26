@@ -7,15 +7,47 @@ if ispc
     dataFold = 'C:\Users\brand\Documents\data';
 %     dataFold = 'F:\Brandon\data';
 elseif ismac
-    dataFold = '/Volumes/Lab drive/Brandon/data';
-%     dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
+%     dataFold = '/Volumes/Lab drive/Brandon/data';
+    dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
 end
 
-animal = 'febl0';
-units = {'001','001','001'};
-expts = {'006','010','016'};
-grp = [1 2 3];
-mergeID = '001006001010001016';
+% animal = 'febg7';
+% units = {'000','000','000','000','000','000'};
+% expts = {'000','003','004','008','009','012'};
+% grp = [1 1 2 2 3 3];
+% mergeID = '000000000003000004000008000009000012';
+
+% units = {'001','001','001','001','001','001'};
+% expts = {'000','004','005','008','009','012'};
+% grp = [1 1 2 2 3 3];
+% mergeID = '001000001004001005001008001009001012';
+
+
+
+
+% animal = 'febg8';
+% units = {'001','001','001','001','001','001'};
+% expts = {'000','003','004','007','008','011'};
+% grp = [1 1 2 2 3 3];
+% mergeID = '001000001003001004001007001008001011';
+
+
+
+
+% animal = 'febg9';
+% units = {'000','000','000','000','000','000'};
+% expts = {'002','006','007','010','011','014'};
+% grp =   [    1,    1,    2,    2,    3,    3];
+% mergeID = '000002000006000007000010000011000014';
+
+
+
+
+% animal = 'febl0';
+% units = {'001','001','001'};
+% expts = {'006','010','016'};
+% grp = [1 2 3];
+% mergeID = '001006001010001016';
 
 % units = {'001','001'};
 % expts = {'018','019'};
@@ -26,21 +58,18 @@ mergeID = '001006001010001016';
 % expts = {'010','012','015'};
 % grp = [1 2 3];
 % mergeID = '000010000012000015';
-probe = 1;
 
-% animal = 'febj8';
-% units = {'003','003','003','003','003','003','003','003','003','003','003','003','003'};
-% expts = {'002','003','004','005','006','008','009','010','016','017','018','019','020'};
-% grp =   [    1,    1,    1,    1,    1,    2,    2,    2,    3,    3,    3,    3,    3];
-% mergeID = '003002003003003004003005003006003008003009003010003016003017003018003019003020';
-% probe = 1;
 
-% animal = 'febg9';
-% units = {'000','000','000','000','000','000'};
-% expts = {'002','006','007','010','011','014'};
-% grp =   [    1,    1,    2,    2,    3,    3];
-% mergeID = '000002000006000007000010000011000014';
-% probe = 1;
+
+
+
+animal = 'febj8';
+units = {'003','003','003','003','003','003','003','003','003','003','003','003','003'};
+expts = {'002','003','004','005','006','008','009','010','016','017','018','019','020'};
+grp =   [    1,    1,    1,    1,    1,    2,    2,    2,    3,    3,    3,    3,    3];
+mergeID = '003002003003003004003005003006003008003009003010003016003017003018003019003020';
+
+
 
 clr = {'k','c','m'};
 mergeName = [animal '_uMMM_' mergeID];
@@ -51,13 +80,18 @@ binWidth=0.010; %sec
 startBin=ceil(-1/binWidth)*binWidth; %need multiple of binWidth to make 0 an edge
 stopBin=floor(1/binWidth)*binWidth;
 binVec=[startBin:binWidth:stopBin];
-anaMode = 'MU';
+anaMode = 'SU';
 
 countU = 0;
 for f = 1:length(expts)
 
     exptName{f} = [animal '_u' units{f} '_' expts{f}];
     load(fullfile(physDir,animal,exptName{f},[exptName{f} '_id.mat']),'id')
+    for p = 1:length(id.probes)
+        if strcmp(id.probes(p).area,'PSS')
+            probe = p;
+        end
+    end
     load(fullfile(physDir,animal,exptName{f},[exptName{f} '_trialInfo.mat']),'trialInfo')
     load(fullfile(physDir,animal,exptName{f},[exptName{f} '.analyzer']),'-mat')
     if strcmp(anaMode,'SU')
@@ -70,7 +104,6 @@ for f = 1:length(expts)
         clear MUspkMerge
     end
     
-    area = id.probes(probe).area;
     sf = id.sampleFreq;
     % kernel = ones(1,0.1*sf)*(1/(0.1*sf));
     kernel = normpdf(-3:6/2000:3);
@@ -231,8 +264,15 @@ uDat = table(exptID,uID',info,goodUnit',raster,latCh',latCh2',fr,x,y,rBlank,rPre
 
 clear x y uIDs uID exptID h
 
-uDat = uDat(uDat.goodUnit == 1,:);
 uIDs = unique(uDat.uID);
+for g = unique(grp)
+    gInd = ismember(uDat.exptID,exptName(grp == g));
+    GU(:,g) = ismember(uIDs,uDat.uID(gInd & uDat.goodUnit));
+end
+keepUnits = find(GU(:,1) & GU(:,3));
+
+uDat = uDat(ismember(uDat.uID,keepUnits),:);
+uIDs = keepUnits;
 for u = 1:length(uIDs)
     figure;hold on
     countTrial = 0;
@@ -284,28 +324,28 @@ for u = 1:length(uIDs)
 
     end
 
-    saveas(gcf,fullfile(physDir,animal,mergeName,[anaMode num2str(u) 'plot']),'fig')
+    saveas(gcf,fullfile(physDir,animal,mergeName,[anaMode num2str(uIDs(u)) 'plot']),'fig')
 end
 
 
 figure;hold on
 for g = unique(grp)
 
-    curDat = uDat(ismember(uDat.exptID,exptName(grp==g)'),:);
     for u = unique(uDat.uID')
-
+        curDat = uDat( ismember(uDat.exptID,exptName(grp==g)') & uDat.uID==u ,:);
+        ui = find(uIDs == u);
         if ismember(u,curDat.uID)
-            LAT(g,u) = mean(curDat(curDat.uID == u,:).lat1,'omitnan');
-            RP(g,u) = mean(curDat(curDat.uID == u,:).rPref);
-            RB(g,u) = mean(mean([curDat(curDat.uID == u,:).rBlank{:}],1),2);
-            DSI(g,u) = mean(curDat(curDat.uID == u,:).DSI);
-            DCV(g,u) = mean(curDat(curDat.uID == u,:).DCV);
+            LAT(g,ui) = mean(curDat(curDat.uID == u,:).lat1,'omitnan');
+            RP(g,ui) = mean(curDat(curDat.uID == u,:).rPref);
+            RB(g,ui) = mean(mean([curDat(curDat.uID == u,:).rBlank{:}],1),2);
+            DSI(g,ui) = mean(curDat(curDat.uID == u,:).DSI);
+            DCV(g,ui) = mean(curDat(curDat.uID == u,:).DCV);
         else
-            LAT(g,u) = nan;
-            RP(g,u) = nan;
-            RB(g,u) = nan;
-            DSI(g,u) = nan;
-            DCV(g,u) = nan;
+            LAT(g,ui) = nan;
+            RP(g,ui) = nan;
+            RB(g,ui) = nan;
+            DSI(g,ui) = nan;
+            DCV(g,ui) = nan;
         end
     end
 
@@ -369,12 +409,15 @@ xlabel('rBlank before cooling V1')
 ylabel('rBlank during cooling V1')
 
 subplot(2,2,4);hold on
-x = DSI(1,:);
-y = DSI(2,:);
+x = 1-DCV(1,:);
+y = 1-DCV(2,:);
 plot(x,y,'k.')
 ub = max([max(x) max(y)]);
 plot([0 ub],[0 ub],'k--')
-xlabel('DSI before cooling V1')
-ylabel('DSI during cooling V1')
+xlabel('1-DCV before cooling V1')
+ylabel('1-DCV during cooling V1')
+
 sgtitle([animal ' summary plot'])
 saveas(gcf,fullfile(physDir,animal,mergeName,[anaMode 'summaryPlot']),'fig')
+
+save(fullfile(physDir,animal,mergeName,[anaMode 'dat.mat']),'LAT','RP','RB','DSI','DCV','GU')
