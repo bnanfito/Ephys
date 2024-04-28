@@ -269,7 +269,7 @@ for g = unique(grp)
     gInd = ismember(uDat.exptID,exptName(grp == g));
     GU(:,g) = ismember(uIDs,uDat.uID(gInd & uDat.goodUnit));
 end
-keepUnits = find(GU(:,1) & GU(:,3));
+keepUnits = find(GU(:,1) | GU(:,3));
 
 uDat = uDat(ismember(uDat.uID,keepUnits),:);
 uIDs = keepUnits;

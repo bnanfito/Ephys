@@ -1,7 +1,8 @@
 % mergeExpts
 clear all; close all;
 if ispc
-    dataFold = 'D:\data'; 
+    dataFold = 'C:\Users\brand\Documents\data';
+%     dataFold = 'D:\data'; 
 %     dataFold = 'F:\Brandon\data';
 elseif ismac
     dataFold = '/Volumes/Lab drive/Brandon/data';
