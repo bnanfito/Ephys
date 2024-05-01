@@ -60,12 +60,15 @@ end
 % mergeID = '000010000012000015';
 
 
-animal = 'febf6';
-units = {'001','001','001'};
-expts = {'000','003','007'};
-grp =   [1 2 3];
-mergeID = '001000001003001007';
 
+
+
+
+% animal = 'febf6';
+% units = {'001','001','001'};
+% expts = {'000','003','007'};
+% grp =   [1 2 3];
+% mergeID = '001000001003001007';
 
 
 % animal = 'febj8';
@@ -73,6 +76,13 @@ mergeID = '001000001003001007';
 % expts = {'002','003','004','005','006','008','009','010','016','017','018','019','020'};
 % grp =   [    1,    1,    1,    1,    1,    2,    2,    2,    3,    3,    3,    3,    3];
 % mergeID = '003002003003003004003005003006003008003009003010003016003017003018003019003020';
+
+
+animal = 'febg2';
+units = {'001','001','001','001','001'};
+expts = {'013','016','017','020','021'};
+grp =   [1 2 3 2 3];
+mergeID = '001013001016001017001020001021';
 
 
 
@@ -88,6 +98,7 @@ binVec=[startBin:binWidth:stopBin];
 anaMode = 'SU';
 
 countU = 0;
+x_lb = 0;
 for f = 1:length(expts)
 
     exptName{f} = [animal '_u' units{f} '_' expts{f}];
@@ -124,9 +135,9 @@ for f = 1:length(expts)
     end
     nU = length(uIDs);
 
-    predelay = getparam('predelay',Analyzer);
+    predelay = getparam('predelay',Analyzer); x_lb = max(predelay,x_lb);
     stimTime = getparam('stim_time',Analyzer);
-    postdelay = getparam('postdelay',Analyzer);
+    postdelay = getparam('postdelay',Analyzer); x_ub = max(stimTime)
     if stimTime < 1
         st = stimTime;
     else
@@ -355,8 +366,10 @@ for g = unique(grp)
     end
 
     subplot(2,2,1);hold on
-    cdf = cdfplot(LAT(g,:));
-    cdf.Color = clr{g};
+    if ~( sum(isnan(LAT(g,:))) == length(LAT(g,:)) )
+        cdf = cdfplot(LAT(g,:));
+        cdf.Color = clr{g};
+    end
     title('')
     ylabel('percentile')
     xlabel('latency')

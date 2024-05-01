@@ -62,6 +62,19 @@ end
 
 
 
+animal = 'febh5';
+% units = {'000','000','000'};
+% expts = {'003','006','009'};
+% grp =   [1 2 3];
+% mergeID = '000003000006000009';
+
+units = {'001','001','001'};
+expts = {'004','008','015'};
+grp =   [1 2 3];
+mergeID = '001004001008001015';
+
+
+
 
 
 % animal = 'febf6';
@@ -78,11 +91,20 @@ end
 % mergeID = '003002003003003004003005003006003008003009003010003016003017003018003019003020';
 
 
-animal = 'febg2';
-units = {'001','001','001','001','001'};
-expts = {'013','016','017','020','021'};
-grp =   [1 2 3 2 3];
-mergeID = '001013001016001017001020001021';
+% animal = 'febg2';
+% units = {'001','001','001','001','001'};
+% expts = {'013','016','017','020','021'};
+% grp =   [1 2 3 2 3];
+% mergeID = '001013001016001017001020001021';
+
+
+
+% animal = 'febg3';
+% units = {'001','001','001'};
+% expts = {'011','013','017'};
+% grp =   [1 2 3];
+% mergeID = '001011001013001017';
+
 
 
 
@@ -95,9 +117,11 @@ binWidth=0.010; %sec
 startBin=ceil(-1/binWidth)*binWidth; %need multiple of binWidth to make 0 an edge
 stopBin=floor(1/binWidth)*binWidth;
 binVec=[startBin:binWidth:stopBin];
-anaMode = 'SU';
+anaMode = 'MU';
 
 countU = 0;
+x_lb = 0;
+x_ub = 0;
 for f = 1:length(expts)
 
     exptName{f} = [animal '_u' units{f} '_' expts{f}];
@@ -134,9 +158,9 @@ for f = 1:length(expts)
     end
     nU = length(uIDs);
 
-    predelay = getparam('predelay',Analyzer);
+    predelay = getparam('predelay',Analyzer); x_lb = max(predelay,x_lb);
     stimTime = getparam('stim_time',Analyzer);
-    postdelay = getparam('postdelay',Analyzer);
+    postdelay = getparam('postdelay',Analyzer); x_ub = max(stimTime+postdelay,x_ub);
     if stimTime < 1
         st = stimTime;
     else
@@ -324,12 +348,14 @@ for u = 1:length(uIDs)
             countTrial = countTrial+nTrial;
             plot(x,y,'.','Color',clr{g})
         end
+        xlim([-1*x_lb x_ub])
 
         subplot(2,2,1);hold on
         h = [curDat.raster{:}];h = h(1,:);
         binW = 0.1;
         hist = histogram(h,'BinWidth',binW,'FaceColor',clr{g},'FaceAlpha',0.3,'EdgeColor','none');
         hist.BinCounts = (hist.BinCounts/nTrial)/binW;
+        xlim([-1*x_lb x_ub])
 
         if swtch == 1
             uTypeTemp = unique(vertcat(curDat.uInfo(curDat.uID==uIDs(u)))); uType{uIDs(u)} = uTypeTemp{:};
