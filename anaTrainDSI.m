@@ -19,11 +19,11 @@ figDir = fullfile(dataFold,'Figures');
 sumDir = fullfile(dataFold,'SummaryStats');
 anaMode = 'MU';
 
-% % V1 COOLED
-% animals = {'febh2','febh3','febj3','febk7','febk8'};
+% V1 COOLED
+animals = {'febh2','febh3','febj3','febk7','febk8'};
 
-% CONTROL
-animals = {'febj4'};
+% % CONTROL
+% animals = {'febj4'};
 
 % % CONTROL (AUGUSTO)
 % animals = {'FEAO4','FEAQ5','FEAS6','FEAT1','FEAN6'};
