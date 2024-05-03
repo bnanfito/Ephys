@@ -58,7 +58,7 @@ for i = 1:3
     B = dat.rp(2,:);
 
     subplot(2,2,3);hold on
-    delta = (B-A)./A;
+    delta = (B-A)./(A+B);
     DELTA{i,2} = delta;
     cdf = cdfplot(delta);
     cdf.Color = clr; cdf.LineWidth = 2;
