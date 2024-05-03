@@ -3,8 +3,8 @@ clear all
 close all
 
 if ispc
-%     dataFold = 'D:\data'; 
-    dataFold = 'C:\Users\brand\Documents\data';
+    dataFold = 'D:\data'; 
+%     dataFold = 'C:\Users\brand\Documents\data';
 %     dataFold = 'F:\Brandon\data';
 elseif ismac
 %     dataFold = '/Volumes/Lab drive/Brandon/data';
@@ -12,11 +12,10 @@ elseif ismac
 end
 
 % animal = 'febg7';
-% units = {'000','000','000','000','000','000'};
-% expts = {'000','003','004','008','009','012'};
-% grp = [1 1 2 2 3 3];
-% mergeID = '000000000003000004000008000009000012';
-
+% % units = {'000','000','000','000','000','000'};
+% % expts = {'000','003','004','008','009','012'};
+% % grp = [1 1 2 2 3 3];
+% % mergeID = '000000000003000004000008000009000012';
 % units = {'001','001','001','001','001','001'};
 % expts = {'000','004','005','008','009','012'};
 % grp = [1 1 2 2 3 3];
@@ -35,25 +34,28 @@ end
 
 
 % animal = 'febg9';
-% units = {'000','000','000','000','000','000'};
-% expts = {'002','006','007','010','011','014'};
-% grp =   [    1,    1,    2,    2,    3,    3];
-% mergeID = '000002000006000007000010000011000014';
-
+% % units = {'000','000','000','000','000','000'};
+% % expts = {'002','006','007','010','011','014'};
+% % grp =   [    1,    1,    2,    2,    3,    3];
+% % mergeID = '000002000006000007000010000011000014';
+% units = {'000','000','000'};
+% expts = {'006','007','011'};
+% grp =   [    1,    2,    3];
+% mergeID = '000006000007000011';
 
 
 
 % animal = 'febl0';
-% units = {'001','001','001'};
-% expts = {'006','010','016'};
-% grp = [1 2 3];
-% mergeID = '001006001010001016';
-
-% units = {'001','001'};
-% expts = {'018','019'};
-% grp = [1 2];
-% mergeID = '001018001019';
-
+% % units = {'001','001','001'};
+% % expts = {'006','010','016'};
+% % grp = [1 2 3];
+% % mergeID = '001006001010001016';
+% 
+% % units = {'001','001'};
+% % expts = {'018','019'};
+% % grp = [1 2];
+% % mergeID = '001018001019';
+% 
 % units = {'000','000','000'};
 % expts = {'010','012','015'};
 % grp = [1 2 3];
@@ -61,17 +63,16 @@ end
 
 
 
-
-animal = 'febh5';
-% units = {'000','000','000'};
-% expts = {'003','006','009'};
+% animal = 'febh5';
+% % units = {'000','000','000'};
+% % expts = {'003','006','009'};
+% % grp =   [1 2 3];
+% % mergeID = '000003000006000009';
+% units = {'001','001','001'};
+% expts = {'004','008','015'};
 % grp =   [1 2 3];
-% mergeID = '000003000006000009';
+% mergeID = '001004001008001015';
 
-units = {'001','001','001'};
-expts = {'004','008','015'};
-grp =   [1 2 3];
-mergeID = '001004001008001015';
 
 
 
@@ -89,13 +90,20 @@ mergeID = '001004001008001015';
 % expts = {'002','003','004','005','006','008','009','010','016','017','018','019','020'};
 % grp =   [    1,    1,    1,    1,    1,    2,    2,    2,    3,    3,    3,    3,    3];
 % mergeID = '003002003003003004003005003006003008003009003010003016003017003018003019003020';
+% % units = {'003','003','003','003','003','003','003','003'};
+% % expts = {'002','003','004','005','006','008','009','010'};
+% % grp =   [    1,    1,    1,    1,    1,    2,    2,    2];
+% % mergeID = '003002003003003004003005003006003008003009003010';
 
 
-% animal = 'febg2';
-% units = {'001','001','001','001','001'};
-% expts = {'013','016','017','020','021'};
-% grp =   [1 2 3 2 3];
-% mergeID = '001013001016001017001020001021';
+
+
+
+animal = 'febg2';
+units = {'001','001','001','001','001'};
+expts = {'013','016','017','020','021'};
+grp =   [1 2 3 2 3];
+mergeID = '001013001016001017001020001021';
 
 
 
@@ -181,18 +189,19 @@ for f = 1:length(expts)
         blank = (1:nConds)==trialInfo.blankId;
     end
 
-    for u = 1:length(uIDs)
+    for u = uIDs
 
         stimCent{f,u} = [];
         countU = countU+1;
+        fileID{countU,1} = [f grp(f) u];
         exptID{countU,1} = exptName{f};
-        uID(countU) = uIDs(u);
+        uID(countU) = u;
         if strcmp(anaMode,'SU')
-            info{countU,1} = spkStrct.unitinfo{uIDs(u)};
-            spkTimes = spkStrct.spktimes(spkStrct.unitid == uIDs(u));
+            info{countU,1} = spkStrct.unitinfo{u};
+            spkTimes = spkStrct.spktimes(spkStrct.unitid == u);
         elseif strcmp(anaMode,'MU')
             info{countU,1} = 'MU';
-            spkTimes = spkStrct.spktimes(spkStrct.detCh == uIDs(u));
+            spkTimes = spkStrct.spktimes(spkStrct.detCh == u);
         end
 
         for c = 1:nConds
@@ -298,8 +307,8 @@ for f = 1:length(expts)
 
 end
 
-varNames = {'exptID','uID','uInfo','goodUnit','raster','lat1','lat2','fr','tuningX','tuningY','rBlank','rPref','cPref','rNull','DSI','DCV'};
-uDat = table(exptID,uID',info,goodUnit',raster,latCh',latCh2',fr,x,y,rBlank,rPref',cPref',rNull',dsi',dcv','VariableNames',varNames);
+varNames = {'fileID','exptID','uID','uInfo','goodUnit','raster','lat1','lat2','fr','tuningX','tuningY','rBlank','rPref','cPref','rNull','DSI','DCV'};
+uDat = table(fileID,exptID,uID',info,goodUnit',raster,latCh',latCh2',fr,x,y,rBlank,rPref',cPref',rNull',dsi',dcv','VariableNames',varNames);
 
 clear x y uIDs uID exptID h
 
@@ -308,8 +317,7 @@ for g = unique(grp)
     gInd = ismember(uDat.exptID,exptName(grp == g));
     GU(:,g) = ismember(uIDs,uDat.uID(gInd & uDat.goodUnit));
 end
-keepUnits = find(GU(:,1) | GU(:,3));
-
+keepUnits = uIDs(GU(:,1)|GU(:,2));
 uDat = uDat(ismember(uDat.uID,keepUnits),:);
 uIDs = keepUnits;
 for u = 1:length(uIDs)
@@ -463,4 +471,4 @@ ylabel('1-DCV during cooling V1')
 sgtitle([animal ' summary plot'])
 saveas(gcf,fullfile(physDir,animal,mergeName,[anaMode 'summaryPlot']),'fig')
 
-save(fullfile(physDir,animal,mergeName,[anaMode 'dat.mat']),'LAT','RP','RB','DSI','DCV','GU')
+save(fullfile(physDir,animal,mergeName,[anaMode 'dat.mat']),'LAT','RP','RB','DSI','DCV','GU','uDat')
