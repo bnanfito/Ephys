@@ -11,11 +11,11 @@ elseif ismac
     dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
 end
 
-% animal = 'febg7';
-% % units = {'000','000','000','000','000','000'};
-% % expts = {'000','003','004','008','009','012'};
-% % grp = [1 1 2 2 3 3];
-% % mergeID = '000000000003000004000008000009000012';
+animal = 'febg7';
+units = {'000','000','000','000','000','000'};
+expts = {'000','003','004','008','009','012'};
+grp = [1 1 2 2 3 3];
+mergeID = '000000000003000004000008000009000012';
 % units = {'001','001','001','001','001','001'};
 % expts = {'000','004','005','008','009','012'};
 % grp = [1 1 2 2 3 3];
@@ -99,11 +99,11 @@ end
 
 
 
-animal = 'febg2';
-units = {'001','001','001','001','001'};
-expts = {'013','016','017','020','021'};
-grp =   [1 2 3 2 3];
-mergeID = '001013001016001017001020001021';
+% animal = 'febg2';
+% units = {'001','001','001','001','001'};
+% expts = {'013','016','017','020','021'};
+% grp =   [1 2 3 2 3];
+% mergeID = '001013001016001017001020001021';
 
 
 
@@ -125,7 +125,23 @@ binWidth=0.010; %sec
 startBin=ceil(-1/binWidth)*binWidth; %need multiple of binWidth to make 0 an edge
 stopBin=floor(1/binWidth)*binWidth;
 binVec=[startBin:binWidth:stopBin];
-anaMode = 'MU';
+anaMode = 'SU';
+
+
+load(fullfile(physDir,animal,mergeName,[mergeName '_id.mat']))
+for p = 1:length(id.probes)
+    if strcmp(id.probes(p).area,'PSS')
+        probe = p;
+    end
+end
+if strcmp(anaMode,'SU')
+    load(fullfile(physDir,animal,mergeName,[mergeName '_p' num2str(probe) '_spkSort.mat']))
+    unitIDs = unique(spkSort.unitid(spkSort.unitid~=0));
+    clear spkSort
+elseif strcmp(anaMode,'MU')
+    unitIDs = 1:id.probes(probe).nChannels;
+end
+
 
 countU = 0;
 x_lb = 0;
@@ -164,7 +180,6 @@ for f = 1:length(expts)
     elseif strcmp(anaMode,'MU')
         uIDs = unique(spkStrct.detCh);
     end
-    nU = length(uIDs);
 
     predelay = getparam('predelay',Analyzer); x_lb = max(predelay,x_lb);
     stimTime = getparam('stim_time',Analyzer);
@@ -189,119 +204,145 @@ for f = 1:length(expts)
         blank = (1:nConds)==trialInfo.blankId;
     end
 
-    for u = uIDs
+    for u = unitIDs
 
         stimCent{f,u} = [];
         countU = countU+1;
         fileID{countU,1} = [f grp(f) u];
         exptID{countU,1} = exptName{f};
         uID(countU) = u;
-        if strcmp(anaMode,'SU')
-            info{countU,1} = spkStrct.unitinfo{u};
-            spkTimes = spkStrct.spktimes(spkStrct.unitid == u);
-        elseif strcmp(anaMode,'MU')
-            info{countU,1} = 'MU';
-            spkTimes = spkStrct.spktimes(spkStrct.detCh == u);
-        end
 
-        for c = 1:nConds
-            trials = find(trialInfo.triallist == c);
-            for r = 1:nReps
-                t = trials(r);
-                tvPre       = stimStart(t)-(predelay*sf):stimStart(t)-1;
-                tvStim      = stimStart(t):stimStart(t)+(stimTime*sf)-1;
-                tvPost      = stimStart(t)+(stimTime*sf):stimStart(t)+((stimTime+postdelay)*sf)-1;
-                tvTrial     = [tvPre tvStim tvPost];
-                spkTrain{f}(:,t,u) = ismember(tvTrial,spkTimes);
+        if ~ismember(u,uIDs)
 
-                stimCent{f,u} = [stimCent{f,u} vertcat( (tvTrial(spkTrain{f}(:,t,u))-stimStart(t))/sf , ...
-                                                                repmat(t,1,length(find(spkTrain{f}(:,t,u)))) ) ];
+            info{countU,1} = 'not detected';
+            raster{countU,1} = stimCent{f,u};
+            fr{countU,1} = struct(  'trial',sortTrialInd,...
+                                    'condition',sortTrialCond,...
+                                    'stim',zeros(nReps,nConds),...
+                                    'base',zeros(nReps,nConds),...
+                                    'bcfr',zeros(nReps,nConds)   );
+            x{countU,1} = trialInfo.domval(sortTrialCond(:,~blank));
+            y{countU,1} = zeros(nReps,sum(~blank));
+            rBlank{countU,1} = zeros(nReps,sum(blank));
+            rPref(countU) = 0;
+            cPref(countU) = nan;
+            cNull(countU) = nan;
+            rNull(countU) = 0;
+            dsi(countU) = nan;
+            dcv(countU) = nan;
+            goodUnit(countU) = false;
+            latCh(countU)= nan;
+            latCh2(countU)= nan;
 
-                baseCount = length(find(ismember(stimStart(t)-sf:stimStart(t),spkTimes)));
-                stimCount = length(find(ismember(stimStart(t):stimStart(t)+sf,spkTimes)));
-                baseFR{f}(r,c,u) = baseCount;
-                stimFR{f}(r,c,u) = stimCount;
-                bcfr{f}(r,c,u) = stimCount-baseCount;
+        else
 
+            if strcmp(anaMode,'SU')
+                info{countU,1} = spkStrct.unitinfo{u};
+                spkTimes = spkStrct.spktimes(spkStrct.unitid == u);
+            elseif strcmp(anaMode,'MU')
+                info{countU,1} = 'MU';
+                spkTimes = spkStrct.spktimes(spkStrct.detCh == u);
+            end
+    
+            for c = 1:nConds
+                trials = find(trialInfo.triallist == c);
+                for r = 1:nReps
+                    t = trials(r);
+                    tvPre       = stimStart(t)-(predelay*sf):stimStart(t)-1;
+                    tvStim      = stimStart(t):stimStart(t)+(stimTime*sf)-1;
+                    tvPost      = stimStart(t)+(stimTime*sf):stimStart(t)+((stimTime+postdelay)*sf)-1;
+                    tvTrial     = [tvPre tvStim tvPost];
+                    spkTrain{f}(:,t,u) = ismember(tvTrial,spkTimes);
+    
+                    stimCent{f,u} = [stimCent{f,u} vertcat( (tvTrial(spkTrain{f}(:,t,u))-stimStart(t))/sf , ...
+                                                                    repmat(t,1,length(find(spkTrain{f}(:,t,u)))) ) ];
+    
+                    baseCount = length(find(ismember(stimStart(t)-sf:stimStart(t),spkTimes)));
+                    stimCount = length(find(ismember(stimStart(t):stimStart(t)+sf,spkTimes)));
+                    baseFR{f}(r,c,u) = baseCount;
+                    stimFR{f}(r,c,u) = stimCount;
+                    bcfr{f}(r,c,u) = stimCount-baseCount;
+    
+                end
+    
+            end
+            raster{countU,1} = stimCent{f,u};
+            fr{countU,1} = struct(  'trial',sortTrialInd,...
+                                    'condition',sortTrialCond,...
+                                    'stim',stimFR{f}(:,:,u),...
+                                    'base',baseFR{f}(:,:,u),...
+                                    'bcfr',bcfr{f}(:,:,u)   );
+            x{countU,1} = trialInfo.domval(sortTrialCond(:,~blank));
+            y{countU,1} = bcfr{f}(:,~blank,u);
+            rBlank{countU,1} = stimFR{f}(:,blank,u);
+            rPref(countU) = max(mean(y{countU,1}));
+            cP = x{countU,1}(1,mean(y{countU,1}) == rPref(countU));
+            if length(cP)>1 % if there is more than one pk with rPref
+                rIn = mean(y{countU,1},'omitnan');
+                pks = rIn == rPref(countU);
+                rConv = rIn([end 1:end 1]);
+                rConv = conv(rConv,ones(1,3)*(1/3),'same');
+                rConv = rConv(1+1:end-1);
+                rConv(~pks) = 0;
+                cPref(countU) = x{countU,1}(1,find(rConv==max(rConv),1,'first'));
+                clear rIn pks rConv 
+            elseif length(cP)==1
+                cPref(countU) = cP;
+            end
+            cNull(countU) = mod(cPref(countU)+180,360);
+            rNull(countU) = mean(y{countU,1}( : , mean(x{countU,1})==cNull(countU) ));
+            dsi(countU) = abs(rPref(countU)-rNull(countU)) / rPref(countU);
+            mv = meanvec(mean(x{countU,1}),mean(y{countU,1}));
+            dcv(countU) = mv.cv;
+    %         [g] = dirGauss(mean(y),mean(x),0);
+    %         xMdl = linspace(0,359,360);
+            isAct = rPref(countU)>=2;
+            bfr = fr{countU,1}.base(:,~blank); bfr = bfr(:);
+            sfr = fr{countU,1}.stim(:,~blank); sfr = sfr(:);
+            pVis = ranksum(bfr,sfr);
+            if isnan(pVis)
+                pVis = 1;
+            end
+            isVis = pVis<0.01;
+    
+            if strcmp(anaMode,'SU')
+                isSU = strcmp(info{countU,1},'SU');
+                goodUnit(countU) = isAct & isVis & isSU;
+            else
+                goodUnit(countU) = isAct & isVis;
+            end
+    
+            prefTrials = find(trialInfo.triallist== find(trialInfo.domval == cPref(countU)) );
+            for rep = 1:length(prefTrials)
+                t = prefTrials(rep);
+                spkTs{rep} = raster{countU,1}(1,raster{countU,1}(2,:)==t);
+                N(rep,:) = histcounts(spkTs{rep},binVec);
+            end
+            avgN = mean(N,1)/binWidth;
+            avgBase=mean(avgN(binVec<0));
+            stdBase=std(avgN(binVec<0));
+            cumN=cumsum(avgN-avgBase); %cumsum(1): value 1 in input
+            diffN=diff(cumN);
+            %criterion 1: cumsum over threshold and 2 increasing bins
+            idx=find(cumN(1:end-2)>2*stdBase & diffN(1:end-1)>0 & diffN(2:end)>0 ...
+                & binVec(1:end-3)>0,1);
+            if ~isempty(idx)
+                latCh(countU)=binVec(idx);
+            else
+                latCh(countU)=NaN;
+            end
+    
+            %criterion 2: cumsum over threshold and 3 increasing bins
+            idx=find(cumN(1:end-3)>2*stdBase & ...
+                diffN(1:end-2)>0 & diffN(2:end-1)>0 & diffN(3:end)>0 ...
+                & binVec(1:end-4)>0,1);
+            if ~isempty(idx)
+                latCh2(countU)=binVec(idx);
+            else
+                latCh2(countU)=NaN;
             end
 
         end
-        raster{countU,1} = stimCent{f,u};
-        fr{countU,1} = struct(  'trial',sortTrialInd,...
-                                'condition',sortTrialCond,...
-                                'stim',stimFR{f}(:,:,u),...
-                                'base',baseFR{f}(:,:,u),...
-                                'bcfr',bcfr{f}(:,:,u)   );
-        x{countU,1} = trialInfo.domval(sortTrialCond(:,~blank));
-        y{countU,1} = bcfr{f}(:,~blank,u);
-        rBlank{countU,1} = stimFR{f}(:,blank,u);
-        rPref(countU) = max(mean(y{countU,1}));
-        cP = x{countU,1}(1,mean(y{countU,1}) == rPref(countU));
-        if length(cP)>1 % if there is more than one pk with rPref
-            rIn = mean(y{countU,1},'omitnan');
-            pks = rIn == rPref(countU);
-            rConv = rIn([end 1:end 1]);
-            rConv = conv(rConv,ones(1,3)*(1/3),'same');
-            rConv = rConv(1+1:end-1);
-            rConv(~pks) = 0;
-            cPref(countU) = x{countU,1}(1,find(rConv==max(rConv),1,'first'));
-            clear rIn pks rConv 
-        elseif length(cP)==1
-            cPref(countU) = cP;
-        end
-        cNull(countU) = mod(cPref(countU)+180,360);
-        rNull(countU) = mean(y{countU,1}( : , mean(x{countU,1})==cNull(countU) ));
-        dsi(countU) = abs(rPref(countU)-rNull(countU)) / rPref(countU);
-        mv = meanvec(mean(x{countU,1}),mean(y{countU,1}));
-        dcv(countU) = mv.cv;
-%         [g] = dirGauss(mean(y),mean(x),0);
-%         xMdl = linspace(0,359,360);
-        isAct = rPref(countU)>=2;
-        bfr = fr{countU,1}.base(:,~blank); bfr = bfr(:);
-        sfr = fr{countU,1}.stim(:,~blank); sfr = sfr(:);
-        pVis = ranksum(bfr,sfr);
-        if isnan(pVis)
-            pVis = 1;
-        end
-        isVis = pVis<0.01;
-
-        if strcmp(anaMode,'SU')
-            isSU = strcmp(info{countU,1},'SU');
-            goodUnit(countU) = isAct & isVis & isSU;
-        else
-            goodUnit(countU) = isAct & isVis;
-        end
-
-        prefTrials = find(trialInfo.triallist== find(trialInfo.domval == cPref(countU)) );
-        for rep = 1:length(prefTrials)
-            t = prefTrials(rep);
-            spkTs{rep} = raster{countU,1}(1,raster{countU,1}(2,:)==t);
-            N(rep,:) = histcounts(spkTs{rep},binVec);
-        end
-        avgN = mean(N,1)/binWidth;
-        avgBase=mean(avgN(binVec<0));
-        stdBase=std(avgN(binVec<0));
-        cumN=cumsum(avgN-avgBase); %cumsum(1): value 1 in input
-        diffN=diff(cumN);
-        %criterion 1: cumsum over threshold and 2 increasing bins
-        idx=find(cumN(1:end-2)>2*stdBase & diffN(1:end-1)>0 & diffN(2:end)>0 ...
-            & binVec(1:end-3)>0,1);
-        if ~isempty(idx)
-            latCh(countU)=binVec(idx);
-        else
-            latCh(countU)=NaN;
-        end
-
-        %criterion 2: cumsum over threshold and 3 increasing bins
-        idx=find(cumN(1:end-3)>2*stdBase & ...
-            diffN(1:end-2)>0 & diffN(2:end-1)>0 & diffN(3:end)>0 ...
-            & binVec(1:end-4)>0,1);
-        if ~isempty(idx)
-            latCh2(countU)=binVec(idx);
-        else
-            latCh2(countU)=NaN;
-        end
-
 
     end
 
@@ -350,16 +391,25 @@ for u = 1:length(uIDs)
 
         subplot(2,2,3);hold on
         for f = 1:height(curDat)
-            nTrial = size(curDat.tuningX{f},1)*size(curDat.tuningX{f},2)+length(curDat.rBlank{f});
+            nTrial = max(max(curDat.fr{f}.trial));
+            if isempty(curDat.raster{f})
+                countTrial = countTrial+nTrial;
+                continue
+            end
+            
             x = curDat.raster{f}(1,:);
             y = curDat.raster{f}(2,:)+countTrial;
             countTrial = countTrial+nTrial;
             plot(x,y,'.','Color',clr{g})
         end
         xlim([-1*x_lb x_ub])
+        ylim([0 countTrial])
 
         subplot(2,2,1);hold on
-        h = [curDat.raster{:}];h = h(1,:);
+        h = [curDat.raster{:}];
+        if ~isempty(h)
+            h = h(1,:);
+        end
         binW = 0.1;
         hist = histogram(h,'BinWidth',binW,'FaceColor',clr{g},'FaceAlpha',0.3,'EdgeColor','none');
         hist.BinCounts = (hist.BinCounts/nTrial)/binW;
@@ -379,22 +429,22 @@ end
 
 figure;hold on
 for g = unique(grp)
-
-    for u = unique(uDat.uID')
-        curDat = uDat( ismember(uDat.exptID,exptName(grp==g)') & uDat.uID==u & uDat.goodUnit==1 ,:);
-        ui = find(uIDs == u);
+    curDat = uDat( ismember(uDat.exptID,exptName(grp==g)') ,:);
+    for u = unitIDs
         if ismember(u,curDat.uID)
-            LAT(g,ui) = mean(curDat(curDat.uID == u,:).lat1,'omitnan');
-            RP(g,ui) = mean(curDat(curDat.uID == u,:).rPref);
-            RB(g,ui) = mean(mean([curDat(curDat.uID == u,:).rBlank{:}],1),2);
-            DSI(g,ui) = mean(curDat(curDat.uID == u,:).DSI);
-            DCV(g,ui) = mean(curDat(curDat.uID == u,:).DCV);
+            LAT(g,u) = mean(curDat(curDat.uID == u,:).lat1,'omitnan');
+            RP(g,u) = mean(curDat(curDat.uID == u,:).rPref);
+            RN(g,u) = mean(curDat(curDat.uID == u,:).rNull);
+            RB(g,u) = mean(mean([curDat(curDat.uID == u,:).rBlank{:}],1),2);
+            DSI(g,u) = mean(curDat(curDat.uID == u,:).DSI,'omitnan');
+            DCV(g,u) = mean(curDat(curDat.uID == u,:).DCV,'omitnan');
         else
-            LAT(g,ui) = nan;
-            RP(g,ui) = nan;
-            RB(g,ui) = nan;
-            DSI(g,ui) = nan;
-            DCV(g,ui) = nan;
+            LAT(g,u) = nan;
+            RP(g,u) = nan;
+            RN(g,u) = nan;
+            RB(g,u) = nan;
+            DSI(g,u) = nan;
+            DCV(g,u) = nan;
         end
     end
 

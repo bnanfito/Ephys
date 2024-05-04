@@ -3,9 +3,9 @@ clear all
 % close all
 
 if ispc
-    dataFold = 'D:\data'; 
+%     dataFold = 'D:\data'; 
 %     dataFold = 'C:\Users\brand\Documents\data';
-%     dataFold = 'F:\Brandon\data';
+    dataFold = 'F:\Brandon\data';
 elseif ismac
     dataFold = '/Volumes/Lab drive/Brandon/data';
 %     dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
@@ -26,9 +26,16 @@ for i = 1:3
         load(fullfile(dataFold,'dataSets','VSS2024',['adultMerge' anaMode 'Dat.mat']))
         clr = [0.6350 0.0780 0.1840]; %red
     end
+    fileID = vertcat(dat.tbl.fileID{:});
+    condID = fileID(:,2);
+    idxA = dat.tbl.goodUnit == 1 & condID == 1;
+    idxB = dat.tbl.goodUnit == 1 & condID == 2;
 
-    A = dat.lat(1,:);
-    B = dat.lat(2,:);
+    A = dat.tbl(idxA,:).DSI;
+    B = dat.tbl(idxB,:).DSI;
+%     A = dat.dsi(1,:); 
+%     B = dat.dsi(2,:);
+%     A(A>1) = 1; B(B>1) = 1;
     n(i) = length(A);
 
     subplot(2,2,1);hold on
@@ -36,8 +43,7 @@ for i = 1:3
     DELTA{i,1} = delta;
     cdf = cdfplot(delta);
     cdf.Color = clr; cdf.LineWidth = 2;
-%     histogram(delta,'BinWidth',0.1,'EdgeColor','none','FaceAlpha',0.5,'FaceColor',clr);hold on
-    xlabel('delta latency')
+    xlabel('delta DSI')
     ylabel('percentile')
     title('')
 
@@ -48,8 +54,10 @@ for i = 1:3
     subplot(2,2,2);hold on
     plot(A,B,'.','Color',clr,'MarkerSize',10)
     plot([0 1],[0 1],'k--')
-    xlabel('latency before cooling (ms)')
-    ylabel('latency after cooling (ms)')
+    xlim([0 1])
+    ylim([0 1])
+    xlabel('DSI before cooling (ms)')
+    ylabel('DSI after cooling (ms)')
 
     
     
@@ -62,7 +70,6 @@ for i = 1:3
     DELTA{i,2} = delta;
     cdf = cdfplot(delta);
     cdf.Color = clr; cdf.LineWidth = 2;
-%     histogram(delta,'BinWidth',5,'EdgeColor','none','FaceAlpha',0.5,'FaceColor',clr);hold on
     xlabel('delta rPref')
     xlim([-1 1])
     ylabel('percentile')
@@ -76,6 +83,15 @@ for i = 1:3
 
 end
 
+
+
+
+
+
+
+
+
+% 
 % animal = 'febg2';
 % unit = 'MMM';
 % expt = '001013001016001017001020001021';
@@ -153,4 +169,4 @@ end
 % plot((wvAvg+([-1;1]*wvError))','k--','LineWidth',lw)
 % 
 % sgtitle([animal ' ' unit ' ' expt ' p' num2str(probe) ' u' num2str(U)])
-
+% 
