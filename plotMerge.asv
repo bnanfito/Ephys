@@ -7,8 +7,8 @@ if ispc
 %     dataFold = 'C:\Users\brand\Documents\data';
 %     dataFold = 'F:\Brandon\data';
 elseif ismac
-%     dataFold = '/Volumes/Lab drive/Brandon/data';
-    dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
+    dataFold = '/Volumes/Lab drive/Brandon/data';
+%     dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
 end
 
 % animal = 'febg7';
@@ -78,11 +78,11 @@ end
 
 
 
-animal = 'febf6';
-units = {'001','001','001'};
-expts = {'000','003','007'};
-grp =   [1 2 3];
-mergeID = '001000001003001007';
+% animal = 'febf6';
+% units = {'001','001','001'};
+% expts = {'000','003','007'};
+% grp =   [1 2 3];
+% mergeID = '001000001003001007';
 
 
 % animal = 'febj8';
@@ -90,13 +90,20 @@ mergeID = '001000001003001007';
 % expts = {'002','003','004','005','006','008','009','010','016','017','018','019','020'};
 % grp =   [    1,    1,    1,    1,    1,    2,    2,    2,    3,    3,    3,    3,    3];
 % mergeID = '003002003003003004003005003006003008003009003010003016003017003018003019003020';
+% % units = {'003','003','003','003','003','003','003','003'};
+% % expts = {'002','003','004','005','006','008','009','010'};
+% % grp =   [    1,    1,    1,    1,    1,    2,    2,    2];
+% % mergeID = '003002003003003004003005003006003008003009003010';
 
 
-% animal = 'febg2';
-% units = {'001','001','001','001','001'};
-% expts = {'013','016','017','020','021'};
-% grp =   [1 2 3 2 3];
-% mergeID = '001013001016001017001020001021';
+
+
+
+animal = 'febg2';
+units = {'001','001','001','001','001'};
+expts = {'013','016','017','020','021'};
+grp =   [1 2 3 2 3];
+mergeID = '001013001016001017001020001021';
 
 
 
@@ -118,7 +125,7 @@ binWidth=0.010; %sec
 startBin=ceil(-1/binWidth)*binWidth; %need multiple of binWidth to make 0 an edge
 stopBin=floor(1/binWidth)*binWidth;
 binVec=[startBin:binWidth:stopBin];
-anaMode = 'SU';
+anaMode = 'MU';
 
 countU = 0;
 x_lb = 0;

@@ -381,7 +381,7 @@ figure;hold on
 for g = unique(grp)
 
     for u = unique(uDat.uID')
-        curDat = uDat( ismember(uDat.exptID,exptName(grp==g)') & uDat.uID==u ,:);
+        curDat = uDat( ismember(uDat.exptID,exptName(grp==g)') & uDat.uID==u & uDat.goodUnit==1 ,:);
         ui = find(uIDs == u);
         if ismember(u,curDat.uID)
             LAT(g,ui) = mean(curDat(curDat.uID == u,:).lat1,'omitnan');
