@@ -4,11 +4,11 @@ area = 'PSS';
 anaMode = 'SU';
 
 if ispc
-    dataFold = 'D:\OneDrive - Johns Hopkins\Documents\data\Ephys';
+    dataFold = 'D:\OneDrive - Johns Hopkins\Documents\data';
 elseif ismac
-    dataFold = '/Users/brandonnanfito/Library/CloudStorage/OneDrive-JohnsHopkins/Documents/data/Ephys';
+    dataFold = '/Users/brandonnanfito/Library/CloudStorage/OneDrive-JohnsHopkins/Documents/data';
 end
-
+physDir = fullfile(dataFold,'Ephys');
 condNames = {'precool','before','during','after'};
 condColor = {'k','k','c','m'};
 conds = [2,3,4];
@@ -31,7 +31,7 @@ data(3).expList{4,1} =   {'febg9_u000_011';'febg9_u001_008';'febh5_u000_009'};
 
 data(4).age = 'Adults';
 data(4).expList{1,1} =   {'febe0_u000_000';'febe0_u001_001';'febe2_u000_000';'febf6_u000_000';'febf6_u001_000';'febf7_u000_000';'febg0_u000_001';'febg0_u001_000';'febg0_u002_000';'febg0_u003_002';'febg1_u000_000';'febg1_u001_000';'febg2_u001_003';'febg3_u000_000'}; %Only pre-any cooling
-data(4).expList{2,1} =   {'febe0_u000_000';'febe0_u001_001';'febe0_u002_000';'febe2_u000_000';'febf6_u000_000';'febf6_u001_000';'febf6_u002_000';'febf7_u000_000';'febf7_u001_001';'febg0_u000_001';'febg0_u001_000';'febg0_u002_000';'febg0_u003_002';'febg1_u000_000';'febg1_u001_000';'febg2_u001_003';'febg3_u000_000';'febg3_u001_011'};
+data(4).expList{2,1} =   {'febe0_u000_000';'febe0_u001_001';'febe0_u002_000';'febe2_u000_000';'febf6_u000_000';'febf6_u001_000';'febf7_u000_000';'febf7_u001_001';'febg0_u000_001';'febg0_u001_000';'febg0_u002_000';'febg0_u003_002';'febg1_u000_000';'febg1_u001_000';'febg2_u001_003';'febg3_u000_000';'febg3_u001_011'};
 data(4).expList{3,1} =   {'febe0_u001_004';'febe0_u002_003';'febe2_u000_004';'febf6_u001_003';'febf6_u002_004';'febf7_u000_004';'febg0_u003_003';'febg1_u001_003';'febg2_u001_005';'febg2_u001_016';'febg2_u001_020';'febg3_u001_003';'febg3_u001_013'};
 data(4).expList{4,1} =   {'febf6_u001_007';'febf6_u002_008';'febf7_u000_007';'febf7_u001_003';'febg0_u003_004';'febg0_u004_000';'febg1_u001_004';'febg2_u001_013';'febg2_u001_017';'febg2_u001_021';'febg3_u001_004';'febg3_u001_017'};
 
@@ -44,20 +44,26 @@ for c = conds
 for e = 1:length(data(ageGroup).expList{c,1})
 
     exptName = data(ageGroup).expList{c,1}{e};
-    disp(exptName)
-
-    linStyle = {'-','--',':'};
-    if strcmp(area,'V1')
-    color = 'b';
-    elseif strcmp(area,'PSS')
-    color = 'r';
-    end
-
     animal = exptName(1:5);
     unit = exptName(8:10);
     expt = exptName(12:14);
+    disp(exptName)
+    load(fullfile(physDir,animal,exptName,[exptName '_id.mat']))
 
-    [sumStats,~] = plotUnits(animal,unit,expt,p,anaMode,visTest,alpha,plt,saveSum,saveFigs,dataFold);
+    linStyle = {'-','--',':'};
+    if strcmp(area,'V1')
+        color = 'b';
+    elseif strcmp(area,'PSS')
+        color = 'r';
+    end
+    for p = 1:length(id.probes)
+        if strcmp(id.probes(p).area,area)
+            probe = p;
+        end
+    end
+
+
+    [sumStats,~] = plotUnits(animal,unit,expt,probe,anaMode,'ranksum',0.01,0,0,0,dataFold);
     close all
     if isempty(sumStats)
         continue

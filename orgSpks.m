@@ -28,6 +28,7 @@ function [spks,trialExclude] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
     else
         st = 1;
     end
+    eventID = sum(trialInfo.eventCh,2);
     trialStart = downsample(trialInfo.eventTimes,nEpochs);
     stimStart = downsample(trialInfo.eventTimes,nEpochs,1);
     stimEnd = downsample(trialInfo.eventTimes,nEpochs,2);

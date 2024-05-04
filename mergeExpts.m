@@ -9,9 +9,9 @@ elseif ismac
 %     dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
 end
 physDir = fullfile(dataFold,'Ephys');
-animal = 'febg2';
-units = {'001','001','001'};
-expts = {'013','016','017'};
+animal = 'febg8';
+units = {'002','002','002','002','002','002'};
+expts = {'000','002','003','005','006','008'};
 mergeID = [];
 files{1,length(expts)} = [];
 for e = 1:length(expts)
