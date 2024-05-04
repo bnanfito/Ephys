@@ -17,14 +17,14 @@ anaMode = 'SU';
 for i = 1:3
 
     if i == 1
-        load(fullfile(dataFold,'Ephys',['P33to34Merge' anaMode 'Dat.mat']))
-        clr = [0.4660 0.6740 0.1880]; %green
-    elseif i == 2
-        load(fullfile(dataFold,'Ephys',['P36to37Merge' anaMode 'Dat.mat']))
+        load(fullfile(dataFold,'dataSets','VSS2024',['P33to34Merge' anaMode 'Dat.mat']))
         clr = [0.9290 0.6940 0.1250]; %yellow
+    elseif i == 2
+        load(fullfile(dataFold,'dataSets','VSS2024',['P36to37Merge' anaMode 'Dat.mat']))
+        clr = [0.8500 0.3250 0.0980]; %orange
     elseif i == 3
-        load(fullfile(dataFold,'Ephys',['adultMerge' anaMode 'Dat.mat']))
-        clr = [0.4940 0.1840 0.5560]; %purple
+        load(fullfile(dataFold,'dataSets','VSS2024',['adultMerge' anaMode 'Dat.mat']))
+        clr = [0.6350 0.0780 0.1840]; %red
     end
 
     A = dat.lat(1,:);
