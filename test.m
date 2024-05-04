@@ -138,7 +138,7 @@ end
 %     x = mean( vertcat(dat.tuningX{bit}) );
 %     y = vertcat(dat.tuningY{bit});
 %     sem = std(y)/sqrt(size(y,1));
-%     plot(x,mean(y),[clr 'o'],'LineWidth',lw,'MarkerSize',5)
+%     plot(x,mean(y),[clr '-o'],'LineWidth',lw,'MarkerSize',5)
 %     plot(repmat(x,2,1),mean(y)+([-1;1]*sem),clr,'LineWidth',lw)
 %     xlim([0 360])
 %     xlabel('Direction of Motion (deg)')
