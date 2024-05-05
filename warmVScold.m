@@ -1,7 +1,7 @@
 clear all; close all
 
 area = 'PSS';
-anaMode = 'SU';
+anaMode = 'MU';
 
 if ispc
 %     dataFold = 'D:\data'; 
@@ -25,16 +25,16 @@ data(1).expList{3,1} =    {'febe7_u000_003'};
 data(1).expList{4,1} =    {'febe7_u000_005'};
 
 data(2).age = 'P33-35';
-data(2).expList{2,1} =    {'febg7_u000_003';                    'febg8_u000_000';'febg8_u001_003'};
-data(2).expList{2,1} =    {'febg7_u000_003';'febg7_u001_004';   'febg8_u000_000';'febg8_u001_003';'febg8_u002_002'};
-data(2).expList{3,1} =    {'febg7_u000_008';'febg7_u001_005';                    'febg8_u001_004';'febg8_u002_003'};
-data(2).expList{4,1} =    {'febg7_u000_009';'febg7_u001_009';                    'febg8_u001_008';'febg8_u002_006'};
+data(2).expList{2,1} =    {'febg7_u000_003';                    'febg8_u001_003'};
+data(2).expList{2,1} =    {'febg7_u000_003';'febg7_u001_004';   'febg8_u001_003';'febg8_u002_002'};
+data(2).expList{3,1} =    {'febg7_u000_008';'febg7_u001_005';   'febg8_u001_004';'febg8_u002_003'};
+data(2).expList{4,1} =    {'febg7_u000_009';'febg7_u001_009';   'febg8_u001_008';'febg8_u002_006'};
 
 data(3).age = 'P36-37';
-data(3).expList{1,1} =   {'febg9_u000_006';                    'febh5_u000_003'}; %Only pre-any cooling
-data(3).expList{2,1} =   {'febg9_u000_006';'febg9_u001_000';   'febh5_u000_003'};
-data(3).expList{3,1} =   {'febg9_u000_007';'febg9_u001_004';   'febh5_u000_006'};
-data(3).expList{4,1} =   {'febg9_u000_011';'febg9_u001_008';   'febh5_u000_009'};
+data(3).expList{1,1} =   {'febg9_u000_006';                    'febh5_u000_003';                     'febl0_u000_010'                                  }; %Only pre-any cooling
+data(3).expList{2,1} =   {'febg9_u000_006';'febg9_u001_000';   'febh5_u000_003';'febh5_u001_004';    'febl0_u000_010';'febl0_u001_006';'febl0_u001_018'};
+data(3).expList{3,1} =   {'febg9_u000_007';'febg9_u001_004';   'febh5_u000_006';'febh5_u001_008';    'febl0_u000_012';'febl0_u001_010';'febl0_u001_019'};
+data(3).expList{4,1} =   {'febg9_u000_011';'febg9_u001_008';   'febh5_u000_009';'febh5_u001_015';    'febl0_u000_015';'febl0_u001_016'                 };
 
 data(4).age = 'Adults';
 data(4).expList{1,1} =   {'febe0_u000_000';'febe0_u001_001';                    'febe2_u000_000';   'febf6_u000_000';'febf6_u001_000';                    'febf7_u000_000';                    'febg0_u000_001';'febg0_u001_000';'febg0_u002_000';'febg0_u003_002';                       'febg1_u000_000';'febg1_u001_000';    'febg2_u001_003';                                       'febg3_u000_000'}; %Only pre-any cooling
