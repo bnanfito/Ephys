@@ -4,12 +4,11 @@ area = 'PSS';
 anaMode = 'SU';
 
 if ispc
-    dataFold = 'D:\OneDrive - Johns Hopkins\Documents\data';
+    dataFold = 'D:\OneDrive - Johns Hopkins\Documents\data\Ephys';
 elseif ismac
-%     dataFold = '/Users/brandonnanfito/Library/CloudStorage/OneDrive-JohnsHopkins/Documents/data/Ephys';
-    dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/VSS2024';
+    dataFold = '/Users/brandonnanfito/Library/CloudStorage/OneDrive-JohnsHopkins/Documents/data/Ephys';
 end
-physDir = fullfile(dataFold,'Ephys');
+
 condNames = {'precool','before','during','after'};
 condColor = {'k','k','c','m'};
 conds = [2,3,4];
@@ -21,7 +20,7 @@ data(1).expList{3,1} =    {'febe7_u000_003'};
 data(1).expList{4,1} =    {'febe7_u000_005'};
 
 data(2).age = 'P33-35';
-data(2).expList{2,1} =    {'febg7_u000_003';                    'febg8_u000_000';'febg8_u001_003'};
+data(2).expList{2,1} =    {'febg7_u000_003';                    'febg8_u000_000'};
 data(2).expList{2,1} =    {'febg7_u000_003';'febg7_u001_004';   'febg8_u000_000';'febg8_u001_003';'febg8_u002_002'};
 data(2).expList{3,1} =    {'febg7_u000_008';'febg7_u001_005';                    'febg8_u001_004';'febg8_u002_003'};
 data(2).expList{4,1} =    {'febg7_u000_009';'febg7_u001_009';                    'febg8_u001_008';'febg8_u002_006'};
@@ -47,26 +46,20 @@ for c = conds
 for e = 1:length(data(ageGroup).expList{c,1})
 
     exptName = data(ageGroup).expList{c,1}{e};
-    animal = exptName(1:5);
-    unit = exptName(8:10);
-    expt = exptName(12:14);
     disp(exptName)
-    load(fullfile(physDir,animal,exptName,[exptName '_id.mat']))
 
     linStyle = {'-','--',':'};
     if strcmp(area,'V1')
-        color = 'b';
+    color = 'b';
     elseif strcmp(area,'PSS')
-        color = 'r';
-    end
-    for p = 1:length(id.probes)
-        if strcmp(id.probes(p).area,area)
-            probe = p;
-        end
+    color = 'r';
     end
 
+    animal = exptName(1:5);
+    unit = exptName(8:10);
+    expt = exptName(12:14);
 
-    [sumStats,~] = plotUnits(animal,unit,expt,probe,anaMode,'ranksum',0.01,0,0,0,dataFold);
+    [sumStats,~] = plotUnits(animal,unit,expt,p,anaMode,visTest,alpha,plt,saveSum,saveFigs,dataFold);
     close all
     if isempty(sumStats)
         continue
