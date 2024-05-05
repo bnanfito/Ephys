@@ -4,10 +4,14 @@ area = 'PSS';
 anaMode = 'SU';
 
 if ispc
-    dataFold = 'D:\OneDrive - Johns Hopkins\Documents\data';
+%     dataFold = 'D:\data'; 
+%     dataFold = 'C:\Users\brand\Documents\data';
+%     dataFold = 'F:\Brandon\data';
+    dataFold = 'F:\Brandon\VSS2024\data';
 elseif ismac
-%     dataFold = '/Users/brandonnanfito/Library/CloudStorage/OneDrive-JohnsHopkins/Documents/data';
-    dataFold = '/Users/brandonnanfito/Documents/NielsenLab/VSS2024';
+%     dataFold = '/Volumes/Lab drive/Brandon/data';
+    dataFold = '/Volumes/Lab drive/Brandon/VSS2024/data';
+%     dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
 end
 physDir = fullfile(dataFold,'Ephys');
 condNames = {'precool','before','during','after'};
