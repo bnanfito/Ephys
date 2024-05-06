@@ -16,7 +16,7 @@ end
 physDir = fullfile(dataFold,'Ephys');
 condNames = {'precool','before','during','after'};
 condColor = {'k','k','c','m'};
-conds = [2,3];
+conds = [1,3];
 
 data(1).age = 'P30-32';
 data(1).expList{1,1} =    {'febe7_u000_001'};
@@ -25,7 +25,7 @@ data(1).expList{3,1} =    {'febe7_u000_003'};
 data(1).expList{4,1} =    {'febe7_u000_005'};
 
 data(2).age = 'P33-35';
-data(2).expList{2,1} =    {'febg7_u000_003';                    'febg8_u001_003'};
+data(2).expList{1,1} =    {'febg7_u000_003';                    'febg8_u001_003'};
 data(2).expList{2,1} =    {'febg7_u000_003';'febg7_u001_004';   'febg8_u001_003';'febg8_u002_002'};
 data(2).expList{3,1} =    {'febg7_u000_008';'febg7_u001_005';   'febg8_u001_004';'febg8_u002_003'};
 data(2).expList{4,1} =    {'febg7_u000_009';'febg7_u001_009';   'febg8_u001_008';'febg8_u002_006'};
@@ -43,9 +43,7 @@ data(4).expList{3,1} =   {                 'febe0_u001_004';'febe0_u002_003';   
 data(4).expList{4,1} =   {                                                                                           'febf6_u001_007';'febf6_u002_008';   'febf7_u000_007';'febf7_u001_003';                                                      'febg0_u003_004';                                        'febg1_u001_004';    'febg2_u001_013';'febg2_u001_017';'febg2_u001_021';                      'febg3_u001_004';'febg3_u001_017'};
 
 for ageGroup = 1:4
-
 for c = conds
-
     sums = [];
 
 for e = 1:length(data(ageGroup).expList{c,1})
@@ -219,7 +217,7 @@ for t = 1:3
         if t == 1
             dist{t,a,c} = data(a).sums{c,1}.rPref;
             yLbl = 'rPref';
-            lims = [1 7 1000];
+            lims = [1 100 1000];
             offsetScale = 3;
             dpScale = 20;
         elseif t == 2
@@ -236,56 +234,56 @@ for t = 1:3
             dpScale = 20;
         end
 
-%         cdf = cdfplot(dist{t,a,c});
-%         cdf.Color = condColor{c};
+        cdf = cdfplot(dist{t,a,c});
+        cdf.Color = condColor{c};
 
 %         histogram(dist{t,a,c},'FaceColor',condColor{c},'FaceAlpha',0.5,'EdgeColor','none')
 
 
-        expts = unique(data(a).sums{c,1}.exptName);
-        nE = length(expts);
-        for e = 1:nE
-            binID = strcmp(data(a).sums{c,1}.exptName,expts{e});
-            exptID(binID) = e;
-        end
-
-        if c == 1
-            
-        elseif c == 2
-
-        end
-
-        rng = lims(2)-lims(1);
-        linWdth = rng/(1*10^1);
-        xBar = mean(dist{t,a,c});
-        med = median(dist{t,a,c});
-        sem = std(dist{t,a,c})/sqrt(length(dist{t,a,c}));
-        v = violin(dist{t,a,c},0.4,lims,1,0);
-        z = c*offsetScale;
-        s = offsetScale/dpScale;
-        plot(((exptID-(nE/2)-0.5)*s*indAnimals)+z,dist{t,a,c}','.','Color',condColor{c});
-    %     plot((vertcat(zeros(size(dist')),ones(size(dist')))*(s))+(z),repmat(dist',2,1),'k');
-    %     for dp = 1:length(dist)
-    %         plot(((v.g(dp,:)*-1)*(s))+(z),v.gX(1,:),'b')
-    %     end
-        patch([v.kdeX -1*fliplr(v.kdeX)]+z,[v.kdeY fliplr(v.kdeY)],condColor{c},'FaceAlpha',0.1,'EdgeColor','none')
-        plot(v.kdeX+z,v.kdeY,'Color',condColor{c})
-        plot((v.kdeX*-1)+z,v.kdeY,'Color',condColor{c})
-        plot([z+s z-s],repmat(xBar,2,1),'r','lineWidth',2)
-        plot([z+s z-s],repmat(med,2,1),'b','lineWidth',2)
-    %     plot([z z],xBar+([-1 1]*sem),'r')
-        
-        clear exptID binID
+%         expts = unique(data(a).sums{c,1}.exptName);
+%         nE = length(expts);
+%         for e = 1:nE
+%             binID = strcmp(data(a).sums{c,1}.exptName,expts{e});
+%             exptID(binID) = e;
+%         end
+% 
+%         if c == 1
+%             
+%         elseif c == 2
+% 
+%         end
+% 
+%         rng = lims(2)-lims(1);
+%         linWdth = rng/(1*10^1);
+%         xBar = mean(dist{t,a,c});
+%         med = median(dist{t,a,c});
+%         sem = std(dist{t,a,c})/sqrt(length(dist{t,a,c}));
+%         v = violin(dist{t,a,c},0.4,lims,1,0);
+%         z = c*offsetScale;
+%         s = offsetScale/dpScale;
+% %         plot(((exptID-(nE/2)-0.5)*s*indAnimals)+z,dist{t,a,c}','.','Color',condColor{c});
+%     %     plot((vertcat(zeros(size(dist')),ones(size(dist')))*(s))+(z),repmat(dist',2,1),'k');
+%     %     for dp = 1:length(dist)
+%     %         plot(((v.g(dp,:)*-1)*(s))+(z),v.gX(1,:),'b')
+%     %     end
+%         patch([v.kdeX -1*fliplr(v.kdeX)]+z,[v.kdeY fliplr(v.kdeY)],condColor{c},'FaceAlpha',0.1,'EdgeColor','none')
+%         plot(v.kdeX+z,v.kdeY,'Color',condColor{c})
+%         plot((v.kdeX*-1)+z,v.kdeY,'Color',condColor{c})
+%         plot([z+s z-s],repmat(xBar,2,1),'r','lineWidth',2)
+%         plot([z+s z-s],repmat(med,2,1),'b','lineWidth',2)
+%     %     plot([z z],xBar+([-1 1]*sem),'r')
+%         
+%         clear exptID binID
 
 
     end
 
-    ylim([lims(1) lims(2)])
-    ylabel(yLbl)
-    xlim([offsetScale 5*offsetScale])
-    xticks(conds*offsetScale)
-    xticklabels({'before','during','after'})
-%     set(gcf, 'Position',  [0, 100, 300, 300])
+%     ylim([lims(1) lims(2)])
+%     ylabel(yLbl)
+%     xlim([offsetScale 5*offsetScale])
+%     xticks(conds*offsetScale)
+%     xticklabels({'before','during','after'})
+% %     set(gcf, 'Position',  [0, 100, 300, 300])
     
     end
 
