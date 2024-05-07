@@ -14,11 +14,17 @@ physDir = fullfile(dataFold,'Ephys');
 dsDir = fullfile(dataFold,'dataSets');
 
 
-
+plr = 1;
 
 load(fullfile(dataFold,'dataSets','V1 Mono Bidir Training','coolV1Train_MUdataSet.mat'))
 figure;hold on
-for t = 1:2
+if plr == 1
+    sp = subplot(1,3,1,polaraxes); hold on
+    sp.ThetaZeroLocation = 'top';
+else
+    sp = subplot(1,3,1); hold on
+end
+for t = 1:4
     if t==1
         tbl = v1bf{end};
         clr = 'b';
@@ -40,20 +46,81 @@ for t = 1:2
     
     x = mean(vertcat(tbl.tuningX{:}));
     y = vertcat(tbl.tuningY{:});
+    Y{t} = mean(y);
+    X{t} = x;
+    SEM{t} = std(y)/sqrt(size(y,1));
     for u = 1:size(y,1)
         y(u,:) = y(u,:)./max(y(u,:));
     end
     sem = std(y)./sqrt(size(y,1));
-    plot(x,mean(y),'Color',clr,'LineStyle',linStl)
-    plot(repmat(x,2,1),mean(y)+([-1;1]*sem),'Color',clr)
-    xticks([-180 -90 0 90 180])
-    ylim([0 1])
+
+    if plr == 1
+        polarplot(deg2rad(x),mean(y),'Color',clr,'LineStyle',linStl)
+        polarplot(deg2rad(repmat(x,2,1)),mean(y)+([-1;1]*sem),'Color',clr)
+    else
+        plot(x,mean(y),'Color',clr,'LineStyle',linStl)
+        plot(repmat(x,2,1),mean(y)+([-1;1]*sem),'Color',clr)
+        xticks([-180 -90 0 90 180])
+        ylim([0 1])
+    end
 
 end
 
 
 
+if plr == 1
+    sp = subplot(1,3,2,polaraxes); hold on
+    sp.ThetaZeroLocation = 'top';
+else
+    sp = subplot(1,3,2); hold on
+end
+for t = 1:4
+    if t==1
+        tbl = v1bf{end};
+        clr = 'b';
+        linStl = '--';
+    elseif t==2
+        tbl = v1af{end};
+        clr = 'b';
+        linStl = '-';
+    elseif t==3
+        tbl = pssbf{end};
+        clr = 'r';
+        linStl = '--';
+    elseif t==4
+        tbl = pssaf{end};
+        clr = 'r';
+        linStl = '-';
+    end
+    tbl = tbl(tbl.goodUnit==1,:);
 
+    if plr == 1
+        polarplot(deg2rad(X{t}),Y{t},[clr linStl])
+        polarplot(deg2rad(repmat(X{t},2,1)),Y{t}+([-1;1]*SEM{t}),clr)
+    else
+        plot(X{t},Y{t},[clr linStl])
+        plot(repmat(X{t},2,1),Y{t}+([-1;1]*SEM{t}),clr)
+        ylim([0 22])
+    end
+
+end
+
+
+
+if plr == 1
+    sp = subplot(1,3,3,polaraxes); hold on
+    sp.ThetaZeroLocation = 'top';
+else
+    sp = subplot(1,3,3); hold on
+end
+if plr == 1
+    polarplot(deg2radX{1},Y{2}./Y{1},'b-o')
+    plot(X{1},Y{4}./Y{3},'r-o')
+else
+    polarplot(X{1},Y{2}./Y{1},'b-o')
+    polarplot(X{1},Y{4}./Y{3},'r-o')
+    ylim([0 1.5])
+end
 
 
 
