@@ -7,8 +7,8 @@ if ispc
 %     dataFold = 'C:\Users\brand\Documents\data';
 %     dataFold = 'F:\Brandon\data';
 elseif ismac
-%     dataFold = '/Volumes/Lab drive/Brandon/data';
-    dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
+    dataFold = '/Volumes/Lab drive/Brandon/data';
+%     dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
 end
 
 animal = 'febg7';
