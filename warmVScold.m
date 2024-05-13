@@ -82,72 +82,7 @@ end
 
 end
 
-%CDF plot
-
-% figure;hold on
-% for c = 1:length(expts)
-% 
-%     p = cdfplot(sums{c}.rPref);
-%     p.Color = color;
-%     p.LineStyle = linStyle{c};
-%     p.LineWidth = 2;
-% 
-% end
-
-
-
-%Raw data plot
-
-% figure;hold on
-% subplot(4,1,1);hold on
-% for c = 1:length(expts)
-%     y{c,1} = sums{c}.dsi;
-%     x{c,1} = ones(length(y{c,1}),1)*c;
-%     plot(x{c,1},y{c,1},'o','Color',condColor{c})
-% end
-% legend({['n = ' num2str(length(y{1}))],['n = ' num2str(length(y{2}))],['n = ' num2str(length(y{3}))]})
-% boxplot(vertcat(y{:}),vertcat(x{:}))
-% ylim([0 1])
-% ylabel('DSI')
-% xlim([0.5 length(expts)+0.5])
-% xticks(1:length(expts))
-% xticklabels({'before','during','after'})
-% title([area ' su dsi dist.'])
-% 
-% 
-% 
-% 
-% subplot(4,1,2);hold on
-% for c = 1:length(expts)
-%     y{c,1} = 1-sums{c}.dcv;
-%     x{c,1} = ones(length(y{c,1}),1)*c;
-%     plot(x{c,1},y{c,1},'o','Color',condColor{c})
-% end
-% legend({['n = ' num2str(length(y{1}))],['n = ' num2str(length(y{2}))],['n = ' num2str(length(y{3}))]})
-% boxplot(vertcat(y{:}),vertcat(x{:}))
-% ylim([0 1])
-% ylabel('1-DCV')
-% xlim([0.5 length(expts)+0.5])
-% xticks(1:length(expts))
-% xticklabels({'before','during','after'})
-% title([area ' su 1-dcv dist.'])
-% 
-% 
-% 
-% 
-% subplot(4,1,3);hold on
-% for c = 1:length(expts)
-%     y{c,1} = sums{c}.rPref;
-%     x{c,1} = ones(length(y{c,1}),1)*c;
-%     plot(x{c,1},y{c,1},'o','Color',condColor{c})
-% end
-% legend({['n = ' num2str(length(y{1}))],['n = ' num2str(length(y{2}))],['n = ' num2str(length(y{3}))]})
-% boxplot(vertcat(y{:}),vertcat(x{:}))
-% ylabel('FR to preferred direction (Hz.)')
-% xlim([0.5 length(expts)+0.5])
-% xticks(1:length(expts))
-% xticklabels({'before','during','after'})
-% title([area ' su rPref dist.'])
+%% Plotting
 
 
 figure;
@@ -208,10 +143,7 @@ for t = 1:3
     
     for a = 1:length(data)
     
-    % VIOLIN PLOT
     nexttile;hold on
-    jit = 0;
-    indAnimals = 1;
     for c = conds
         
         if t == 1
@@ -236,6 +168,8 @@ for t = 1:3
 
         cdf = cdfplot(dist{t,a,c});
         cdf.Color = condColor{c};
+        ylabel('percentile')
+        xlabel(yLbl)
 
 %         histogram(dist{t,a,c},'FaceColor',condColor{c},'FaceAlpha',0.5,'EdgeColor','none')
 

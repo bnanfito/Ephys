@@ -4,7 +4,8 @@ clear all
 if ispc
 %     dataFold = 'D:\data'; 
 %     dataFold = 'C:\Users\brand\Documents\data';
-    dataFold = 'F:\Brandon\data';
+%     dataFold = 'F:\Brandon\data';
+    dataFold = 'F:\Brandon\VSS2024\data';
 elseif ismac
 %     dataFold = '/Volumes/Lab drive/Brandon/data';
     dataFold = '/Volumes/Lab drive/Brandon/VSS2024/data';
@@ -164,9 +165,6 @@ for age = 1:3
 %     cdf.LineStyle = '--';
 
 end
-
-
-
 
 
 
