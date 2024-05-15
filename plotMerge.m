@@ -11,11 +11,11 @@ elseif ismac
 %     dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
 end
 
-animal = 'febg7';
-units = {'000','000','000','000','000','000'};
-expts = {'000','003','004','008','009','012'};
-grp = [1 1 2 2 3 3];
-mergeID = '000000000003000004000008000009000012';
+% animal = 'febg7';
+% % units = {'000','000','000','000','000','000'};
+% % expts = {'000','003','004','008','009','012'};
+% % grp = [1 1 2 2 3 3];
+% % mergeID = '000000000003000004000008000009000012';
 % units = {'001','001','001','001','001','001'};
 % expts = {'000','004','005','008','009','012'};
 % grp = [1 1 2 2 3 3];
@@ -356,9 +356,9 @@ clear x y uIDs uID exptID h
 uIDs = unique(uDat.uID);
 for g = unique(grp)
     gInd = ismember(uDat.exptID,exptName(grp == g));
-    GU(:,g) = ismember(uIDs,uDat.uID(gInd & uDat.goodUnit));
+    GU(g,:) = ismember(uIDs,uDat.uID(gInd & uDat.goodUnit));
 end
-keepUnits = uIDs(GU(:,1)|GU(:,2));
+keepUnits = uIDs(GU(1,:)|GU(2,:));
 uDat = uDat(ismember(uDat.uID,keepUnits),:);
 uIDs = keepUnits;
 for u = 1:length(uIDs)
@@ -429,16 +429,20 @@ end
 
 figure;hold on
 for g = unique(grp)
-    curDat = uDat( ismember(uDat.exptID,exptName(grp==g)') ,:);
     for u = unitIDs
-        if ismember(u,curDat.uID)
-            LAT(g,u) = mean(curDat(curDat.uID == u,:).lat1,'omitnan');
-            RP(g,u) = mean(curDat(curDat.uID == u,:).rPref);
-            RN(g,u) = mean(curDat(curDat.uID == u,:).rNull);
-            RB(g,u) = mean(mean([curDat(curDat.uID == u,:).rBlank{:}],1),2);
-            DSI(g,u) = mean(curDat(curDat.uID == u,:).DSI,'omitnan');
-            DCV(g,u) = mean(curDat(curDat.uID == u,:).DCV,'omitnan');
-        else
+        curDat = uDat( ismember(uDat.exptID,exptName(grp==g)') & uDat.uID == u ,:); % take the subset of entries in data table for experiments of group g & for unit u
+        if ismember(u,curDat.uID) % take the mean of these metrics for any experiments of this group that this neuron was detected in
+            X{g,u} = mean(vertcat(curDat.tuningX{:}));
+            Y{g,u} = mean(vertcat(curDat.tuningY{:}));
+            LAT(g,u) = mean(curDat.lat1,'omitnan');
+            RP(g,u) = mean(curDat.rPref);
+            RN(g,u) = mean(curDat.rNull);
+            RB(g,u) = mean(mean([curDat.rBlank{:}],1),2);
+            DSI(g,u) = mean(curDat.DSI,'omitnan');
+            DCV(g,u) = mean(curDat.DCV,'omitnan');
+        else % this neuron was not detected in any experiments of this group and mean metrics are set to nan
+            X{g,u} = nan;
+            Y{g,u} = nan;
             LAT(g,u) = nan;
             RP(g,u) = nan;
             RN(g,u) = nan;
@@ -521,4 +525,4 @@ ylabel('1-DCV during cooling V1')
 sgtitle([animal ' summary plot'])
 saveas(gcf,fullfile(physDir,animal,mergeName,[anaMode 'summaryPlot']),'fig')
 
-save(fullfile(physDir,animal,mergeName,[anaMode 'dat.mat']),'LAT','RP','RB','DSI','DCV','GU','uDat')
+save(fullfile(physDir,animal,mergeName,[anaMode 'dat.mat']),'X','Y','LAT','RP','RN','RB','DSI','DCV','GU','keepUnits','uDat')

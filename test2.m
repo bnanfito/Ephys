@@ -29,12 +29,12 @@ for age = 1:3
     elseif age == 3
         load(fullfile(dsDir,'adultMergeSUDat.mat'))
     end
-    fileID = vertcat(dat.tbl.fileID{:});
-    cndID = fileID(:,2);
+    idx = dat.gu(1,:)|dat.gu(2,:);
+    dat.x = dat.x(:,idx);
+    dat.y = dat.y(:,idx);
 
     for cnd = 1:2
-        idxA = cndID == cnd;
-        data = dat.tbl(idxA,:);
+        
 
         if cnd == 1
             clr = 'k';
@@ -42,10 +42,11 @@ for age = 1:3
             clr = 'c';
         end
 
-        for u = 1:height(data)
-            x = mean(data.tuningX{u});
-            y = mean(data.tuningY{u});
-            if length(y)<16
+        for u = 1:size(dat.x,2)
+            x = dat.x{cnd,u};
+            y = dat.y{cnd,u};
+            y(y<0) = 0;
+            if isnan(x) | isnan(y) | length(y)<16 
                 continue
             end
             [X{age,cnd}(u,:),Y{age,cnd}(u,:),~] = alignDirTuning(x,y);
