@@ -3,13 +3,22 @@ clear all
 close all
 
 if ispc
-    dataFold = 'D:\data'; 
-%     dataFold = 'C:\Users\brand\Documents\data';
+%     dataFold = 'D:\data'; 
+    dataFold = 'C:\Users\brand\Documents\data';
 %     dataFold = 'F:\Brandon\data';
 elseif ismac
     dataFold = '/Volumes/Lab drive/Brandon/data';
 %     dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
 end
+
+animal = 'febe7';
+units = {'000','000','000'};
+expts = {'001','003','005'};
+grp = [1 2 3];
+mergeID = '000001000003000005';
+
+
+
 
 % animal = 'febg7';
 % % units = {'000','000','000','000','000','000'};
