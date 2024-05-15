@@ -1,6 +1,6 @@
 
 clear all
-% close all
+close all 
 
 if ispc
 %     dataFold = 'D:\data'; 
@@ -27,24 +27,20 @@ for i = 1:3
         load(fullfile(dataFold,'dataSets',['adultMerge' anaMode 'Dat.mat']))
         clr = [0.6350 0.0780 0.1840]; %red
     end
-%     fileID = vertcat(dat.tbl.fileID{:});
-%     condID = fileID(:,2);
-%     idxA = dat.tbl.goodUnit == 1 & condID == 1;
-%     idxB = dat.tbl.goodUnit == 1 & condID == 2;
-% 
-%     A = dat.tbl(idxA,:).DSI;
-%     B = dat.tbl(idxB,:).DSI;
-    A = dat.dsi(1,:); 
-    B = dat.dsi(2,:);
-    A(A>1) = 1; B(B>1) = 1;
+    idx = dat.gu(1,:)|dat.gu(2,:);
+    A = dat.rn(1,idx); 
+    B = dat.rn(2,idx);
+%     A(A>1) = 1; B(B>1) = 1;
     n(i) = length(A);
 
     subplot(2,2,1);hold on
-    delta = B-A;
+%     delta = B-A;
+    delta = (B-A)./(A+B);
     DELTA{i,1} = delta;
     cdf = cdfplot(delta);
     cdf.Color = clr; cdf.LineWidth = 2;
-    xlabel('delta DSI')
+    xlabel('delta rNull')
+    xlim([-1 1])
     ylabel('percentile')
     title('')
 
@@ -53,18 +49,20 @@ for i = 1:3
     end
 
     subplot(2,2,2);hold on
+    ub = 16;lb = -3;
     plot(A,B,'.','Color',clr,'MarkerSize',10)
-    plot([0 1],[0 1],'k--')
-    xlim([0 1])
-    ylim([0 1])
-    xlabel('DSI before cooling (ms)')
-    ylabel('DSI after cooling (ms)')
+%     plot(log2(A),log2(B),'.','Color',clr,'MarkerSize',10)
+    plot([lb ub],[lb ub],'k--')
+    xlim([lb ub])
+    ylim([lb ub])
+    xlabel('rNull before cooling (ms)')
+    ylabel('rNull after cooling (ms)')
 
     
     
     
-    A = dat.rp(1,:);
-    B = dat.rp(2,:);
+    A = dat.rp(1,idx);
+    B = dat.rp(2,idx);
 
     subplot(2,2,3);hold on
     delta = (B-A)./(A+B);
@@ -78,6 +76,7 @@ for i = 1:3
     
     subplot(2,2,4);hold on
     plot(A,B,'.','Color',clr,'MarkerSize',10)
+%     plot(log2(A),log2(B),'.','Color',clr,'MarkerSize',10)
     plot([0 30],[0 30],'k--')
     xlabel('rPref before cooling (ms)')
     ylabel('rPref after cooling (ms)')
