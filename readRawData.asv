@@ -1,6 +1,6 @@
 
 
-function [dataRaw,dataFilt] = readRawData(animal,unit,expt,start,stop,band,dataFold)
+function [dataRaw,dataFilt] = readRawData(animal,unit,expt,start,stop,band,daphystaFold)
 
 % if ispc
 % %     dataFold = 'C:\Users\brand\Documents\data\Ephys';
@@ -10,10 +10,10 @@ function [dataRaw,dataFilt] = readRawData(animal,unit,expt,start,stop,band,dataF
 % end
 
 physDir = fullfile(dataFold,'Ephys');
-exptName = [animal '_u' unit '_' expt];
-cd(fullfile(physDir,animal,exptName))
-load(fullfile(physDir,animal,exptName,[exptName '_id.mat']),'id')
-ampFile = fullfile(physDir,animal,exptName,[exptName '_amplifier.dat']);
+baseName = [animal '_u' unit '_' expt];
+cd(fullfile(dataFold,animal,baseName))
+
+load(fullfile(dataFold,animal,baseName,[baseName '_id.mat']),'id')
 
 nProbes = length(id.probes);
 nCh = nan(nProbes,1);
@@ -23,6 +23,7 @@ end
 sf= id.sampleFreq;
 
 
+ampFile = [baseName '_amplifier.dat'];
 
 startSample = start-1;
 nSamps = (stop-start)+1;
