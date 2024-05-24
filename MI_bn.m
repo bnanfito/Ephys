@@ -17,13 +17,21 @@ animal = 'febl0';
 unit = '000';
 expt = '010';
 probe = 1;
-u = 1;
 exptName = [animal '_u' unit '_' expt];
 exptDir = fullfile(physDir,animal,exptName);
+anaMode = 'MU';
 
 load(fullfile(exptDir,[exptName '_id.mat']))
 load(fullfile(exptDir,[exptName '_trialInfo.mat']))
-load(fullfile(exptDir,[exptName '_p' num2str(probe) '_spkSort.mat']))
+if strcmp(anaMode,'SU')
+    load(fullfile(exptDir,[exptName '_p' num2str(probe) '_spkSort.mat']))
+    spkStruct = spkSort;
+    clear spkSort
+elseif strcmp(anaMode,'MU')
+    load(fullfile(exptDir,[exptName '_p' num2str(probe) '_MUspkMerge.mat']))
+    spkStruct = MUspkMerge;
+    clear MUspkMerge
+end
 load(fullfile(exptDir,[exptName '.analyzer']),'-mat')
 
 predelay = getparam('predelay',Analyzer);
@@ -36,6 +44,11 @@ nTrials = length(trialInfo.triallist);
 nConds = length(unique(trialInfo.triallist));
 nReps = nTrials/nConds;
 nEpochs = length(trialInfo.eventTimes)/nTrials;
+if strcmp(anaMode,'SU')
+    nU = length(unique(spkStruct.unitid));
+elseif strcmp(anaMode,'MU')
+    nU = length(unique(spkStruct.detChSort));
+end
 if isempty(trialInfo.blankId)
     blank = zeros(1,nConds)==1;
 else
@@ -53,29 +66,45 @@ trialEnd = eventTimes(eventID == -1);
 sortTrialCond = reshape(sortTrialCond,nReps,nConds);
 sortTrialInd = reshape(sortTrialInd,nReps,nConds);
 
-win = 0.01;%ms
-nWin = trialL/win;
-for t = 1:nTrials
-
-    [r,c] = find(sortTrialInd==t);
-    trialInfo.triallist(t) == c
-    tv = trialStart(t):trialStart(t)+(trialL*sf);
-    s(t,:) = zeros(size(tv));
-    if trialInfo.triallist(t) ~= trialInfo.blankId
-        s(ismember(tv,stimStart(t):stimEnd(t))) =  trialInfo.triallist(t);
-    end
-    spkTimes{t} = spkSort.spktimes( spkSort.unitid==u & ( ...
-                                    spkSort.spktimes>trialStart(t) & ...
-                                    spkSort.spktimes<trialEnd(t)) );
-    r(t,:) = ismember(tv,spkTimes{t});
-    for w = 1:nWin
-        S(t,w) = max(unique(s(t,1+((w-1)*(sf*win)):sf*win)));
-%         R(t,w) = 
+for u = 4
+    if strcmp(anaMode,'SU')
+        uIdx = spkStruct.unitid==u;
+    elseif strcmp(anaMode,'MU')
+        uIdx = spkStruct.detChSort==u;
     end
 
+    win = 0.01;%ms
+    nWin = trialL/win;
+    for t = 1:nTrials
+    
+        [rep,cnd] = find(sortTrialInd==t);
+        tv = trialStart(t):trialStart(t)+(trialL*sf)-1;
+        s(t,:) = zeros(size(tv));
+        if cnd ~= trialInfo.blankId
+            s(t,ismember(tv,stimStart(t):stimEnd(t))) =  cnd;
+        end
+        spkTimes{t} = spkStruct.spktimes( uIdx & ( ...
+                                        spkStruct.spktimes>trialStart(t) & ...
+                                        spkStruct.spktimes<trialEnd(t)) );
+        r(t,:) = ismember(tv,spkTimes{t});
+        for w = 1:nWin
+            S(t,w) = max(unique(s(t,1+((w-1)*(sf*win)):sf*win)));
+    %         R(t,w) = 
+        end
+    
+    
+    
+    end
+    
+    figure; 
+    for c = 1:nConds
+        subplot(nConds,1,c);hold on
+        tIdx = trialInfo.triallist == c;
+        plot(s(tIdx,:)','LineWidth',2)
+        plot(r(tIdx,:)','LineWidth',2)
+    
+    
+    end
 
 
 end
-
-
-
