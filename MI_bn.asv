@@ -69,7 +69,7 @@ for t = 1:nTrials
                                     spkSort.spktimes<trialEnd(t)) );
     r(t,:) = ismember(tv,spkTimes{t});
     for w = 1:nWin
-        S(t,w) = max(unique(s(t,1+((w-1)*(sf*win)):sf*win)));
+        S(t,w) = max(unique(s(t,1:sf*win)));
 %         R(t,w) = 
     end
 
