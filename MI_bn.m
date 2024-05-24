@@ -54,3 +54,6 @@ trialEnd = downsample(trialInfo.eventTimes,nEpochs,3);
 [sortTrialCond,sortTrialInd] = sort(trialInfo.triallist);
 sortTrialCond = reshape(sortTrialCond,nReps,nConds);
 sortTrialInd = reshape(sortTrialInd,nReps,nConds);
+
+
+

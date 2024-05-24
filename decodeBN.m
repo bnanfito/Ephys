@@ -2,7 +2,7 @@ clear all
 close all
 
 dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
-load(fullfile(dataFold,'dataSets/training/coolV1_MUdataSet.mat'))
+load(fullfile(dataFold,'dataSets/training/cntrlAL_MUdataSet.mat'))
 
 for t = 1:4
 
