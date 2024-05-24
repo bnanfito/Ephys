@@ -21,7 +21,7 @@ animal = 'febl0';
 unitID = '000'; 
 expt = '005';
 probe = 1;
-detCh = 32;
+unit = 6;
 exptName =[animal '_u' unitID '_' expt];
 exptPath = fullfile(dataFold,'Ephys',animal,exptName);
 
@@ -35,9 +35,7 @@ sf=id.sampleFreq;
 nProbes = length(id.probes);
 nCh=sum(vertcat(id.probes.nChannels));
 nUnits = length(spkSort.unitinfo);
-if probe>1
-    detCh = detCh + ( sum(vertcat(id.probes(1:probe-1).nChannels)) ) ;
-end
+
 
 %% compute channel neighbor matrix
 
@@ -73,10 +71,14 @@ lp = 150;
 
 figure;hold on
 for u = 1:nUnits
+    if u == 6
+        continue
+    end
     disp(['unit: ' num2str(u)])
     spkTimes{u} = spkSort.spktimes(spkSort.unitid == u);
 
     for spk = 1:length(spkTimes{u})
+        disp(['spk #' num2str(spk) '/' num2str(length(spkTimes{u}))])
         spkT = spkTimes{u}(spk);
         [~,dataFilt] = readRawData(animal,unitID,expt,spkT-(sf*1),spkT+(sf*1),[hp lp],dataFold);
         if spk>1 & size(dataFilt,2)~=size(lfp{u},2)
@@ -88,7 +90,7 @@ for u = 1:nUnits
         elseif probe == 2
             lfp{u}(spk,:) = mean(dataFilt( 1:id.probes(probe-1).nChannels ,:));
         end
-
+        fclose all;
     end
     STA(u,:) = mean(lfp{u});
     plot(STA(u,:),'LineWidth',2)
