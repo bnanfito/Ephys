@@ -20,7 +20,7 @@ sumDir = fullfile(dataFold,'SummaryStats');
 anaMode = 'MU';
 
 % V1 COOLED
-animals = {'febh2','febh3','febj3','febk7','febk8'};
+animals = {'febh2','febh3','febj3','febk7','febk8','febl7'};
 
 % % CONTROL
 % animals = {'febj4'};
@@ -57,6 +57,10 @@ elseif strcmp(animals{a},'febk8')
     before = {'_u000_000'}; %binocular FF
     after = {'_u002_033'}; %monocular (contra) train stim
     trainAx = [45 225];
+elseif strcmp(animals{a},'febl7')
+    before = {'_u000_000'}; %monocular (contra) FF
+    after = {'_u000_034','_u001_001','_u002_001'}; %monocular (contra) train stim
+    trainAx = [90 270];
 elseif strcmp(animals{a},'febj2')
     before = {'_u000_003'};
     after = {'_u000_023'};
