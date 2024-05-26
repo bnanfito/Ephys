@@ -441,9 +441,15 @@ if plt == 1
         plot(x,mean(y),'k--o','LineWidth',2)
         plot(repmat(x,2,1),mean(y)+([-1;1]*sem),'k','LineWidth',2)
         y = vertcat(sumStats(goodInd,:).tuningY{:});
-        sem = std(y)/sqrt(size(y,1));
-        plot(x,mean(y),'k-o','LineWidth',2)
-        plot(repmat(x,2,1),mean(y)+([-1;1]*sem),'k','LineWidth',2)
+        if size(y,1)==1
+            sem = std(y)/sqrt(1);
+            plot(x,y,'k-o','LineWidth',2)
+            plot(repmat(x,2,1),y+([-1;1]*sem),'k','LineWidth',2)
+        else
+            sem = std(y)/sqrt(size(y,1));
+            plot(x,mean(y),'k-o','LineWidth',2)
+            plot(repmat(x,2,1),mean(y)+([-1;1]*sem),'k','LineWidth',2)
+        end
         if alignBit == 1
             xticks([-180 -90 0 90 180])
         else

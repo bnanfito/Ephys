@@ -28,11 +28,11 @@ for u = 1:length(in)
     isVis(u) = pVis(u,1)<alpha;
 
     if strcmp(mode,'SU')
-        isAct(u) = max(mean(in(u).fr.bc(:,~blankBit),'omitnan'))>2;
+        isAct(u) = max(mean(in(u).fr.bc(:,~blankBit),'omitnan'))>=2;
         isSU(u) = strcmp(in(u).info,'SU');
         maybeSU(u) = strcmp(in(u).info,'SU?');
     elseif strcmp(mode,'MU')
-        isAct(u) = max(mean(in(u).fr.bc(:,~blankBit),'omitnan'))>5;
+        isAct(u) = max(mean(in(u).fr.bc(:,~blankBit),'omitnan'))>=2;
     end
 
 end
