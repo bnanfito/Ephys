@@ -3,9 +3,9 @@ clear all
 close all 
 
 if ispc
-%     dataFold = 'D:\data'; 
+    dataFold = 'D:\data'; 
 %     dataFold = 'C:\Users\brand\Documents\data';
-    dataFold = 'F:\Brandon\data';
+%     dataFold = 'F:\Brandon\data';
 elseif ismac
     dataFold = '/Volumes/Lab drive/Brandon/data';
 %     dataFold = '/Volumes/Lab drive/Brandon/VSS2024/data';
