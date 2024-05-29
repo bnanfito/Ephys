@@ -61,6 +61,7 @@ for c = 1:nConds
     trialRepMap(:,c) = find(trialInfo.triallist == c);
 
 end
+clear c
 
 
 %% DATA PROCESSING
@@ -147,6 +148,7 @@ for u = 1:length(spks)
         c = trialInfo.domval; % vectors of conditions (x axis of tuning curve; e.g. orientations)
         r = spks(u).fr.bc(:,~blank);
         rBlank = spks(u).fr.stim(:,blank);
+        rB(u,1) = mean(rBlank);
         sem = std(r,'omitnan')/sqrt(size(r,1)); % nConds long vector of standard error of the mean for each condition
         ci95 = confInt(r); % nConds long vector of 95% confidence interval for each condition
         
@@ -164,17 +166,17 @@ for u = 1:length(spks)
         end
 
         rPref = max(mean(r,'omitnan')); rP(u,1) = rPref;
-        cPref = c(mean(r,'omitnan')==rPref);
+        cPref = find(mean(r,'omitnan')==rPref);
 
         if length(c) == 2 %%% bidirectional training %%%
 
             if length(cPref)>1 % if there is more than one pk with rPref
                 cPref = cPref(1);
             end
-            cP(u,1) = cPref;
+            cP(u,1) = c(cPref);
             
-            x = c; tuningX{u,1} = x;
-            y = mean(r,'omitnan'); tuningY{u,1} = y; 
+            x = c;                  tuningX{u,1} = x;
+            y = mean(r,'omitnan');  tuningY{u,1} = y; 
 
             dpi(u,1) = abs(diff(y))/max(y);
 
@@ -240,12 +242,12 @@ for u = 1:length(spks)
                 rConv = conv(rConv,ones(1,3)*(1/3),'same');
                 rConv = rConv(1+1:end-1);
                 rConv(~pks) = 0;
-                cPref = c(find(rConv==max(rConv),1,'first'));
+                cPref = find(rConv==max(rConv),1,'first');
                 clear rIn pks rConv 
             end
-            cP(u,1) = cPref;
-            cNull = c(c==mod(cPref + 180,360)); cN(u,1) = cNull;
-            rNull = mean(r(:,c==cNull),'omitnan'); rN(u,1) = rNull;
+            cP(u,1) = c(cPref);
+            cNull = c==mod(cP(u,1) + 180,360); cN(u,1) = c(cNull);
+            rNull = mean(r(:,c==cN(u,1)),'omitnan'); rN(u,1) = rNull;
             dsi(u,1) = abs(rPref-rNull)/rPref;
             mv = meanvec(c,mean(r,'omitnan'));
             dcv(u,1) = mv.cv;
@@ -296,15 +298,34 @@ for u = 1:length(spks)
 
     elseif length(trialInfo.dom) ==2  % for experiments where another variable changes in addition to ori/dir (e.g. contrast experiments, spatial frequency, etc)
 
-%         oriInd = find(strcmp(trialInfo.dom,'ori'));
-%         notOriInd = find(~((1:2)==oriInd));
-%         oris = unique(trialInfo.domval(:,oriInd));
-%         for o = 1:length(oris)
-% 
-% %             c{o} = 
-% %             r{o} = 
-% 
-%         end
+        oriInd = find(strcmp(trialInfo.dom,'ori'));
+        notOriInd = find(~((1:2)==oriInd));
+        oris = unique(trialInfo.domval(:,oriInd));
+        rBlank = spks(u).fr.bc(:,blank);
+        rB(u,1) = mean(rBlank);
+        for o = 1:length(oris)
+            oriIdx = trialInfo.domval(:,oriInd)==oris(o);
+            c{o} = trialInfo.domval(oriIdx,notOriInd);
+            r{o} = mean(spks(u).fr.bc(:,oriIdx),'omitnan');
+            oriMax(o) = max(r{o});
+%             [nakaX,nakaY,~,~,~,~,~] = nakaRush(r{o},c{o},1,0);
+            if plt == 1
+                subplot(1,3,3);hold on
+                plot(c{o},r{o},'-o','LineWidth',2)
+%                 plot(nakaX,nakaY,'--','LineWidth',2)
+            end
+
+        end
+        if length(unique(oriMax)) == 1   
+            oriPref = 1;
+        elseif length(unique(oriMax)) > 1
+            oriPref = find(oriMax == max(oriMax));
+        end
+        tuningX{u,1} = c{oriPref};
+        tuningY{u,1} = r{oriPref};
+        cPref = find(trialInfo.domval(:,oriInd) == oris(oriPref) & trialInfo.domval(:,notOriInd) == 100);
+        rP(u,1) = oriMax(oriPref);
+        cP(u,1) = c{oriPref}( find(r{oriPref} == rP(u,1),1) );
 
     end
 
@@ -314,7 +335,7 @@ for u = 1:length(spks)
     startBin=ceil(-1/binWidth)*binWidth; %need multiple of binWidth to make 0 an edge
     stopBin=floor(1/binWidth)*binWidth;
     binVec=[startBin:binWidth:stopBin];
-    prefTrials = find(trialInfo.triallist== find(trialInfo.domval == cPref) );
+    prefTrials = find(trialInfo.triallist==cPref);
     for rep = 1:length(prefTrials)
         t = prefTrials(rep);
         spkTs{rep} = spks(u).stimCent(1,spks(u).stimCent(2,:)==t);
@@ -372,13 +393,17 @@ end
 
 %% Make Summary Stats Table
 
-varNames = {'exptName','probe','area','uID','goodUnit','fr','rPref','cPref','pVis','lat1','lat2'};
-sumStats = table(exptNames,probeIDs,areaIDs,uID,goodUnits',vertcat(spks.fr),rP,cP,pVis,latCh,latCh2,'VariableNames',varNames);
+varNames = {'exptName','probe','area','uID','goodUnit','pVis','fr','rPref','cPref','rBlank','lat1','lat2'};
+sumStats = table(exptNames,probeIDs,areaIDs,uID,goodUnits',pVis,vertcat(spks.fr),rP,cP,rB,latCh,latCh2,'VariableNames',varNames);
 sumStats.tuningX = tuningX;
 sumStats.tuningY = tuningY;
 if strcmp(anaMode,'MU')
     sumStats.xPos = vertcat(spks.xPos);
     sumStats.zPos = vertcat(spks.zPos);
+end
+if exist('rN','var')
+    sumStats.rNull = rN;
+    sumStats.cNull = cN;
 end
 if exist('dsi','var')
     sumStats.dsi = dsi;
@@ -558,7 +583,7 @@ if plt == 1
     end
     
     
-    set(gcf,'Position',[0 0 1000 1000])
+%     set(gcf,'Position',[0 0 1000 1000])
     sgtitle([animal ' u' unit ' e' expt ' p' num2str(probe) '(' area ') summary plot'])
     
     if saveFigs == 1
