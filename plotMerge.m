@@ -12,24 +12,26 @@ elseif ismac
 end
 
 
-animal = 'febl6';
-% units = {'000','000','000','000','000','000','000','000'};
-% expts = {'001','002','003','004','005','006','007','008'};
-% grp = [1 1 2 3 3 2 3 3];
-% mergeID = '000001000002000003000004000005000006000007000008';
-units = {'001','001','001','001','001','001'};
-expts = {'001','002','003','004','005','006'};
-grp = [1 2 3 3 2 3];
-mergeID = '001001001002001003001004001005001006';
+% animal = 'febl6';
+% % units = {'000','000','000','000','000','000','000','000'};
+% % expts = {'001','002','003','004','005','006','007','008'};
+% % grp = [1 1 2 3 3 2 3 3];
+% % mergeID = '000001000002000003000004000005000006000007000008';
+% units = {'001','001','001','001','001','001'};
+% expts = {'001','002','003','004','005','006'};
+% fileNum = [1 2 3 4 5 6];
+% grp = [1 2 3 3 2 3];
+% mergeID = '001001001002001003001004001005001006';
 
 
 
 
-% animal = 'febe7';
-% units = {'000','000','000'};
-% expts = {'001','003','005'};
-% grp = [1 2 3];
-% mergeID = '000001000003000005';
+animal = 'febe7';
+units = {'000','000','000'};
+expts = {'001','003','005'};
+fileNum = [1 3 5];
+grp = [1 2 3];
+mergeID = '000001000002000003000004000005';
 
 
 
@@ -180,7 +182,7 @@ for f = 1:length(expts)
     load(fullfile(physDir,animal,exptName{f},[exptName{f} '_trialInfo.mat']),'trialInfo')
     load(fullfile(physDir,animal,exptName{f},[exptName{f} '.analyzer']),'-mat')
     if strcmp(anaMode,'SU')
-        load(fullfile(physDir,animal,mergeName,[exptName{f} '_p' num2str(probe) '_' num2str(f) '_spkSort.mat']),'spkSort')
+        load(fullfile(physDir,animal,mergeName,[exptName{f} '_p' num2str(probe) '_' num2str(fileNum(f)) '_spkSort.mat']),'spkSort')
         spkStrct = spkSort;
         clear spkSort
     elseif strcmp(anaMode,'MU')
@@ -380,7 +382,7 @@ for g = unique(grp)
     gInd = ismember(uDat.exptID,exptName(grp == g));
     GU(g,:) = ismember(uIDs,uDat.uID(gInd & uDat.goodUnit));
 end
-keepUnits = uIDs(GU(1,:)|GU(2,:));
+keepUnits = uIDs(GU(1,:)|GU(2,:)|GU(3,:));
 uDat = uDat(ismember(uDat.uID,keepUnits),:);
 uIDs = keepUnits;
 for u = 1:length(uIDs)
