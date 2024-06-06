@@ -93,11 +93,11 @@ physDir = fullfile(dataFold,'Ephys');
 
 
 
-animal = 'febl7';
+animal = 'febk8';
 unit = 'MMM';
-expt = '000000000001000002000003';
+expt = '000000000001000002000003000004';
 probe = 1;
-for U = [1 2 4 5 8]
+for U = [2 3 4 9 10 11 13]
 
 anaMode = 'SU';
 

@@ -296,7 +296,77 @@ for u = 1:length(spks)
 
         end
 
-    elseif length(trialInfo.dom) ==2  % for experiments where another variable changes in addition to ori/dir (e.g. contrast experiments, spatial frequency, etc)
+    elseif sum(strcmp(trialInfo.dom,'y_size'))>0 % for experiments where stimulus alternates between full field and hemifield 
+
+        oriInd = find(strcmp(trialInfo.dom,'ori'));
+        oris = unique(trialInfo.domval(:,oriInd));
+        ySizeInd = find(strcmp(trialInfo.dom,'y_size'));
+        ySizes = unique(trialInfo.domval(:,ySizeInd));
+        ff_cndInd = trialInfo.domval(:,ySizeInd) == ySizes(ySizes>180);
+        ff_trialInd = ismember(trialInfo.triallist,find(ff_cndInd));
+        hemi_cndInd = trialInfo.domval(:,ySizeInd) == ySizes(ySizes<=75);
+        hemi_trialInd = ismember(trialInfo.triallist,find(hemi_cndInd));
+        rBlank = spks(u).fr.bc(:,blank);
+        rB(u,1) = mean(rBlank,'omitnan');
+
+        for stim = 1:2
+
+            if stim == 1
+                idxCnd = ff_cndInd;
+                idxTrial = ff_trialInd;
+                clr = 'g';
+            elseif stim == 2
+                idxCnd = hemi_cndInd;
+                idxTrial = hemi_trialInd;
+                clr = 'k';
+            end
+
+            c{stim} = trialInfo.domval(idxCnd,oriInd);
+            r{stim} = spks(u).fr.bc(:,idxCnd);
+            rPref{stim} = max( mean(r{stim}) );
+            cPref{stim} = find(mean(r{stim},'omitnan') == rPref{stim});
+            if length(cPref{stim})>1 % if there is more than one pk with rPref
+                rIn = mean(r{stim},'omitnan');
+                pks = rIn == rPref{stim};
+                rConv = rIn([end 1:end 1]);
+                rConv = conv(rConv,ones(1,3)*(1/3),'same');
+                rConv = rConv(1+1:end-1);
+                rConv(~pks) = 0;
+                cPref{stim} = find(rConv==max(rConv),1,'first');
+                clear rIn pks rConv 
+            end
+            cNull{stim} = mod(cPref{stim}+180,360);
+            rNull{stim} = r{stim}(c{stim}==cNull{stim});
+            dsi_tmp{stim} = abs(rPref{stim}-rNull{stim})/rPref{stim};
+            mv = meanvec(c{stim},mean(r{stim},'omitnan'));
+            dcv_tmp{stim} = mv.cv;
+            
+
+
+
+            if plt == 1
+                subplot(1,3,3);hold on
+                plot(c{stim},mean(r{stim},'omitnan'),'-o','LineWidth',2,'Color',clr)
+                plot(c{stim},r{stim}','--','LineWidth',1,'Color',clr)
+
+            end
+            
+
+
+        end
+
+        cP{u,1} = c{1}([cPref{:}]);
+        rP{u,1} = [rPref{:}];
+        rN{u,1} = [rNull{:}];
+        cN{u,1} = c{1}([cPref{:}]);
+        dsi{u,1} = [dsi_tmp{:}];
+        dcv{u,1} = [dcv_tmp{:}];
+        tuningX{u,1} = c;
+        tuningY{u,1} = r;
+
+
+
+    elseif length(trialInfo.dom) == 2  % for experiments where another variable changes in addition to ori/dir (e.g. contrast experiments, spatial frequency, etc)
 
         oriInd = find(strcmp(trialInfo.dom,'ori'));
         notOriInd = find(~((1:2)==oriInd));
@@ -335,7 +405,11 @@ for u = 1:length(spks)
     startBin=ceil(-1/binWidth)*binWidth; %need multiple of binWidth to make 0 an edge
     stopBin=floor(1/binWidth)*binWidth;
     binVec=[startBin:binWidth:stopBin];
-    prefTrials = find(trialInfo.triallist==cPref);
+    if length(cPref)==1
+        prefTrials = find(trialInfo.triallist==cPref);
+    else
+        prefTrials = find(trialInfo.triallist==cPref{1});
+    end
     for rep = 1:length(prefTrials)
         t = prefTrials(rep);
         spkTs{rep} = spks(u).stimCent(1,spks(u).stimCent(2,:)==t);
