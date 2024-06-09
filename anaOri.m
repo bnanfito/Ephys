@@ -20,14 +20,14 @@ figDir = fullfile(dataFold,'Figures');
 %% Settings
 
 animal = 'febj5';
-unit = '000';
-expt = '023';
+unit = '001';
+expt = '003';
 exptName = [animal '_u' unit '_' expt];
-probe = 1;
+probe = 2;
 
 plt = 1;
-plr = 0;
-anaMode = 'MU';
+plr = 1;
+anaMode = 'SU';
 stimPres = 'ff';
 visTest = 'ranksum';
 alpha = 0.01;
@@ -89,12 +89,12 @@ for u = 1:nU % u indexes a unit (column) in structure spks
 
         cndInclude = ~blank;
 
-    elseif nDom==2 && sum(strcmp(trialInfo.dom,'y_size'))==1
+    elseif nDom==2 && sum(strcmp(trialInfo.dom,'y_size '))==1
 
         if strcmp(stimPres,'ff')
-            cndInclude = trialInfo.domval( : , strcmp(trialInfo.dom,'y_size') ) >=150;
+            cndInclude = trialInfo.domval( : , strcmp(trialInfo.dom,'y_size ') ) >=150;
         elseif strcmp(stimPres,'hemi')
-            cndInclude = trialInfo.domval( : , strcmp(trialInfo.dom,'y_size') ) <=75;
+            cndInclude = trialInfo.domval( : , strcmp(trialInfo.dom,'y_size ') ) <=75;
         end
 
     end
@@ -173,12 +173,39 @@ if plt == 1
             plot(C{u},mean(R{u},'omitnan'),'k-o')
         end
 
-        ttl = [exptName ' p' num2str(probe) ' (' area ') ' anaMode '#' num2str(u)];
+        ttl = [exptName ' p' num2str(probe) ' (' area ') ' anaMode '#' num2str(uID(u))];
         if ~ismember(u,find(goodUnits))
             ttl = [ttl '(BAD UNIT)'];
         end
         sgtitle(ttl)
     end
+
+    figure;
+    goodIdx = sumStats.goodUnit;
+
+    subplot(2,3,1); hold on
+
+    x = sumStats.rPref;
+    cdf = cdfplot(x);
+    cdf.LineWidth = 2;
+    cdf.LineStyle = '--';
+    cdf.Color = 'k';
+    cdf = cdfplot(x(goodIdx));
+    cdf.LineWidth = 2;
+    cdf.LineStyle = '-';
+    cdf.Color = 'k';
+
+    subplot(2,3,2);hold on
+    x = sumStats.dsi;
+    y = sumStats.rPref;
+    plot(x,y,'ko','MarkerSize',5);
+    plot(x(goodIdx),y(goodIdx),'k.','MarkerSize',10)
+
+    subplot(2,3,3);hold on
+    x = sumStats.ldr;
+    y = sumStats.rPref;
+    plot(x,y,'ko','MarkerSize',5);
+    plot(x(goodIdx),y(goodIdx),'k.','MarkerSize',10)
 
     
 end
