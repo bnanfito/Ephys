@@ -482,7 +482,7 @@ end
 if exist('dsi','var')
     sumStats.dsi = dsi;
     sumStats.dcv = dcv;
-    sumStats.osi = osi;
+%     sumStats.osi = osi;
 end
 if exist('dpi','var')
     sumStats.dpi = dpi;
@@ -509,6 +509,7 @@ if plt == 1
     
         subplot(2,3,1); hold on
         if sum(goodInd)>0
+            sumStats.rPref(goodInd)
             p1 = cdfplot(sumStats.rPref(goodInd)); p1.Color = 'k'; p1.LineWidth = 2;
         end
         p2 = cdfplot(sumStats.rPref); p2.LineStyle = '--'; p2.Color = 'k'; p2.LineWidth = 2;
