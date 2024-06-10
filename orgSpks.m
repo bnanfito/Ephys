@@ -29,11 +29,31 @@ function [spks,trialExclude] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
     else
         st = 1;
     end
-    eventID = sum(trialInfo.eventCh,2);
-    trialStart = downsample(trialInfo.eventTimes,nEpochs);
-    stimStart = downsample(trialInfo.eventTimes,nEpochs,1);
-    stimEnd = downsample(trialInfo.eventTimes,nEpochs,2);
-    trialEnd = downsample(trialInfo.eventTimes,nEpochs,3);
+
+    eventIDdiff = [1;diff(trialInfo.eventId)];
+    eventTimes = trialInfo.eventTimes;
+    if strcmp(Analyzer.modID,'PG')
+
+        stimStartID = 3;
+%         trialStart = downsample(trialInfo.eventTimes,nEpochs);
+%         stimStart = downsample(trialInfo.eventTimes,nEpochs,1);
+%         stimEnd = downsample(trialInfo.eventTimes,nEpochs,2);
+%         trialEnd = downsample(trialInfo.eventTimes,nEpochs,3);
+
+        trialStart = eventTimes(eventIDdiff==1);
+        stimStart = eventTimes(eventIDdiff==2);
+        stimEnd = eventTimes(eventIDdiff==-2);
+        trialEnd = eventTimes(eventIDdiff==-1);
+
+    elseif strcmp(Analyzer.modID,'RD')
+
+        stimStartID = 7;
+        trialStart = eventTimes(eventIDdiff==1);
+        stimStart = eventTimes(eventIDdiff==6 | eventIDdiff==2);
+        stimEnd = eventTimes(eventIDdiff==-6 | eventIDdiff==-2);
+        trialEnd = eventTimes(eventIDdiff==-1);
+
+    end
     [sortTrialCond,sortTrialInd] = sort(trialInfo.triallist);
     sortTrialCond = reshape(sortTrialCond,nReps,nConds);
     sortTrialInd = reshape(sortTrialInd,nReps,nConds);
@@ -51,7 +71,7 @@ function [spks,trialExclude] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
         load(fullfile(physDir,[baseName '_p' num2str(probe) '_MUspkMerge.mat']),'MUspkMerge');
         spkStruct = MUspkMerge;
         clear MUspkMerge
-        MUThreshTrialData(fullfile(dataFold,'Ephys'),animal,unit,expt,probe,'id',3,st,st)
+        MUThreshTrialData(fullfile(dataFold,'Ephys'),animal,unit,expt,probe,'id',stimStartID,st,st)
         load(fullfile(physDir,[baseName '_p' num2str(probe) '_MUThreshTrial.mat']),'MUThresh','MUThreshInfo')
         nUnits = length(MUThresh);
         trialExclude = MUThreshInfo.trialExclude;
