@@ -19,17 +19,17 @@ figDir = fullfile(dataFold,'Figures');
 
 %% Settings
 
-animal = 'febj5';
-unit = '001';
-expt = '003';
+animal = 'febl0';
+unit = '000';
+expt = '000';
 exptName = [animal '_u' unit '_' expt];
-probe = 2;
+probe = 'PSS';
 
 plt = 1;
 plr = 1;
-anaMode = 'SU';
+anaMode = 'MU';
 stimPres = 'ff';
-visTest = 'ranksum';
+visTest = 'anova';
 alpha = 0.01;
 
 
@@ -183,8 +183,33 @@ if plt == 1
     figure;
     goodIdx = sumStats.goodUnit;
 
-    subplot(2,3,1); hold on
+    subplot(2,3,2);hold on
+    x = sumStats.dsi;
+    cdf = cdfplot(x);
+    cdf.LineWidth = 2;
+    cdf.LineStyle = '--';
+    cdf.Color = 'k';
+    cdf = cdfplot(x(goodIdx));
+    cdf.LineWidth = 2;
+    cdf.LineStyle = '-';
+    cdf.Color = 'k';
+    xlim([0 1])
+    ylim([0 1])
 
+    subplot(2,3,3);hold on
+    x = sumStats.ldr;
+    cdf = cdfplot(x);
+    cdf.LineWidth = 2;
+    cdf.LineStyle = '--';
+    cdf.Color = 'k';
+    cdf = cdfplot(x(goodIdx));
+    cdf.LineWidth = 2;
+    cdf.LineStyle = '-';
+    cdf.Color = 'k';
+    xlim([0 1])
+    ylim([0 1])
+
+    subplot(2,3,4); hold on
     x = sumStats.rPref;
     cdf = cdfplot(x);
     cdf.LineWidth = 2;
@@ -194,18 +219,22 @@ if plt == 1
     cdf.LineWidth = 2;
     cdf.LineStyle = '-';
     cdf.Color = 'k';
+    legend({['all units; n=' num2str(length(x))],['good units; n=' num2str(sum(goodIdx))]})
+    ylim([0 1])
 
-    subplot(2,3,2);hold on
+    subplot(2,3,5);hold on
     x = sumStats.dsi;
     y = sumStats.rPref;
     plot(x,y,'ko','MarkerSize',5);
     plot(x(goodIdx),y(goodIdx),'k.','MarkerSize',10)
+    xlim([0 1])
 
-    subplot(2,3,3);hold on
+    subplot(2,3,6);hold on
     x = sumStats.ldr;
     y = sumStats.rPref;
     plot(x,y,'ko','MarkerSize',5);
     plot(x(goodIdx),y(goodIdx),'k.','MarkerSize',10)
+    xlim([0 1])
 
     
 end
