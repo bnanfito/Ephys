@@ -1,9 +1,10 @@
 % anaOri
+function [sumStats] = anaOri(animal,unit,expt,probe,anaMode,stimMode,plt)
 
 %% Initialize
 
-clear
-close all
+% clear
+% close all
 
 if ispc
     dataFold = 'D:\data'; 
@@ -19,16 +20,16 @@ figDir = fullfile(dataFold,'Figures');
 
 %% Settings
 
-animal = 'febl0';
-unit = '000';
-expt = '000';
+% animal = 'febl0';
+% unit = '000';
+% expt = '000';
 exptName = [animal '_u' unit '_' expt];
-probe = 'PSS';
+% probe = 'PSS';
 
-plt = 1;
+% plt = 1;
 plr = 1;
-anaMode = 'MU';
-stimPres = 'ff';
+% anaMode = 'MU';
+% stimMode = 'mono c hemi';
 visTest = 'anova';
 alpha = 0.01;
 
@@ -89,12 +90,12 @@ for u = 1:nU % u indexes a unit (column) in structure spks
 
         cndInclude = ~blank;
 
-    elseif nDom==2 && sum(strcmp(trialInfo.dom,'y_size '))==1
+    elseif nDom==2 && (sum(strcmp(trialInfo.dom,'y_size'))==1 || sum(strcmp(trialInfo.dom,'y_size '))==1)
 
-        if strcmp(stimPres,'ff')
-            cndInclude = trialInfo.domval( : , strcmp(trialInfo.dom,'y_size ') ) >=150;
-        elseif strcmp(stimPres,'hemi')
-            cndInclude = trialInfo.domval( : , strcmp(trialInfo.dom,'y_size ') ) <=75;
+        if strcmp(stimMode,'bi ff') || strcmp(stimMode,'mono c ff')
+            cndInclude = trialInfo.domval( : , strcmp(trialInfo.dom,'y_size') | strcmp(trialInfo.dom,'y_size ') ) >=150;
+        elseif strcmp(stimMode,'mono c hemi')
+            cndInclude = trialInfo.domval( : , strcmp(trialInfo.dom,'y_size') | strcmp(trialInfo.dom,'y_size ') ) <=75;
         end
 
     end
@@ -189,10 +190,12 @@ if plt == 1
     cdf.LineWidth = 2;
     cdf.LineStyle = '--';
     cdf.Color = 'k';
-    cdf = cdfplot(x(goodIdx));
-    cdf.LineWidth = 2;
-    cdf.LineStyle = '-';
-    cdf.Color = 'k';
+    if sum(goodIdx)>0
+        cdf = cdfplot(x(goodIdx));
+        cdf.LineWidth = 2;
+        cdf.LineStyle = '-';
+        cdf.Color = 'k';
+    end
     xlim([0 1])
     ylim([0 1])
 
@@ -202,10 +205,12 @@ if plt == 1
     cdf.LineWidth = 2;
     cdf.LineStyle = '--';
     cdf.Color = 'k';
-    cdf = cdfplot(x(goodIdx));
-    cdf.LineWidth = 2;
-    cdf.LineStyle = '-';
-    cdf.Color = 'k';
+    if sum(goodIdx)>0
+        cdf = cdfplot(x(goodIdx));
+        cdf.LineWidth = 2;
+        cdf.LineStyle = '-';
+        cdf.Color = 'k';
+    end
     xlim([0 1])
     ylim([0 1])
 
@@ -215,12 +220,17 @@ if plt == 1
     cdf.LineWidth = 2;
     cdf.LineStyle = '--';
     cdf.Color = 'k';
-    cdf = cdfplot(x(goodIdx));
-    cdf.LineWidth = 2;
-    cdf.LineStyle = '-';
-    cdf.Color = 'k';
-    legend({['all units; n=' num2str(length(x))],['good units; n=' num2str(sum(goodIdx))]})
-    ylim([0 1])
+    if sum(goodIdx)>0
+        cdf = cdfplot(x(goodIdx));
+        cdf.LineWidth = 2;
+        cdf.LineStyle = '-';
+        cdf.Color = 'k';
+        legend({['all units; n=' num2str(length(x))],['good units; n=' num2str(sum(goodIdx))]})
+        ylim([0 1])
+    else
+        legend({['no good units; n=' num2str(length(x))]})
+        ylim([0 1])
+    end
 
     subplot(2,3,5);hold on
     x = sumStats.dsi;
@@ -241,4 +251,4 @@ end
 
 %% Save
 
-
+end
