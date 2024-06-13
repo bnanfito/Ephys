@@ -1,6 +1,6 @@
 %process units
 clear all
-% close all
+close all
 
 visTest = 'ranksum'; alpha = 0.01;
 svePlt = 0;
@@ -19,11 +19,11 @@ figDir = fullfile(dataFold,'Figures');
 sumDir = fullfile(dataFold,'SummaryStats');
 anaMode = 'MU';
 
-% V1 COOLED
-animals = {'febh2','febh3','febj3','febk7','febk8','febl7'};
+% % V1 COOLED
+% animals = {'febh2','febh3','febj3','febk7','febk8','febl7'};
 
-% % CONTROL
-% animals = {'febj4'};
+% CONTROL
+animals = {'febj4','febl8'};
 
 % % CONTROL (AUGUSTO)
 % animals = {'FEAO4','FEAQ5','FEAS6','FEAT1','FEAN6'};
@@ -69,6 +69,10 @@ elseif strcmp(animals{a},'febj4')
     before = {'_u000_006'};
     after = {'_u000_027'};
     trainAx = [90 270];
+elseif strcmp(animals{a},'febl8')
+    before = {'_u001_004'};
+    after = {'_u001_025'};
+    trainAx = [0 180];
 elseif strcmp(animals{a},'FEAO4')
     before = {'_u000_001'};
     after = {'_u002_000'};
@@ -172,7 +176,7 @@ for tr = 1:2 % tr = 1 = before; tr = 2 = after training
             sumStats.dsi(sumStats.dsi>1) = 1;
             sumStats.dcv(sumStats.dcv>1) = 1;
             sumStats.dcv(sumStats.dcv<0) = 0;
-            sumStats.osi(sumStats.osi>1) = 1;
+%             sumStats.osi(sumStats.osi>1) = 1;
 
             if ~isempty(trainAx)
                 oriDiff = abs(sumStats.cPref-trainAx);
@@ -214,7 +218,7 @@ pssaf{nAnimals+1} = vertcat(pssaf{1:nAnimals});
 
 %% PLOT
 
-metrics = {'rPref','dsi','dcv','osi'};
+metrics = {'rPref','dsi','dcv'};
 nMet = length(metrics);
 
 for f = 1:nFig % all units; pref trained; pref orth

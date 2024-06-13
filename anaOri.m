@@ -30,7 +30,7 @@ exptName = [animal '_u' unit '_' expt];
 plr = 1;
 % anaMode = 'MU';
 % stimMode = 'mono c hemi';
-visTest = 'anova';
+visTest = 'ranksum';
 alpha = 0.01;
 
 
@@ -101,7 +101,7 @@ for u = 1:nU % u indexes a unit (column) in structure spks
     end
 
     if ~isempty(trialInfo.blankId)
-        Rblank{u} = spks(u).fr.bc(:,blank);
+        Rblank{u} = spks(u).fr.stim(:,blank);
     end
     R{u} = spks(u).fr.bc(:,cndInclude);
     C{u} = trialInfo.domval(cndInclude, strcmp(trialInfo.dom,'ori') )';
