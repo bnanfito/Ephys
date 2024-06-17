@@ -19,11 +19,11 @@ figDir = fullfile(dataFold,'Figures');
 sumDir = fullfile(dataFold,'SummaryStats');
 anaMode = 'MU';
 
-% % V1 COOLED
-% animals = {'febh2','febh3','febj3','febk7','febk8','febl7'};
+% V1 COOLED
+animals = {'febh2','febh3','febj3','febk7','febk8','febl7'};
 
-% CONTROL
-animals = {'febj4','febl8'};
+% % CONTROL
+% animals = {'febj4','febl8'};
 
 % % CONTROL (AUGUSTO)
 % animals = {'FEAO4','FEAQ5','FEAS6','FEAT1','FEAN6'};
@@ -39,27 +39,28 @@ for a = 1:nAnimals
 %% Define experiments and training parameters
 if strcmp(animals{a},'febh2')
     before = {'_u000_001'}; %binocular FF
-    after = {'_u000_040','_u000_041','_u002_000'}; %binocular FF
+%     after = {'_u000_038'}; %mono c hemi
+    after = {'','',''};
     trainAx = [90 270];
 elseif strcmp(animals{a},'febh3')
     before = {'_u000_002'}; %binocular FF
-    after = {'_u000_043','_u001_000','_u002_002','_u003_000'}; %binocular FF
+    after = {'_u000_041','_u001_002','_u002_000'}; %mono c hemi
     trainAx = [0 180];
 elseif strcmp(animals{a},'febj3')
-    before = {'_u000_001'}; %monocular (contra) FF; (ipsi eye never opened)
-    after = {'_u000_038'}; %monocular (contra) FF
+    before = {'_u000_002'}; %mono c hemi
+    after = {'_u000_037'}; %mono c hemi
     trainAx = [0 180];
 elseif strcmp(animals{a},'febk7')
     before = {'_u000_001'}; %binocular FF
     after = {'_u000_042'}; %binocular FF
     trainAx = [90 270];
 elseif strcmp(animals{a},'febk8')
-    before = {'_u000_000'}; %binocular FF
-    after = {'_u002_033'}; %monocular (contra) train stim
+    before = {'_u000_002'}; %mono c hemi
+    after = {'_u002_033'}; %mono c hemi
     trainAx = [45 225];
 elseif strcmp(animals{a},'febl7')
-    before = {'_u000_000'}; %monocular (contra) FF
-    after = {'_u000_034','_u001_001','_u002_001'}; %monocular (contra) train stim
+    before = {'_u000_001'}; %mono c hemi
+    after = {'_u000_034','_u001_001','_u002_001'}; %mono c hemi
     trainAx = [90 270];
 elseif strcmp(animals{a},'febj2')
     before = {'_u000_003'};

@@ -93,11 +93,11 @@ physDir = fullfile(dataFold,'Ephys');
 
 
 
-animal = 'febk8';
+animal = 'febg2';
 unit = 'MMM';
-expt = '000000000001000002000003000004';
+expt = '001013001016001017001020001021';
 probe = 1;
-for U = [2 3 4 9 10 11 13]
+for U = [1 2 3 8 9]
 
 anaMode = 'SU';
 
@@ -120,8 +120,9 @@ for f = 1:height(dat)
     if dat.fileID{f}(2)== 1 || dat.fileID{f}(2)== 3
         clr = 'k';
     elseif dat.fileID{f}(2)== 2
-        clr = 'c';
-%         patch([-1 -0.9 -0.9 -1],[maxTrial+1 maxTrial+1 maxTrial+nTrials maxTrial+nTrials],'c','EdgeColor','none')
+%         clr = 'c';
+        clr = 'k';
+        patch([timeLims fliplr(timeLims)],[maxTrial+1 maxTrial+1 maxTrial+nTrials maxTrial+nTrials],'c','EdgeColor','none','FaceAlpha',0.2)
     end
     x = dat.raster{f}(1,:);
     y = dat.raster{f}(2,:)+yOffset;
@@ -168,6 +169,7 @@ for c = 1:2
     plot(x,mean(y),[clr '-o'],'LineWidth',lw,'MarkerSize',5)
     plot(repmat(x,2,1),mean(y)+([-1;1]*sem),clr,'LineWidth',lw)
     xlim([0 360])
+    xticks([0 90 180 270])
     xlabel('Direction of Motion (deg)')
     ylabel('Firing Rate (Hz)')
 

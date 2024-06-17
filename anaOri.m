@@ -1,5 +1,5 @@
 % anaOri
-function [sumStats] = anaOri(animal,unit,expt,probe,anaMode,stimMode,plt)
+function [sumStats] = anaOri(animal,unit,expt,probe,anaMode,stimMode,plt,svePlt)
 
 %% Initialize
 
@@ -27,7 +27,8 @@ exptName = [animal '_u' unit '_' expt];
 % probe = 'PSS';
 
 % plt = 1;
-plr = 1;
+plr = 0;
+alignBit = 1;
 % anaMode = 'MU';
 % stimMode = 'mono c hemi';
 visTest = 'ranksum';
@@ -159,19 +160,44 @@ if plt == 1
         subplot(2,2,3);hold on
         x = spks(u).stimCent(1,:);
         y = spks(u).stimCent(2,:);
+        if isempty(x) || isempty(y)
+            text(0,0,'no spikes')
+            ttl = [exptName ' p' num2str(probe) ' (' area ') ' anaMode '#' num2str(uID(u))];
+            if ~ismember(u,find(goodUnits))
+                ttl = [ttl '(BAD UNIT)'];
+            end
+            sgtitle(ttl)
+            continue
+        end
         patch([0 1 1 0],[0 0 max(y)+1 max(y)+1],'k','EdgeColor','none','FaceAlpha',0.2)
+        for t = 1:nTrials
+            if ismember(t,find(trialExclude))
+                patch([-predelay stimTime+postdelay stimTime+postdelay -predelay],[t-0.5 t-0.5 t+0.5 t+0.5],'r','EdgeColor','none','FaceAlpha',0.2)
+            end
+        end
         plot(x,y,'k.')
         xlim([-1 2])
         ylim([0 max(y)+1])
 
         if plr == 1
             subplot(1,2,2,polaraxes);hold on
-            x = deg2rad(C{u}); x = [x(1:end) x(1)];
-            y = mean(R{u},'omitnan'); y = [y(1:end) y(1)];
-            polarplot(x,y,'k-o')            
+            xT{u} = deg2rad(C{u}); xT{u} = [xT{u}(1:end) xT{u}(1)];
+            yT{u} = mean(R{u},'omitnan'); yT{u} = [yT{u}(1:end) yT{u}(1)];
+            polarplot(xT{u},yT{u},'k-o')            
         else
             subplot(1,2,2);hold on
-            plot(C{u},mean(R{u},'omitnan'),'k-o')
+            xT{u} = C{u};
+            yT{u} = R{u};
+            yMean{u} = mean(yT{u},'omitnan');
+            sem{u} = std(yT{u},'omitnan')/sqrt(size(yT{u},1));
+            if alignBit == 1
+                [xT{u},yMean{u},i] = alignDirTuning(xT{u},yMean{u});
+                yT{u} = yT{u}(:,i);
+                sem{u} = sem{u}(i);
+            end
+            plot(xT{u},yT{u}','k.')
+            plot(repmat(xT{u},2,1),yMean{u}+([1;-1]*sem{u}),'k')
+            plot(xT{u},yMean{u},'k-o')
         end
 
         ttl = [exptName ' p' num2str(probe) ' (' area ') ' anaMode '#' num2str(uID(u))];
@@ -179,10 +205,24 @@ if plt == 1
             ttl = [ttl '(BAD UNIT)'];
         end
         sgtitle(ttl)
+        if svePlt == 1 && ismember(u,find(goodUnits))
+            figFileDir = fullfile(figDir,animal,exptName);
+            if ~isfolder(figFileDir)
+                mkdir(figFileDir)
+            end
+            figFileName = fullfile(figFileDir,[exptName '_p' num2str(probe) '_' anaMode num2str(uID(u))]);
+            saveas(gcf,figFileName)
+        end
     end
 
     figure;
     goodIdx = sumStats.goodUnit;
+    
+    subplot(2,3,1); hold on
+    x = mean(vertcat(xT{:}),'omitnan');
+    y = mean(vertcat(yMean{:}),'omitnan');
+    plot(x,y,'k-o','LineWidth',2)
+
 
     subplot(2,3,2);hold on
     x = sumStats.dsi;
@@ -196,8 +236,11 @@ if plt == 1
         cdf.LineStyle = '-';
         cdf.Color = 'k';
     end
+    xlabel('DSI')
     xlim([0 1])
+    ylabel('percentile')
     ylim([0 1])
+    title('')
 
     subplot(2,3,3);hold on
     x = sumStats.ldr;
@@ -211,8 +254,11 @@ if plt == 1
         cdf.LineStyle = '-';
         cdf.Color = 'k';
     end
+    xlabel('Ldir')
     xlim([0 1])
+    ylabel('percentile')
     ylim([0 1])
+    title('')
 
     subplot(2,3,4); hold on
     x = sumStats.rPref;
@@ -226,29 +272,45 @@ if plt == 1
         cdf.LineStyle = '-';
         cdf.Color = 'k';
         legend({['all units; n=' num2str(length(x))],['good units; n=' num2str(sum(goodIdx))]})
-        ylim([0 1])
     else
         legend({['no good units; n=' num2str(length(x))]})
-        ylim([0 1])
     end
+    xlabel('rPref')
+    ylabel('percentile')
+    ylim([0 1])
 
     subplot(2,3,5);hold on
     x = sumStats.dsi;
     y = sumStats.rPref;
     plot(x,y,'ko','MarkerSize',5);
     plot(x(goodIdx),y(goodIdx),'k.','MarkerSize',10)
+    xlabel('DSI')
     xlim([0 1])
+    ylabel('rPref')
 
     subplot(2,3,6);hold on
     x = sumStats.ldr;
     y = sumStats.rPref;
     plot(x,y,'ko','MarkerSize',5);
     plot(x(goodIdx),y(goodIdx),'k.','MarkerSize',10)
+    xlabel('Ldir')
     xlim([0 1])
+    ylabel('rPref')
+
+    if svePlt == 1
+        figFileDir = fullfile(figDir,animal,exptName);
+        if ~isfolder(figFileDir)
+            mkdir(figFileDir)
+        end
+        figFileName = fullfile(figFileDir,[exptName '_p' num2str(probe) '_SummaryPlot']);
+        saveas(gcf,figFileName)
+    end
 
     
 end
 
 %% Save
+
+
 
 end
