@@ -38,29 +38,76 @@ nAnimals = length(animals);
 for a = 1:nAnimals
 %% Define experiments and training parameters
 if strcmp(animals{a},'febh2')
-    before = {'_u000_001'}; %binocular FF
-%     after = {'_u000_038'}; %mono c hemi
-    after = {'','',''};
+    % mono c hemi
+    before = {};
+    after = {'_u000_038'}; 
+%     % bi ff
+%     before = {'_u000_001'}; 
+%     after = {'_u000_040','_u001_000','_u002_000'};
+%     % mono c ff
+%     before = {};
+%     after = {'_u000_039','_u001_001','_u002_001'};
+
     trainAx = [90 270];
 elseif strcmp(animals{a},'febh3')
-    before = {'_u000_002'}; %binocular FF
-    after = {'_u000_041','_u001_002','_u002_000'}; %mono c hemi
+    % mono c hemi
+    before = {};
+    after = {'_u000_041','_u001_002','_u002_000'}; 
+%     % bi ff
+%     before = {'_u000_002'};
+%     after = {'_u000_043','_u001_000','_u002_002','_u003_000'};
+%     % mono c ff
+%     before = {};
+%     after = {'_u000_042','_u001_001','_u002_001'};
+
     trainAx = [0 180];
 elseif strcmp(animals{a},'febj3')
-    before = {'_u000_002'}; %mono c hemi
-    after = {'_u000_037'}; %mono c hemi
+    % mono c hemi
+    before = {'_u000_002'};
+    after = {'_u000_037'};
+%     % bi ff
+%     before = {};
+%     after = {};
+%     % mono c ff
+%     before = {'_u000_001'};
+%     after = {'_u000_038'};
+
     trainAx = [0 180];
 elseif strcmp(animals{a},'febk7')
-    before = {'_u000_001'}; %binocular FF
-    after = {'_u000_042'}; %binocular FF
+    % mono c hemi
+    before = {'_u000_006'};
+    after = {'_u000_041'};
+%     % bi ff
+%     before = {'_u000_001'};
+%     after = {'_u000_042'};
+%     % mono c ff
+%     before = {};
+%     after = {};
+
     trainAx = [90 270];
 elseif strcmp(animals{a},'febk8')
-    before = {'_u000_002'}; %mono c hemi
-    after = {'_u002_033'}; %mono c hemi
+    % mono c hemi
+    before = {'_u000_002'};
+    after = {'_u002_033','_u003_001','_u004_000'};
+%     % bi ff
+%     before = {'_u000_000'};
+%     after = {'_u003_000','_u004_001'};
+%     % mono c ff
+%     before = {'_u000_001'};
+%     after = {_u002_036};
+
     trainAx = [45 225];
 elseif strcmp(animals{a},'febl7')
-    before = {'_u000_001'}; %mono c hemi
-    after = {'_u000_034','_u001_001','_u002_001'}; %mono c hemi
+    % mono c hemi
+    before = {'_u000_001'};
+    after = {'_u000_034','_u001_001'};
+%     % bi ff
+%     before = {};
+%     after = {};
+%     % mono c ff
+%     before = {'_u000_000'};
+%     after = {'_u000_035','_u001_002'};
+
     trainAx = [90 270];
 elseif strcmp(animals{a},'febj2')
     before = {'_u000_003'};
