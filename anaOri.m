@@ -125,7 +125,7 @@ for u = 1:nU % u indexes a unit (column) in structure spks
 
     dsi(u) = abs(rPref-rNull)/rPref;
     mv = meanvec(C{u},rMean);
-    ldr(u) = mv.l;
+    ldir(u) = mv.ldir;
 
     Rpref(u) = rPref;
     Cpref(u) = cPref;
@@ -135,7 +135,7 @@ for u = 1:nU % u indexes a unit (column) in structure spks
 end
 
 varNames = {'exptName','probe','area','uID','goodUnit','pVis','fr','response','condition','rPref','cPref','rNull','cNull','rBlank','dsi','ldr'};
-sumStats = table(exptID',probeID',areaID',uID',goodUnits',pVis,vertcat(spks.fr),R',C',Rpref',Cpref',Rnull',Cnull',Rblank',dsi',ldr','VariableNames',varNames);
+sumStats = table(exptID',probeID',areaID',uID',goodUnits',pVis,vertcat(spks.fr),R',C',Rpref',Cpref',Rnull',Cnull',Rblank',dsi',ldir','VariableNames',varNames);
 
 if strcmp(anaMode,'MU')
     sumStats.xPos = vertcat(spks.xPos);

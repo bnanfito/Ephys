@@ -20,7 +20,7 @@ sumDir = fullfile(dataFold,'SummaryStats');
 anaMode = 'MU';
 
 % V1 COOLED
-animals = {'febh2','febh3','febj3','febk7','febk8','febl7'};
+animals = {'febj3','febk7','febk8','febl7'};
 
 % % CONTROL
 % animals = {'febj4','febl8'};
@@ -114,12 +114,20 @@ elseif strcmp(animals{a},'febj2')
     after = {'_u000_023'};
     trainAx = [90 270];
 elseif strcmp(animals{a},'febj4')
+%       % mono c hemi
+%     before = {'_u000_003'};
+%     after = {'_u000_024'};
+    % bi ff
     before = {'_u000_006'};
     after = {'_u000_027'};
     trainAx = [90 270];
 elseif strcmp(animals{a},'febl8')
+    % mono c hemi
     before = {'_u001_004'};
     after = {'_u001_025'};
+%         % bi ff
+%     before = {'_u001_000'};
+%     after = {'_u001_026'};
     trainAx = [0 180];
 elseif strcmp(animals{a},'FEAO4')
     before = {'_u000_001'};
@@ -222,9 +230,7 @@ for tr = 1:2 % tr = 1 = before; tr = 2 = after training
 %             sumStats = convertAL(animals{a},unit,expt,p,dataFold);
 %             sumStats = sumStats(sumStats.goodUnit == 1,:);
             sumStats.dsi(sumStats.dsi>1) = 1;
-            sumStats.dcv(sumStats.dcv>1) = 1;
-            sumStats.dcv(sumStats.dcv<0) = 0;
-%             sumStats.osi(sumStats.osi>1) = 1;
+            sumStats.osi(sumStats.osi>1) = 1;
 
             if ~isempty(trainAx)
                 oriDiff = abs(sumStats.cPref-trainAx);
@@ -266,7 +272,7 @@ pssaf{nAnimals+1} = vertcat(pssaf{1:nAnimals});
 
 %% PLOT
 
-metrics = {'rPref','dsi','dcv'};
+metrics = {'rPref','dsi','ldir','osi','lori'};
 nMet = length(metrics);
 
 for f = 1:nFig % all units; pref trained; pref orth
@@ -375,15 +381,18 @@ for f = 1:nFig % all units; pref trained; pref orth
                 if strcmp(metric,'dsi')
                     dist{a,t,f}(:,m) = tbl.dsi;
                     xLbl = 'DSI';
-                elseif strcmp(metric,'dcv')
-                    dist{a,t,f}(:,m) = 1-tbl.dcv;
-                    xLbl = '1-DCV';
+                elseif strcmp(metric,'ldir')
+                    dist{a,t,f}(:,m) = tbl.ldir;
+                    xLbl = 'Ldir';
                 elseif strcmp(metric,'rPref')
                     dist{a,t,f}(:,m) = tbl.rPref;
                     xLbl = 'rPref';
                 elseif strcmp(metric,'osi')
                     dist{a,t,f}(:,m) = tbl.osi;
                     xLbl = 'osi';
+                elseif strcmp(metric,'lori')
+                    dist{a,t,f}(:,m) = tbl.lori;
+                    xLbl = 'Lori';
                 end
 
                 c(t) = cdfplot(dist{a,t,f}(:,m));
@@ -527,20 +536,40 @@ title('MU Before vs After BiDir Training')
 
 
 figure;hold on;
-c = cdfplot(1-v1bf{end}(v1bf{end}.goodUnit==1,:).dcv);
+c = cdfplot(v1bf{end}(v1bf{end}.goodUnit==1,:).ldir);
 c.LineStyle = '--';c.Color = 'b';
-c = cdfplot(1-v1af{end}(v1af{end}.goodUnit==1,:).dcv);
+c = cdfplot(v1af{end}(v1af{end}.goodUnit==1,:).ldir);
 c.LineStyle = '-';c.Color = 'b';
-c = cdfplot(1-pssbf{end}(pssbf{end}.goodUnit==1,:).dcv);
+c = cdfplot(pssbf{end}(pssbf{end}.goodUnit==1,:).ldir);
 c.LineStyle = '--';c.Color = 'r';
-c = cdfplot(1-pssaf{end}(pssaf{end}.goodUnit==1,:).dcv);
+c = cdfplot(pssaf{end}(pssaf{end}.goodUnit==1,:).ldir);
 c.LineStyle = '-';c.Color = 'r';
 lbls = {['V1 before; n=' num2str(length(find(v1bf{end}.goodUnit==1)))],...
     ['V1 after; n=' num2str(length(find(v1af{end}.goodUnit==1)))],...
     ['PSS before; n=' num2str(length(find(pssbf{end}.goodUnit==1)))],...
     ['PSS after; n=' num2str(length(find(pssaf{end}.goodUnit==1)))]};
 legend(lbls,'Location','southeast')
-xlabel('1-DCV')
+xlabel('Ldir')
+ylabel('Percentile')
+title('MU Before vs After BiDir Training')
+
+
+
+figure;hold on;
+c = cdfplot(v1bf{end}(v1bf{end}.goodUnit==1,:).lori);
+c.LineStyle = '--';c.Color = 'b';
+c = cdfplot(v1af{end}(v1af{end}.goodUnit==1,:).lori);
+c.LineStyle = '-';c.Color = 'b';
+c = cdfplot(pssbf{end}(pssbf{end}.goodUnit==1,:).lori);
+c.LineStyle = '--';c.Color = 'r';
+c = cdfplot(pssaf{end}(pssaf{end}.goodUnit==1,:).lori);
+c.LineStyle = '-';c.Color = 'r';
+lbls = {['V1 before; n=' num2str(length(find(v1bf{end}.goodUnit==1)))],...
+    ['V1 after; n=' num2str(length(find(v1af{end}.goodUnit==1)))],...
+    ['PSS before; n=' num2str(length(find(pssbf{end}.goodUnit==1)))],...
+    ['PSS after; n=' num2str(length(find(pssaf{end}.goodUnit==1)))]};
+legend(lbls,'Location','southeast')
+xlabel('Lori')
 ylabel('Percentile')
 title('MU Before vs After BiDir Training')
 
