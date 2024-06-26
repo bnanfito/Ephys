@@ -1,7 +1,7 @@
 clear all
 close all
 
-load('/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/V1Cool_Ori16_monoChemi_ranksum.mat','Data','animals','exptList','age')
+load('D:\data\dataSets\V1Cool_Ori16_monoChemi_ranksum.mat','Data','animals','exptList','age')
 
 metrics = {'rPref','dsi','ldr'};
 

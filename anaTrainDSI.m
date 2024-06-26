@@ -530,6 +530,7 @@ lbls = {['V1 before; n=' num2str(length(find(v1bf{end}.goodUnit==1)))],...
     ['PSS after; n=' num2str(length(find(pssaf{end}.goodUnit==1)))]};
 legend(lbls,'Location','southeast')
 xlabel('DSI')
+xlim([0 1])
 ylabel('Percentile')
 title('MU Before vs After BiDir Training')
 
@@ -550,6 +551,7 @@ lbls = {['V1 before; n=' num2str(length(find(v1bf{end}.goodUnit==1)))],...
     ['PSS after; n=' num2str(length(find(pssaf{end}.goodUnit==1)))]};
 legend(lbls,'Location','southeast')
 xlabel('Ldir')
+xlim([0 1])
 ylabel('Percentile')
 title('MU Before vs After BiDir Training')
 
@@ -570,6 +572,7 @@ lbls = {['V1 before; n=' num2str(length(find(v1bf{end}.goodUnit==1)))],...
     ['PSS after; n=' num2str(length(find(pssaf{end}.goodUnit==1)))]};
 legend(lbls,'Location','southeast')
 xlabel('Lori')
+xlim([0 1])
 ylabel('Percentile')
 title('MU Before vs After BiDir Training')
 
