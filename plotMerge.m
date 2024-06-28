@@ -90,34 +90,34 @@ end
 
 
 
-animal = 'febg9';
-units = {'000','000','000','000','000','000'};
-expts = {'002','006','007','010','011','014'};
-grp =   [1 1 2 2 3 3];
-fileNum = [1 2 3 4 5 6];
-mergeID = '000002000006000007000010000011000014';
-% units = {'000','000','000'};
-% expts = {'006','007','011'};
-% grp =   [    1,    2,    3];
-% mergeID = '000006000007000011';
+% animal = 'febg9';
+% units = {'000','000','000','000','000','000'};
+% expts = {'002','006','007','010','011','014'};
+% grp =   [1 1 2 2 3 3];
+% fileNum = [1 2 3 4 5 6];
+% mergeID = '000002000006000007000010000011000014';
+% % units = {'000','000','000'};
+% % expts = {'006','007','011'};
+% % grp =   [    1,    2,    3];
+% % mergeID = '000006000007000011';
 
 
 
-% animal = 'febl0';
-% % units = {'001','001','001'};
-% % expts = {'006','010','016'};
-% % grp = [1 2 3];
-% % mergeID = '001006001010001016';
-% 
-% % units = {'001','001'};
-% % expts = {'018','019'};
-% % grp = [1 2];
-% % mergeID = '001018001019';
-% 
-% units = {'000','000','000'};
-% expts = {'010','012','015'};
+animal = 'febl0';
+% units = {'001','001','001'};
+% expts = {'006','010','016'};
 % grp = [1 2 3];
-% mergeID = '000010000012000015';
+% mergeID = '001006001010001016';
+
+% units = {'001','001'};
+% expts = {'018','019'};
+% grp = [1 2];
+% mergeID = '001018001019';
+
+units = {'000','000','000'};
+expts = {'010','012','015'};
+grp = [1 2 3];
+mergeID = '000010000012000015';
 
 
 
@@ -287,7 +287,7 @@ for f = 1:length(expts)
             cNull(countU) = nan;
             rNull(countU) = 0;
             dsi(countU) = nan;
-            dcv(countU) = nan;
+            ldir(countU) = nan;
             goodUnit(countU) = false;
             latCh(countU)= nan;
             latCh2(countU)= nan;
@@ -351,7 +351,7 @@ for f = 1:length(expts)
             rNull(countU) = mean(y{countU,1}( : , mean(x{countU,1})==cNull(countU) ));
             dsi(countU) = abs(rPref(countU)-rNull(countU)) / rPref(countU);
             mv = meanvec(mean(x{countU,1}),mean(y{countU,1}));
-            dcv(countU) = mv.cv;
+            ldir(countU) = mv.ldir;
     %         [g] = dirGauss(mean(y),mean(x),0);
     %         xMdl = linspace(0,359,360);
             isAct = rPref(countU)>=2;
@@ -407,7 +407,7 @@ for f = 1:length(expts)
 end
 
 varNames = {'fileID','exptID','uID','uInfo','goodUnit','raster','lat1','lat2','fr','tuningX','tuningY','rBlank','rPref','cPref','rNull','DSI','DCV'};
-uDat = table(fileID,exptID,uID',info,goodUnit',raster,latCh',latCh2',fr,x,y,rBlank,rPref',cPref',rNull',dsi',dcv','VariableNames',varNames);
+uDat = table(fileID,exptID,uID',info,goodUnit',raster,latCh',latCh2',fr,x,y,rBlank,rPref',cPref',rNull',dsi',ldir','VariableNames',varNames);
 
 clear x y uIDs uID exptID h
 
