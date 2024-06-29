@@ -23,7 +23,8 @@ anaMode = 'MU';
 animals = {'febj3','febk7','febk8','febl7'};
 
 % % CONTROL
-% animals = {'febj4','febl8'};
+% animals = {'febl8'};
+% % animals = {'febj4','febl8'};
 
 % % CONTROL (AUGUSTO)
 % animals = {'FEAO4','FEAQ5','FEAS6','FEAT1','FEAN6'};
@@ -114,13 +115,13 @@ elseif strcmp(animals{a},'febj2')
     after = {'_u000_023'};
     trainAx = [90 270];
 elseif strcmp(animals{a},'febj4')
-%       % mono c hemi
-%     before = {'_u000_003'};
-%     after = {'_u000_024'};
-    % bi ff
-    before = {'_u000_006'};
-    after = {'_u000_027'};
-    trainAx = [90 270];
+      % mono c hemi
+    before = {'_u000_003'};
+    after = {'_u000_024'};
+%     % bi ff
+%     before = {'_u000_006'};
+%     after = {'_u000_027'};
+%     trainAx = [90 270];
 elseif strcmp(animals{a},'febl8')
     % mono c hemi
     before = {'_u001_004'};

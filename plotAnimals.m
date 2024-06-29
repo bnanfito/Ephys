@@ -26,7 +26,7 @@ ori16Idx = strcmp(coolExpts.module,'PG') &...
 coolExpts = coolExpts(~excludeIdx & pssIdx & ori16Idx,:);
 animals = unique(coolExpts.experimentId);
 for a = 1:length(animals)
-    ages(a) = unique( coolExpts.age( strcmp(coolExpts.experimentId,animals(a)) ) );
+    ages(a,1) = unique( coolExpts.age( strcmp(coolExpts.experimentId,animals(a)) ) );
 end
 
 clear exptNameList
@@ -161,6 +161,16 @@ for a = 1:length(animals)
 end
 xlabel('age')
 ylabel('Rpref')
+
+
+figure; hold on
+for a = 1:length(animals)
+    si = (aniRPcool(a) - aniRPcntrl(a))/(aniRPcool(a) + aniRPcntrl(a));
+    plot(ages(a),si,'g.','MarkerSize',10)
+end
+xlabel('age')
+ylabel('SI')
+
 
 figure; hold on
 for a = 1:length(animals)
