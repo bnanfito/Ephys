@@ -3,8 +3,8 @@ clear all
 close all
 
 if ispc
-    dataFold = 'D:\data'; 
-%     dataFold = 'C:\Users\brand\Documents\data';
+%     dataFold = 'D:\data'; 
+    dataFold = 'C:\Users\brand\Documents\data';
 %     dataFold = 'F:\Brandon\data';
 elseif ismac
     dataFold = '/Volumes/Lab drive/Brandon/data';
@@ -103,21 +103,21 @@ end
 
 
 
-animal = 'febl0';
-% units = {'001','001','001'};
-% expts = {'006','010','016'};
+% animal = 'febl0';
+% % units = {'001','001','001'};
+% % expts = {'006','010','016'};
+% % grp = [1 2 3];
+% % mergeID = '001006001010001016';
+% 
+% % units = {'001','001'};
+% % expts = {'018','019'};
+% % grp = [1 2];
+% % mergeID = '001018001019';
+% 
+% units = {'000','000','000'};
+% expts = {'010','012','015'};
 % grp = [1 2 3];
-% mergeID = '001006001010001016';
-
-% units = {'001','001'};
-% expts = {'018','019'};
-% grp = [1 2];
-% mergeID = '001018001019';
-
-units = {'000','000','000'};
-expts = {'010','012','015'};
-grp = [1 2 3];
-mergeID = '000010000012000015';
+% mergeID = '000010000012000015';
 
 
 
@@ -170,6 +170,15 @@ mergeID = '000010000012000015';
 % expts = {'011','013','017'};
 % grp =   [1 2 3];
 % mergeID = '001011001013001017';
+
+
+
+animal = 'febm3';
+units = {'001','001','001'};
+expts = {'003','004','005'};
+fileNum = [1 2 3];
+grp = [1 2 3];
+mergeID = '001003001004001005';
 
 
 
