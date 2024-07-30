@@ -13,7 +13,7 @@ if ~strcmp(unit,'MMM')
 end
 name = 'BRN';
 scaleFactor = 5;
-nJobs = 50;
+nJobs = 100;
 legacyFlag = 0;
 
 baseName = [animal '_u' unit '_' expt];

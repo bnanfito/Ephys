@@ -10,7 +10,7 @@ badAnimals = {'febe7','febg6','febg7','febg8','febg9','febk6','febl6','febl8','f
 badExpts = {'febh5_u001_012'};
 biFFlist = {'febk7_u000_002','febk8_u000_000','febl0_u000_001','febh5_u000_000','febj8_u000_000','febj8_u001_000','febj8_u002_000','febj8_u003_000'};
 
-needSort = {'febj8_u003_008','febj8_u003_009','febj8_u003_010','febj8_u003_022','febl0_u000_012','febl0_u000_023','febl0_u000_027','febl0_u001_010','febl0_u001_019','febj7_u000_011'};
+needSort = {'febj8_u003_009','febj8_u003_010','febj8_u003_022','febl0_u000_012','febl0_u000_023','febl0_u000_027','febl0_u001_010','febl0_u001_019','febj7_u000_011'};
 
 %% query data
 
