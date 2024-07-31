@@ -91,12 +91,18 @@ for u = 1:nU % u indexes a unit (column) in structure spks
 
         cndInclude = ~blank;
 
-    elseif nDom==2 && (sum(strcmp(trialInfo.dom,'y_size'))==1 || sum(strcmp(trialInfo.dom,'y_size '))==1)
+    elseif nDom==2 && (sum(strcmp(trialInfo.dom,'y_size'))==1 || ...
+                       sum(strcmp(trialInfo.dom,'y_size '))==1 || ...
+                       sum(strcmp(trialInfo.dom,'x_size'))==1)
 
         if strcmp(stimMode,'bi ff') || strcmp(stimMode,'mono c ff')
-            cndInclude = trialInfo.domval( : , strcmp(trialInfo.dom,'y_size') | strcmp(trialInfo.dom,'y_size ') ) >=150;
+            cndInclude = trialInfo.domval( : , strcmp(trialInfo.dom,'y_size') | ...
+                                               strcmp(trialInfo.dom,'y_size ') | ...
+                                               strcmp(trialInfo.dom,'x_size') ) >=150;
         elseif strcmp(stimMode,'mono c hemi')
-            cndInclude = trialInfo.domval( : , strcmp(trialInfo.dom,'y_size') | strcmp(trialInfo.dom,'y_size ') ) <=75;
+            cndInclude = trialInfo.domval( : , strcmp(trialInfo.dom,'y_size') | ...
+                                               strcmp(trialInfo.dom,'y_size ') | ...
+                                               strcmp(trialInfo.dom,'x_size') ) <=75;
         end
 
     end

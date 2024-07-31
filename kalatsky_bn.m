@@ -2,15 +2,16 @@
 clear all
 close all
 
-dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
+% dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
+dataFold = '/Volumes/Lab drive/Brandon/data';
 physDir = fullfile(dataFold,'Ephys');
 
-animal = 'febl0';
+animal = 'febm7';
 unit = '000';
-expt = '008';
+expt = '001';
 probe = 2;
 exptName = [animal '_u' unit '_' expt];
-anaMode = 'SU';
+anaMode = 'MU';
 
 load(fullfile(physDir,animal,exptName,[exptName '_trialInfo.mat']))
 load(fullfile(physDir,animal,exptName,[exptName '_id.mat']))

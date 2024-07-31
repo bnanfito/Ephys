@@ -159,31 +159,58 @@ end
 
 %% Plot
 
+if strcmp(anaMode,'MU')
 
-figure; hold on
-for a = 1:length(animals)
-    plot(ages(a),aniRPcntrl(a),'k.','MarkerSize',nCntrl(a))
-    plot(ages(a),aniRPcool(a),'c.','MarkerSize',nCool(a))
+    figure; hold on
+    for a = 1:length(animals)
+        plot(ages(a),aniRPcntrl(a),'k.','MarkerSize',nCntrl(a))
+        plot(ages(a),aniRPcool(a),'c.','MarkerSize',nCool(a))
+    end
+    xlabel('age')
+    ylabel('Rpref')
+    
+    
+    figure; hold on
+    for a = 1:length(animals)
+        si = (aniRPcool(a) - aniRPcntrl(a))/(aniRPcool(a) + aniRPcntrl(a));
+        plot(ages(a),si,'g.','MarkerSize',10)
+    end
+    xlabel('age')
+    ylabel('SI')
+    
+    
+    figure; hold on
+    for a = 1:length(animals)
+        plot(ages(a),aniLdirCntrl(a),'k.','MarkerSize',nCntrl(a))
+        plot(ages(a),aniLdirCool(a),'c.','MarkerSize',nCool(a))
+    end
+    xlabel('age')
+    ylabel('Ldir')
+
+elseif strcmp(anaMode,'SU')
+
+    mrkSize = 20;
+
+    figure; hold on
+    plot(ages,aniRPcntrl,'k.','MarkerSize',mrkSize)
+    plot(ages,aniRPcool,'c.','MarkerSize',mrkSize)
+    xlabel('age')
+    ylabel('Rpref')
+    
+    
+    figure; hold on
+    si = (aniRPcool - aniRPcntrl)./(aniRPcool + aniRPcntrl);
+    plot(ages,si,'k.','MarkerSize',mrkSize)
+    xlabel('age')
+    ylabel('SI')
+    
+    
+    figure; hold on
+    plot(ages,aniLdirCntrl,'k.','MarkerSize',mrkSize)
+    plot(ages,aniLdirCool,'c.','MarkerSize',mrkSize)
+    xlabel('age')
+    ylabel('Ldir')
+
 end
-xlabel('age')
-ylabel('Rpref')
-
-
-figure; hold on
-for a = 1:length(animals)
-    si = (aniRPcool(a) - aniRPcntrl(a))/(aniRPcool(a) + aniRPcntrl(a));
-    plot(ages(a),si,'g.','MarkerSize',10)
-end
-xlabel('age')
-ylabel('SI')
-
-
-figure; hold on
-for a = 1:length(animals)
-    plot(ages(a),aniLdirCntrl(a),'k.','MarkerSize',nCntrl(a))
-    plot(ages(a),aniLdirCool(a),'c.','MarkerSize',nCool(a))
-end
-xlabel('age')
-ylabel('Ldir')
 
 
