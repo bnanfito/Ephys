@@ -10,7 +10,7 @@ countHas = 0;
 countNeeds = 0;
 dualRecOnly = 1;
 
-animal = 'febh3';
+animal = 'febj5';
 cd(fullfile(dataFold,animal))
 exptList = dir;
 exptList  = {exptList.name}';

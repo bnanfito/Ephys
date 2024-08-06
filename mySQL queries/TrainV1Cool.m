@@ -34,3 +34,6 @@ close(conn)
 
 %% Clear variables
 clear conn query
+
+animals = unique(data.experimentId);
+

@@ -1,19 +1,19 @@
 % anaOri
-function [sumStats] = anaOri(animal,unit,expt,probe,anaMode,stimMode,plt,svePlt)
+function [sumStats] = anaOri(animal,unit,expt,probe,anaMode,dataFold,plt,svePlt)
 
 %% Initialize
 
 % clear
 % close all
 
-if ispc
-%     dataFold = 'D:\data'; 
-    dataFold = 'C:\Users\brand\Documents\data';
-%     dataFold = 'F:\Brandon\data';
-elseif ismac
-    dataFold = '/Volumes/Lab drive/Brandon/data';
-%     dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
-end
+% if ispc
+% %     dataFold = 'D:\data'; 
+%     dataFold = 'C:\Users\brand\Documents\data';
+% %     dataFold = 'F:\Brandon\data';
+% elseif ismac
+%     dataFold = '/Volumes/Lab drive/Brandon/data';
+% %     dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
+% end
 physDir = fullfile(dataFold,'Ephys');
 figDir = fullfile(dataFold,'Figures');
 
@@ -30,7 +30,7 @@ exptName = [animal '_u' unit '_' expt];
 plr = 0;
 alignBit = 1;
 % anaMode = 'MU';
-% stimMode = 'mono c hemi';
+stimMode = 'mono c hemi';
 visTest = 'ranksum';
 alpha = 0.01;
 
@@ -63,7 +63,7 @@ if isempty(trialInfo.blankId)
 else
     blank = (1:nConds)==trialInfo.blankId;
 end
-[~,sortTrialInd] = sort(trialInfo.triallist);
+[sortTrialInd(:,1),sortTrialInd(:,2)] = sort(trialInfo.triallist);
 nT = ((1:(trialL*sf))-(predelay*sf))/sf;
 kernel = normpdf(-3:6/2000:3);
 colors = {[0 0.4470 0.7410],[0.8500 0.3250 0.0980],[0.9290 0.6940 0.1250],[0.4940 0.1840 0.5560],[0.4660 0.6740 0.1880],[0.3010 0.7450 0.9330],[0.6350 0.0780 0.1840]};

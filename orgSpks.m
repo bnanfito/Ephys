@@ -35,11 +35,6 @@ function [spks,trialExclude] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
     if strcmp(Analyzer.modID,'PG')
 
         stimStartID = 3;
-%         trialStart = downsample(trialInfo.eventTimes,nEpochs);
-%         stimStart = downsample(trialInfo.eventTimes,nEpochs,1);
-%         stimEnd = downsample(trialInfo.eventTimes,nEpochs,2);
-%         trialEnd = downsample(trialInfo.eventTimes,nEpochs,3);
-
         trialStart = eventTimes(eventIDdiff==1);
         stimStart = eventTimes(eventIDdiff==2);
         stimEnd = eventTimes(eventIDdiff==-2);
@@ -63,7 +58,7 @@ function [spks,trialExclude] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
         load(fullfile(physDir,[baseName '_p' num2str(probe) '_spkSort.mat']),'spkSort');
         spkStruct = spkSort; 
         clear spkSort
-        SUTrialData(fullfile(dataFold,'Ephys'),animal,unit,expt,probe,'id',3,st,st)
+        SUTrialData(fullfile(dataFold,'Ephys'),animal,unit,expt,probe,'id',stimStartID,st,st)
         load(fullfile(physDir,[baseName '_p' num2str(probe) '_SUTrial.mat']),'SU','SUinfo')
         nUnits = length(SU);
         trialExclude = zeros(1,nTrials) == 1;
