@@ -174,10 +174,14 @@ if plt == 1
         for sz = 1:nSize
 
             clr = colors{sz};
-            if sz==ff
-                legLbl{sz} = ['full field'];
-            elseif sz==hemi
-                legLbl{sz} = ['hemi field'];
+            if nDom==2 && sum(sizeInd)>0
+                if sz==ff
+                    legLbl{sz} = ['full field'];
+                elseif sz==hemi
+                    legLbl{sz} = ['hemi field'];
+                end
+            else
+                legLbl{sz} = ['data'];
             end
 
             szSpkIdx = ismember(y,szTrialList{sz});
