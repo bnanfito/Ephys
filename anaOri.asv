@@ -129,16 +129,16 @@ for u = 1:nU % u indexes a unit (column) in structure spks
             rConv = conv(rConv,ones(1,3)*(1/3),'same');
             rConv = rConv(1+1:end-1);
             rConv(~pks) = 0;
-            cPref = C{u}(oriInd,find(rConv==max(rConv),1,'first'),sz);
+            cPref = C{u,sz}(oriInd,find(rConv==max(rConv),1,'first'));
             clear rIn pks rConv 
         else
             cPref = C{u}(oriInd,rMean==rPref,sz);
         end
         cNull = mod(cPref+180,360);
-        rNull = rMean(C{u}(oriInd,:,sz)==cNull);
+        rNull = rMean(C{u}(:,:,sz)==cNull);
     
         dsi(u,sz) = abs(rPref-rNull)/rPref;
-        mv = meanvec(C{u}(oriInd,:,sz),rMean);
+        mv = meanvec(C{u}(:,:,sz),rMean);
         ldir(u,sz) = mv.ldir;
     
         Rpref(u,sz) = rPref;
@@ -150,8 +150,8 @@ for u = 1:nU % u indexes a unit (column) in structure spks
 
 end
 
-varNames = {'exptName','probe','area','uInfo','uID','goodUnit','pVis','fr','response','condition','paramKey','rPref','oriPref','rNull','oriNull','rBlank','dsi','ldr'};
-sumStats = table(exptID',probeID',areaID',{spks.info}',uID',goodUnits',pVis,vertcat(spks.fr),R',C',paramKey',Rpref,Cpref,Rnull,Cnull,Rblank',dsi,ldir,'VariableNames',varNames);
+varNames = {'exptName','probe','area','uID','goodUnit','pVis','fr','response','condition','paramKey','rPref','oriPref','rNull','oriNull','rBlank','dsi','ldr'};
+sumStats = table(exptID',probeID',areaID',uID',goodUnits',pVis,vertcat(spks.fr),R',C',paramKey',Rpref,Cpref,Rnull,Cnull,Rblank',dsi,ldir,'VariableNames',varNames);
 
 if strcmp(anaMode,'MU')
     sumStats.xPos = vertcat(spks.xPos);
@@ -215,13 +215,13 @@ if plt == 1
 
             if plr == 1
                 subplot(1,2,2,polaraxes);hold on
-                xT{u} = deg2rad(C{u}(oriInd,:,sz)); xT{u} = [xT{u}(1:end) xT{u}(1)];
-                yT{u} = mean(R{u}(:,:,sz),'omitnan'); yT{u} = [yT{u}(1:end) yT{u}(1)];
+                xT{u} = deg2rad(C{u,sz}(oriInd,:)); xT{u} = [xT{u}(1:end) xT{u}(1)];
+                yT{u} = mean(R{u,sz},'omitnan'); yT{u} = [yT{u}(1:end) yT{u}(1)];
                 legSubset(sz) = polarplot(xT{u},yT{u},'-o','Color',clr);
             else
                 subplot(1,2,2);hold on
-                xT{u} = C{u}(oriInd,:,sz);
-                yT{u} = R{u}(:,:,sz);
+                xT{u} = C{u,sz}(oriInd,:);
+                yT{u} = R{u,sz};
                 yMean{u} = mean(yT{u},'omitnan');
                 sem{u} = std(yT{u},'omitnan')/sqrt(size(yT{u},1));
                 if alignBit == 1
