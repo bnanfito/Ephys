@@ -70,14 +70,21 @@ colors = {[0 0.4470 0.7410],[0.8500 0.3250 0.0980],[0.9290 0.6940 0.1250],[0.494
 
 oriInd = strcmp(trialInfo.dom,'ori');
 sizeInd = strcmp(trialInfo.dom,'y_size') | strcmp(trialInfo.dom,'y_size ') | strcmp(trialInfo.dom,'x_size');
-if sum(sizeInd)==0
-    nSize = 1;
-    szTrialList{1} = find(trialInfo.triallist~=find(blank));
-elseif sum(sizeInd)>0
+posInd = strcmp(trialInfo.dom,'x_pos');
+if nDom==1 && strcmp(trialInfo.dom{1},'ori') && sum(sizeInd)==0
+    nStim = 1;
+    stTrialList{1} = find(trialInfo.triallist~=find(blank));
+elseif nDom == 2 && sum(sizeInd)>0 
     sizes = unique(trialInfo.domval(:,sizeInd));
-    nSize = length(sizes);
-    for sz = 1:nSize
-        szTrialList{sz} = find(ismember(trialInfo.triallist,find(trialInfo.domval(:,sizeInd)==sizes(sz))));
+    nStim = length(sizes);
+    for st = 1:nStim
+        stTrialList{st} = find(ismember(trialInfo.triallist,find(trialInfo.domval(:,sizeInd)==sizes(st))));
+    end
+elseif nDom == 2 && sum(posInd)>0 
+    pos = unique(trialInfo.domval(:,posInd));
+    nStim = length(pos);
+    for st = 1:nStim
+        stTrialList{st} = find(ismember(trialInfo.triallist,find(trialInfo.domval(:,posInd)==pos(st))));
     end
 end
 
@@ -99,28 +106,35 @@ for u = 1:nU % u indexes a unit (column) in structure spks
     probeID(u) = probe;
     areaID{u} = area;
 
-    for sz = 1:nSize
+    for st = 1:nStim
 
         if nDom==1 && strcmp(trialInfo.dom{1},'ori') && sum(sizeInd)==0
     
             cndInclude = ~blank;
     
-        elseif nDom==2 && sum(sizeInd)>0
-            cndInclude = trialInfo.domval( : , sizeInd ) == sizes(sz);
-            if sizes(sz) >= 150
-                ff = sz;
-            elseif sizes(sz) <= 75
-                hemi = sz;
+        elseif nDom == 2 && sum(sizeInd)>0
+            cndInclude = trialInfo.domval( : , sizeInd ) == sizes(st);
+            if sizes(st) >= 150
+                ff = st;
+            elseif sizes(st) <= 75
+                hemi = st;
             end
+        elseif nDom == 2 && sum(posInd)>0
+            cndInclude = trialInfo.domval( : , posInd ) == pos(st);
+%             if pos(st) >= 
+%                 ff = st;
+%             elseif pos(st) <= 
+%                 hemi = st;
+%             end
         end
     
         if ~isempty(trialInfo.blankId)
             Rblank{u} = spks(u).fr.stim(:,blank);
         end
-        R{u}(:,:,sz) = spks(u).fr.bc(:,cndInclude);
-        C{u}(:,:,sz) = trialInfo.domval(cndInclude,:)';
+        R{u}(:,:,st) = spks(u).fr.bc(:,cndInclude);
+        C{u}(:,:,st) = trialInfo.domval(cndInclude,:)';
         paramKey{u} = trialInfo.dom;
-        rMean = mean(R{u}(:,:,sz),'omitnan');
+        rMean = mean(R{u}(:,:,st),'omitnan');
         rPref = max(rMean);
         if sum(rMean==rPref)>1
             rIn = rMean;
@@ -129,22 +143,22 @@ for u = 1:nU % u indexes a unit (column) in structure spks
             rConv = conv(rConv,ones(1,3)*(1/3),'same');
             rConv = rConv(1+1:end-1);
             rConv(~pks) = 0;
-            cPref = C{u}(oriInd,find(rConv==max(rConv),1,'first'),sz);
+            cPref = C{u}(oriInd,find(rConv==max(rConv),1,'first'),st);
             clear rIn pks rConv 
         else
-            cPref = C{u}(oriInd,rMean==rPref,sz);
+            cPref = C{u}(oriInd,rMean==rPref,st);
         end
         cNull = mod(cPref+180,360);
-        rNull = rMean(C{u}(oriInd,:,sz)==cNull);
+        rNull = rMean(C{u}(oriInd,:,st)==cNull);
     
-        dsi(u,sz) = abs(rPref-rNull)/rPref;
-        mv = meanvec(C{u}(oriInd,:,sz),rMean);
-        ldir(u,sz) = mv.ldir;
+        dsi(u,st) = abs(rPref-rNull)/rPref;
+        mv = meanvec(C{u}(oriInd,:,st),rMean);
+        ldir(u,st) = mv.ldir;
     
-        Rpref(u,sz) = rPref;
-        Cpref(u,sz) = cPref;
-        Rnull(u,sz) = rNull;
-        Cnull(u,sz) = cNull;
+        Rpref(u,st) = rPref;
+        Cpref(u,st) = cPref;
+        Rnull(u,st) = rNull;
+        Cnull(u,st) = cNull;
 
     end
 
@@ -165,29 +179,29 @@ if plt == 1
 
     for u = 1:nU
         figure;
-        legLbl{nSize+1} = 'blank';
+        legLbl{nStim+1} = 'blank';
         x = spks(u).stimCent(1,:);
         y = spks(u).stimCent(2,:);
         blankSpkIdx = ismember(y,blankTrialList);
-        for sz = 1:nSize
+        for st = 1:nStim
 
-            clr = colors{sz};
+            clr = colors{st};
             if nDom==2 && sum(sizeInd)>0
-                if sz==ff
-                    legLbl{sz} = ['full field'];
-                elseif sz==hemi
-                    legLbl{sz} = ['hemi field'];
+                if st==ff
+                    legLbl{st} = ['full field'];
+                elseif st==hemi
+                    legLbl{st} = ['hemi field'];
                 end
             else
-                legLbl{sz} = ['data'];
+                legLbl{st} = ['data'];
             end
 
-            szSpkIdx = ismember(y,szTrialList{sz});
+            szSpkIdx = ismember(y,stTrialList{st});
 
             subplot(2,2,1);hold on
             bins = -1:0.1:2;
             h = histogram(x(szSpkIdx),'BinEdges',bins);
-            h.FaceColor = colors{sz};
+            h.FaceColor = colors{st};
             h.EdgeColor = 'none';
             xlim([bins(1) bins(end)])
     
@@ -201,7 +215,7 @@ if plt == 1
                 sgtitle(ttl)
                 continue
             end
-            if sz == 1
+            if st == 1
                 patch([0 1 1 0],[0 0 max(y)+1 max(y)+1],'k','EdgeColor','none','FaceAlpha',0.2)
             end
             for t = 1:nTrials
@@ -209,19 +223,19 @@ if plt == 1
                     patch([-predelay stimTime+postdelay stimTime+postdelay -predelay],[t-0.5 t-0.5 t+0.5 t+0.5],'r','EdgeColor','none','FaceAlpha',0.2)
                 end
             end
-            plot(x(szSpkIdx),y(szSpkIdx),'.','Color',colors{sz})
+            plot(x(szSpkIdx),y(szSpkIdx),'.','Color',colors{st})
             xlim([-1 2])
             ylim([0 max(y)+1])
 
             if plr == 1
                 subplot(1,2,2,polaraxes);hold on
-                xT{u} = deg2rad(C{u}(oriInd,:,sz)); xT{u} = [xT{u}(1:end) xT{u}(1)];
-                yT{u} = mean(R{u}(:,:,sz),'omitnan'); yT{u} = [yT{u}(1:end) yT{u}(1)];
-                legSubset(sz) = polarplot(xT{u},yT{u},'-o','Color',clr);
+                xT{u} = deg2rad(C{u}(oriInd,:,st)); xT{u} = [xT{u}(1:end) xT{u}(1)];
+                yT{u} = mean(R{u}(:,:,st),'omitnan'); yT{u} = [yT{u}(1:end) yT{u}(1)];
+                legSubset(st) = polarplot(xT{u},yT{u},'-o','Color',clr);
             else
                 subplot(1,2,2);hold on
-                xT{u} = C{u}(oriInd,:,sz);
-                yT{u} = R{u}(:,:,sz);
+                xT{u} = C{u}(oriInd,:,st);
+                yT{u} = R{u}(:,:,st);
                 yMean{u} = mean(yT{u},'omitnan');
                 sem{u} = std(yT{u},'omitnan')/sqrt(size(yT{u},1));
                 if alignBit == 1
@@ -231,7 +245,7 @@ if plt == 1
                 end
                 plot(xT{u},yT{u}','.','Color',clr)
                 plot(repmat(xT{u},2,1),yMean{u}+([1;-1]*sem{u}),'Color',clr)
-                legSubset(sz) = plot(xT{u},yMean{u},'-o','Color',clr);
+                legSubset(st) = plot(xT{u},yMean{u},'-o','Color',clr);
             end
 
         end
@@ -262,98 +276,6 @@ if plt == 1
             saveas(gcf,figFileName)
         end
     end
-
-%     figure;
-%     goodIdx = sumStats.goodUnit;
-%     
-%     subplot(2,3,1); hold on
-%     x = mean(vertcat(xT{:}),'omitnan');
-%     y = mean(vertcat(yMean{:}),'omitnan');
-%     plot(x,y,'k--','LineWidth',2)
-%     y = mean(vertcat(yMean{goodIdx}),'omitnan');
-%     plot(x,y,'k-o','LineWidth',2)
-% 
-%     subplot(2,3,2);hold on
-%     x = sumStats.dsi;
-%     cdf = cdfplot(x);
-%     cdf.LineWidth = 2;
-%     cdf.LineStyle = '--';
-%     cdf.Color = 'k';
-%     if sum(goodIdx)>0
-%         cdf = cdfplot(x(goodIdx));
-%         cdf.LineWidth = 2;
-%         cdf.LineStyle = '-';
-%         cdf.Color = 'k';
-%     end
-%     xlabel('DSI')
-%     xlim([0 1])
-%     ylabel('percentile')
-%     ylim([0 1])
-%     title('')
-% 
-%     subplot(2,3,3);hold on
-%     x = sumStats.ldr;
-%     cdf = cdfplot(x);
-%     cdf.LineWidth = 2;
-%     cdf.LineStyle = '--';
-%     cdf.Color = 'k';
-%     if sum(goodIdx)>0
-%         cdf = cdfplot(x(goodIdx));
-%         cdf.LineWidth = 2;
-%         cdf.LineStyle = '-';
-%         cdf.Color = 'k';
-%     end
-%     xlabel('Ldir')
-%     xlim([0 1])
-%     ylabel('percentile')
-%     ylim([0 1])
-%     title('')
-% 
-%     subplot(2,3,4); hold on
-%     x = sumStats.rPref;
-%     cdf = cdfplot(x);
-%     cdf.LineWidth = 2;
-%     cdf.LineStyle = '--';
-%     cdf.Color = 'k';
-%     if sum(goodIdx)>0
-%         cdf = cdfplot(x(goodIdx));
-%         cdf.LineWidth = 2;
-%         cdf.LineStyle = '-';
-%         cdf.Color = 'k';
-%         legend({['all units; n=' num2str(length(x))],['good units; n=' num2str(sum(goodIdx))]})
-%     else
-%         legend({['no good units; n=' num2str(length(x))]})
-%     end
-%     xlabel('rPref')
-%     ylabel('percentile')
-%     ylim([0 1])
-% 
-%     subplot(2,3,5);hold on
-%     x = sumStats.dsi;
-%     y = sumStats.rPref;
-%     plot(x,y,'ko','MarkerSize',5);
-%     plot(x(goodIdx),y(goodIdx),'k.','MarkerSize',10)
-%     xlabel('DSI')
-%     xlim([0 1])
-%     ylabel('rPref')
-% 
-%     subplot(2,3,6);hold on
-%     x = sumStats.ldr;
-%     y = sumStats.rPref;
-%     plot(x,y,'ko','MarkerSize',5);
-%     plot(x(goodIdx),y(goodIdx),'k.','MarkerSize',10)
-%     xlabel('Ldir')
-%     xlim([0 1])
-%     ylabel('rPref')
-% 
-%     if svePlt == 1
-%         figFileDir = fullfile(figDir,animal,exptName);
-%         if ~isfolder(figFileDir)
-%             mkdir(figFileDir)
-%         end
-%         figFileName = fullfile(figFileDir,[exptName '_p' num2str(probe) '_SummaryPlot']);
-%         saveas(gcf,figFileName)
-%     end
 
     
 end
