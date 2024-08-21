@@ -64,8 +64,10 @@ function [spks,trialExclude] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
         trialExclude = zeros(1,nTrials) == 1;
     elseif strcmp(anaMode,'MU')
         load(fullfile(physDir,[baseName '_p' num2str(probe) '_MUspkMerge.mat']),'MUspkMerge');
+        load(fullfile(physDir,[baseName '_p' num2str(probe) '_MULatency.mat']),'MUlatency')
         spkStruct = MUspkMerge;
-        clear MUspkMerge
+        latency = MUlatency;
+        clear MUspkMerge MUlatency
         MUThreshTrialData(fullfile(dataFold,'Ephys'),animal,unit,expt,probe,'id',stimStartID,st,st)
         load(fullfile(physDir,[baseName '_p' num2str(probe) '_MUThreshTrial.mat']),'MUThresh','MUThreshInfo')
         nUnits = length(MUThresh);
@@ -88,6 +90,7 @@ function [spks,trialExclude] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
         end
 
         spks(u).stimCent = [];
+        spks(u).late = latency(u);
         spks(u).fr.trialNum = sortTrialInd;
         spks(u).fr.trialCond = sortTrialCond;
 
@@ -125,15 +128,15 @@ function [spks,trialExclude] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
 
                 end
 
-                s = spks(u).stimCent(1,:);
-                tID = spks(u).stimCent(2,:);
-                [values,edges] = histcounts(s(s<=1 & tID==t),-predelay:0.05:1);
-%                 values = zscore(values);
-                values = values(end-19:end);
-                edges = edges(end-19:end);
-                spks(u).psth_stim.values(r,:,c) = values;
-                spks(u).psth_stim.binEdges(r,:,c) = edges;
-                clear s tID values edges
+%                 s = spks(u).stimCent(1,:);
+%                 tID = spks(u).stimCent(2,:);
+%                 [values,edges] = histcounts(s(s<=1 & tID==t),-predelay:0.05:1);
+% %                 values = zscore(values);
+%                 values = values(end-19:end);
+%                 edges = edges(end-19:end);
+%                 spks(u).psth_stim.values(r,:,c) = values;
+%                 spks(u).psth_stim.binEdges(r,:,c) = edges;
+%                 clear s tID values edges
 
 
             end
