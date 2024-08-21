@@ -164,8 +164,8 @@ for u = 1:nU % u indexes a unit (column) in structure spks
 
 end
 
-varNames = {'exptName','probe','area','uInfo','uID','goodUnit','pVis','latency','fr','response','condition','paramKey','rPref','oriPref','rNull','oriNull','rBlank','dsi','ldr'};
-sumStats = table(exptID',probeID',areaID',{spks.info}',uID',goodUnits',pVis,spks.late,vertcat(spks.fr),R',C',paramKey',Rpref,Cpref,Rnull,Cnull,Rblank',dsi,ldir,'VariableNames',varNames);
+varNames = {'exptName','probe','area','uInfo','uID','goodUnit','pVis','fr','response','condition','paramKey','rPref','oriPref','rNull','oriNull','rBlank','dsi','ldr'};
+sumStats = table(exptID',probeID',areaID',{spks.info}',uID',goodUnits',pVis,vertcat(spks.fr),R',C',paramKey',Rpref,Cpref,Rnull,Cnull,Rblank',dsi,ldir,'VariableNames',varNames);
 
 if strcmp(anaMode,'MU')
     sumStats.xPos = vertcat(spks.xPos);
