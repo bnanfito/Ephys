@@ -164,8 +164,8 @@ for u = 1:nU % u indexes a unit (column) in structure spks
 
 end
 
-varNames = {'exptName','probe','area','uInfo','uID','goodUnit','pVis','fr','response','condition','paramKey','rPref','oriPref','rNull','oriNull','rBlank','dsi','ldr'};
-sumStats = table(exptID',probeID',areaID',{spks.info}',uID',goodUnits',pVis,vertcat(spks.fr),R',C',paramKey',Rpref,Cpref,Rnull,Cnull,Rblank',dsi,ldir,'VariableNames',varNames);
+varNames = {'exptName','probe','area','uInfo','uID','goodUnit','pVis','latency','fr','response','condition','paramKey','rPref','oriPref','rNull','oriNull','rBlank','dsi','ldr'};
+sumStats = table(exptID',probeID',areaID',{spks.info}',uID',goodUnits',pVis,vertcat(spks.late),vertcat(spks.fr),R',C',paramKey',Rpref,Cpref,Rnull,Cnull,Rblank',dsi,ldir,'VariableNames',varNames);
 
 if strcmp(anaMode,'MU')
     sumStats.xPos = vertcat(spks.xPos);
@@ -203,6 +203,7 @@ if plt == 1
             h = histogram(x(szSpkIdx),'BinEdges',bins);
             h.FaceColor = colors{st};
             h.EdgeColor = 'none';
+            xline(spks(u).late,'--','LineWidth',2)
             xlim([bins(1) bins(end)])
     
             subplot(2,2,3);hold on
@@ -224,6 +225,7 @@ if plt == 1
                 end
             end
             plot(x(szSpkIdx),y(szSpkIdx),'.','Color',colors{st})
+            xline(spks(u).late,'--','LineWidth',2)
             xlim([-1 2])
             ylim([0 max(y)+1])
 
