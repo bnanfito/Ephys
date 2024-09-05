@@ -2,11 +2,11 @@
 
 function [projectTbl,stats] = anaTrain(proj)
 
-    dataFold = ['/Volumes/Lab drive/Brandon/data/dataSets/training/' proj];
-    load(fullfile(dataFold,'projectTbl.mat'),'projectTbl')
+%     dataFold = ['/Volumes/Lab drive/Brandon/data/dataSets/training/' proj];
+%     load(fullfile(dataFold,'projectTbl.mat'),'projectTbl')
 
-%     dataFold = 'Y:\Brandon\data';
-%     projectTbl=getProjectFiles(proj,1,'age','recSite','priorMFlag','priorDescr','duringMFlag','manipDescr','manipDetail');
+    dataFold = 'Y:\Brandon\data';
+    projectTbl=getProjectFiles(proj,1,'age','recSite','priorMFlag','priorDescr','duringMFlag','manipDescr','manipDetail');
     
     for e = 1:height(projectTbl)
         animal = projectTbl.experimentId{e};
