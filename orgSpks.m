@@ -56,13 +56,15 @@ function [spks,trialExclude] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
 
     if strcmp(anaMode,'SU')
         SUTrialData(fullfile(dataFold,'Ephys'),animal,unit,expt,probe,'id',stimStartID,st,st)
-        load(fullfile(physDir,[baseName '_p' num2str(probe) '_SUTrial.mat']),'SU','SUinfo')
+        load(fullfile(physDir,[baseName '_p' num2str(probe) '_SUTrial.mat']),'SU')
         nUnits = length(SU);
         trialExclude = zeros(1,nTrials) == 1;
 
         load(fullfile(physDir,[baseName '_p' num2str(probe) '_spkSort.mat']),'spkSort');
+        load(fullfile(physDir,[baseName '_p' num2str(probe) '_SULatency.mat']),'SUlatency')
         spkStruct = spkSort; 
-        clear spkSort
+        latency = SUlatency;
+        clear spkSort SUlatency
     elseif strcmp(anaMode,'MU')
         MUThreshTrialData(fullfile(dataFold,'Ephys'),animal,unit,expt,probe,'id',stimStartID,st,st)
         load(fullfile(physDir,[baseName '_p' num2str(probe) '_MUThreshTrial.mat']),'MUThresh','MUThreshInfo')
