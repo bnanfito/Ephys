@@ -12,7 +12,7 @@ if ~strcmp(unit,'MMM')
     extractTrials(physDir,physDir,physDir,animal,unit,expt)
 end
 name = 'BRN';
-scaleFactor = 5;
+scaleFactor = 4;
 nJobs = 100;
 legacyFlag = 0;
 

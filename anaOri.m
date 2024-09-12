@@ -134,6 +134,7 @@ for u = 1:nU % u indexes a unit (column) in structure spks
         R{u}(:,:,st) = spks(u).fr.bc(:,cndInclude);
         C{u}(:,:,st) = trialInfo.domval(cndInclude,:)';
         paramKey{u} = trialInfo.dom;
+        cndKey{u} = trialInfo.domval;
         rMean = mean(R{u}(:,:,st),'omitnan');
         rPref = max(rMean);
         if sum(rMean==rPref)>1
@@ -164,8 +165,8 @@ for u = 1:nU % u indexes a unit (column) in structure spks
 
 end
 
-varNames = {'exptName','probe','area','uInfo','uID','goodUnit','pVis','latency','fr','response','condition','paramKey','rPref','oriPref','rNull','oriNull','rBlank','dsi','ldr'};
-sumStats = table(exptID',probeID',areaID',{spks.info}',uID',goodUnits',pVis,vertcat(spks.late),vertcat(spks.fr),R',C',paramKey',Rpref,Cpref,Rnull,Cnull,Rblank',dsi,ldir,'VariableNames',varNames);
+varNames = {'exptName','probe','area','uInfo','uID','goodUnit','pVis','latency','fr','response','condition','paramKey','cndKey','rPref','oriPref','rNull','oriNull','rBlank','dsi','ldr'};
+sumStats = table(exptID',probeID',areaID',{spks.info}',uID',goodUnits',pVis,vertcat(spks.late),vertcat(spks.fr),R',C',paramKey',cndKey',Rpref,Cpref,Rnull,Cnull,Rblank',dsi,ldir,'VariableNames',varNames);
 
 if strcmp(anaMode,'MU')
     sumStats.xPos = vertcat(spks.xPos);
