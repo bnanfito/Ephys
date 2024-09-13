@@ -70,11 +70,10 @@ function [projectTbl,stats,data] = anaTrain(proj)
 %             end
             isVis = tbl.pVis<0.01;
             isAct = tbl.rPref>2;
-            if strcmp(anaMode,'MU')
-                goodIdx = isVis' & isAct;
-            elseif strcmp(anaMode,'SU')
-                isSU = strcmp(tbl.uInfo,'SU');
-                goodIdx = isVis & isAct & isSU;
+            if strcmp(anaMode)
+            goodIdx = isVis' & isAct;
+            elseif
+
             end
             tbl = tbl(goodIdx,:);
             clear pVis
