@@ -7,7 +7,7 @@ function [projectTbl,stats,data] = anaTrain(proj)
 %     dataFold = ['/Volumes/Lab drive/Brandon/data/dataSets/training/' proj];
 %     load(fullfile(dataFold,'projectTbl.mat'),'projectTbl')
 
-    dataFold = 'F:\Brandon\data';
+    dataFold = 'D:\data';
     projectTbl=getProjectFiles(proj,1,'age','recSite','priorMFlag','priorDescr','duringMFlag','manipDescr','manipDetail');
     
     for e = 1:height(projectTbl)
@@ -61,20 +61,20 @@ function [projectTbl,stats,data] = anaTrain(proj)
             end
         
         %     goodIdx = tbl.goodUnit;
-%             for u = 1:height(tbl)
-%         %         pVis(u) = anova1([tbl.response{u} tbl.rBlank{u}],[],"off");
-%                 baseFR = tbl.fr(u).base(:,1:end-1);
-%                 stimFR = tbl.fr(u).stim(:,1:end-1);
-%                 pVis(u) = ranksum(baseFR(:),stimFR(:));
-%                 clear baseFR stimFR
-%             end
-            isVis = tbl.pVis<0.01;
+            for u = 1:height(tbl)
+        %         pVis(u) = anova1([tbl.response{u} tbl.rBlank{u}],[],"off");
+                baseFR = tbl.fr(u).base(:,1:end-1);
+                stimFR = tbl.fr(u).stim(:,1:end-1);
+                pVis(u) = ranksum(baseFR(:),stimFR(:));
+                clear baseFR stimFR
+            end
+            isVis = pVis<0.01;
             isAct = tbl.rPref>2;
             if strcmp(anaMode,'MU')
                 goodIdx = isVis' & isAct;
             elseif strcmp(anaMode,'SU')
                 isSU = strcmp(tbl.uInfo,'SU');
-                goodIdx = isVis & isAct & isSU;
+                goodIdx = isVis' & isAct & isSU;
             end
             tbl = tbl(goodIdx,:);
             clear pVis

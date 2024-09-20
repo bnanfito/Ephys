@@ -116,6 +116,7 @@ for u = 1:nU % u indexes a unit (column) in structure spks
             cndInclude = trialInfo.domval( : , sizeInd ) == sizes(st);
             if sizes(st) >= 150
                 ff = st;
+                continue
             elseif sizes(st) <= 75
                 hemi = st;
             end
@@ -152,14 +153,14 @@ for u = 1:nU % u indexes a unit (column) in structure spks
         cNull = mod(cPref+180,360);
         rNull = rMean(C{u}(oriInd,:,st)==cNull);
     
-        dsi(u,st) = abs(rPref-rNull)/rPref;
+        dsi(u,1) = abs(rPref-rNull)/rPref;
         mv = meanvec(C{u}(oriInd,:,st),rMean);
-        ldir(u,st) = mv.ldir;
+        ldir(u,1) = mv.ldir;
     
-        Rpref(u,st) = rPref;
-        Cpref(u,st) = cPref;
-        Rnull(u,st) = rNull;
-        Cnull(u,st) = cNull;
+        Rpref(u,1) = rPref;
+        Cpref(u,1) = cPref;
+        Rnull(u,1) = rNull;
+        Cnull(u,1) = cNull;
 
     end
 
