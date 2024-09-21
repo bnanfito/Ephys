@@ -12,27 +12,27 @@ function [out,pVis] = screenUnits(in,mode,blankBit,visTest,alpha)
 % alpha = 0.01;
 % visTest = 'ranksum';
 
-for u = 1:length(in)
+for u = 1:height(in)
 
-    baseFR = in(u).fr.base(:,~blankBit);    baseFR = baseFR(:); 
-    stimFR = in(u).fr.stim(:,~blankBit);    stimFR = stimFR(:); 
-    bcFR = in(u).fr.bc(:,~blankBit);        bcFR = bcFR(:); bcFR = bcFR(~isnan(bcFR));
+    baseFR = in(u,:).fr.base(:,~blankBit);    baseFR = baseFR(:); 
+    stimFR = in(u,:).fr.stim(:,~blankBit);    stimFR = stimFR(:); 
+    bcFR = in(u,:).fr.bc(:,~blankBit);        bcFR = bcFR(:); bcFR = bcFR(~isnan(bcFR));
  
     if strcmp(visTest,'signrank')
         pVis(u,1) = signrank(bcFR);
     elseif strcmp(visTest,'ranksum')
         pVis(u,1) = ranksum(baseFR,stimFR);
     elseif strcmp(visTest,'anova')
-        pVis(u,1) = anova1(in(u).fr.bc,[],'off');
+        pVis(u,1) = anova1(in(u,:).fr.bc,[],'off');
     end
     isVis(u) = pVis(u,1)<alpha;
 
     if strcmp(mode,'SU')
-        isAct(u) = max(mean(in(u).fr.bc(:,~blankBit),'omitnan'))>=2;
-        isSU(u) = strcmp(in(u).info,'SU');
-        maybeSU(u) = strcmp(in(u).info,'SU?');
+        isAct(u) = max(mean(in(u,:).fr.bc(:,~blankBit),'omitnan'))>=2;
+        isSU(u) = strcmp(in(u,:).uInfo,'SU');
+        maybeSU(u) = strcmp(in(u,:).uInfo,'SU?');
     elseif strcmp(mode,'MU')
-        isAct(u) = max(mean(in(u).fr.bc(:,~blankBit),'omitnan'))>=2;
+        isAct(u) = max(mean(in(u,:).fr.bc(:,~blankBit),'omitnan'))>=2;
     end
 
 end
