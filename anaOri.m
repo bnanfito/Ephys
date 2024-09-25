@@ -91,7 +91,6 @@ end
 %% Compute 
 
 [spks,trialExclude] = orgSpks(animal,unit,expt,probe,anaMode,dataFold);
-[goodUnits,pVis] = screenUnits(spks,anaMode,blank,visTest,alpha);
 nU = length(spks);
 
 dim{1} = 'response';
@@ -166,8 +165,12 @@ for u = 1:nU % u indexes a unit (column) in structure spks
 
 end
 
-varNames = {'exptName','probe','area','uInfo','uID','goodUnit','pVis','latency','fr','response','condition','paramKey','cndKey','rPref','oriPref','rNull','oriNull','rBlank','dsi','ldr'};
-sumStats = table(exptID',probeID',areaID',{spks.info}',uID',goodUnits',pVis,vertcat(spks.late),vertcat(spks.fr),R',C',paramKey',cndKey',Rpref,Cpref,Rnull,Cnull,Rblank',dsi,ldir,'VariableNames',varNames);
+varNames = {'exptName','probe','area','uInfo','uID','latency','fr','response','condition','paramKey','cndKey','rPref','oriPref','rNull','oriNull','rBlank','dsi','ldr'};
+sumStats = table(exptID',probeID',areaID',{spks.info}',uID',vertcat(spks.late),vertcat(spks.fr),R',C',paramKey',cndKey',Rpref,Cpref,Rnull,Cnull,Rblank',dsi,ldir,'VariableNames',varNames);
+
+[goodUnit,pVis] = screenUnits(sumStats,anaMode,blank,visTest,alpha);
+sumStats.goodUnit = goodUnit';
+sumStats.pVis = pVis;
 
 if strcmp(anaMode,'MU')
     sumStats.xPos = vertcat(spks.xPos);
@@ -214,7 +217,7 @@ if plt == 1
             if isempty(x) || isempty(y)
                 text(0,0,'no spikes')
                 ttl = [exptName ' p' num2str(probe) ' (' area ') ' anaMode '#' num2str(uID(u))];
-                if ~ismember(u,find(goodUnits))
+                if ~ismember(u,find(goodUnit))
                     ttl = [ttl '(BAD UNIT)'];
                 end
                 sgtitle(ttl)
@@ -271,11 +274,11 @@ if plt == 1
         legend(legSubset,legLbl)
 
         ttl = [exptName ' p' num2str(probe) ' (' area ') ' anaMode '#' num2str(uID(u))];
-        if ~ismember(u,find(goodUnits))
+        if ~ismember(u,find(goodUnit))
             ttl = [ttl '(BAD UNIT)'];
         end
         sgtitle(ttl)
-        if svePlt == 1 && ismember(u,find(goodUnits))
+        if svePlt == 1 && ismember(u,find(goodUnit))
             figFileDir = fullfile(figDir,animal,exptName);
             if ~isfolder(figFileDir)
                 mkdir(figFileDir)
