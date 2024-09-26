@@ -27,9 +27,9 @@ exptName = [animal '_u' unit '_' expt];
 % probe = 'PSS';
 
 % plt = 1;
-plr = 0;
+plr = 1;
 alignBit = 0;
-visTest = 'ranksum';
+visTest = 'anova';
 alpha = 0.01;
 
 
@@ -133,6 +133,7 @@ for u = 1:nU % u indexes a unit (column) in structure spks
         end
         R{u}(:,:,st) = spks(u).fr.bc(:,cndInclude);
         C{u}(:,:,st) = trialInfo.domval(cndInclude,:)';
+        dir = C{u}(oriInd,:,st);
         paramKey{u} = trialInfo.dom;
         cndKey{u} = trialInfo.domval;
         rMean = mean(R{u}(:,:,st),'omitnan');
@@ -161,12 +162,16 @@ for u = 1:nU % u indexes a unit (column) in structure spks
         Rnull(u,1) = rNull;
         Cnull(u,1) = cNull;
 
+        %double gaussian fit
+        G{u,1} = dirGauss(rMean,dir,0);
+
+
     end
 
 end
 
-varNames = {'exptName','probe','area','uInfo','uID','latency','fr','response','condition','paramKey','cndKey','rPref','oriPref','rNull','oriNull','rBlank','dsi','ldr'};
-sumStats = table(exptID',probeID',areaID',{spks.info}',uID',vertcat(spks.late),vertcat(spks.fr),R',C',paramKey',cndKey',Rpref,Cpref,Rnull,Cnull,Rblank',dsi,ldir,'VariableNames',varNames);
+varNames = {'exptName','probe','area','uInfo','uID','latency','fr','response','condition','gaussFit','paramKey','cndKey','rPref','oriPref','rNull','oriNull','rBlank','dsi','ldr'};
+sumStats = table(exptID',probeID',areaID',{spks.info}',uID',vertcat(spks.late),vertcat(spks.fr),R',C',G,paramKey',cndKey',Rpref,Cpref,Rnull,Cnull,Rblank',dsi,ldir,'VariableNames',varNames);
 
 [goodUnit,pVis] = screenUnits(sumStats,anaMode,blank,visTest,alpha);
 sumStats.goodUnit = goodUnit';
@@ -182,7 +187,9 @@ end
 
 if plt == 1
 
-    for u = 1:nU
+    for u = find(goodUnit)
+
+        
         figure;
         legLbl{nStim+1} = 'blank';
         x = spks(u).stimCent(1,:);
@@ -240,23 +247,34 @@ if plt == 1
 
             if plr == 1
                 subplot(1,2,2,polaraxes);hold on
-                xT{u} = deg2rad(C{u}(oriInd,:,st)); xT{u} = [xT{u}(1:end) xT{u}(1)];
-                yT{u} = mean(R{u}(:,:,st),'omitnan'); yT{u} = [yT{u}(1:end) yT{u}(1)];
-                legSubset(st) = polarplot(xT{u},yT{u},'-o','Color',clr);
+                xP{u} = deg2rad(C{u}(oriInd,:,st)); xP{u} = [xP{u}(1:end) xP{u}(1)];
+                yP{u} = mean(R{u}(:,:,st),'omitnan'); yP{u} = [yP{u}(1:end) yP{u}(1)];
+                sem{u} = std(R{u}(:,:,st),'omitnan')/sqrt(size(R{u}(:,:,st),1)); sem{u} = [sem{u}(1:end) sem{u}(1)];
+                legSubset(st) = polarplot(xP{u},yP{u},'o','Color',clr);
+                hold on;polarplot(repmat(xP{u},2,1),yP{u}+([1;-1]*sem{u}),'Color',clr)
             else
                 subplot(1,2,2);hold on
-                xT{u} = C{u}(oriInd,:,st);
-                yT{u} = R{u}(:,:,st);
-                yMean{u} = mean(yT{u},'omitnan');
-                sem{u} = std(yT{u},'omitnan')/sqrt(size(yT{u},1));
-                if alignBit == 1
-                    [xT{u},yMean{u},i] = alignDirTuning(xT{u},yMean{u});
-                    yT{u} = yT{u}(:,i);
-                    sem{u} = sem{u}(i);
+                xP{u} = C{u}(oriInd,:,st);
+                yP{u} = R{u}(:,:,st);
+                if alignBit == 0
+                    gX = linspace(0,360);
+                elseif alignBit == 1
+                    gX = linspace(-180,180);
                 end
-                plot(xT{u},yT{u}','.','Color',clr)
-                plot(repmat(xT{u},2,1),yMean{u}+([1;-1]*sem{u}),'Color',clr)
-                legSubset(st) = plot(xT{u},yMean{u},'-o','Color',clr);
+                gP{u} = G{u}.auss(gX);
+                yMean{u} = mean(yP{u},'omitnan');
+                sem{u} = std(yP{u},'omitnan')/sqrt(size(yP{u},1));
+                if alignBit == 1
+                    [xP{u},yMean{u},i] = alignDirTuning(xP{u},yMean{u});
+                    yP{u} = yP{u}(:,i);
+                    sem{u} = sem{u}(i);
+                    gX = gX(i);
+                    gP{u} = gP{u}(i);
+                end
+%                 plot(xP{u},yP{u}','.','Color',clr)
+                plot(repmat(xP{u},2,1),yMean{u}+([1;-1]*sem{u}),'Color',clr)
+                plot(gX,gP{u},'Color',clr)
+                legSubset(st) = plot(xP{u},yMean{u},'o','Color',clr);
             end
 
         end
@@ -271,7 +289,7 @@ if plt == 1
         subplot(2,2,3);hold on
         plot(x(blankSpkIdx),y(blankSpkIdx),'k.')
 
-        legend(legSubset,legLbl)
+%         legend(legSubset,legLbl)
 
         ttl = [exptName ' p' num2str(probe) ' (' area ') ' anaMode '#' num2str(uID(u))];
         if ~ismember(u,find(goodUnit))

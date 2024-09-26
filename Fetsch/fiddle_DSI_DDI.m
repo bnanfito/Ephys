@@ -6,6 +6,7 @@
 %% simulate a tuning curve
 
 clear
+close all
 
 % anonymous function for von Mises (circular Gaussian)
 tuning_vonMises = @(b,dir) b(1) * exp(b(2)*cosd(dir-b(3))) / (2*pi*besseli(0,b(2))) + b(4);
@@ -19,7 +20,9 @@ baseline = 10;
 b = [ampl conc peak baseline];
     
 frMean = tuning_vonMises(b,dirAxis);
-figure;plot(dirAxis,frMean);
+figure;
+subplot(2,2,1);hold on
+plot(dirAxis,frMean);
 
 
 %% simulate an experiment
@@ -48,7 +51,7 @@ for n = 1:length(dirAxis)
     rVar(n) = nanstd(R(i))^2;
     rSE(n) = nanstd(R(i))/sqrt(nansum(i));
 end
-figure; errorbar(dirAxis, rMean, rSE);
+errorbar(dirAxis, rMean, rSE);
 
 
 %% compare indices
@@ -71,9 +74,13 @@ DDI = calcDDI(dirAxis,dirs,rMean,R)
 dirAxInterp = -180:180;
 rMeanSmoothed = interp1(dirAxis,rMean,dirAxInterp,'spline');
 rVarSmoothed  = interp1(dirAxis,rVar,dirAxInterp,'spline');
+subplot(2,2,2);hold on
+plot(dirAxInterp,rMeanSmoothed)
 
 % get max slope (absolute value) and variance at nearest measured value
 absSlope = abs(gradient(rMeanSmoothed));
+subplot(2,2,4);hold on
+plot(dirAxInterp,absSlope)
 FIslope = max(absSlope);
 FIvar = rVarSmoothed(absSlope==max(absSlope));
 

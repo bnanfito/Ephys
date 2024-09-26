@@ -1,74 +1,67 @@
 
-function [g] = dirGauss(r,dir,p)
+function [g] = dirGauss(r,c,p)
 
 X = [-360:720];
 r_rep = repmat(r,3,1);
-dir_rep = [dir-360;dir;dir+360];
+c_rep = [c-360;c;c+360];
 
 %% shift to minimum
 
 Rmin = min(r);
-dirMin = dir(r == Rmin);
-if length(dirMin)>1
-%     diffs = abs(dirMin-(dir(r==max(r))))
-%     dirMin = dirMin(diffs == min(diffs));
-    dirMin = min(dirMin);
-end
+dirMin = c(r == Rmin);
 if length(dirMin)>1
     dirMin = dirMin(1);
 end
-dirShift = [dir(dir<dirMin)+360 dir(dir>=dirMin)];
-if mod(max(dirShift),360) == dir(r==max(r)) & ~isempty(dir(dir<dirMin))
-    dirShift(find(dirShift == max(dirShift))+1)=dirShift(find(dirShift == max(dirShift))+1)+360;
+cShift = [c(c<dirMin)+360 c(c>=dirMin)]; % direction vector shifted 
+if mod(max(cShift),360) == c(r==max(r)) & ~isempty(c(c<dirMin))
+    cShift(find(cShift == max(cShift))+1)=cShift(find(cShift == max(cShift))+1)+360;
 end
 
 if p
     figure;
     subplot(2,2,1);hold on
-    plot(dir,r,'ko')
-    plot(dirShift,r,'r*')
-    plot(dir_rep,r_rep,'k-')
+    plot(c,r,'ko')
+    plot(cShift,r,'r*')
+    plot(c_rep,r_rep,'k-')
     plot([0 0],[0 max(r)],'r--')
     plot([360 360],[0 max(r)],'r--')
 end
 
 %% initial guess at gaussian
 
-Rpref = max(r);
-pref = unique(dirShift(r == Rpref));
-if length(pref)>1
-    for i = 1:length(pref)
-        id = find(dirShift == pref(i));
-        if length(id)>1 && (ismember(1,id) && ismember(length(dirShift),id))
-            energies(i) = mean([r(end-1) r(1) r(2)]);
-        else
-            energies(i) = mean(r(id-1:id+1));
-        end
-    end
-    pref = pref(energies == max(energies));
-    if length(pref)>1
-        pref = pref(1);
-    end
+rPref = max(r);
+if sum(r==rPref)>1
+    rIn = r;
+    pks = rIn == rPref;
+    rConv = rIn([end 1:end 1]);
+    rConv = conv(rConv,ones(1,3)*(1/3),'same');
+    rConv = rConv(1+1:end-1);
+    rConv(~pks) = 0;
+    cPref = cShift(find(rConv==max(rConv),1,'first'));
+    clear rIn pks rConv 
+else
+    cPref = cShift(r==rPref);
 end
+
 sigma1 = 30;
-nullA = pref+180;
-nullB = pref-180;
-if ismember(nullA,dirShift)
+nullA = cPref+180;
+nullB = cPref-180;
+if ismember(nullA,cShift)
 null = nullA;
-elseif ismember(nullB,dirShift)
+elseif ismember(nullB,cShift)
 null = nullB;
 end
-Rnull = r(dirShift == null);
+Rnull = r(cShift == null);
 sigma2 = 30;
 
-gauss = @(x) Rpref*exp(-((x-pref).^2/(2*sigma1^2))) + Rnull*exp(-((x-null).^2/(2*sigma2^2)));
+gauss = @(x) rPref*exp(-((x-cPref).^2/(2*sigma1^2))) + Rnull*exp(-((x-null).^2/(2*sigma2^2)));
 
 
 if p
     subplot(2,2,2);hold on
-    plot(dir,r,'ko')
-    plot(dirShift,r,'r*')
-    plot(pref,Rpref,'ro')
+    plot(c,r,'ko')
+    plot(cShift,r,'r*')
+    plot(cPref,rPref,'ro')
     plot(null,Rnull,'ro')
     plot(X,gauss(X),'g--')
     plot([0 0],[0 max(r)],'r--')
@@ -77,30 +70,30 @@ end
 
 %% fitting gaussian
 
-err = @(pars) (pars(1)*exp(-((dirShift-pars(2)).^2/(2*pars(3)^2))) + pars(4)*exp(-((dirShift-pars(5)).^2/(2*pars(6)^2))))-r;
+err = @(pars) (pars(1)*exp(-((cShift-pars(2)).^2/(2*pars(3)^2))) + pars(4)*exp(-((cShift-pars(5)).^2/(2*pars(6)^2))))-r;
 % err = @(pars) (pars(1)*exp(-(mod(dirShift-pars(2),360).^2/(2*pars(3)^2))) + pars(4)*exp(-(mod(dirShift-pars(5),360).^2/(2*pars(6)^2))))-r;
 
-lb = [0     pref-45     10      0       null-45     10];
-ub = [Inf   pref+45     100     Inf     null+45     100];
-xo = [Rpref , pref , sigma1 , Rnull , null, sigma2];
+lb = [0     cPref-45     10      0       null-45     10];
+ub = [Inf   cPref+45     100     Inf     null+45     100];
+xo = [rPref , cPref , sigma1 , Rnull , null, sigma2];
 [params,resnorm,residuals] = lsqnonlin(err,xo,lb,ub);
 
-Rpref = params(1);%max(r);
-pref = params(2);%dir(r == max(r));
+rPref = params(1);%max(r);
+cPref = params(2);%dir(r == max(r));
 sigma1 = params(3);%10;
 Rnull = params(4);%r(dir == null);
 null = params(5);%mod(pref+180,360);
 sigma2 = params(6);%10;
 
-g.auss = @(x) Rpref*exp(-((x-pref).^2/(2*sigma1^2))) + Rnull*exp(-((x-null).^2/(2*sigma2^2)))...
-    + Rnull*exp(-((x-(null-360)).^2/(2*sigma2^2))) + Rpref*exp(-((x-(pref-360)).^2/(2*sigma1^2)));
-g.Rpref = Rpref;
-g.pref = pref;
+g.auss = @(x) rPref*exp(-((x-cPref).^2/(2*sigma1^2))) + Rnull*exp(-((x-null).^2/(2*sigma2^2)))...
+    + Rnull*exp(-((x-(null-360)).^2/(2*sigma2^2))) + rPref*exp(-((x-(cPref-360)).^2/(2*sigma1^2)));
+g.Rpref = rPref;
+g.pref = cPref;
 g.sigma1 = sigma1;
 g.Rnull = Rnull;
 g.null = null;
 g.sigma2 = sigma2;
-g.residuals = g.auss(dir)-r;
+g.residuals = g.auss(c)-r;
 
 
 % g.auss = @(x) Rpref*exp(-(mod(x-pref,360).^2/(2*sigma1^2))) + Rnull*exp(-(mod(x-null,360).^2/(2*sigma2^2)));
@@ -109,8 +102,8 @@ g.residuals = g.auss(dir)-r;
 
 if p
     subplot(2,2,3);hold on
-    plot(dir,r,'ko')
-    plot(dirShift,r,'r*')
+    plot(c,r,'ko')
+    plot(cShift,r,'r*')
     plot(X,g.auss(X),'g-')
     plot([0 0],[0 max(r)],'r--')
     plot([360 360],[0 max(r)],'r--')

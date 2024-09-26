@@ -145,6 +145,10 @@ function [spks,trialExclude] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
 
             end
         end
+
+        baseEst = mean(spks(u).fr.base(:),'omitnan');
+        stdEst = std(spks(u).fr.base(:),'omitnan');
+        spks(u).fr.z = (spks(u).fr.stim - baseEst)./stdEst;
     
     end
 
