@@ -27,7 +27,7 @@ exptName = [animal '_u' unit '_' expt];
 % probe = 'PSS';
 
 % plt = 1;
-plr = 1;
+plr = 0;
 alignBit = 0;
 visTest = 'anova';
 alpha = 0.01;
@@ -114,10 +114,10 @@ for u = 1:nU % u indexes a unit (column) in structure spks
         elseif nDom == 2 && sum(sizeInd)>0
             cndInclude = trialInfo.domval( : , sizeInd ) == sizes(st);
             if sizes(st) >= 150
-                ff = st;
+                ffIdx = st;
                 continue
             elseif sizes(st) <= 75
-                hemi = st;
+                hemiIdx = st;
             end
         elseif nDom == 2 && sum(posInd)>0
             cndInclude = trialInfo.domval( : , posInd ) == pos(st);
@@ -136,42 +136,38 @@ for u = 1:nU % u indexes a unit (column) in structure spks
         dir = C{u}(oriInd,:,st);
         paramKey{u} = trialInfo.dom;
         cndKey{u} = trialInfo.domval;
+        
         rMean = mean(R{u}(:,:,st),'omitnan');
-        rPref = max(rMean);
-        if sum(rMean==rPref)>1
+        rPref(u,1) = max(rMean);
+        if sum(rMean==rPref(u,1))>1
             rIn = rMean;
-            pks = rIn == rPref;
+            pks = rIn == rPref(u,1);
             rConv = rIn([end 1:end 1]);
             rConv = conv(rConv,ones(1,3)*(1/3),'same');
             rConv = rConv(1+1:end-1);
             rConv(~pks) = 0;
-            cPref = C{u}(oriInd,find(rConv==max(rConv),1,'first'),st);
+            cPref(u,1) = dir(find(rConv==max(rConv),1,'first'));
             clear rIn pks rConv 
         else
-            cPref = C{u}(oriInd,rMean==rPref,st);
+            cPref(u,1) = dir(rMean==rPref(u,1));
         end
-        cNull = mod(cPref+180,360);
-        rNull = rMean(C{u}(oriInd,:,st)==cNull);
+        cNull(u,1) = mod(cPref(u,1)+180,360);
+        rNull(u,1) = rMean(C{u}(oriInd,:,st)==cNull(u,1));
     
-        dsi(u,1) = abs(rPref-rNull)/rPref;
-        mv = meanvec(C{u}(oriInd,:,st),rMean);
-        ldir(u,1) = mv.ldir;
-    
-        Rpref(u,1) = rPref;
-        Cpref(u,1) = cPref;
-        Rnull(u,1) = rNull;
-        Cnull(u,1) = cNull;
+        dsi(u,1) = abs(rPref(u,1)-rNull(u,1))/rPref(u,1);
+        mv{u} = meanvec(C{u}(oriInd,:,st),rMean);
+        ldr(u,1) = mv{u}.ldr;
 
         %double gaussian fit
-        G{u,1} = dirGauss(rMean,dir,0);
+        G{u} = dirGauss(rMean,dir,0);
 
 
     end
 
 end
 
-varNames = {'exptName','probe','area','uInfo','uID','latency','fr','response','condition','gaussFit','paramKey','cndKey','rPref','oriPref','rNull','oriNull','rBlank','dsi','ldr'};
-sumStats = table(exptID',probeID',areaID',{spks.info}',uID',vertcat(spks.late),vertcat(spks.fr),R',C',G,paramKey',cndKey',Rpref,Cpref,Rnull,Cnull,Rblank',dsi,ldir,'VariableNames',varNames);
+varNames = {'exptName','probe','area','uInfo','uID','spkTimes','latency','fr','paramKey','cndKey','response','condition','gaussFit','meanVec','rPref','oriPref','rNull','oriNull','rBlank','dsi','ldr'};
+sumStats = table(exptID',probeID',areaID',{spks.info}',uID',{spks.stimCent}',vertcat(spks.late),vertcat(spks.fr),paramKey',cndKey',R',C',G',mv',rPref,cPref,rNull,cNull,Rblank',dsi,ldr,'VariableNames',varNames);
 
 [goodUnit,pVis] = screenUnits(sumStats,anaMode,blank,visTest,alpha);
 sumStats.goodUnit = goodUnit';
@@ -192,16 +188,16 @@ if plt == 1
         
         figure;
         legLbl{nStim+1} = 'blank';
-        x = spks(u).stimCent(1,:);
-        y = spks(u).stimCent(2,:);
+        x = sumStats.spkTimes{1}(1,:);
+        y = sumStats.spkTimes{1}(2,:);
         blankSpkIdx = ismember(y,blankTrialList);
         for st = 1:nStim
 
             clr = colors{st};
             if nDom==2 && sum(sizeInd)>0
-                if st==ff
+                if st==ffIdx
                     legLbl{st} = ['full field'];
-                elseif st==hemi
+                elseif st==hemiIdx
                     legLbl{st} = ['hemi field'];
                 end
             else
@@ -215,8 +211,8 @@ if plt == 1
             h = histogram(x(szSpkIdx),'BinEdges',bins);
             h.FaceColor = colors{st};
             h.EdgeColor = 'none';
-            if ~isnan(spks(u).late)
-                xline(spks(u).late,'--','LineWidth',2)
+            if ~isnan(sumStats.latency(u))
+                xline(sumStats.latency(u),'--','LineWidth',2)
             end
             xlim([bins(1) bins(end)])
     
@@ -239,42 +235,48 @@ if plt == 1
                 end
             end
             plot(x(szSpkIdx),y(szSpkIdx),'.','Color',colors{st})
-            if ~isnan(spks(u).late)
-                xline(spks(u).late,'--','LineWidth',2)
+            if ~isnan(sumStats.latency(u))
+                xline(sumStats.latency(u),'--','LineWidth',2)
             end
             xlim([-1 2])
             ylim([0 max(y)+1])
 
+            xP = sumStats.condition{u}(oriInd,:,st);
+            yP = sumStats.response{u}(:,:,st);
+            yMean = mean(yP,'omitnan');
+            if alignBit == 1
+                [xP,yMean,i] = alignDirTuning(xP,yMean);
+                yP{u} = yP{u}(:,i);
+            else
+                xP = [xP xP(1)+360];
+                yP = [yP yP(:,1)];
+                yMean = [yMean yMean(1)];
+            end
+            sem = std(yP,'omitnan')/sqrt(size(yP,1));
+
             if plr == 1
                 subplot(1,2,2,polaraxes);hold on
-                xP{u} = deg2rad(C{u}(oriInd,:,st)); xP{u} = [xP{u}(1:end) xP{u}(1)];
-                yP{u} = mean(R{u}(:,:,st),'omitnan'); yP{u} = [yP{u}(1:end) yP{u}(1)];
-                sem{u} = std(R{u}(:,:,st),'omitnan')/sqrt(size(R{u}(:,:,st),1)); sem{u} = [sem{u}(1:end) sem{u}(1)];
-                legSubset(st) = polarplot(xP{u},yP{u},'o','Color',clr);
-                hold on;polarplot(repmat(xP{u},2,1),yP{u}+([1;-1]*sem{u}),'Color',clr)
+                xP = deg2rad(xP);
+                polarplot(xP,yMean,'o','Color',clr);
+                hold on;
+%                 polarplot(xP,yP,'.','Color',clr)
+                polarplot(repmat(xP,2,1),yMean+([1;-1]*sem),'Color',clr)
+                
+                polarplot(repmat(deg2rad(sumStats.meanVec{u}.angDir),2,1),...
+                    [0 sumStats.meanVec{u}.magDir],'k','LineWidth',2)
+                polarplot(repmat(deg2rad(sumStats.meanVec{u}.angDir),2,1),...
+                    [0 sumStats.meanVec{u}.ldr*sumStats.meanVec{u}.magDir],'g','LineWidth',2)
+                polarplot(deg2rad(sumStats.oriPref(u)),sumStats.rPref(u),'r*')
             else
                 subplot(1,2,2);hold on
-                xP{u} = C{u}(oriInd,:,st);
-                yP{u} = R{u}(:,:,st);
-                if alignBit == 0
-                    gX = linspace(0,360);
-                elseif alignBit == 1
-                    gX = linspace(-180,180);
-                end
-                gP{u} = G{u}.auss(gX);
-                yMean{u} = mean(yP{u},'omitnan');
-                sem{u} = std(yP{u},'omitnan')/sqrt(size(yP{u},1));
-                if alignBit == 1
-                    [xP{u},yMean{u},i] = alignDirTuning(xP{u},yMean{u});
-                    yP{u} = yP{u}(:,i);
-                    sem{u} = sem{u}(i);
-                    gX = gX(i);
-                    gP{u} = gP{u}(i);
-                end
-%                 plot(xP{u},yP{u}','.','Color',clr)
-                plot(repmat(xP{u},2,1),yMean{u}+([1;-1]*sem{u}),'Color',clr)
-                plot(gX,gP{u},'Color',clr)
-                legSubset(st) = plot(xP{u},yMean{u},'o','Color',clr);
+
+                plot(xP,yP','.','Color',clr)
+                plot(repmat(xP,2,1),yMean+([1;-1]*sem),'Color',clr)
+                plot(xP,yMean,'o','Color',clr);
+
+                plot(repmat(sumStats.meanVec{u}.angDir,2,1),[0;sumStats.meanVec{u}.magDir],'k','LineWidth',2)
+                plot(repmat(sumStats.meanVec{u}.angDir,2,1),[0;sumStats.meanVec{u}.ldr*sumStats.meanVec{u}.magDir],'g','LineWidth',2)
+                plot(sumStats.oriPref(u),sumStats.rPref(u),'r*')
             end
 
         end
@@ -288,8 +290,6 @@ if plt == 1
 
         subplot(2,2,3);hold on
         plot(x(blankSpkIdx),y(blankSpkIdx),'k.')
-
-%         legend(legSubset,legLbl)
 
         ttl = [exptName ' p' num2str(probe) ' (' area ') ' anaMode '#' num2str(uID(u))];
         if ~ismember(u,find(goodUnit))
@@ -308,8 +308,6 @@ if plt == 1
 
     
 end
-
-%% Save
 
 
 

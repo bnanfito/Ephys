@@ -60,22 +60,22 @@ function [projectTbl,stats,data] = anaTrain(proj)
                 linStyl = '-';
             end
         
-        %     goodIdx = tbl.goodUnit;
-            for u = 1:height(tbl)
-        %         pVis(u) = anova1([tbl.response{u} tbl.rBlank{u}],[],"off");
-                baseFR = tbl.fr(u).base(:,1:end-1);
-                stimFR = tbl.fr(u).stim(:,1:end-1);
-                pVis(u) = ranksum(baseFR(:),stimFR(:));
-                clear baseFR stimFR
-            end
-            isVis = pVis<0.01;
-            isAct = tbl.rPref>2;
-            if strcmp(anaMode,'MU')
-                goodIdx = isVis' & isAct;
-            elseif strcmp(anaMode,'SU')
-                isSU = strcmp(tbl.uInfo,'SU');
-                goodIdx = isVis' & isAct & isSU;
-            end
+            goodIdx = tbl.goodUnit;
+%             for u = 1:height(tbl)
+%         %         pVis(u) = anova1([tbl.response{u} tbl.rBlank{u}],[],"off");
+%                 baseFR = tbl.fr(u).base(:,1:end-1);
+%                 stimFR = tbl.fr(u).stim(:,1:end-1);
+%                 pVis(u) = ranksum(baseFR(:),stimFR(:));
+%                 clear baseFR stimFR
+%             end
+%             isVis = pVis<0.01;
+%             isAct = tbl.rPref>2;
+%             if strcmp(anaMode,'MU')
+%                 goodIdx = isVis' & isAct;
+%             elseif strcmp(anaMode,'SU')
+%                 isSU = strcmp(tbl.uInfo,'SU');
+%                 goodIdx = isVis' & isAct & isSU;
+%             end
             tbl = tbl(goodIdx,:);
             clear pVis
         

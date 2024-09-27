@@ -1,7 +1,7 @@
-function [out,pVis] = screenUnits(in,mode,blankBit,visTest,alpha)
+function [out,pVis] = screenUnits(sumStats,mode,blankBit,visTest,alpha)
 
 % INPUTS
-% 1. in = structure containing spike data organized by unit. Output of 'orgSpks' function
+% 1. in = structure containing spike data organized by unit.
 % 2. mode = 'SU' for single-unit analysis or 'MU' for multi-unit analysis
 % 3. blankBit = binary vector (0 or 1) indicating which condition in the nRep x nCondition firing rate matrix (field in 'in') is a blank (=1)
 
@@ -12,27 +12,35 @@ function [out,pVis] = screenUnits(in,mode,blankBit,visTest,alpha)
 % alpha = 0.01;
 % visTest = 'ranksum';
 
-for u = 1:height(in)
+for u = 1:height(sumStats)
 
-    baseFR = in(u,:).fr.base(:,~blankBit);    baseFR = baseFR(:); 
-    stimFR = in(u,:).fr.stim(:,~blankBit);    stimFR = stimFR(:); 
-    bcFR = in(u,:).fr.bc(:,~blankBit);        bcFR = bcFR(:); bcFR = bcFR(~isnan(bcFR));
+    if length(sumStats.paramKey{u})>1
+        sizeInd = contains(sumStats.paramKey{u},'size');
+        sizeVec = sumStats.cndKey{u}(:,sizeInd);
+        cndInclude = find(sizeVec==min(sizeVec));
+    else
+        cndInclude = ~blankBit;
+    end
+
+    baseFR = sumStats(u,:).fr.base(:,cndInclude);    baseFR = baseFR(:); 
+    stimFR = sumStats(u,:).fr.stim(:,cndInclude);    stimFR = stimFR(:); 
+    bcFR = sumStats(u,:).fr.bc(:,cndInclude);        bcFR = bcFR(:); bcFR = bcFR(~isnan(bcFR));
  
     if strcmp(visTest,'signrank')
         pVis(u,1) = signrank(bcFR);
     elseif strcmp(visTest,'ranksum')
         pVis(u,1) = ranksum(baseFR,stimFR);
     elseif strcmp(visTest,'anova')
-        pVis(u,1) = anova1(in(u,:).fr.bc,[],'off');
+        pVis(u,1) = anova1(sumStats(u,:).fr.bc,[],'off');
     end
     isVis(u) = pVis(u,1)<alpha;
 
     if strcmp(mode,'SU')
-        isAct(u) = max(mean(in(u,:).fr.bc(:,~blankBit),'omitnan'))>=2;
-        isSU(u) = strcmp(in(u,:).uInfo,'SU');
-        maybeSU(u) = strcmp(in(u,:).uInfo,'SU?');
+        isAct(u) = max(mean(sumStats(u,:).fr.bc(:,~blankBit),'omitnan'))>=2;
+        isSU(u) = strcmp(sumStats(u,:).uInfo,'SU');
+        maybeSU(u) = strcmp(sumStats(u,:).uInfo,'SU?');
     elseif strcmp(mode,'MU')
-        isAct(u) = max(mean(in(u,:).fr.bc(:,~blankBit),'omitnan'))>=2;
+        isAct(u) = max(mean(sumStats(u,:).fr.bc(:,~blankBit),'omitnan'))>=2;
     end
 
 end
