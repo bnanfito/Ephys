@@ -36,11 +36,11 @@ for u = 1:height(sumStats)
     isVis(u) = pVis(u,1)<alpha;
 
     if strcmp(mode,'SU')
-        isAct(u) = max(mean(sumStats(u,:).fr.bc(:,~blankBit),'omitnan'))>=2;
+        isAct(u) = max(mean(sumStats(u,:).fr.bc(:,cndInclude),'omitnan'))>=2;
         isSU(u) = strcmp(sumStats(u,:).uInfo,'SU');
         maybeSU(u) = strcmp(sumStats(u,:).uInfo,'SU?');
     elseif strcmp(mode,'MU')
-        isAct(u) = max(mean(sumStats(u,:).fr.bc(:,~blankBit),'omitnan'))>=2;
+        isAct(u) = max(mean(sumStats(u,:).fr.bc(:,cndInclude),'omitnan'))>=5;
     end
 
 end

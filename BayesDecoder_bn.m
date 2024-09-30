@@ -7,10 +7,10 @@ close all
 anaMode = 'SU';
 trainProj = 'Train_V1Cool';
 dataFold = 'F:\Brandon\data';
-dsFold = fullfile(dataFold,'dataSets','training',trainProj,anaMode);
+dsFold = fullfile(dataFold,'dataSets','training',trainProj,anaMode,'ranksum & rPref above 5');
 load(fullfile(dsFold,[trainProj '_' anaMode 'dataSet.mat']))
 
-% figure;hold on
+figure;hold on
 for i = 1:4
 
     if i==1
@@ -106,31 +106,31 @@ for i = 1:4
             pVal{i}(u) = sum([pVal{i}(u),Pj]);
         end
 
-        if ismember(u,find(tbl.goodUnit))
-        figure
-            subplot(2,2,1)
-            histogram(R)
-            xline(meanR{i}(u),'r--')
-            ylabel('count')
-            xlabel('spk count')
-    
-            for s = 1:nStim
-                subplot(nStim,2,2*s);hold on
-                histogram(R(S==s),min(R)-1:1:max(R)+1)
-                plot(Gs{i,s,u}(2,:),Gs{i,s,u}(1,:),'r-')
-                ylabel(num2str(s))
-                xlim([min(R)-1 max(R)+1])
-            end
-
-            subplot(2,2,3)
-            imagesc(cMat{i}(:,:,u))
-            ylabel('actual stim.')
-            xlabel('predicted stim.')
-    
-            sgtitle([I ' unit#' num2str(u) '; perf = ' num2str(hitRate{i}(u)) '; pVal = ' num2str(pVal{i}(u))])
-            fName = fullfile(dsFold,['bayesDecoder_' I anaMode num2str(u) '.fig']);
-            saveas(gcf,fName)
-        end
+%         if ismember(u,find(tbl.goodUnit))
+%         figure
+%             subplot(2,2,1)
+%             histogram(R)
+%             xline(meanR{i}(u),'r--')
+%             ylabel('count')
+%             xlabel('spk count')
+%     
+%             for s = 1:nStim
+%                 subplot(nStim,2,2*s);hold on
+%                 histogram(R(S==s),min(R)-1:1:max(R)+1)
+%                 plot(Gs{i,s,u}(2,:),Gs{i,s,u}(1,:),'r-')
+%                 ylabel(num2str(s))
+%                 xlim([min(R)-1 max(R)+1])
+%             end
+% 
+%             subplot(2,2,3)
+%             imagesc(cMat{i}(:,:,u))
+%             ylabel('actual stim.')
+%             xlabel('predicted stim.')
+%     
+%             sgtitle([I ' unit#' num2str(u) '; perf = ' num2str(hitRate{i}(u)) '; pVal = ' num2str(pVal{i}(u))])
+%             fName = fullfile(dsFold,['bayesDecoder_' I anaMode num2str(u) '.fig']);
+%             saveas(gcf,fName)
+%         end
 
     
     end
@@ -141,30 +141,93 @@ for i = 1:4
     cMat{i} = cMat{i}(:,:,tbl.goodUnit);
     meanR{i} = meanR{i}(tbl.goodUnit);
     ldr{i} = ldr{i}(tbl.goodUnit);
-%     cdf = cdfplot(log10(pVal{i}));
-%     cdf.LineStyle = linStyl;
-%     cdf.LineWidth = 2;
-%     cdf.Color = clr;
+    cdf = cdfplot(log10(pVal{i}));
+    cdf.LineStyle = linStyl;
+    cdf.LineWidth = 2;
+    cdf.Color = clr;
 
 
 end
 
-% pChance = 0;
-% k = nTrial*Ps; %number of hits
-% n = nTrial; %number of trials
-% p = Ps; %probability of stimuli
-% for j = k:n
-%     Pj = nchoosek(n,j) * (p^j) * ((1-p)^(n-j)) ;
-%     pChance = sum([pChance,Pj]);
+pChance = 0;
+k = nTrial*Ps; %number of hits
+n = nTrial; %number of trials
+p = Ps; %probability of stimuli
+for j = k:n
+    Pj = nchoosek(n,j) * (p^j) * ((1-p)^(n-j)) ;
+    pChance = sum([pChance,Pj]);
+end
+xline(log10(pChance),'g-','LineWidth',2)
+xline(log10(0.05),'g:','LineWidth',2)
+xline(log10(0.01),'g--','LineWidth',2)
+% xline(Ps,'g--','LineWidth',2);
+xlabel('log10(pVal)')
+ylabel('proportion')
+title([anaMode ' Bayesian Decoder Performance'])
+legend({['v1bf; n=' num2str(length(hitRate{1}))],['v1af; n=' num2str(length(hitRate{2}))],['pssbf; n=' num2str(length(hitRate{3}))],['pssaf; n=' num2str(length(hitRate{4}))],'chance hitrate','pVal=0.05','pVal=0.01'})
+fName = fullfile(dsFold,['bayesDecoder_cdf_' anaMode 'pVal.fig']);
+saveas(gcf,fName)
+
+
+
+
+
+
+
+
+
+
+% figure;hold on
+% for i = 1:4
+%     if i==1
+%         I = 'v1bf';
+%         tbl = data.v1bf;
+%         clr = 'b';
+%         linStyl = '--';
+%         mrk = 'o';
+%         mrkSize = 5;
+%         sp = 3;
+%     elseif i==2
+%         I = 'v1af';
+%         tbl = data.v1af;
+%         clr = 'b';
+%         linStyl = '-';
+%         mrk = '.';
+%         mrkSize = 10;
+%         sp = 4;
+%     elseif i==3
+%         I = 'pssbf';
+%         tbl = data.pssbf;
+%         clr = 'r';
+%         linStyl = '--';
+%         mrk = 'o';
+%         mrkSize = 5;
+%         sp = 7;
+%     elseif i==4
+%         I = 'pssaf';
+%         tbl = data.pssaf;
+%         clr = 'r';
+%         linStyl = '-';
+%         mrk = '.';
+%         mrkSize = 10;
+%         sp = 8;
+%     end
+%         
+%     subplot(1,2,1);hold on
+%     plot(tbl.dsi(tbl.goodUnit==1),log2(tbl.rPref(tbl.goodUnit==1)),[clr mrk],'MarkerSize',mrkSize)
+%     xlabel('dsi')
+%     ylabel('log2(rPref)')
+% 
+%     subplot(2,4,sp);hold on
+%     plot(tbl.dsi(tbl.goodUnit==1),log2(tbl.rPref(tbl.goodUnit==1)),[clr mrk],'MarkerSize',mrkSize)
+% 
 % end
-% xline(log10(pChance),'g-','LineWidth',2)
-% xline(log10(0.05),'g:','LineWidth',2)
-% xline(log10(0.01),'g--','LineWidth',2)
-% % xline(Ps,'g--','LineWidth',2);
-% xlabel('log10(pVal)')
-% ylabel('proportion')
-% title([anaMode ' Bayesian Decoder Performance'])
-% legend({['v1bf; n=' num2str(length(hitRate{1}))],['v1af; n=' num2str(length(hitRate{2}))],['pssbf; n=' num2str(length(hitRate{3}))],['pssaf; n=' num2str(length(hitRate{4}))],'chance hitrate','pVal=0.05','pVal=0.01'})
-% fName = [dsFold '/' anaMode '/bayesDecoder_cdf_' anaMode 'pVal.fig'];
-% % saveas(gcf,fName)
+% sgtitle('DSI vs rPref')
+
+
+
+
+
+
+
 

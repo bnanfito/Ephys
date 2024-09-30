@@ -29,7 +29,7 @@ exptName = [animal '_u' unit '_' expt];
 % plt = 1;
 plr = 0;
 alignBit = 0;
-visTest = 'anova';
+visTest = 'ranksum';
 alpha = 0.01;
 
 

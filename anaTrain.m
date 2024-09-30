@@ -2,7 +2,7 @@
 
 function [projectTbl,stats,data] = anaTrain(proj)
 
-    anaMode = 'SU';
+    anaMode = 'MU';
 
 %     dataFold = ['/Volumes/Lab drive/Brandon/data/dataSets/training/' proj];
 %     load(fullfile(dataFold,'projectTbl.mat'),'projectTbl')
@@ -61,21 +61,7 @@ function [projectTbl,stats,data] = anaTrain(proj)
             end
         
             goodIdx = tbl.goodUnit;
-%             for u = 1:height(tbl)
-%         %         pVis(u) = anova1([tbl.response{u} tbl.rBlank{u}],[],"off");
-%                 baseFR = tbl.fr(u).base(:,1:end-1);
-%                 stimFR = tbl.fr(u).stim(:,1:end-1);
-%                 pVis(u) = ranksum(baseFR(:),stimFR(:));
-%                 clear baseFR stimFR
-%             end
-%             isVis = pVis<0.01;
-%             isAct = tbl.rPref>2;
-%             if strcmp(anaMode,'MU')
-%                 goodIdx = isVis' & isAct;
-%             elseif strcmp(anaMode,'SU')
-%                 isSU = strcmp(tbl.uInfo,'SU');
-%                 goodIdx = isVis' & isAct & isSU;
-%             end
+            N(i) = sum(goodIdx);
             tbl = tbl(goodIdx,:);
             clear pVis
         
@@ -99,7 +85,8 @@ function [projectTbl,stats,data] = anaTrain(proj)
             end
         
         end
-        legend({'V1 before','V1 after','PSS before','PSS after'})
+        legend({['V1 before; n=' num2str(N(1))],['V1 after; n=' num2str(N(2))],...
+                ['PSS before; n=' num2str(N(3))],['PSS after; n=' num2str(N(4))]})
     end
     
     for m = 1:length(metrics)
@@ -110,7 +97,7 @@ function [projectTbl,stats,data] = anaTrain(proj)
             
             subplot(1,2,1);hold on
             legLbls1Target(a) = plot((1:2)+xOff , aniMean(m,1:2,a),['b-' aniMarks{a}],'LineWidth',1,'MarkerSize',10);
-            legLbls1{a} = animals{a};
+            legLbls1{a} = [animals{a} '; n1=' num2str(length(aniDist{m,1,a})) '; n2=' num2str(length(aniDist{m,2,a}))];
             plot(repmat(1:2,2,1)+xOff , aniMean(m,1:2,a) + ([1;-1]*aniSEM(m,1:2,a)) ,'b-','LineWidth',1)
             xticks(1:2);
             xticklabels({'before','after'})   
@@ -120,7 +107,7 @@ function [projectTbl,stats,data] = anaTrain(proj)
     
             subplot(1,2,2);hold on
             legLbls2Target(a) = plot((1:2)+xOff , aniMean(m,3:4,a),['r-' aniMarks{a}],'LineWidth',1,'MarkerSize',10);
-            legLbls2{a} = animals{a};
+            legLbls2{a} = [animals{a} '; n1=' num2str(length(aniDist{m,3,a})) '; n2=' num2str(length(aniDist{m,4,a}))];
             plot(repmat(1:2,2,1)+xOff , aniMean(m,3:4,a) + ([1;-1]*aniSEM(m,3:4,a)) ,'r-','LineWidth',1)
             xticks(1:2);
             xticklabels({'before','after'})
