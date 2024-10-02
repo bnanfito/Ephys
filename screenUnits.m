@@ -40,7 +40,7 @@ for u = 1:height(sumStats)
         isSU(u) = strcmp(sumStats(u,:).uInfo,'SU');
         maybeSU(u) = strcmp(sumStats(u,:).uInfo,'SU?');
     elseif strcmp(mode,'MU')
-        isAct(u) = max(mean(sumStats(u,:).fr.bc(:,cndInclude),'omitnan'))>=5;
+        isAct(u) = max(mean(sumStats(u,:).fr.bc(:,cndInclude),'omitnan'))>=2;
     end
 
 end
