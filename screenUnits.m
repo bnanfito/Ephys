@@ -14,7 +14,7 @@ function [out,pVis] = screenUnits(sumStats,mode,blankBit,visTest,alpha)
 
 for u = 1:height(sumStats)
 
-    if length(sumStats.paramKey{u})>1
+    if sum(contains(sumStats.paramKey{u},'size'))>0
         sizeInd = contains(sumStats.paramKey{u},'size');
         sizeVec = sumStats.cndKey{u}(:,sizeInd);
         cndInclude = find(sizeVec==min(sizeVec));
@@ -23,7 +23,7 @@ for u = 1:height(sumStats)
     end
 
     baseFR = sumStats(u,:).fr.base(:,cndInclude);    baseFR = baseFR(:); 
-    stimFR = sumStats(u,:).fr.stim(:,cndInclude);    stimFR = stimFR(:); 
+    stimFR = sumStats(u,:).fr.stim(:,cndInclude);    stimFR = stimFR(:);
     bcFR = sumStats(u,:).fr.bc(:,cndInclude);        bcFR = bcFR(:); bcFR = bcFR(~isnan(bcFR));
  
     if strcmp(visTest,'signrank')

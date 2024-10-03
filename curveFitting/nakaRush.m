@@ -5,7 +5,7 @@ function [x,y,cF,resnorm,residuals,aic,bic] = nakaRush(r,c,mod,p)
 
 if mod == 1
     
-    x = linspace(0,100,100000);
+    x = linspace(1,100);
 
     rM = max(r);
 
