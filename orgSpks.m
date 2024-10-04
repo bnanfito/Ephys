@@ -48,6 +48,13 @@ function [spks,trialExclude] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
         stimEnd = eventTimes(eventIDdiff==-6 | eventIDdiff==-2);
         trialEnd = eventTimes(eventIDdiff==-1);
 
+    elseif strcmp(Analyzer.modID,'BK')
+        
+%         stimStartID = 1;
+%         trialStart = eventTimes(eventIDdiff==1);
+%         stimStart = eventTimes(eventIDdiff==2);
+%         trialEnd = eventIDdiff(eventIDdiff==-1);
+
     end
     [sortTrialCond,sortTrialInd] = sort(trialInfo.triallist);
     sortTrialCond = reshape(sortTrialCond,nReps,nConds);

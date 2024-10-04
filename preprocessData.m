@@ -40,12 +40,12 @@ for p = probe
 
     % spike detection
     parfor j = 0:nJobs-1
-        extractSpikes(physDir,animal,unit,expt,p,name,copyToZ,MUflag,legacyFlag,nJobs,j,'id',id)
+        extractSpikes(physDir,animal,unit,expt,p,name,copyToZ,MUflag,legacyFlag,nJobs,j)
     end
 
     % feature extraction
     parfor j = 0:nJobs-1
-        extractSpikeProps(physDir,animal,unit,expt,p,name,copyToZ,MUflag,j,'id',id)
+        extractSpikeProps(physDir,animal,unit,expt,p,name,copyToZ,MUflag,j)
     end
 
     if MUflag == 1 % for MUA generate MUspkMerge.mat file automatically, otherwise for SUA generate spkSort.mat file using sortGui (manual)

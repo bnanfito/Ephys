@@ -105,12 +105,16 @@ for u = 1:nU % u indexes a unit (column) in structure spks
     cont = C{u}(contInd,:,oriPref(u));
 
     [nk{u}.x,nk{u}.y,nk{u}.cF,nk{u}.resnorm,nk{u}.residuals,nk{u}.aic,nk{u}.bic] = nakaRush(rMean{u},cont,0,0);
-    cF(u) = nk{u}.cF;
+    if nk{u}.cF>100
+        cF(u) = nan;
+    else
+        cF(u) = nk{u}.cF;
+    end
 
 end
 
-varNames = {'exptName','probe','area','uInfo','uID','spkTimes','latency','fr','paramKey','cndKey','response','condition','rPref','nkFit','cF','rBlank'};
-sumStats = table(exptID',probeID',areaID',{spks.info}',uID',{spks.stimCent}',vertcat(spks.late),vertcat(spks.fr),paramKey',cndKey',R',C',rPref',nk',cF',Rblank','VariableNames',varNames);
+varNames = {'exptName','probe','area','uInfo','uID','spkTimes','latency','fr','paramKey','cndKey','oriPref','response','condition','rPref','nkFit','cF','rBlank'};
+sumStats = table(exptID',probeID',areaID',{spks.info}',uID',{spks.stimCent}',vertcat(spks.late),vertcat(spks.fr),paramKey',cndKey',oriPref',R',C',rPref',nk',cF',Rblank','VariableNames',varNames);
 
 [goodUnit,pVis] = screenUnits(sumStats,anaMode,blank,visTest,alpha);
 sumStats.goodUnit = goodUnit';
@@ -125,69 +129,74 @@ end
 
 if plt == 1
 
-        for u = find(goodUnit)
+    for u = 1:height(sumStats)
 
-            figure;
+        figure;
 
-            for o = 1:length(oris)
-                clr = colors{o};
-       
-                x = sumStats.spkTimes{u}(1,:);
-                y = sumStats.spkTimes{u}(2,:);
-                spkIdx = ismember(y,find(trialInclude));
-                blankSpkIdx = ismember(y,blankTrial);
-        
-                subplot(2,2,1);hold on
-                bins = -1:0.1:2;
-                h = histogram(x(spkIdx),'BinEdges',bins);
-                h.FaceColor = clr;
-                h.EdgeColor = 'none';
-                h = histogram(x(blankSpkIdx),'BinEdges',bins);
-                h.FaceColor = 'k';
-                h.EdgeColor = 'none';
-                if ~isnan(sumStats.latency(u))
-                    xline(sumStats.latency(u),'--','LineWidth',2)
-                end
-                xlim([bins(1) bins(end)])
-        
-                subplot(2,2,3);hold on
-                if isempty(x(spkIdx)) || isempty(y(spkIdx))
-                    text(0,0,'no spikes')
-                    ttl = [exptName ' p' num2str(probe) ' (' area ') ' anaMode '#' num2str(uID(u))];
-                    if ~ismember(u,find(goodUnit))
-                        ttl = [ttl '(BAD UNIT)'];
-                    end
-                    sgtitle(ttl)
-                    continue
-                end
-                patch([0 1 1 0],[0 0 max(y(spkIdx))+1 max(y(spkIdx))+1],'k','EdgeColor','none','FaceAlpha',0.2)
-                for t = 1:nTrials
-                    if ismember(t,find(trialExclude))
-                        patch([-predelay stimTime+postdelay stimTime+postdelay -predelay],[t-0.5 t-0.5 t+0.5 t+0.5],'r','EdgeColor','none','FaceAlpha',0.2)
-                    end
-                end
-                plot(x(spkIdx),y(spkIdx),'.','Color',clr)
-                plot(x(blankSpkIdx),y(blankSpkIdx),'k.')
-                if ~isnan(sumStats.latency(u))
-                    xline(sumStats.latency(u),'--','LineWidth',2)
-                end
-                xlim([-1 2])
-                ylim([0 max(y(spkIdx))+1])
-
+        for o = 1:length(oris)
+            clr = colors{o};
+   
+            x = sumStats.spkTimes{u}(1,:);
+            y = sumStats.spkTimes{u}(2,:);
+            spkIdx = ismember(y,find(trialInclude));
+            blankSpkIdx = ismember(y,blankTrial);
+    
+            subplot(2,2,1);hold on
+            bins = -1:0.1:2;
+            h = histogram(x(spkIdx),'BinEdges',bins);
+            h.FaceColor = clr;
+            h.EdgeColor = 'none';
+            h = histogram(x(blankSpkIdx),'BinEdges',bins);
+            h.FaceColor = 'k';
+            h.EdgeColor = 'none';
+            if ~isnan(sumStats.latency(u))
+                xline(sumStats.latency(u),'--','LineWidth',2)
             end
-
-            xT = cont;
-            yT = R{u}(:,:,oriPref(u));
-            subplot(1,2,2);hold on
-            plot(xT,rMean{u},'o','Color',clr)
-            plot(repmat(xT,size(yT,1),1),yT,'.','Color',clr)
-            plot(nk{u}.x,nk{u}.y)
-            xline(nk{u}.cF,'g--')
-            yline(0,'k')
+            xlim([bins(1) bins(end)])
+    
+            subplot(2,2,3);hold on
+            if isempty(x(spkIdx)) || isempty(y(spkIdx))
+                text(0,0,'no spikes')
+                continue
+            end
+            patch([0 1 1 0],[0 0 max(y(spkIdx))+1 max(y(spkIdx))+1],'k','EdgeColor','none','FaceAlpha',0.2)
+            for t = 1:nTrials
+                if ismember(t,find(trialExclude))
+                    patch([-predelay stimTime+postdelay stimTime+postdelay -predelay],[t-0.5 t-0.5 t+0.5 t+0.5],'r','EdgeColor','none','FaceAlpha',0.2)
+                end
+            end
+            plot(x(spkIdx),y(spkIdx),'.','Color',clr)
+            plot(x(blankSpkIdx),y(blankSpkIdx),'k.')
+            if ~isnan(sumStats.latency(u))
+                xline(sumStats.latency(u),'--','LineWidth',2)
+            end
+            xlim([-1 2])
+            ylim([0 max(y(spkIdx))+1])
 
         end
 
+        xT = cont;
+        yT = R{u}(:,:,oriPref(u));
+        subplot(1,2,2);hold on
+        plot(xT,rMean{u},'o','Color',clr)
+        plot(repmat(xT,size(yT,1),1),yT,'.','Color',clr)
+        plot(nk{u}.x,nk{u}.y)
+        xline(nk{u}.cF,'g--')
+        yline(0,'k')
+
+        ttl = [sumStats.uInfo{u} '#' num2str(sumStats.uID(u))];
+        if ~ismember(u,find(sumStats.goodUnit))
+            ttl = ['(BAD) ' ttl];
+        end
+        sgtitle(ttl)
+        clear ttl
+
+    end
+
 end
+
+    figure;
+    cdfplot(sumStats.cF(sumStats.goodUnit))
 
 
 
