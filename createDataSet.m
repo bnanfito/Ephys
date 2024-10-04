@@ -18,7 +18,7 @@ coolAnimals = unique(coolData.experimentId);
 cntrlIdx = ismember(cntrlData.experimentId,coolAnimals);
 cntrlData = cntrlData(cntrlIdx,:);
 
-%remove Kalatsky experiments
+%% remove Kalatsky experiments
 coolKalIdx = strcmp(coolData.module,'BK');
 coolKalatskyData = coolData(coolKalIdx,:);
 coolData = coolData(~coolKalIdx,:);
@@ -27,7 +27,7 @@ cntrlKalIdx = strcmp(cntrlData.module,'BK');
 cntrlKalatskyData = cntrlData(cntrlKalIdx,:);
 cntrlData = cntrlData(~cntrlKalIdx,:);
 
-%remove fullfield experiments
+%% remove fullfield experiments
 % include experiments with size as a looped parameter (should have both ff and hemifield trials)
 hemiCoolIdx = contains(coolData.looperNameCond1,'size') | ...
            contains(coolData.looperNameCond2,'size') | ...
@@ -65,6 +65,24 @@ hemiCntrlIdx = hemiCntrlIdx | spValCntrl( : , contains(stimParams,'x_size') ) ==
                     spValCntrl( : , contains(stimParams,'y_size') ) == 50;
 ffCntrlData = cntrlData(~hemiCntrlIdx,:);
 cntrlData = cntrlData(hemiCntrlIdx,:);
+
+
+%% split datasets by domval
+
+coolLooperVals = [coolData.looperNameCond1 coolData.looperNameCond2 ...
+                  coolData.looperNameCond3 coolData.looperNameCond4 ...
+                  coolData.looperNameCond5];
+
+cntrlLooperVals = [cntrlData.looperNameCond1 cntrlData.looperNameCond2 ...
+                   cntrlData.looperNameCond3 cntrlData.looperNameCond4 ...
+                   cntrlData.looperNameCond5];
+
+%contrast dataset
+cntrlContIdx = sum(contains(cntrlLooperVals,'contrast'),2)>0;
+cntrlContData = cntrlData(cntrlContIdx,:);
+
+coolContIdx = sum(contains(coolLooperVals,'contrast'),2)>0;
+coolContData = coolData(coolContIdx,:);
 
 
 
