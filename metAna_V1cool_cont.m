@@ -45,6 +45,7 @@ cntrlData.sumStats = cntrlSumStats;
 animals = unique([coolAnimals;cntrlAnimals]);
 for a = 1:length(animals)
     curAni = animals{a};
+    ages(a) = unique([coolAge(strcmp(coolAnimals,curAni)) cntrlAge(strcmp(cntrlAnimals,curAni))]);
 
     curAniIdx = contains(coolData.experimentId,curAni);
     if sum(curAniIdx)==0
@@ -69,15 +70,57 @@ for a = 1:length(animals)
 
     if ~isempty(sumStats.cool{a})
         coolCF = sumStats.cool{a}.cF(sumStats.cool{a}.goodUnit);
-        plot(coolAge(strcmp(coolAnimals,curAni)),mean(coolCF,'omitnan'),'co')
+        plot(coolAge(strcmp(coolAnimals,curAni)),mean(coolCF,'omitnan'),'c.')
     end
 
     if ~isempty(sumStats.cntrl{a})
         cntrlCF = sumStats.cntrl{a}.cF(sumStats.cntrl{a}.goodUnit);
-        plot(cntrlAge(strcmp(cntrlAnimals,curAni)),mean(cntrlCF,'omitnan'),'ko')
+        plot(cntrlAge(strcmp(cntrlAnimals,curAni)),mean(cntrlCF,'omitnan'),'k.')
     end
 
 
+end
+
+
+for a = 1:length(animals)
+
+    coolTbl = sumStats.cool{a};
+    cntrlTbl = sumStats.cntrl{a};
+    if isempty(coolTbl) || isempty(cntrlTbl)
+        continue
+    end
+    coolTbl = coolTbl(coolTbl.goodUnit,:);
+    cntrlTbl = cntrlTbl(cntrlTbl.goodUnit,:);
+    
+    figure;
+    subplot(1,2,1);hold on
+    cntrlSpkTimes = [cntrlTbl.spkTimes{:}];
+    coolSpkTimes = [coolTbl.spkTimes{:}];
+    bins = [-1:0.1:2];
+    h1 = histogram(coolSpkTimes(1,:),bins);
+    h1.FaceColor = 'c';h1.EdgeColor = 'none';
+    h2 = histogram(cntrlSpkTimes(1,:),bins);
+    h2.FaceColor = 'k';h2.EdgeColor = 'none';
+
+    for u = 1:height(coolTbl)
+        meanCurve.cool{a}(u,:) = mean(coolTbl.response{u}(:,:,coolTbl.oriPref(u)),'omitnan');
+        cnd.cool{a}(u,:) = coolTbl.condition{u}(strcmp(coolTbl.paramKey{u},'contrast'),:,coolTbl.oriPref(u));
+    end
+
+    for u = 1:height(cntrlTbl)
+        meanCurve.cntrl{a}(u,:) = mean(cntrlTbl.response{u}(:,:,cntrlTbl.oriPref(u)),'omitnan');
+        cnd.cntrl{a}(u,:) = cntrlTbl.condition{u}(strcmp(cntrlTbl.paramKey{u},'contrast'),:,cntrlTbl.oriPref(u));
+    end
+    
+    subplot(2,2,2);hold on
+    plot(cnd.cool{a}',meanCurve.cool{a}','c--','LineWidth',0.5)
+    plot(cnd.cntrl{a}',meanCurve.cntrl{a}','k--','LineWidth',0.5)
+
+    subplot(2,2,4);hold on
+    plot(mean(meanCurve.cool{a}),'c-o','LineWidth',2)
+    plot(mean(meanCurve.cntrl{a}),'k-o')
+
+    title([animals{a} '; P' num2str(ages(a))])
 end
 
 
