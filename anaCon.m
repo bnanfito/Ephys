@@ -95,8 +95,11 @@ for u = 1:nU % u indexes a unit (column) in structure spks
 
     for o = 1:length(oris)
         curOri = trialInfo.domval(:,oriInd) == oris(o);
-        R{u}(:,:,o) = spks(u).fr.bc(:,cndInclude & curOri');
-        C{u}(:,:,o) = trialInfo.domval(cndInclude & curOri',:)';
+        if size(cndInclude,1) ~= size(curOri,1)
+            curOri = curOri';
+        end
+        R{u}(:,:,o) = spks(u).fr.bc(:,cndInclude & curOri);
+        C{u}(:,:,o) = trialInfo.domval(cndInclude & curOri,:)';
         maxR(u,o) = max(mean(R{u}(:,:,o),'omitnan'));
     end
     rPref(u) = max(maxR(u,:));
@@ -195,8 +198,8 @@ if plt == 1
 
 end
 
-    figure;
-    cdfplot(sumStats.cF(sumStats.goodUnit))
+%     figure;
+%     cdfplot(sumStats.cF(sumStats.goodUnit))
 
 
 
