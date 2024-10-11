@@ -2,7 +2,9 @@
 clear all
 close all
 
-load('/Volumes/Lab drive/Brandon/data/dataSets/cooling/V1cool_MU_ori/V1cool_MU_ori_projectTbl.mat');
+% dataFold = '/Volumes/Lab drive/Brandon/data';
+dataFold = 'F:\Brandon\data';
+load(fullfile(dataFold,'dataSets','cooling','V1cool_MU_ori','V1cool_MU_ori_projectTbl.mat'))
 
 pssIdx = strcmp(projectTbl.recSite,'PSS');
 v1Idx = strcmp(projectTbl.recSite,'V1');

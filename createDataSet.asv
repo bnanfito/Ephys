@@ -5,7 +5,7 @@ close all
 
 zPath = 'Z:\EphysNew\data';
 anaPath = 'Z:\EphysNew\analyzer';
-dataPath = 'F:\Brandon\data';
+dataPath = 'D:\data';
 
 
 ageLims = [0 1000];
@@ -79,6 +79,7 @@ contIdx = sum(contains(looperVars,'contrast'),2)>0;
 % take only contrast expt & recordings from 'area'
 cntrlData = cntrlData(areaIdx & contIdx,:);
 
+anaPath = 'Z:\EphysNew\analyzer';
 for i = 1:height(cntrlData)
     
     exptId = cntrlData.experimentId{i};
@@ -99,13 +100,9 @@ for a = 1:length(animals)
 end
 
 figure; hold on
-histogram(ages,[0:1:1000])
+histogram()
 
-fileName = fullfile(dataPath,'dataSets','cntrl','cntrlContrast.xlsx');
-writetable(cntrlData,fileName,'Sheet',1,'Range','A1')
 
-fileName = fullfile(dataPath,'dataSets','cntrl','cntrlContrast.mat');
-save(fileName,'cntrlData','animals','ages')
 
 
 
