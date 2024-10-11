@@ -119,19 +119,12 @@ for a = 1:length(animals)
     plot(cnd.cntrl{a}',meanCurve.cntrl{a}','k--','LineWidth',0.5)
 
     subplot(2,2,4);hold on
+    sem = std(meanCurve.cool{a})/sqrt(size(meanCurve.cool{a},1));
     x = mean(cnd.cool{a});
     y = meanCurve.cool{a};
-    sem = std(y)/sqrt(size(y,1));
     plot(x,mean(y),'c-o','LineWidth',2)
-    plot(repmat(x,2,1),mean(y)+([-1;1]*sem),'c','LineWidth',2)
-    clear x y sem
-
-    x = mean(cnd.cntrl{a});
-    y = meanCurve.cntrl{a};
-    sem = std(y)/sqrt(size(y,1));
-    plot(x,mean(y),'k-o','LineWidth',2)
-    plot(repmat(x,2,1),mean(y)+([-1;1]*sem),'k','LineWidth',2)
-    clear x y sem
+    plot()
+    plot(mean(cnd.cntrl{a}),mean(meanCurve.cntrl{a}),'k-o','LineWidth',2)
 
     title([animals{a} '; P' num2str(ages(a))])
 end
