@@ -34,15 +34,15 @@ for i = 1:4
             cPrefSizes = tbl.cndKey{u}(cPrefIdx,sizeIdx);
             cPrefIdx = cPrefIdx(cPrefSizes == min(cPrefSizes));
             hemiIdx = tbl.cndKey{u}(:,sizeIdx) == min(cPrefSizes);
+            hemiTrials = tbl(u,:).fr.trialNum(:,hemiIdx);
+            hemiTrials = hemiTrials(:);
+            h
         end
 
         if allTrials == 1
             if sum(sizeIdx)>0
-                hemiTrials = tbl(u,:).fr.trialNum(:,hemiIdx);
-                hemiTrials = hemiTrials(:);
-                hemiSpkIdx = ismember(tbl.spkTimes{u}(2,:),hemiTrials);
-                curSpks = tbl.spkTimes{u}(1,hemiSpkIdx);
-                nTrials = length(unique(tbl.spkTimes{u}(2,hemiSpkIdx)));
+                curSpks = tbl.spkTimes{u}(1,:);
+
             else
                 curSpks = tbl.spkTimes{u}(1,:);
                 nTrials = length(unique(tbl.spkTimes{u}(2,:)));
