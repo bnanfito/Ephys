@@ -4,7 +4,7 @@
 clear all
 close all
 
-anaMode = 'MU';
+anaMode = 'SU';
 trainProj = 'Train_V1Cool';
 % dataFold = 'F:\Brandon\data';
 dataFold = '/Volumes/NielsenHome2/Brandon/data';
@@ -12,13 +12,11 @@ dsFold = fullfile(dataFold,'dataSets','training',trainProj,anaMode);
 load(fullfile(dsFold,[trainProj '_' anaMode 'dataSet.mat']))
 
 
-tbl = data.pssaf;
+tbl = data.v1bf;
 
-u = 10;
+u = 1;
 
 R = tbl.response{u};
-figure;
-plot(mean(R))
 nRep = size(R,1);
 nCnd = size(R,2);
 
