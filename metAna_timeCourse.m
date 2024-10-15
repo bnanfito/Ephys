@@ -3,10 +3,11 @@ clear all
 close all
 
 % dataFold = '/Volumes/Lab drive/Brandon/data';
-dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
+% dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
+dataFold = 'Y:\Brandon\data';
 anaMode = 'MU';
 proj = 'Train_V1Cool';
-allTrials = 0;
+allTrials = 1;
 load(fullfile(dataFold,'dataSets','training',proj,anaMode,[proj '_' anaMode 'dataSet.mat']))
 
 tBinSize = 0.01;

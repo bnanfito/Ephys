@@ -4,23 +4,23 @@ function [projectTbl,stats,data] = anaTrain(proj)
 
     anaMode = 'MU';
 
-    dataFold = ['/Volumes/Lab drive/Brandon/data/dataSets/training/' proj];
-    load(fullfile(dataFold,'projectTbl.mat'),'projectTbl')
+%     dataFold = '/Volumes/Lab drive/Brandon/data/dataSets/training/';
+%     load(fullfile(dataFold,proj,anaMode,'projectTbl.mat'),'projectTbl')
 
-%     dataFold = 'D:\data';
-%     projectTbl=getProjectFiles(proj,1,'age','recSite','priorMFlag','priorDescr','duringMFlag','manipDescr','manipDetail');
-%     
-%     for e = 1:height(projectTbl)
-%         animal = projectTbl.experimentId{e};
-%         unit = projectTbl.unitNr{e};
-%         expt = projectTbl.experimentNr{e};
-%         probe = projectTbl.probeId(e);
-%         exptName = projectTbl.fileBase{e};
-%         exptDir = fullfile(dataFold,'Ephys',animal,exptName);
-%         disp(['generating sumStats for ' exptName])
-%         [sumStats{e,1}] = anaOri(animal,unit,expt,probe,anaMode,dataFold,0,0);
-%     end
-%     projectTbl.sumStats = sumStats;
+    dataFold = fullfile('Y:\Brandon\data\dataSets\training',proj);
+    projectTbl=getProjectFiles(proj,1,'age','recSite','priorMFlag','priorDescr','duringMFlag','manipDescr','manipDetail');
+    
+    for e = 1:height(projectTbl)
+        animal = projectTbl.experimentId{e};
+        unit = projectTbl.unitNr{e};
+        expt = projectTbl.experimentNr{e};
+        probe = projectTbl.probeId(e);
+        exptName = projectTbl.fileBase{e};
+        exptDir = fullfile(dataFold,'Ephys',animal,exptName);
+        disp(['generating sumStats for ' exptName])
+        [sumStats{e,1}] = anaOri(animal,unit,expt,probe,anaMode,dataFold,0,0);
+    end
+    projectTbl.sumStats = sumStats;
     
     v1bf = vertcat(projectTbl.sumStats{projectTbl.priorMFlag == 0 & strcmp(projectTbl.recSite,'V1')});
     v1af = vertcat(projectTbl.sumStats{projectTbl.priorMFlag == 1 & strcmp(projectTbl.recSite,'V1')});

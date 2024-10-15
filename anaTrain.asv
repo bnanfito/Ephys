@@ -4,11 +4,10 @@ function [projectTbl,stats,data] = anaTrain(proj)
 
     anaMode = 'MU';
 
-%     dataFold = ['/Volumes/Lab drive/Brandon/data/dataSets/training/' proj];
-%     load(fullfile(dataFold,'projectTbl.mat'),'projectTbl')
+%     dataFold = '/Volumes/Lab drive/Brandon/data/dataSets/training/';
+%     load(fullfile(dataFold,proj,anaMode,'projectTbl.mat'),'projectTbl')
 
-    dataFold = 'D:\data';
-    dataFold = 'Y:\Brandon\data';
+    dataFold = fullfile('Y:\Brandon\data\dataSets\training',proj,);
     projectTbl=getProjectFiles(proj,1,'age','recSite','priorMFlag','priorDescr','duringMFlag','manipDescr','manipDetail');
     
     for e = 1:height(projectTbl)
@@ -31,7 +30,7 @@ function [projectTbl,stats,data] = anaTrain(proj)
     
     animals = unique(projectTbl.experimentId);
     aniMarks = {'o','+','*','x','square','diamond','^','v','<','>'};
-    metrics = {'rPref','dsi','ldr','latency'};
+    metrics = {'rPref','dsi','ldr'};
 
     %% plot
     
