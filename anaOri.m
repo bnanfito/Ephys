@@ -11,7 +11,7 @@ figDir = fullfile(dataFold,'Figures');
 
 exptName = [animal '_u' unit '_' expt];
 
-plr = 0;
+plr = 1;
 alignBit = 0;
 visTest = 'ranksum';
 alpha = 0.01;
@@ -207,10 +207,10 @@ if plt == 1
         if plr == 1
             subplot(1,2,2,polaraxes);hold on
             xT = deg2rad(xT);
-            polarplot(xT,yMean,'o','Color',clr);
+            polarplot(xT,yMean,'-','Color',clr);
             hold on;
 %                 polarplot(xP,yP,'.','Color',clr)
-            polarplot(repmat(xT,2,1),yMean+([1;-1]*sem),'Color',clr)
+            polarplot(repmat(xT,2,1),yMean+([1;-1]*sem),'Color',clr,'LineWidth',2)
             
             polarplot(repmat(deg2rad(sumStats.meanVec{u}.angDir),2,1),...
                 [0 sumStats.meanVec{u}.magDir],'k','LineWidth',2)
