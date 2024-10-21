@@ -3,16 +3,20 @@
 clear all;close all
 colors = {[0 0.4470 0.7410],[0.8500 0.3250 0.0980],[0.9290 0.6940 0.1250],[0.4940 0.1840 0.5560],[0.4660 0.6740 0.1880],[0.3010 0.7450 0.9330],[0.6350 0.0780 0.1840]};
 nRep = 5;
-s = 0:22.5:337.5;
-rMean = normpdf(s,180,40)*500; 
-rStd = repmat(1,1,length(rMean));
+% s = 0:22.5:337.5;
+% rMean = normpdf(s,180,40)*500; 
+% rStd = repmat(1,1,length(rMean));
+s = 0:10;
+rMean = [20 20 20 30 40 50 60 70 80 80 80];
+rStd = repmat(10,1,11);
 r_sim = rMean+(randn(nRep,length(s)).*rStd); 
 rMean_sim = mean(r_sim,'omitnan');
 rVar = rStd.^2;
 rStd_sim = std(r_sim,'omitnan');
 rVar_sim = rStd_sim.^2;
 
-R_axMin = -5;R_axMax = 15;
+% R_axMin = min(r_sim,[],'all');R_axMax = max(r_sim,[],'all');
+R_axMin = 0;R_axMax = 100;
 R_ax = R_axMin:0.1:R_axMax; 
 R_lbl = R_axMin:2:R_axMax; 
 R_tic = find(ismember(R_ax,R_lbl));
@@ -54,9 +58,12 @@ yticklabels(R_lbl)
 subplot(2,2,4)
 plot(pRsim,R_ax)
 
-for i = 1:length(s)
-Ir_s(i) = sum(pR_S(:,i).*log2(pR_S(:,i)./pR));
-Ir_s_sim(i) = sum(pRsim_S(:,i).*log2(pRsim_S(:,i)./pRsim));
+for x = 1:length(s)
+    for i = 1:length(rMean)
+
+    end
+%     Ir_s(x) = sum(pR_S(:,x).*log2(pR_S(:,x)./pR));
+%     Ir_s_sim(x) = sum(pRsim_S(:,x).*log2(pRsim_S(:,x)./pRsim));
 end
 
 figure(1)
