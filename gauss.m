@@ -1,9 +1,11 @@
 
-function [g] = gauss(x,a,b)
+function [g] = gauss(x,m,s)
 % a = mean
-% b = std
+% sigma = std
 % x = evaluation
 
-g = exp(-1*( ( 2*(x-a) )/b ).^2);
+% g = exp(-1*( ( 2*(x-m) )/s ).^2);
+
+g = 1/sqrt(2*pi*(s^2)) * exp(-1*( ((x-m).^2)/(2*(s^2)) ));
 
 end
