@@ -63,14 +63,17 @@ function [spks,trialExclude] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
 
     if strcmp(anaMode,'SU')
         SUTrialData(fullfile(dataFold,'Ephys'),animal,unit,expt,probe,'id',stimStartID,st,st,0)
-        load(fullfile(physDir,[baseName '_p' num2str(probe) '_SUTrial.mat']),'SU')
+        load(fullfile(physDir,[baseName '_p' num2str(probe) '_SUTrial.mat']),'SU','SUInfo')
         nUnits = length(SU);
         trialExclude = zeros(1,nTrials) == 1;
 
         load(fullfile(physDir,[baseName '_p' num2str(probe) '_spkSort.mat']),'spkSort');
-        load(fullfile(physDir,[baseName '_p' num2str(probe) '_SULatency.mat']),'SUlatency')
         spkStruct = spkSort; 
-        latency = SUlatency;
+
+%         load(fullfile(physDir,[baseName '_p' num2str(probe) '_SULatency.mat']),'SUlatency')
+%         latency = SUlatency;
+        latency = computeLatency_bn(SU,SUInfo,trialExclude);
+
         clear spkSort SUlatency
     elseif strcmp(anaMode,'MU')
         MUThreshTrialData(fullfile(dataFold,'Ephys'),animal,unit,expt,probe,'id',stimStartID,st,st,0)
@@ -79,9 +82,12 @@ function [spks,trialExclude] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
         trialExclude = MUThreshInfo.trialExclude;
 
         load(fullfile(physDir,[baseName '_p' num2str(probe) '_MUspkMerge.mat']),'MUspkMerge');
-        load(fullfile(physDir,[baseName '_p' num2str(probe) '_MULatency.mat']),'MUlatency')
         spkStruct = MUspkMerge;
-        latency = MUlatency;
+
+%         load(fullfile(physDir,[baseName '_p' num2str(probe) '_MULatency.mat']),'MUlatency')
+%         latency = MUlatency;
+        latency = computeLatency_bn(MUThresh,MUThreshInfo,trialExclude);
+
         clear MUspkMerge MUlatency
     end
 

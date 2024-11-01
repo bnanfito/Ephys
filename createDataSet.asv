@@ -8,13 +8,6 @@ anaPath = 'Z:\EphysNew\analyzer';
 dataPath = 'F:\Brandon\data';
 
 
-
-
-
-
-
-
-
 % ageLims = [0 1000];
 % 
 % [coolData] = queryCoolV1(ageLims);
