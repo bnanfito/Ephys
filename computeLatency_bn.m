@@ -69,7 +69,7 @@ for u=1:length(data)
     %to keep all matrices the same, we use circshift
     %to generate all of the shifted copies
     %also add that time has to be larger than 0 to clean up
-    NShift=NrBinSpin.Value;
+    NShift=2;
     diffNshift=zeros(NShift,length(diffN));
     for i=0:NShift-1 %first one is not shifted, see above
         diffNshift(i+1,:)=circshift(diffN,-i);
