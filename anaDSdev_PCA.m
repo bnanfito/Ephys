@@ -2,7 +2,8 @@ clear all
 close all
 
 anaMode = 'SU';
-dataFold = '/Volumes/Lab drive/Brandon/data/dataSets/DSdev';
+% dataFold = '/Volumes/Lab drive/Brandon/data/dataSets/DSdev';
+dataFold = 'F:\Brandon\data\dataSets\DSdev';
 load(fullfile(dataFold,"DSdev_projectTbl.mat"))
 
 ageGroups = {[0 30],[31 33],[34 36],[37 39],[40 300]};

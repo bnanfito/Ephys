@@ -1,11 +1,31 @@
 %create dataset
 
-clear all
-close all
+% clear all
+% close all
 
 zPath = 'Z:\EphysNew\data';
 anaPath = 'Z:\EphysNew\analyzer';
-dataPath = 'F:\Brandon\data';
+procSpksPath = 'Z:\EphysNew\processedSpikes';
+% dataPath = 'F:\Brandon\data';
+dest = 'D:\data\dataSets\DSdev\Ephys';
+
+for f = 1:height(projList)
+    animal = projList.experimentId{f};
+    unit = projList.unitNr{f};
+    expt = projList.experimentNr{f};
+    probe = projList.probeId(f);
+    exptName = [animal '_u' unit '_' expt];
+
+    if ~isfolder(fullfile(dest,animal,exptName))
+        mkdir(fullfile(dest,animal,exptName))
+    end
+
+    copyfile(fullfile(anaPath,animal,[exptName '.analyzer']),fullfile(dest,animal,exptName,[exptName '.analyzer']))
+    copyfile(fullfile(procSpksPath,animal,exptName,[exptName '_id.mat']),fullfile(dest,animal,exptName,[exptName '_id.mat']))
+    copyfile(fullfile(procSpksPath,animal,exptName,[exptName '_trialInfo.mat']),fullfile(dest,animal,exptName,[exptName '_trialInfo.mat']))
+    copyfile(fullfile(procSpksPath,animal,exptName,[exptName '_p' num2str(probe) '_spkSort.mat']),fullfile(dest,animal,exptName,[exptName '_p' num2str(probe) '_spkSort.mat']))
+
+end
 
 
 

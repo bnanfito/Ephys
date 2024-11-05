@@ -1,16 +1,16 @@
 clear all
-close all
+% close all
 
-anaMode = 'MU';
-proj = 'Train_Static';
+anaMode = 'SU';
+proj = 'Train_V1Cool';
 dataFold = 'D:\data\dataSets\training';
-% path = fullfile(dataFold,proj,anaMode,'ranksum & rPref above 2');
-path = fullfile(dataFold,proj,anaMode);
+path = fullfile(dataFold,proj,anaMode,'ranksum & rPref above 2');
+% path = fullfile(dataFold,proj,anaMode);
 dataFileName = [proj '_' anaMode 'dataSet.mat'];
 load(fullfile(path,dataFileName))
 
 area = 'PSS';
-exp = 'bf';
+exp = 'af';
 ttl = [proj ': ' area exp ' training ' anaMode ' response'];
 figFileName = [proj '_' anaMode '_' area exp '_popPCA.fig'];
 if strcmp(area,'V1') && strcmp(exp,'bf')
@@ -84,6 +84,7 @@ C = tbl.condition{1};
 
 r = Rnorm;
 [coeff, score, latent, tsq, explained] = pca(r);
+D = squareform(pdist(r));
 
 for u = 1:nU
     [cAlign,rAlign(:,u),~] = alignDirTuning(C,r(:,u)');
@@ -93,7 +94,7 @@ figure; hold on
 subplot(3,2,1);hold on
 imagesc(r)
 yticks(1:length(C))
-yticklabels(mat2cell(C,1,ones(1,length(C))))
+yticklabels(num2str(C'))
 xlabel('unit')
 ylabel('direction (deg.)')
 axis tight
@@ -127,7 +128,15 @@ xlabel('PC')
 ylabel('cum.sum explained variance')
 ylim([0 100])
 
-subplot(3,1,3)
+subplot(3,2,5);hold on
+imagesc(D)
+axis tight
+xticks([1:size(D,2)])
+xticklabels(num2str(C'))
+yticks([1:size(D,1)])
+yticklabels(num2str(C'))
+
+subplot(3,2,6)
 plot(C,score(:,1:4),'LineWidth',2)
 % polarplot(deg2rad(C),score(:,1:4),'LineWidth',2)
 % rlim([-1.5 1.5])
