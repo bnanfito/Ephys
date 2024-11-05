@@ -25,7 +25,9 @@ for ag = 1:nAG
             c = cInt;
             r = rInt;
         end
-        rV1{ag}(:,u) = r./max(r);
+        r = r./max(r);
+        r(r<0) = 0;
+        rV1{ag}(:,u) = r;
         cV1{ag}(:,u) = c;
     end
 
@@ -39,38 +41,74 @@ for ag = 1:nAG
             c = cInt;
             r = rInt;
         end
-        rPSS{ag}(:,u) = r./max(r);
+        r = r./max(r);
+        r(r<0) = 0;
+        rPSS{ag}(:,u) = r;
         cPSS{ag}(:,u) = c;
     end
 
     [coeff{1,ag}, score{1,ag}, latent{1,ag}, tsq{1,ag}, explained{1,ag}] = pca(rV1{ag});
     [coeff{2,ag}, score{2,ag}, latent{2,ag}, tsq{2,ag}, explained{2,ag}] = pca(rPSS{ag});
 
+    D{1,ag} = squareform(pdist(rV1{ag}));
+    D{2,ag} = squareform(pdist(rPSS{ag}));
+
 end
 
 
 figure;hold on
 for ag = 1:nAG
-    subplot(2,nAG,ag);hold on
+
+    subplot(6,nAG,ag);hold on
+    imagesc(D{1,ag})
+    axis tight
+    xticks([1:size(D{1,ag},2)])
+    xticklabels(num2str(c'))
+    yticks([1:size(D{1,ag},1)])
+    yticklabels(num2str(c'))
+
+    subplot(6,nAG,ag+(nAG*1));hold on
+    imagesc(rV1{ag});
+    axis tight
+    yticks([1:size(rV1{ag},1)])
+    yticklabels(num2str(c'))
+
+    subplot(6,nAG,ag+(nAG*2));hold on
     nP = size(score{1,ag},1);
     clrs = hsv(nP);
     for i = 1:nP
         pt(i) = plot3(score{1,ag}(i,1),score{1,ag}(i,2),score{1,ag}(i,3),'.','Color',clrs(i,:),'MarkerSize',20);
     end
-    plot3(score{1,ag}(:,1),score{1,ag}(:,2),score{1,ag}(:,3),'k--')
+    plot3([score{1,ag}(:,1);score{1,ag}(1,1)],[score{1,ag}(:,2);score{1,ag}(1,2)],[score{1,ag}(:,3);score{1,ag}(1,3)],'k--')
+    xlabel('PC1');ylabel('PC2');zlabel('PC3')
     title(['age:' num2str(ageGroups{ag}(1)) '-' num2str(ageGroups{ag}(2)) ';nU=' num2str(nU_v1(ag))])
     if ag ==nAG
         legend(pt,num2str(c'))
     end
 
-    subplot(2,nAG,ag+nAG);hold on
+    subplot(6,nAG,ag+(nAG*3));hold on
     nP = size(score{2,ag},1);
     clrs = hsv(nP);
     for i = 1:nP
         plot3(score{2,ag}(i,1),score{2,ag}(i,2),score{2,ag}(i,3),'.','Color',clrs(i,:),'MarkerSize',20)
     end
-    plot3(score{2,ag}(:,1),score{2,ag}(:,2),score{2,ag}(:,3),'k--')
+    plot3([score{2,ag}(:,1);score{2,ag}(1,1)],[score{2,ag}(:,2);score{2,ag}(1,2)],[score{2,ag}(:,3);score{2,ag}(1,3)],'k--')
+    xlabel('PC1');ylabel('PC2');zlabel('PC3')
     title(['age:' num2str(ageGroups{ag}(1)) '-' num2str(ageGroups{ag}(2)) ';nU=' num2str(nU_pss(ag))])
+
+    subplot(6,nAG,ag+(nAG*4));hold on
+    imagesc(rPSS{ag})
+    axis tight
+    yticks([1:size(rPSS{ag},1)])
+    yticklabels(num2str(c'))
+
+    subplot(6,nAG,ag+(nAG*5));hold on
+    imagesc(D{2,ag})
+    axis tight
+    xticks([1:size(D{2,ag},2)])
+    xticklabels(num2str(c'))
+    yticks([1:size(D{2,ag},1)])
+    yticklabels(num2str(c'))
 
 end
 
