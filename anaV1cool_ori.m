@@ -2,9 +2,9 @@
 clear
 close all
 
-% anaMode = 'MU';
-% proj = ['V1cool_' anaMode '_ori'];
-% area = 'PSS';
+anaMode = 'MU';
+proj = ['V1cool_' anaMode '_ori'];
+area = 'PSS';
 % dataFold = fullfile('Y:\Brandon\data');
 % projTbl = getProjectFiles(proj,1,'age','recSite','penNr','priorMFlag','priorDescr',...
 %                                        'duringMFlag','manipDescr','manipDetail',...
@@ -196,6 +196,7 @@ xlabel('age')
 ax4 = gca;
 
 linkaxes([ax1 ax2 ax3 ax4],'x')
+sgtitle([proj ' ' area ' ' anaMode ' ind. animal means'])
 
 
 
@@ -254,7 +255,7 @@ for ag = 1:nAG
 
 
 end
-
+sgtitle([proj ' ' area ' ' anaMode ' cntrl distance'])
 
 
 
@@ -313,7 +314,7 @@ for ag = 1:nAG
 
 
 end
-
+sgtitle([proj ' ' area ' ' anaMode ' cooled distance'])
 
 
 
