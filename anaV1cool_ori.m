@@ -30,8 +30,8 @@ area = 'PSS';
 % projTbl.sumStats = sumStats;
 % projTbl.nGU = nGoodUnits;
 
-% load('Y:\Brandon\data\dataSets\cooling\V1cool_MU_ori\V1cool_MU_ori_projectTbl.mat')
-load('/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/cooling/V1cool_MU_ori/V1cool_MU_ori_projectTbl.mat')
+load('Y:\Brandon\data\dataSets\cooling\V1cool_MU_ori\V1cool_MU_ori_projectTbl.mat')
+% load('/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/cooling/V1cool_MU_ori/V1cool_MU_ori_projectTbl.mat')
 
 
 coolIdx = projTbl.duringMFlag==1 & strcmp(projTbl.manipDescr,'Cooling') & ...
