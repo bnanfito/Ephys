@@ -1,14 +1,14 @@
 % anaOri
-% function [sumStats] = anaSF(animal,unit,expt,probe,anaMode,dataFold,plt,svePlt)
+function [sumStats] = anaSF(animal,unit,expt,probe,anaMode,dataFold,plt,svePlt)
 
-clear all
+% clear all
 % close all
-animal = 'febo5';
-unit = '000';
-expt = '008';
-probe = 1;
-anaMode = 'MU';
-dataFold = '/Volumes/Lab drive/Brandon/data';
+% animal = 'febo5';
+% unit = '000';
+% expt = '008';
+% probe = 1;
+% anaMode = 'MU';
+% dataFold = '/Volumes/Lab drive/Brandon/data';
 
 
 %% Initialize
@@ -145,6 +145,8 @@ sumStats.pVis = pVis;
 
 %% plotting
 
+if plt == 1
+
 for u = 1:nU
 
     if ~sumStats.goodUnit(u)
@@ -152,19 +154,28 @@ for u = 1:nU
     end
 
     opIdx = squeeze(mean(sumStats.condition{u}(oriInd,:,:),2)) == sumStats.oriPref(u);
-%     figure;
     y(u,:) = mean( sumStats.response{u}(:,:,opIdx) ,1,'omitnan');
     y(u,:) = y(u,:)./max(y(u,:));
     x = sumStats.condition{u}(sfInd,:,opIdx);
+    
+%     figure
 %     plot(x,y);
 
 
 
 end
 
-figure;
-plot(x,mean(y))
+figure;hold on
+plot(x,mean(y,'omitnan'),'k','LineWidth',2)
+sem = std(y,'omitnan')/sqrt(size(y,1));
+plot(repmat(x,2,1),mean(y)+([1;-1].*sem),'k','LineWidth',2)
+
+if svePlt == 1
+%     saveas()
+end
+
+end
 
 
 
-% end
+end

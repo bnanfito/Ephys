@@ -2,7 +2,7 @@ clear all
 close all
 
 anaMode = 'MU';
-load(['/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/training/Train_V1Cool/' anaMode '/ranksum & rPref above 2/Train_V1Cool_' anaMode 'dataSet.mat'])
+% load(['/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/training/Train_V1Cool/' anaMode '/ranksum & rPref above 2/Train_V1Cool_' anaMode 'dataSet.mat'])
 
 tbl = data.v1bf;
 tbl = tbl(tbl.goodUnit,:);

@@ -30,8 +30,8 @@ area = 'PSS';
 % projTbl.sumStats = sumStats;
 % projTbl.nGU = nGoodUnits;
 
-load('Y:\Brandon\data\dataSets\cooling\V1cool_MU_ori\V1cool_MU_ori_projectTbl.mat')
-% load('/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/cooling/V1cool_MU_ori/V1cool_MU_ori_projectTbl.mat')
+% load('Y:\Brandon\data\dataSets\cooling\V1cool_MU_ori\V1cool_MU_ori_projectTbl.mat')
+load('/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/cooling/V1cool_MU_ori/V1cool_MU_ori_projectTbl.mat')
 
 
 coolIdx = projTbl.duringMFlag==1 & strcmp(projTbl.manipDescr,'Cooling') & ...
@@ -86,7 +86,7 @@ for a = 1:length(animals)
 
 end
 
-ageGroups = {[28 29],[30 31],[32 33],[34 35],[36 37],[38 45],[46 200]};
+ageGroups = {[28 29],[30 33],[34 37],[38 45],[46 200]};
 for ag = 1:length(ageGroups)
     agIdx = datTbl.age>=ageGroups{ag}(1) & datTbl.age<=ageGroups{ag}(2);
 
@@ -234,9 +234,17 @@ for ag = 1:nAG
     xlabel('unit')
     title(['ages ' num2str(ageGroups{ag}(1)) '-' num2str(ageGroups{ag}(2)) '; nA=' num2str(nA(ag))])
 
-    subplot(4,nAG,ag+(nAG*1))
-    plot3(score{ag}(:,1),score{ag}(:,2),score{ag}(:,3),'ko-')
+    subplot(4,nAG,ag+(nAG*1));hold on
+    np = size(score{ag},1);
+    clrs = hsv(np);
+    for i = 1:np
+        pt(i) = plot3(score{ag}(i,1),score{ag}(i,2),score{ag}(i,3),'.','MarkerSize',20,'Color',clrs(i,:));
+    end
+    plot3([score{ag}(:,1);score{ag}(1,1)],[score{ag}(:,2);score{ag}(1,2)],[score{ag}(:,3);score{ag}(1,3)],'k--')
     xlabel('PC1');ylabel('PC2');zlabel('PC3')
+    if ag == 1
+        legend(pt,num2str(c'))
+    end
 
     subplot(4,nAG,ag+(nAG*2))
     imagesc(D{ag})
@@ -292,8 +300,13 @@ for ag = 1:nAG
     xlabel('unit')
     title(['ages ' num2str(ageGroups{ag}(1)) '-' num2str(ageGroups{ag}(2)) '; nA=' num2str(nA(ag))])
 
-    subplot(4,nAG,ag+(nAG*1))
-    plot3(score{ag}(:,1),score{ag}(:,2),score{ag}(:,3),'ko-')
+    subplot(4,nAG,ag+(nAG*1));hold on
+    np = size(score{ag},1);
+    clrs = hsv(np);
+    for i = 1:np
+        pt(i) = plot3(score{ag}(i,1),score{ag}(i,2),score{ag}(i,3),'.','MarkerSize',20,'Color',clrs(i,:));
+    end
+    plot3([score{ag}(:,1);score{ag}(1,1)],[score{ag}(:,2);score{ag}(1,2)],[score{ag}(:,3);score{ag}(1,3)],'k--')
     xlabel('PC1');ylabel('PC2');zlabel('PC3')
 
     subplot(4,nAG,ag+(nAG*2))
