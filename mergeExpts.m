@@ -1,17 +1,17 @@
 % mergeExpts
 clear all; close all;
 if ispc
-    dataFold = 'C:\Users\brand\Documents\data';
+%     dataFold = 'C:\Users\brand\Documents\data';
 %     dataFold = 'D:\data'; 
-%     dataFold = 'F:\Brandon\data';
+    dataFold = 'F:\Brandon\data';
 elseif ismac
     dataFold = '/Volumes/Lab drive/Brandon/data';
 %     dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
 end
 physDir = fullfile(dataFold,'Ephys');
 animal = 'febi0';
-units = {'000','000','000'};
-expts = {'007','018','013'};
+units = {'000','000'};
+expts = {'007','008'};
 mergeID = [];
 files{1,length(expts)} = [];
 for e = 1:length(expts)
