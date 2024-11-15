@@ -16,6 +16,11 @@ for ag = 1:nAG
     v1Dat{ag} = v1Dat{ag}(v1Dat{ag}.goodUnit,:);
     pssDat{ag} = pssDat{ag}(pssDat{ag}.goodUnit,:);
 
+    [~,sortIdx] = sort(v1Dat{ag}.oriPref);
+    v1Dat{ag} = v1Dat{ag}(sortIdx,:);
+    [~,sortIdx] = sort(pssDat{ag}.oriPref);
+    pssDat{ag} = pssDat{ag}(sortIdx,:);
+
     nU_v1(ag) = height(v1Dat{ag});
     for u = 1:nU_v1(ag)
         r = mean(v1Dat{ag}.response{u},'omitnan');

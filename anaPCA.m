@@ -1,12 +1,13 @@
 close all
 clear
 
-animal = 'febn1';
+animal = 'febn2';
 unit = '000';
-expt = '001';
-area = 'PSS';
-anaMode = 'SU';
-dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
+expt = '008';
+area = 'V1';
+anaMode = 'MU';
+% dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
+dataFold = '/Volumes/Lab drive/Brandon/data';
 tAve = 1;
 
 [sumStats] = anaOri(animal,unit,expt,area,anaMode,dataFold,0,0);
@@ -43,7 +44,7 @@ else
 
 end
 
-[coeff,score,latent,tsquare] = pca(x);
+[coeff,score,latent,tsquare,explained] = pca(x);
 D = squareform(pdist(x,'squaredeuclidean'));
 
 for i = 1:size(D,1)
@@ -70,17 +71,21 @@ axis tight
 yticks(1:size(x,1))
 yticklabels(num2str(y'))
 colorbar
+xlabel('unit')
+ylabel('direction of motion')
 
-subplot(3,2,2);hold on;
+subplot(3,2,3);hold on;
 for u = 1:nU
     [tOut,rOut(:,u)] = alignDirTuning(y,x(:,u)');
 end
 plot(tOut,rOut) 
 plot(tOut,mean(rOut,2,'omitnan'),'k','LineWidth',2)
 plot(repmat(tOut,2,1),mean(rOut,2,'omitnan')'+([1;-1].*std(rOut,[],2,'omitnan')'),'k','LineWidth',2)
+xlabel('deg. relative to preferred')
+ylabel('mean (+/-sem) normalized response')
 
 
-subplot(3,2,3);hold on;
+subplot(3,2,5);hold on;
 imagesc(D);
 axis tight
 yticks(1:length(y))
@@ -88,12 +93,14 @@ yticklabels(num2str(y'))
 xticks(1:length(y))
 xticklabels(num2str(y'))
 colorbar
-xBox = [0 1 1 0]; xOrthOff = [(0.5:11.5) (12.5:15.5)]; xBox = repmat(xBox',1,length(xOrthOff))+xOrthOff;
-yBox = [0 0 1 1]; yOrthOff = [(4.5:15.5) (0.5:3.5)]; yBox = repmat(yBox',1,length(yOrthOff))+yOrthOff;
+xBox = [0 1 1 0]; xOrthOff = [(0.5:11.5) (0.5:3.5)]; xBox = repmat(xBox',1,length(xOrthOff))+xOrthOff;
+yBox = [0 0 1 1]; yOrthOff = [(4.5:15.5) (12.5:15.5)]; yBox = repmat(yBox',1,length(yOrthOff))+yOrthOff;
 patch(yBox,xBox,'r','FaceColor','none','EdgeColor','r','LineWidth',2)
+xlabel('direction of motion')
+ylabel('direction of motion')
 
 
-subplot(3,2,4);hold on;
+subplot(3,2,2);hold on;
 for i = 1:np
 clr = clrs(i,:);
 pt(i) = plot3(score(i,1),score(i,2),score(i,3),'.','Color',clr,'MarkerSize',20);
@@ -104,41 +111,39 @@ if tAve == 1
 end
 xlabel('PC1');ylabel('PC2');zlabel('PC3')
 
-subplot(3,2,5);hold on
-imagesc(Dshift)
-axis tight
-ticShift = find(C==90)-1;
-yticks(1:size(Dshift,2))
-yticklabels(num2str(y'))
-xticks(1:ticShift:size(Dshift,2))
-xticklabels(num2str(y(1:ticShift:end)'))
-xBox = [0 1 1 0]; xOrthOff = 4.5; xBox = repmat(xBox',1,length(xOrthOff))+xOrthOff;
-yBox = [0 0 size(Dshift,1) size(Dshift,1)]; yOrthOff = 0.5; yBox = repmat(yBox',1,length(yOrthOff))+yOrthOff;
-patch(xBox,yBox,'r','FaceColor','none','EdgeColor','r','LineWidth',2)
-colorbar
+subplot(3,2,4);hold on
+stem(cumsum(explained))
+xlabel('PC')
+ylabel('cum.sum explained variance')
+ylim([0 100])
 
-subplot(3,2,6);hold on
-plot(mean(Dshift))
-xticks(1:ticShift:size(Dshift,2))
-xticklabels(num2str(y(1:ticShift:end)'))
+subplot(3,2,6)
+plot(C,score(:,1:4),'LineWidth',2)
+% polarplot(deg2rad(C),score(:,1:4),'LineWidth',2)
+% rlim([-1.5 1.5])
+legend({'PC1','PC2','PC3','PC4'})
 
+sgtitle([animal ' ' unit ' ' expt ' ' area ' ' anaMode])
+figName = [animal '_u' unit '_' expt '_' area '_' anaMode '_distance.fig'];
+saveas(gcf,fullfile(dataFold,'Ephys',animal,[animal '_u' unit '_' expt],figName))
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+% subplot(3,2,5);hold on
+% imagesc(Dshift)
+% axis tight
+% ticShift = find(C==90)-1;
+% yticks(1:size(Dshift,2))
+% yticklabels(num2str(y'))
+% xticks(1:ticShift:size(Dshift,2))
+% xticklabels(num2str(y(1:ticShift:end)'))
+% xBox = [0 1 1 0]; xOrthOff = 4.5; xBox = repmat(xBox',1,length(xOrthOff))+xOrthOff;
+% yBox = [0 0 size(Dshift,1) size(Dshift,1)]; yOrthOff = 0.5; yBox = repmat(yBox',1,length(yOrthOff))+yOrthOff;
+% patch(xBox,yBox,'r','FaceColor','none','EdgeColor','r','LineWidth',2)
+% colorbar
+% 
+% subplot(3,2,6);hold on
+% plot(mean(Dshift))
+% xticks(1:ticShift:size(Dshift,2))
+% xticklabels(num2str(y(1:ticShift:end)'))
 
 
 
@@ -149,19 +154,37 @@ xticklabels(num2str(y(1:ticShift:end)'))
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% 
 % clear all
 % close all
 % 
-% anaMode = 'SU';
+% anaMode = 'MU';
 % proj = 'Train_V1Cool';
-% dataFold = 'D:\data\dataSets\training';
+% dataFold = '/Volumes/Lab drive/Brandon/data/dataSets/training';
 % path = fullfile(dataFold,proj,anaMode,'ranksum & rPref above 2');
 % % path = fullfile(dataFold,proj,anaMode);
 % dataFileName = [proj '_' anaMode 'dataSet.mat'];
 % load(fullfile(path,dataFileName))
 % 
 % area = 'PSS';
-% exp = 'af';
+% exp = 'bf';
 % ttl = [proj ': ' area exp ' training ' anaMode ' response'];
 % figFileName = [proj '_' anaMode '_' area exp '_popPCA.fig'];
 % if strcmp(area,'V1') && strcmp(exp,'bf')
@@ -174,6 +197,8 @@ xticklabels(num2str(y(1:ticShift:end)'))
 %     tbl = data.pssaf;
 % end
 % tbl = tbl(tbl.goodUnit,:);
+% [~,sortIdx] = sort(tbl.oriPref);
+% tbl = tbl(sortIdx,:);
 % 
 % % nU = height(tbl);
 % % for u = 1:nU
@@ -191,6 +216,7 @@ xticklabels(num2str(y(1:ticShift:end)'))
 % % 
 % % oris = unique(c);
 % % [coeff, score, latent, tsq, explained] = pca(r);
+% % D = squareform(pdist(r));
 % % 
 % % nClr = length(oris);
 % % clrs = hsv(nClr);
@@ -199,6 +225,9 @@ xticklabels(num2str(y(1:ticShift:end)'))
 % % subplot(3,2,1);hold on
 % % imagesc(r)
 % % axis tight
+% % colorbar
+% % ylabel('trial')
+% % xlabel('unit')
 % % 
 % % subplot(3,2,2);hold on
 % % nP = size(score,1);
@@ -206,7 +235,9 @@ xticklabels(num2str(y(1:ticShift:end)'))
 % %     clr = clrs(oris == c(i),:);
 % %     plot3(score(i,1),score(i,2),score(i,3),'.','MarkerSize',20,'Color',clr)
 % % end
-% % % plot3(score(:,1),score(:,2),score(:,3),'k--')
+% % xlabel('PC1')
+% % ylabel('PC2')
+% % zlabel('PC3')
 % % 
 % % subplot(3,2,3); hold on
 % % y = mean(r,2,'omitnan');
@@ -218,8 +249,15 @@ xticklabels(num2str(y(1:ticShift:end)'))
 % % ylabel('cum.sum explained variance')
 % % ylim([0 100])
 % % 
-% % subplot(3,1,3);hold on
+% % subplot(3,2,5);hold on
+% % imagesc(D)
+% % axis tight
+% % 
+% % subplot(3,2,6);hold on
 % % plot(c,score(:,1:4),'.','MarkerSize',20)
+% % 
+% % sgtitle(ttl)
+% % saveas(gcf,fullfile(path,['trial_' figFileName]))
 % 
 % 
 % 
@@ -250,6 +288,7 @@ xticklabels(num2str(y(1:ticShift:end)'))
 % ylabel('direction (deg.)')
 % axis tight
 % title('norm. mean response matrix')
+% colorbar
 % 
 % subplot(3,2,3);hold on
 % plot(cAlign,rAlign)
@@ -266,7 +305,7 @@ xticklabels(num2str(y(1:ticShift:end)'))
 % for i = 1:nP
 %     pt(i) = plot3(score(i,1),score(i,2),score(i,3),'.','Color',clrs(i,:),'MarkerSize',20);
 % end
-% plot3(score(:,1),score(:,2),score(:,3),'k--')
+% plot3([score(:,1);score(1,1)],[score(:,2);score(1,2)],[score(:,3);score(1,3)],'k--')
 % xlabel('PC1')
 % ylabel('PC2')
 % zlabel('PC3')
@@ -286,6 +325,9 @@ xticklabels(num2str(y(1:ticShift:end)'))
 % xticklabels(num2str(C'))
 % yticks([1:size(D,1)])
 % yticklabels(num2str(C'))
+% xBox = [0 1 1 0]; xOrthOff = [(0.5:11.5) (0.5:3.5)]; xBox = repmat(xBox',1,length(xOrthOff))+xOrthOff;
+% yBox = [0 0 1 1]; yOrthOff = [(4.5:15.5) (12.5:15.5)]; yBox = repmat(yBox',1,length(yOrthOff))+yOrthOff;
+% patch(yBox,xBox,'r','FaceColor','none','EdgeColor','r','LineWidth',2)
 % 
 % subplot(3,2,6)
 % plot(C,score(:,1:4),'LineWidth',2)
