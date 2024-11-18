@@ -120,17 +120,13 @@ ax1 = gca;
 sz1 = 10;
 sz2 = 40;
 
-metric = 'dsi';
+
 subplot(2,2,2);hold on
 for a = 1:length(animals)
     x = ages(a);
     
     if ~isempty(cntrlAniDat{a})
-        if strcmp(metric,'dsi')
-            Y = cntrlAniDat{a}.dsi;
-        elseif strcmp(metric,'ldr')
-            Y = cntrlAniDat{a}.ldr;
-        end
+        Y = cntrlAniDat{a}.dsi;
         y = mean(Y,'omitnan');
         n = length(Y);
         sem = std(Y,'omitnan')/sqrt(n);
@@ -143,11 +139,7 @@ for a = 1:length(animals)
     end
 
     if ~isempty(coolAniDat{a})
-        if strcmp(metric,'dsi')
-            Y = coolAniDat{a}.dsi;
-        elseif strcmp(metric,'ldr')
-            Y = coolAniDat{a}.ldr;
-        end
+        Y = coolAniDat{a}.dsi;
         y = mean(Y,'omitnan');
         n = length(Y);
         sem = std(Y,'omitnan')/sqrt(n);
@@ -160,11 +152,7 @@ for a = 1:length(animals)
     end
 
 end
-if strcmp(metric,'dsi')
-    ylabel('DSI')
-elseif strcmp(metric,'ldr')
-    ylabel('Ldir')
-end
+ylabel('Ldir')
 xlabel('age')
 ax2 = gca;
 

@@ -118,9 +118,7 @@ for u = 1:nU % u indexes a unit (column) in structure spks
         cPref_ori = oris(rMean_ori==rPref_ori);
     end
     cNull_ori = mod(cPref_ori+180,360);
-    rNull_ori = rMean_ori(oris==cNull_ori);
-    osi(u,1) = abs(rPref_ori-rNull_ori)/rPref_ori;
-    clear rMean_ori rPref_ori rNull_ori
+    clear rMean_ori rPref_ori
 
     rMean = mean(R{u}(:,:),'omitnan');
     rPref(u) = max(rMean);
@@ -137,20 +135,21 @@ for u = 1:nU % u indexes a unit (column) in structure spks
         cPref(u) = dir(rMean==rPref(u));
     end
     cNull(u) = mod(cPref(u)+180,360);
-    rNull(u) = rMean(dir==cNull(u));
+    rNull(u) = rMean(C{u}(oriInd,:)==cNull(u));
 
     dsi(u,1) = abs(rPref(u)-rNull(u))/rPref(u);
-    mv{u} = meanvec(dir,rMean);
+    mv{u} = meanvec(C{u}(oriInd,:),rMean);
     ldr(u,1) = mv{u}.ldr;
     lor(u,1) = mv{u}.lor;
 
     %double gaussian fit
     G{u} = dirGauss(rMean,dir,0);
 
+
 end
 
-varNames = {'exptName','probe','area','uInfo','uID','spkTimes','latency','fr','paramKey','cndKey','response','condition','gaussFit','meanVec','rPref','oriPref','rNull','oriNull','rBlank','dsi','osi','ldr','lor'};
-sumStats = table(exptID',probeID',areaID',{spks.info}',uID',{spks.stimCent}',vertcat(spks.late),vertcat(spks.fr),paramKey',cndKey',R',C',G',mv',rPref',cPref',rNull',cNull',Rblank',dsi,osi,ldr,lor,'VariableNames',varNames);
+varNames = {'exptName','probe','area','uInfo','uID','spkTimes','latency','fr','paramKey','cndKey','response','condition','gaussFit','meanVec','rPref','oriPref','rNull','oriNull','rBlank','dsi','ldr','lor'};
+sumStats = table(exptID',probeID',areaID',{spks.info}',uID',{spks.stimCent}',vertcat(spks.late),vertcat(spks.fr),paramKey',cndKey',R',C',G',mv',rPref',cPref',rNull',cNull',Rblank',dsi,ldr,lor,'VariableNames',varNames);
 
 [goodUnit,pVis] = screenUnits(sumStats,anaMode,blank,visTest,alpha);
 sumStats.goodUnit = goodUnit';
