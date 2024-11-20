@@ -16,13 +16,16 @@ for u = 1:height(sumStats)
 
     if sum(contains(sumStats.paramKey{u},'size'))>0
         cndSize = sumStats.cndKey{u}(:,contains(sumStats.paramKey{u},'size'));
-        
-        rTmp = sumStats.response{u}==sumStats(u,:).fr.bc(:,cndSize>100);
-        isFF = length(unique(rTmp)) == 1 & unique(rTmp) == 1;
+        sizes = unique(cndSize);
+        a = sumStats.response{u}
+        b = sumStats(u,:).fr.bc(:,cndSize>100) 
+        cmpre = a==b
+        cmpre = cmpre(~isnan(a) & )
+        isFF = length(unique(cmpre)) == 1 & unique(cmpre) == 1
         if isFF
-            cndInclude = cndSize>100;
+            cndInclude = cndSize==max(sizes)
         else
-            cndInclude = cndSize<100;
+            cndInclude = cndSize==min(sizes)
         end
     else
         cndInclude = ~blankBit;

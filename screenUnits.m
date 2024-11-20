@@ -17,8 +17,11 @@ for u = 1:height(sumStats)
     if sum(contains(sumStats.paramKey{u},'size'))>0
         cndSize = sumStats.cndKey{u}(:,contains(sumStats.paramKey{u},'size'));
         sizes = unique(cndSize);
-        rTmp = sumStats.response{u}==sumStats(u,:).fr.bc(:,cndSize>100);
-        isFF = length(unique(rTmp)) == 1 & unique(rTmp) == 1;
+        a = sumStats.response{u};
+        b = sumStats(u,:).fr.bc(:,cndSize>100);
+        cmpre = a==b;
+        cmpre = cmpre(~isnan(a) & ~isnan(b));
+        isFF = length(unique(cmpre)) == 1 & max(unique(cmpre)) == 1;
         if isFF
             cndInclude = cndSize==max(sizes);
         else
