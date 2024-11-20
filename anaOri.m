@@ -98,7 +98,7 @@ for u = 1:nU % u indexes a unit (column) in structure spks
 
     dir = C{u}(oriInd,:);
 
-    ori = mod(dir,360);
+    ori = mod(dir,180);
     oris = unique(ori);
     for o = 1:length(oris)
         idx = ori == oris(o);
@@ -117,7 +117,7 @@ for u = 1:nU % u indexes a unit (column) in structure spks
     else
         cPref_ori = oris(rMean_ori==rPref_ori);
     end
-    cNull_ori = mod(cPref_ori+180,360);
+    cNull_ori = mod(cPref_ori+90,180);
     rNull_ori = rMean_ori(oris==cNull_ori);
     osi(u,1) = abs(rPref_ori-rNull_ori)/rPref_ori;
     clear rMean_ori rPref_ori rNull_ori
