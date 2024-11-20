@@ -2,36 +2,36 @@
 clear
 close all
 
-anaMode = 'MU';
-proj = ['V1cool_' anaMode '_ori'];
+anaMode = 'SU';
+proj = ['V1cool_MU_ori'];
 area = 'PSS';
-% dataFold = fullfile('Y:\Brandon\data');
-% projTbl = getProjectFiles(proj,1,'age','recSite','penNr','priorMFlag','priorDescr',...
-%                                        'duringMFlag','manipDescr','manipDetail',...
-%                                        'looperNameCond1','looperNameCond2',...
-%                                        'looperNameCond3','looperNameCond4',...
-%                                        'looperNameCond5');
-% projTbl = projTbl(strcmp(projTbl.recSite,area),:);
-% animals = unique(projTbl.experimentId);
-% for a = 1:length(animals)
-%     aniIdx = strcmp(projTbl.experimentId,animals{a});
-%     ages(a) = unique(projTbl.age(aniIdx));
-% end
-% for e = 1:height(projTbl)
-%     animal = projTbl.experimentId{e};
-%     unit = projTbl.unitNr{e};
-%     expt = projTbl.experimentNr{e};
-%     probe = projTbl.probeId(e);
-%     exptName = projTbl.fileBase{e};
-%     disp(['generating sumStats for ' exptName])
-%     [sumStats{e,1}] = anaOri(animal,unit,expt,probe,anaMode,dataFold,0,0);
-%     nGoodUnits(e,1) = sum(sumStats{e}.goodUnit);
-% end
-% projTbl.sumStats = sumStats;
-% projTbl.nGU = nGoodUnits;
+dataFold = fullfile('Y:\Brandon\data');
+projTbl = getProjectFiles(proj,1,'age','recSite','penNr','priorMFlag','priorDescr',...
+                                       'duringMFlag','manipDescr','manipDetail',...
+                                       'looperNameCond1','looperNameCond2',...
+                                       'looperNameCond3','looperNameCond4',...
+                                       'looperNameCond5');
+projTbl = projTbl(strcmp(projTbl.recSite,area),:);
+animals = unique(projTbl.experimentId);
+for a = 1:length(animals)
+    aniIdx = strcmp(projTbl.experimentId,animals{a});
+    ages(a) = unique(projTbl.age(aniIdx));
+end
+for e = 1:height(projTbl)
+    animal = projTbl.experimentId{e};
+    unit = projTbl.unitNr{e};
+    expt = projTbl.experimentNr{e};
+    probe = projTbl.probeId(e);
+    exptName = projTbl.fileBase{e};
+    disp(['generating sumStats for ' exptName])
+    [sumStats{e,1}] = anaOri(animal,unit,expt,probe,anaMode,dataFold,0,0);
+    nGoodUnits(e,1) = sum(sumStats{e}.goodUnit);
+end
+projTbl.sumStats = sumStats;
+projTbl.nGU = nGoodUnits;
 
 % load('Y:\Brandon\data\dataSets\cooling\V1cool_MU_ori\V1cool_MU_ori_projectTbl.mat')
-load('/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/cooling/V1cool_MU_ori/V1cool_MU_ori_projectTbl.mat')
+% % load('/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/cooling/V1cool_MU_ori/V1cool_MU_ori_projectTbl.mat')
 
 
 coolIdx = projTbl.duringMFlag==1 & strcmp(projTbl.manipDescr,'Cooling') & ...
@@ -117,10 +117,11 @@ ylabel('animal count')
 xlabel('age')
 ax1 = gca;
 
-sz1 = 10;
-sz2 = 40;
+sz1 = 5;
+sz2 = 20;
+lw = 1;
 
-metric = 'dsi';
+metric = 'ldr';
 subplot(2,2,2);hold on
 for a = 1:length(animals)
     x = ages(a);
@@ -135,11 +136,11 @@ for a = 1:length(animals)
         n = length(Y);
         sem = std(Y,'omitnan')/sqrt(n);
         if n < 20
-            plot(x,y,'ko','MarkerSize',sz1,'LineWidth',2)
+            plot(x,y,'ko','MarkerSize',sz1,'LineWidth',lw)
         else
             plot(x,y,'k.','MarkerSize',sz2)
         end
-        plot(repmat(x,2,1),y+([1;-1]*sem),'k-','LineWidth',2)
+        plot(repmat(x,2,1),y+([1;-1]*sem),'k-','LineWidth',lw)
     end
 
     if ~isempty(coolAniDat{a})
@@ -152,11 +153,11 @@ for a = 1:length(animals)
         n = length(Y);
         sem = std(Y,'omitnan')/sqrt(n);
         if n < 20
-            plot(x,y,'co','MarkerSize',sz1,'LineWidth',2)
+            plot(x,y,'co','MarkerSize',sz1,'LineWidth',lw)
         else
             plot(x,y,'c.','MarkerSize',sz2)
         end
-        plot(repmat(x,2,1),y+([1;-1]*sem),'c-','LineWidth',2)
+        plot(repmat(x,2,1),y+([1;-1]*sem),'c-','LineWidth',lw)
     end
 
 end
@@ -177,12 +178,12 @@ for a = 1:length(animals)
         y = mean(Y);
         n = length(Y);
         sem = std(Y)/sqrt(n);
-        if n < 20
-            plot(x,y,'ko','MarkerSize',sz1,'LineWidth',2)
+        if n < 3
+            plot(x,y,'ko','MarkerSize',sz1,'LineWidth',lw)
         else
             plot(x,y,'k.','MarkerSize',sz2)
         end
-        plot(repmat(x,2,1),y+([1;-1]*sem),'k-','LineWidth',2)
+        plot(repmat(x,2,1),y+([1;-1]*sem),'k-','LineWidth',lw)
     end
 
     if ~isempty(coolAniDat{a})
@@ -191,11 +192,11 @@ for a = 1:length(animals)
         n = length(Y);
         sem = std(Y)/sqrt(n);
         if n < 20
-            plot(x,y,'co','MarkerSize',sz1,'LineWidth',2)
+            plot(x,y,'co','MarkerSize',sz1,'LineWidth',lw)
         else
             plot(x,y,'c.','MarkerSize',sz2)
         end
-        plot(repmat(x,2,1),y+([1;-1]*sem),'c-','LineWidth',2)
+        plot(repmat(x,2,1),y+([1;-1]*sem),'c-','LineWidth',lw)
     end
 
 end
@@ -213,11 +214,11 @@ for a = 1:length(animals)
         n = length(Y);
         sem = std(Y)/sqrt(n);
         if n < 20
-            plot(x,y,'ko','MarkerSize',sz1,'LineWidth',2)
+            plot(x,y,'ko','MarkerSize',sz1,'LineWidth',lw)
         else
             plot(x,y,'k.','MarkerSize',sz2)
         end
-        plot(repmat(x,2,1),y+([1;-1]*sem),'k-','LineWidth',2)
+        plot(repmat(x,2,1),y+([1;-1]*sem),'k-','LineWidth',lw)
     end
 
     if ~isempty(coolAniDat{a})
@@ -226,11 +227,11 @@ for a = 1:length(animals)
         n = length(Y);
         sem = std(Y)/sqrt(n);
         if n < 20
-            plot(x,y,'co','MarkerSize',sz1,'LineWidth',2)
+            plot(x,y,'co','MarkerSize',sz1,'LineWidth',lw)
         else
             plot(x,y,'c.','MarkerSize',sz2)
         end
-        plot(repmat(x,2,1),y+([1;-1]*sem),'c-','LineWidth',2)
+        plot(repmat(x,2,1),y+([1;-1]*sem),'c-','LineWidth',lw)
     end
 
 end

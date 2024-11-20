@@ -1,63 +1,73 @@
 clear all
-close all
+% close all
 
 anaMode = 'SU';
-dataFold = '/Volumes/Lab drive/Brandon/data/dataSets/DSdev';
-% dataFold = 'F:\Brandon\data\dataSets\DSdev';
+% dataFold = '/Volumes/Lab drive/Brandon/data/dataSets/DSdev';
+dataFold = 'F:\Brandon\data\dataSets\DSdev';
 load(fullfile(dataFold,"DSdev_projectTbl.mat"))
 
-ageGroups = {[0 30],[31 33],[34 36],[37 39],[40 300]};
+area = 'PSS';
+ageGroups = {[0 33],[34 39],[40 300]};
 nAG = length(ageGroups);
 for ag = 1:nAG
     ageLims = ageGroups{ag};
-    v1Dat{ag} = vertcat(projectTbl(strcmp(projectTbl.recSite,'V1') & projectTbl.age>=ageLims(1) & projectTbl.age<=ageLims(2),:).sumStats{:});
-    pssDat{ag} = vertcat(projectTbl(strcmp(projectTbl.recSite,'PSS') & projectTbl.age>=ageLims(1) & projectTbl.age<=ageLims(2),:).sumStats{:});
+    areaIdx = strcmp(projectTbl.recSite,area);
+    ageLimIdx = projectTbl.age>=ageLims(1) & projectTbl.age<=ageLims(2);
+    dat{ag} = vertcat(projectTbl(areaIdx & ageLimIdx,:).sumStats{:});
 
-    v1Dat{ag} = v1Dat{ag}(v1Dat{ag}.goodUnit,:);
-    pssDat{ag} = pssDat{ag}(pssDat{ag}.goodUnit,:);
+    dat{ag} = dat{ag}(dat{ag}.goodUnit,:);
 
-    [~,sortIdx] = sort(v1Dat{ag}.oriPref);
-    v1Dat{ag} = v1Dat{ag}(sortIdx,:);
-    [~,sortIdx] = sort(pssDat{ag}.oriPref);
-    pssDat{ag} = pssDat{ag}(sortIdx,:);
+    [~,sortIdx] = sort(dat{ag}.oriPref);
+    dat{ag} = dat{ag}(sortIdx,:);
 
-    nU_v1(ag) = height(v1Dat{ag});
-    for u = 1:nU_v1(ag)
-        r = mean(v1Dat{ag}.response{u},'omitnan');
-        c = v1Dat{ag}.condition{u}(strcmp(v1Dat{ag}.paramKey{u},'ori'),:);
-        if length(r)~=12
+    nU(ag) = height(dat{ag});
+    for u = 1:nU(ag)
+        rTmp = mean(dat{ag}.response{u},'omitnan');
+        c = dat{ag}.condition{u}(strcmp(dat{ag}.paramKey{u},'ori'),:);
+        if length(rTmp)~=12
             cInt = 0:30:330;
-            rInt = interp1([c c(1)+360],[r r(1)],cInt);
+            rInt = interp1([c c(1)+360],[rTmp rTmp(1)],cInt);
             c = cInt;
-            r = rInt;
+            rTmp = rInt;
         end
-        r = r./max(r);
-        r(r<0) = 0;
-        rV1{ag}(:,u) = r;
-        cV1{ag}(:,u) = c;
+        rTmp = rTmp./max(rTmp);
+        rTmp(rTmp<0) = 0;
+        r{ag}(:,u) = rTmp;
     end
 
-    nU_pss(ag) = height(pssDat{ag});
-    for u = 1:nU_pss(ag)
-        r = mean(pssDat{ag}.response{u},'omitnan');
-        c = pssDat{ag}.condition{u}(strcmp(pssDat{ag}.paramKey{u},'ori'),:);
-        if length(r)~=12
-            cInt = 0:30:330;
-            rInt = interp1([c c(1)+360],[r r(1)],cInt);
-            c = cInt;
-            r = rInt;
+    [coeff{1,ag}, score{1,ag}, latent{1,ag}, tsq{1,ag}, explained{1,ag}] = pca(r{ag});
+
+%     D{1,ag} = squareform(pdist(r{ag}));
+    D{1,ag} = dist(r{ag}');
+
+    for i = 1:length(c)
+        
+        angDif{ag}(i,:) = c-c(i);
+        angDif{ag}(i,angDif{ag}(i,:)>180) = angDif{ag}(i,angDif{ag}(i,:)>180)-360;
+        angDif{ag}(i,angDif{ag}(i,:)<-180) = angDif{ag}(i,angDif{ag}(i,:)<-180)+360;
+        
+        a = r{ag}(i,:);
+        for j = 1:length(angDif{ag})
+            b = r{ag}(j,:);
+            D2{1,ag}(i,j) = norm(a-b);
         end
-        r = r./max(r);
-        r(r<0) = 0;
-        rPSS{ag}(:,u) = r;
-        cPSS{ag}(:,u) = c;
     end
 
-    [coeff{1,ag}, score{1,ag}, latent{1,ag}, tsq{1,ag}, explained{1,ag}] = pca(rV1{ag});
-    [coeff{2,ag}, score{2,ag}, latent{2,ag}, tsq{2,ag}, explained{2,ag}] = pca(rPSS{ag});
+    for i = 1:size(D{ag},1)
+        shift = size(D{ag},1)-(i-1);
+        Dshift{ag}(i,:) = circshift(D{ag}(i,:),shift,2);
+    end
 
-    D{1,ag} = squareform(pdist(rV1{ag}));
-    D{2,ag} = squareform(pdist(rPSS{ag}));
+    for i = 1:size(D2{ag},1)
+        shift = size(D2{ag},1)-(i-1);
+        D2shift{ag}(i,:) = circshift(D2{ag}(i,:),shift,2);
+    end
+
+    for i = 1:size(angDif{ag},1)
+        shift = size(angDif{ag},1)-(i-1);
+        angDifShift{ag}(i,:) = circshift(angDif{ag}(i,:),shift,2);
+    end
+
 
 end
 
@@ -65,7 +75,14 @@ end
 figure;hold on
 for ag = 1:nAG
 
-    subplot(6,nAG,ag);hold on
+    subplot(4,nAG,ag+(nAG*0));hold on
+    title(['V1 age:' num2str(ageGroups{ag}(1)) '-' num2str(ageGroups{ag}(2)) ';nU=' num2str(nU(ag))])
+    imagesc(r{ag});
+    axis tight
+    yticks([1:size(r{ag},1)])
+    yticklabels(num2str(c'))
+
+    subplot(4,nAG,ag+(nAG*1));hold on
     imagesc(D{1,ag})
     axis tight
     xticks([1:size(D{1,ag},2)])
@@ -73,13 +90,7 @@ for ag = 1:nAG
     yticks([1:size(D{1,ag},1)])
     yticklabels(num2str(c'))
 
-    subplot(6,nAG,ag+(nAG*1));hold on
-    imagesc(rV1{ag});
-    axis tight
-    yticks([1:size(rV1{ag},1)])
-    yticklabels(num2str(c'))
-
-    subplot(6,nAG,ag+(nAG*2));hold on
+    subplot(4,nAG,ag+(nAG*2));hold on
     nP = size(score{1,ag},1);
     clrs = hsv(nP);
     for i = 1:nP
@@ -87,34 +98,15 @@ for ag = 1:nAG
     end
     plot3([score{1,ag}(:,1);score{1,ag}(1,1)],[score{1,ag}(:,2);score{1,ag}(1,2)],[score{1,ag}(:,3);score{1,ag}(1,3)],'k--')
     xlabel('PC1');ylabel('PC2');zlabel('PC3')
-    title(['age:' num2str(ageGroups{ag}(1)) '-' num2str(ageGroups{ag}(2)) ';nU=' num2str(nU_v1(ag))])
     if ag ==nAG
         legend(pt,num2str(c'))
     end
 
-    subplot(6,nAG,ag+(nAG*3));hold on
-    nP = size(score{2,ag},1);
-    clrs = hsv(nP);
-    for i = 1:nP
-        plot3(score{2,ag}(i,1),score{2,ag}(i,2),score{2,ag}(i,3),'.','Color',clrs(i,:),'MarkerSize',20)
-    end
-    plot3([score{2,ag}(:,1);score{2,ag}(1,1)],[score{2,ag}(:,2);score{2,ag}(1,2)],[score{2,ag}(:,3);score{2,ag}(1,3)],'k--')
-    xlabel('PC1');ylabel('PC2');zlabel('PC3')
-    title(['age:' num2str(ageGroups{ag}(1)) '-' num2str(ageGroups{ag}(2)) ';nU=' num2str(nU_pss(ag))])
-
-    subplot(6,nAG,ag+(nAG*4));hold on
-    imagesc(rPSS{ag})
+    subplot(4,nAG,ag+(nAG*3));hold on
+    plot(c,mean(Dshift{ag}))
     axis tight
-    yticks([1:size(rPSS{ag},1)])
-    yticklabels(num2str(c'))
-
-    subplot(6,nAG,ag+(nAG*5));hold on
-    imagesc(D{2,ag})
-    axis tight
-    xticks([1:size(D{2,ag},2)])
-    xticklabels(num2str(c'))
-    yticks([1:size(D{2,ag},1)])
-    yticklabels(num2str(c'))
+    xticks([0 90 180])
+    xlim([0 180])
 
 end
 
