@@ -6,7 +6,7 @@ anaMode = 'SU';
 dataFold = 'F:\Brandon\data\dataSets\DSdev';
 load(fullfile(dataFold,"DSdev_projectTbl.mat"))
 
-area = 'PSS';
+area = 'V1';
 ageGroups = {[0 33],[34 39],[40 300]};
 nAG = length(ageGroups);
 for ag = 1:nAG
@@ -76,7 +76,7 @@ figure;hold on
 for ag = 1:nAG
 
     subplot(4,nAG,ag+(nAG*0));hold on
-    title(['V1 age:' num2str(ageGroups{ag}(1)) '-' num2str(ageGroups{ag}(2)) ';nU=' num2str(nU(ag))])
+    title([area ' age:' num2str(ageGroups{ag}(1)) '-' num2str(ageGroups{ag}(2)) ';nU=' num2str(nU(ag))])
     imagesc(r{ag});
     axis tight
     yticks([1:size(r{ag},1)])
