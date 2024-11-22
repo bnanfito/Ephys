@@ -3,13 +3,15 @@ clear
 
 animal = 'febn2';
 unit = '000';
-expt = '008';
-area = 'PSS';
-anaMode = 'SU';
+expt = '002';
+area = 'V1';
+anaMode = 'MU';
 % dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
 % dataFold = '/Volumes/Lab drive/Brandon/data';
-dataFold = '/Volumes/NielsenHome2/Brandon/data';
+% dataFold = '/Volumes/NielsenHome2/Brandon/data';
+dataFold = 'Y:\Brandon\data';
 tAve = 1;
+fullDim = 1;
 
 [sumStats] = anaOri(animal,unit,expt,area,anaMode,dataFold,0,0);
 sumStats = sumStats(sumStats.goodUnit,:);
@@ -46,12 +48,15 @@ x = x./max(x);
 
 [coeff,score,latent,tsquare,explained] = pca(x);
 % D = squareform(pdist(x,'squaredeuclidean'));
-D = dist(x');
-% D = dist(score(:,1:3)');
+if fullDim == 1
+    D = dist(x');
+else
+    D = dist(score(:,1:3)');
+end
 
 %% Null Dist
 
-nNullRep = 10;
+nNullRep = 1000;
 for nr = 1:nNullRep
     
     randIdx = randperm(size(rTrial,1));
@@ -63,14 +68,20 @@ for nr = 1:nNullRep
         shuff = rTshuff;
     end
     shuff = shuff./max(shuff);
-    Dnull(:,:,nr) = dist(shuff');
+    [coeffShuff,scoreShuff,latentShuff,tsquareShuff,explainedShuff] = pca(shuff);
+    if fullDim == 1
+        Dnull(:,:,nr) = dist(shuff');
+    else
+        Dnull(:,:,nr) = dist(scoreShuff(:,1:3)');
+    end
     for i = 1:size(Dnull,1)
         shift = size(Dnull,1)-(i-1);
         DnullShift(i,:,nr) = circshift(Dnull(i,:,nr),shift,2);
     end
-    distNull(nr,:) = mean(DnullShift(:,:,nr));
+    distNull{nr} = DnullShift(:,:,nr);
 
 end
+distNull = vertcat(distNull{:});
 distNull = distNull(:,y<=180);
 
 %% distance function
@@ -85,7 +96,7 @@ distF = distF(y<=180);
 
 %% Plot
 
-figure;
+figure('Position',[0 0 1000 1500]);
 
 subplot(4,2,1);hold on;
 imagesc(x);
@@ -140,7 +151,11 @@ ylabel('explained variance')
 % ylim([0 100])
 
 subplot(4,2,6)
-plot(y,score(:,1:4),'LineWidth',2)
+if tAve == 1
+    plot(y,score(:,1:4),'LineWidth',2)
+else
+    plot(y,score(:,1:4),'o')
+end
 % polarplot(deg2rad(C),score(:,1:4),'LineWidth',2)
 % rlim([-1.5 1.5])
 legend({'PC1','PC2','PC3','PC4'})
@@ -148,11 +163,23 @@ legend({'PC1','PC2','PC3','PC4'})
 subplot(4,2,7);hold on
 plot(y(y<=180),distF,'-o')
 sem = std(Dshift)/sqrt(size(Dshift,1)); sem = sem(y<=180);
-patch([y(y<=180) fliplr(y(y<=180))],[distF-sem fliplr(distF+sem)],'r','EdgeColor','none','FaceAlpha',0.2)
+v = var(Dshift); v = v(y<=180);
+patch([y(y<=180) fliplr(y(y<=180))],[distF-v fliplr(distF+v)],'r','EdgeColor','none','FaceAlpha',0.2)
+
 plot(y(y<=180),mean(distNull))
 sem = std(distNull)/sqrt(size(distNull,1));
 v = var(distNull);
-patch([y(y<=180) fliplr(y(y<=180))],[mean(distNull)-v fliplr(mean(distNull)+v)],'k','EdgeColor','none','FaceAlpha',0.2)
+for i = 1:size(distNull,2)
+    h = cdfplot(distNull(:,i));
+    P95(i) = h.XData(find(h.YData>=0.95,1));
+    P05(i) = h.XData(find(h.YData>=0.05,1));
+    delete(h)
+end
+% patch([y(y<=180) fliplr(y(y<=180))],[mean(distNull)-v fliplr(mean(distNull)+v)],'k','EdgeColor','none','FaceAlpha',0.2)
+patch([y(y<=180) fliplr(y(y<=180))],[P05 fliplr(P95)],'k','EdgeColor','none','FaceAlpha',0.2)
+xticks([0 90 180])
+xticklabels({'0','90','180'})
+xlabel('angular disparity (+/- deg)')
 
 subplot(4,2,5)
 imagesc(mean(Dnull,3))
@@ -168,29 +195,15 @@ patch(yBox,xBox,'r','FaceColor','none','EdgeColor','r','LineWidth',2)
 xlabel('direction of motion')
 ylabel('direction of motion')
 
-
-sgtitle([animal ' ' unit ' ' expt ' ' area ' ' anaMode])
+ttl = [animal ' ' unit ' ' expt ' ' area ' ' anaMode];
+if fullDim == 1
+    ttl = [ttl ' full dim.'];
+else
+    ttl = [ttl ' first 3 PC'];
+end
+sgtitle(ttl)
 figName = [animal '_u' unit '_' expt '_' area '_' anaMode '_distance.fig'];
 saveas(gcf,fullfile(dataFold,'Ephys',animal,[animal '_u' unit '_' expt],figName))
-
-% subplot(3,2,5);hold on
-% imagesc(Dshift)
-% axis tight
-% ticShift = find(C==90)-1;
-% yticks(1:size(Dshift,2))
-% yticklabels(num2str(y'))
-% xticks(1:ticShift:size(Dshift,2))
-% xticklabels(num2str(y(1:ticShift:end)'))
-% xBox = [0 1 1 0]; xOrthOff = 4.5; xBox = repmat(xBox',1,length(xOrthOff))+xOrthOff;
-% yBox = [0 0 size(Dshift,1) size(Dshift,1)]; yOrthOff = 0.5; yBox = repmat(yBox',1,length(yOrthOff))+yOrthOff;
-% patch(xBox,yBox,'r','FaceColor','none','EdgeColor','r','LineWidth',2)
-% colorbar
-% 
-% subplot(3,2,6);hold on
-% plot(mean(Dshift))
-% xticks(1:ticShift:size(Dshift,2))
-% xticklabels(num2str(y(1:ticShift:end)'))
-
 
 
 
