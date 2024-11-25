@@ -1,9 +1,9 @@
 
-
+function plotSum(dat)
 close all
 plr = 1;
 
-dat = data.v1bf;
+% dat = data.v1bf;
 dat = dat(dat.goodUnit,:);
 nU = height(dat);
 if nU>50
@@ -84,5 +84,7 @@ for u = uInd
         plot(repmat(x,2,1),mean(y,'omitnan')+([1;-1]*sem),'k')
     end
 
+
+end
 
 end
