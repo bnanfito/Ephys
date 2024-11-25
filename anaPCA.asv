@@ -217,8 +217,6 @@ end
 
 patch([angDisp fliplr(angDisp)],[mean(distNull)-v fliplr(mean(distNull)+v)],'r','EdgeColor','none','FaceAlpha',0.2)
 patch([angDisp fliplr(angDisp)],[P05 fliplr(P95)],'r','FaceColor','none','EdgeColor','r','LineStyle','--')
-patch([angDisp fliplr(angDisp)],[mean(distNull2)-v2 fliplr(mean(distNull2)+v2)],'b','EdgeColor','none','FaceAlpha',0.2)
-patch([angDisp fliplr(angDisp)],[P05_2 fliplr(P95_2)],'r','FaceColor','none','EdgeColor','b','LineStyle','--')
 
 sigHiX = angDisp(distF>P95);
 sigHiY = distF(distF>P95);
