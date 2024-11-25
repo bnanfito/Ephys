@@ -75,23 +75,25 @@ distF = distF(y<=180);
 nNullRep = 1000;
 for nr = 1:nNullRep
     
-%     randIdx = randperm(size(rTrial,1));
-%     rTshuff = rTrial(randIdx,:);
-%     rMshuff = squeeze(mean(reshape(rTshuff,nReps,nConds,nU),1,'omitnan'));
-%     if tAve == 1
-%         shuff = rMshuff;
-%     else
-%         shuff = rTshuff;
-%     end
+    randIdx = randperm(size(rTrial,1));
+    rTshuff = rTrial(randIdx,:);
+    rMshuff = squeeze(mean(reshape(rTshuff,nReps,nConds,nU),1,'omitnan'));
     if tAve == 1
-        randIdx = randperm(size(rMean,1));
-        rMshuff = rMean(randIdx,:);
         shuff = rMshuff;
     else
-        randIdx = randperm(size(rTrial,1));
-        rTshuff = rTrial(randIdx,:);
         shuff = rTshuff;
     end
+
+%     if tAve == 1
+%         randIdx = randperm(size(rMean,1));
+%         rMshuff = rMean(randIdx,:);
+%         shuff = rMshuff;
+%     else
+%         randIdx = randperm(size(rTrial,1));
+%         rTshuff = rTrial(randIdx,:);
+%         shuff = rTshuff;
+%     end
+
     shuff = shuff./max(shuff);
     [coeffShuff,scoreShuff,latentShuff,tsquareShuff,explainedShuff] = pca(shuff);
     if fullDim == 1
