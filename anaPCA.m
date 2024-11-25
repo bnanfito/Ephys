@@ -195,12 +195,13 @@ end
 legend({'PC1','PC2','PC3','PC4'})
 
 subplot(4,2,7);hold on
-plot(y(y<=180),distF,'k-o','LineWidth',2)
+angDisp = y(y<=180);
+plot(angDisp,distF,'k-o','LineWidth',2)
 sem = std(Dshift)/sqrt(size(Dshift,1)); sem = sem(y<=180);
 v = var(Dshift); v = v(y<=180);
-patch([y(y<=180) fliplr(y(y<=180))],[distF-v fliplr(distF+v)],'k','EdgeColor','none','FaceAlpha',0.2)
+patch([angDisp fliplr(angDisp)],[distF-v fliplr(distF+v)],'k','EdgeColor','none','FaceAlpha',0.2)
 
-plot(y(y<=180),mean(distNull),'r-o','LineWidth',2)
+plot(angDisp,mean(distNull),'r-o','LineWidth',2)
 sem = std(distNull)/sqrt(size(distNull,1));
 v = var(distNull);
 sig2 = std(distNull,'omitnan')*2;
@@ -210,8 +211,16 @@ for i = 1:size(distNull,2)
     P05(i) = h.XData(find(h.YData>=0.05,1));
     delete(h)
 end
-patch([y(y<=180) fliplr(y(y<=180))],[mean(distNull)-v fliplr(mean(distNull)+v)],'r','EdgeColor','none','FaceAlpha',0.2)
-patch([y(y<=180) fliplr(y(y<=180))],[P05 fliplr(P95)],'r','FaceColor','none','EdgeColor','r','LineStyle','--')
+patch([angDisp fliplr(angDisp)],[mean(distNull)-v fliplr(mean(distNull)+v)],'r','EdgeColor','none','FaceAlpha',0.2)
+patch([angDisp fliplr(angDisp)],[P05 fliplr(P95)],'r','FaceColor','none','EdgeColor','r','LineStyle','--')
+
+sigHiX = angDisp(distF>P95);
+sigHiY = distF(distF>P95);
+sigLoX = angDisp(distF<P05);
+sigLoY = distF(distF<P05);
+text(sigHiX,sigHiY+(sigHiY*0.1),'*')
+text(sigLoX,sigLoY-(sigLoY*0.1),'*')
+
 xticks([0 90 180])
 xticklabels({'0','90','180'})
 xlabel('angular disparity (+/- deg)')

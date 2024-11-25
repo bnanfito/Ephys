@@ -3,7 +3,7 @@
 close all
 plr = 1;
 
-dat = data.pssaf;
+dat = data.v1af;
 dat = dat(dat.goodUnit,:);
 nU = height(dat);
 if nU>50
@@ -18,7 +18,7 @@ for u = uInd
     stimTime = 1;
     postdelay = 1;
     nTrials = max(max(dat.fr(u).trialNum));
-    nConds = max(max(dat.fr(u).trialCond));
+    nCond = max(max(dat.fr(u).trialCond));
 
     x = dat.spkTimes{u}(1,:);
     y = dat.spkTimes{u}(2,:);
@@ -55,8 +55,6 @@ for u = uInd
         yT = unique(dat.fr(u).trialCond(dat.fr(u).trialNum==t));
         plot(xT,yT,'k.')
     end
-    xlim([-predelay stimTime+postdelay])
-    ylim([0 nConds+1])
 
     x = dat.condition{u}(strcmp(dat.paramKey{u},'ori'),:);
     y = dat.response{u};
