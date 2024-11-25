@@ -3,7 +3,7 @@
 close all
 plr = 1;
 
-dat = data.pssaf;
+dat = data.v1bf;
 dat = dat(dat.goodUnit,:);
 nU = height(dat);
 if nU>50
@@ -18,7 +18,7 @@ for u = uInd
     stimTime = 1;
     postdelay = 1;
     nTrials = max(max(dat.fr(u).trialNum));
-    nConds = max(max(dat.fr(u).trialCond));
+    nConds = size(dat.cndKey{u},1);
 
     x = dat.spkTimes{u}(1,:);
     y = dat.spkTimes{u}(2,:);
@@ -56,7 +56,15 @@ for u = uInd
         plot(xT,yT,'k.')
     end
     xlim([-predelay stimTime+postdelay])
-    ylim([0 nConds+1])
+    if ~isempty(dat.rBlank{u})
+        ylim([0 nConds+1])
+    else
+        ylim([0 nConds])
+    end
+    yticIdx = 1:2:nConds;
+    yticks(1:2:nConds)
+    yticklabels(num2str(dat.cndKey{u}(yticIdx,:)))
+    
 
     x = dat.condition{u}(strcmp(dat.paramKey{u},'ori'),:);
     y = dat.response{u};
