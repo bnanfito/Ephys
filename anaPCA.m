@@ -1,10 +1,10 @@
 % close all
 % clear
 
-function [x,y,D,distF,distNull,distNull2] = anaPCA(sumStats)
+function [x,y,D,Dshift,distF,distNull,noise] = anaPCA(sumStats)
 
 tAve = 1;
-fullDim = 1;
+fullDim = 0;
 
 % animal = 'febn2';
 % unit = '000';
@@ -26,6 +26,9 @@ sumStats = sumStats(sumStats.goodUnit,:);
 sumStats = sumStats(oriPrefIdx,:);
 
 nU = height(sumStats);
+for u = 1:nU
+    noise(:,:,u) = sumStats.response{u}-mean(sumStats.response{u},'omitnan');
+end
 R = cat(3,sumStats.response{:});
 R(R<0)=0;
 nReps = size(R,1);
@@ -54,9 +57,9 @@ end
 x = x./max(x);
 
 [coeff,score,latent,tsquare,explained] = pca(x);
-% D = squareform(pdist(x,'squaredeuclidean'));
 if fullDim == 1
     D = dist(x');
+    % D = squareform(pdist(x,'squaredeuclidean'));
 else
     D = dist(score(:,1:3)');
 end
@@ -75,24 +78,24 @@ distF = distF(y<=180);
 nNullRep = 1000;
 for nr = 1:nNullRep
     
-    randIdx = randperm(size(rTrial,1));
-    rTshuff = rTrial(randIdx,:);
-    rMshuff = squeeze(mean(reshape(rTshuff,nReps,nConds,nU),1,'omitnan'));
-    if tAve == 1
-        shuff = rMshuff;
-    else
-        shuff = rTshuff;
-    end
-
+%     randIdx = randperm(size(rTrial,1));
+%     rTshuff = rTrial(randIdx,:);
+%     rMshuff = squeeze(mean(reshape(rTshuff,nReps,nConds,nU),1,'omitnan'));
 %     if tAve == 1
-%         randIdx = randperm(size(rMean,1));
-%         rMshuff = rMean(randIdx,:);
 %         shuff = rMshuff;
 %     else
-%         randIdx = randperm(size(rTrial,1));
-%         rTshuff = rTrial(randIdx,:);
 %         shuff = rTshuff;
 %     end
+
+    if tAve == 1
+        randIdx = randperm(size(rMean,1));
+        rMshuff = rMean(randIdx,:);
+        shuff = rMshuff;
+    else
+        randIdx = randperm(size(rTrial,1));
+        rTshuff = rTrial(randIdx,:);
+        shuff = rTshuff;
+    end
 
     shuff = shuff./max(shuff);
     [coeffShuff,scoreShuff,latentShuff,tsquareShuff,explainedShuff] = pca(shuff);
@@ -111,6 +114,8 @@ for nr = 1:nNullRep
 end
 distNull2 = vertcat(distNull2{:}); distNull2 = distNull2(:,y<=180);
 distNull = distNull(:,y<=180);
+
+distF_z = (distF-mean(distNull,'omitnan'))./std(distNull,'omitnan');
 
 %% Plot
 
@@ -188,6 +193,7 @@ legend({'PC1','PC2','PC3','PC4'})
 
 subplot(4,2,7);hold on
 angDisp = y(y<=180);
+% plot(angDisp,distF_z,'k-o','LineWidth',2)
 plot(angDisp,distF,'k-o','LineWidth',2)
 sem = std(Dshift)/sqrt(size(Dshift,1)); sem = sem(y<=180);
 v = var(Dshift); v = v(y<=180);
@@ -198,27 +204,31 @@ sem = std(distNull)/sqrt(size(distNull,1));
 v = var(distNull);
 sig2 = std(distNull,'omitnan')*2;
 for i = 1:size(distNull,2)
-    h = cdfplot(distNull(:,i));
-    P95(i) = h.XData(find(h.YData>=0.95,1));
-    P05(i) = h.XData(find(h.YData>=0.05,1));
-    delete(h)
+%     h = cdfplot(distNull(:,i));
+%     P95(i) = h.XData(find(h.YData>=0.95,1));
+%     P05(i) = h.XData(find(h.YData>=0.05,1));
+%     delete(h)
+    P99(i) = prctile(distNull(:,i),99,'Method','exact');
+    P95(i) = prctile(distNull(:,i),95,'Method','exact');
+    P05(i) = prctile(distNull(:,i),5,'Method','exact');
+    P01(i) = prctile(distNull(:,i),1,'Method','exact');
 end
-
-plot(angDisp,mean(distNull2),'b--*')
-sem2 = std(distNull2)/sqrt(size(distNull2,1));
-v2 = var(distNull2);
-sig2_2 = std(distNull2,'omitnan')*2;
-for i = 1:size(distNull2,2)
-    h = cdfplot(distNull2(:,i));
-    P95_2(i) = h.XData(find(h.YData>=0.95,1));
-    P05_2(i) = h.XData(find(h.YData>=0.05,1));
-    delete(h)
-end
-
 patch([angDisp fliplr(angDisp)],[mean(distNull)-v fliplr(mean(distNull)+v)],'r','EdgeColor','none','FaceAlpha',0.2)
 patch([angDisp fliplr(angDisp)],[P05 fliplr(P95)],'r','FaceColor','none','EdgeColor','r','LineStyle','--')
-patch([angDisp fliplr(angDisp)],[mean(distNull2)-v2 fliplr(mean(distNull2)+v2)],'b','EdgeColor','none','FaceAlpha',0.2)
-patch([angDisp fliplr(angDisp)],[P05_2 fliplr(P95_2)],'r','FaceColor','none','EdgeColor','b','LineStyle','--')
+patch([angDisp fliplr(angDisp)],[P01 fliplr(P99)],'r','FaceColor','none','EdgeColor','r','LineStyle',':')
+
+% plot(angDisp,mean(distNull2),'b--*')
+% sem2 = std(distNull2)/sqrt(size(distNull2,1));
+% v2 = var(distNull2);
+% sig2_2 = std(distNull2,'omitnan')*2;
+% for i = 1:size(distNull2,2)
+%     h = cdfplot(distNull2(:,i));
+%     P95_2(i) = h.XData(find(h.YData>=0.95,1));
+%     P05_2(i) = h.XData(find(h.YData>=0.05,1));
+%     delete(h)
+% end
+% patch([angDisp fliplr(angDisp)],[mean(distNull2)-v2 fliplr(mean(distNull2)+v2)],'b','EdgeColor','none','FaceAlpha',0.2)
+% patch([angDisp fliplr(angDisp)],[P05_2 fliplr(P95_2)],'b','FaceColor','none','EdgeColor','b','LineStyle','--')
 
 sigHiX = angDisp(distF>P95);
 sigHiY = distF(distF>P95);
