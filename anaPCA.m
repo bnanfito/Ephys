@@ -1,10 +1,10 @@
 % close all
 % clear
 
-function [x,y,D,Dshift,distF,distNull,noise] = anaPCA(sumStats)
+function [x,y,D,Dshift,distF,distNull] = anaPCA(sumStats)
 
 tAve = 1;
-fullDim = 0;
+fullDim = 1;
 
 % animal = 'febn2';
 % unit = '000';
@@ -27,9 +27,10 @@ sumStats = sumStats(oriPrefIdx,:);
 
 nU = height(sumStats);
 for u = 1:nU
-    noise(:,:,u) = sumStats.response{u}-mean(sumStats.response{u},'omitnan');
+%     noise(:,:,u) = sumStats.response{u}-mean(sumStats.response{u},'omitnan');
+    R(:,:,u) = sumStats.response{u}(1:5,:);
 end
-R = cat(3,sumStats.response{:});
+% R = cat(3,sumStats.response{:});
 R(R<0)=0;
 nReps = size(R,1);
 nConds = size(R,2);

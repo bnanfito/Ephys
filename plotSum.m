@@ -1,15 +1,19 @@
 
-function plotSum(dat)
+function plotSum(dat,plt,svePlt,figFold)
 close all
 plr = 1;
 
 % dat = data.v1bf;
 dat = dat(dat.goodUnit,:);
 nU = height(dat);
-if nU>50
-uInd = 1:floor(nU/50):nU;
+if plt == 1
+    if nU>50
+    uInd = 1:floor(nU/50):nU;
+    else
+    uInd = 1:nU;
+    end
 else
-uInd = 1:nU;
+    uInd = 1:nU;
 end
 for u = uInd
     figure;hold on
@@ -82,6 +86,17 @@ for u = uInd
         plot(x,y,'k.')
         plot(x,mean(y,'omitnan'),'k-o')
         plot(repmat(x,2,1),mean(y,'omitnan')+([1;-1]*sem),'k')
+    end
+    
+    
+    ttl = [dat.exptName{u} ' ' dat.area{u} ' ' dat.uInfo{u} ' ' dat.uID{u}];
+    figName = [dat.exptName{u} '_' dat.area{u} '_' dat.uInfo{u} '_' dat.uID{u} '.fig'];
+    sgtitle(ttl)
+    if svePlt == 1
+        if ~isfolder(figFold)
+            mkdir(figFold)
+        end
+        saveas()
     end
 
 
