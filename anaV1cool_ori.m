@@ -2,43 +2,154 @@
 
 
 
-clear all
-close all
-load('/Volumes/NielsenHome2/Brandon/data/dataSets/cooling/V1cool_MU_ori/V1cool_SU_ori_projectTbl.mat')
-ageGroup = {[28  33],[34  37],[38  45],[46 200]};
-for ag = 1:length(ageGroup)
-    sumStats = vertcat(projTbl.sumStats{projTbl.age>=ageGroup{ag}(1) & projTbl.age<=ageGroup{ag}(2) & projTbl.duringMFlag == 0});
-    [x,y,D,distF] = anaPCA(sumStats);
-    sgtitle(num2str(ageGroup{ag}))
-end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-% %anaV1Cool_ori
-% clear
+% clear all
 % close all
+% load('/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/cooling/V1cool_MU_ori/V1cool_SU_ori_projectTbl.mat')
+% ageGroup = {[28  30],[31  33],[34 37],[38  40],[46 200]};
+% % ageGroup = {[0 33],[34 39],[40 300]};
+% % ageGroup = {[28 30],[29 31],[30 32],[31 33],[32 34],[33 35],[34 36],[35 37],[36 38]};
+% % ageGroup = {[35 37],[36 38],[37 39],[38 40],[39 41],[40 42],[41 43],[42 44],[43 45]};
+% % ageGroup = {[28 30],[31 33],[34 36],[37 39],[40 200]};
+% nAG = length(ageGroup);
+% animals = unique(projTbl.experimentId);
+% nAn = length(animals);
+% for a = 1:nAn
+%     ages(a) = unique(projTbl.age(strcmp(projTbl.experimentId,animals(a))));
+% end
+% coolBit = 0;
+% coolInd = projTbl.duringMFlag == coolBit;
 % 
-% anaMode = 'SU';
-% proj = ['V1cool_MU_ori'];
-% area = 'PSS';
+% figure;
+% for a = 1:nAG
+%     ageInd = projTbl.age>=ageGroup{a}(1) & projTbl.age<=ageGroup{a}(2);
+%     sumStats = vertcat(projTbl.sumStats{ageInd & coolInd});
+%     if isempty(sumStats)
+%         continue
+%     end
+%     sumStats = sumStats(sumStats.goodUnit,:);
+%     if isempty(sumStats)
+%         continue
+%     end
+%     animals_AG = unique({projTbl.experimentId{ageInd & coolInd}});
+%     nA(a) = length(animals_AG);
+%     nU(a) = height(sumStats);
+% 
+%     [x,y,rCent,tCent,score,D,Dshift,distF,distNull] = anaPCA(sumStats,0);
+% %     ttl = ['P' num2str(ageGroup{ag}(1)) '-' num2str(ageGroup{ag}(2)) '; Na=' num2str(nA(ag)) '; Nu=' num2str(nU(ag))];
+% %     sgtitle(ttl)
+% 
+% 
+% 
+%     subplot(5,nAG,a+(nAG*0));hold on
+%     imagesc(x);
+%     axis tight
+%     yticks(1:size(x,1))
+%     yticklabels(num2str(y'))
+%     colorbar
+%     xlabel('unit')
+%     ylabel('direction of motion')
+% 
+%     ttl = ['P' num2str(ageGroup{a}(1)) '-' num2str(ageGroup{a}(2)) '; Na=' num2str(nA(a)) '; Nu=' num2str(nU(a))];
+%     title(ttl)
+% 
+% 
+%     subplot(5,nAG,a+(nAG*1));hold on
+%     plot(tCent,rCent) 
+%     plot(tCent,mean(rCent,2,'omitnan'),'k','LineWidth',2)
+%     plot(repmat(tCent,2,1),mean(rCent,2,'omitnan')'+([1;-1].*(std(rCent,[],2,'omitnan')/sqrt(size(rCent,2)))'),'k','LineWidth',2)
+%     xlabel('deg. relative to preferred')
+%     ylabel('mean (+/-sem) normalized response')
+% 
+% 
+%     subplot(5,nAG,a+(nAG*2));hold on
+%     np = size(x,1);
+%     clrs = hsv(np);
+%     for i = 1:np
+%     clr = clrs(i,:);
+%     pt(i) = plot3(score(i,1),score(i,2),score(i,3),'.','Color',clr,'MarkerSize',20);
+%     end
+%     plot3([score(:,1);score(1,1)],[score(:,2);score(1,2)],[score(:,3);score(1,3)],'k--','LineWidth',2)
+%     if a == 1
+%         legend(pt,num2str(y'))
+%     end
+%     xlabel('PC1');ylabel('PC2');zlabel('PC3')
+% 
+% 
+%     subplot(5,nAG,a+(nAG*3));hold on
+%     imagesc(D);
+%     axis tight
+%     yticks(1:length(y))
+%     yticklabels(num2str(y'))
+%     xticks(1:length(y))
+%     xticklabels(num2str(y'))
+%     colorbar
+%     xlabel('direction of motion')
+%     ylabel('direction of motion')
+% 
+% 
+%     subplot(5,nAG,a+(nAG*4));hold on
+%     angDisp = y(y<=180);
+%     plot(angDisp,distF,'k-o','LineWidth',2)
+%     sem = std(Dshift)/sqrt(size(Dshift,1)); sem = sem(y<=180);
+%     v = var(Dshift); v = v(y<=180);
+%     patch([angDisp fliplr(angDisp)],[distF-v fliplr(distF+v)],'k','EdgeColor','none','FaceAlpha',0.2)
+%     
+%     plot(angDisp,mean(distNull),'r-o')
+%     sem = std(distNull)/sqrt(size(distNull,1));
+%     v = var(distNull);
+%     sig2 = std(distNull,'omitnan')*2;
+%     for i = 1:size(distNull,2)
+%         P99(i) = prctile(distNull(:,i),99,'Method','exact');
+%         P95(i) = prctile(distNull(:,i),95,'Method','exact');
+%         P05(i) = prctile(distNull(:,i),5,'Method','exact');
+%         P01(i) = prctile(distNull(:,i),1,'Method','exact');
+%     end
+%     patch([angDisp fliplr(angDisp)],[mean(distNull)-v fliplr(mean(distNull)+v)],'r','EdgeColor','none','FaceAlpha',0.2)
+%     patch([angDisp fliplr(angDisp)],[P05 fliplr(P95)],'r','FaceColor','none','EdgeColor','r','LineStyle','--')
+%     patch([angDisp fliplr(angDisp)],[P01 fliplr(P99)],'r','FaceColor','none','EdgeColor','r','LineStyle',':')
+%         
+%     sigHiX = angDisp(distF>P95);
+%     sigHiY = distF(distF>P95);
+%     sigLoX = angDisp(distF<P05);
+%     sigLoY = distF(distF<P05);
+%     text(sigHiX,sigHiY+(sigHiY*0.1),'*')
+%     text(sigLoX,sigLoY-(sigLoY*0.1),'*')
+%     
+%     xticks([0 90 180])
+%     xticklabels({'0','90','180'})
+%     xlabel('angular disparity (+/- deg)')
+% 
+% 
+% 
+% end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%anaV1Cool_ori
+clear
+close all
+
+anaMode = 'MU';
+proj = ['V1cool_MU_ori'];
+area = 'PSS';
 % dataFold = fullfile('Y:\Brandon\data');
 % projTbl = getProjectFiles(proj,1,'age','recSite','penNr','priorMFlag','priorDescr',...
 %                                        'duringMFlag','manipDescr','manipDetail',...
@@ -63,222 +174,291 @@ end
 % end
 % projTbl.sumStats = sumStats;
 % projTbl.nGU = nGoodUnits;
-% 
-% % load('Y:\Brandon\data\dataSets\cooling\V1cool_MU_ori\V1cool_MU_ori_projectTbl.mat')
-% % % load('/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/cooling/V1cool_MU_ori/V1cool_MU_ori_projectTbl.mat')
-% 
-% 
-% coolIdx = projTbl.duringMFlag==1 & strcmp(projTbl.manipDescr,'Cooling') & ...
-%           strcmp(projTbl.manipDetail,'V1');
-% datTbl = [];
-% for a = 1:length(animals)
-%     aniIdx = strcmp(projTbl.experimentId,animals{a});
-% 
-%     %cntrl
-%     idx = ~coolIdx & aniIdx;
-%     cntrlPens = unique(projTbl(idx,:).penNr);
-%     for pen = 1:length(cntrlPens)
-%         curDat = projTbl(idx & projTbl.penNr==cntrlPens(pen),:);
-%         maxGUidx = find( curDat.nGU == max(curDat.nGU) );
-%         if length(maxGUidx)>1
-%             maxGUidx = maxGUidx(1);
-%         end
-%         datTbl = vertcat(datTbl,curDat(maxGUidx,:));
-%     end
-%     
-% 
-%     %cool
-%     idx = coolIdx & aniIdx;
-%     coolPens = unique(projTbl(idx,:).penNr);
-%     for pen = 1:length(coolPens)
-%         curDat = projTbl(idx & projTbl.penNr==coolPens(pen),:);
-%         maxGUidx = find( curDat.nGU == max(curDat.nGU) );
-%         if length(maxGUidx)>1
-%             maxGUidx = maxGUidx(1);
-%         end
-%         datTbl = vertcat(datTbl,curDat(maxGUidx,:));
-%     end
-% 
-% end
-% 
-% %Organize sumStats column from datTbl by animal and condition in vars
-% %'cntrlAniDat' and 'coolAniDat'
-% coolIdx = datTbl.duringMFlag==1 & strcmp(datTbl.manipDescr,'Cooling') & ...
-%           strcmp(datTbl.manipDetail,'V1');
-% for a = 1:length(animals)
-%     aniIdx = strcmp(datTbl.experimentId,animals{a});
-% 
-%     idx = ~coolIdx & aniIdx;
-%     cntrlAniDat{a} = vertcat(datTbl.sumStats{idx});
-%     if ~isempty(cntrlAniDat{a})
-%         cntrlAniDat{a} = cntrlAniDat{a}(cntrlAniDat{a}.goodUnit,:);
-%     end
-% 
-%     idx = coolIdx & aniIdx;
-%     coolAniDat{a} = vertcat(datTbl.sumStats{idx});
-%     if ~isempty(coolAniDat{a})
-%         coolAniDat{a} = coolAniDat{a}(coolAniDat{a}.goodUnit,:);
-%     end
-% 
-% end
-% 
-% %Organize sumStats from datTbl by age as defined by var 'ageGroups'
-% ageGroups = {[28 29],[30 33],[34 37],[38 45],[46 200]};
-% for ag = 1:length(ageGroups)
-%     agIdx = datTbl.age>=ageGroups{ag}(1) & datTbl.age<=ageGroups{ag}(2);
-% 
-%     idx = ~coolIdx & agIdx;
-%     cntrlAgeDat{ag} = vertcat(datTbl.sumStats{idx});
-%     if ~isempty(cntrlAgeDat{ag})
-%         cntrlAgeDat{ag} = cntrlAgeDat{ag}(cntrlAgeDat{ag}.goodUnit,:);
-%     end
-% 
-%     idx = coolIdx & agIdx;
-%     coolAgeDat{ag} = vertcat(datTbl.sumStats{idx});
-%     if ~isempty(coolAgeDat{ag})
-%         coolAgeDat{ag} = coolAgeDat{ag}(coolAgeDat{ag}.goodUnit,:);
-%     end
-% 
-% end
-% 
-% 
-% %% Plot
-% 
-% figure;
-% subplot(2,2,1)
-% histogram(ages,[20:1:100])
-% ylabel('animal count')
-% xlabel('age')
-% ax1 = gca;
-% 
-% sz1 = 5;
-% sz2 = 20;
-% lw = 1;
-% 
-% metric = 'ldr';
-% subplot(2,2,2);hold on
-% for a = 1:length(animals)
-%     x = ages(a);
-%     
-%     if ~isempty(cntrlAniDat{a})
-%         if strcmp(metric,'dsi')
-%             Y = cntrlAniDat{a}.dsi;
-%         elseif strcmp(metric,'ldr')
-%             Y = cntrlAniDat{a}.ldr;
-%         end
-%         y = mean(Y,'omitnan');
-%         n = length(Y);
-%         sem = std(Y,'omitnan')/sqrt(n);
-%         if n < 20
-%             plot(x,y,'ko','MarkerSize',sz1,'LineWidth',lw)
-%         else
-%             plot(x,y,'k.','MarkerSize',sz2)
-%         end
-%         plot(repmat(x,2,1),y+([1;-1]*sem),'k-','LineWidth',lw)
-%     end
-% 
-%     if ~isempty(coolAniDat{a})
-%         if strcmp(metric,'dsi')
-%             Y = coolAniDat{a}.dsi;
-%         elseif strcmp(metric,'ldr')
-%             Y = coolAniDat{a}.ldr;
-%         end
-%         y = mean(Y,'omitnan');
-%         n = length(Y);
-%         sem = std(Y,'omitnan')/sqrt(n);
-%         if n < 20
-%             plot(x,y,'co','MarkerSize',sz1,'LineWidth',lw)
-%         else
-%             plot(x,y,'c.','MarkerSize',sz2)
-%         end
-%         plot(repmat(x,2,1),y+([1;-1]*sem),'c-','LineWidth',lw)
-%     end
-% 
-% end
-% if strcmp(metric,'dsi')
-%     ylabel('DSI')
-% elseif strcmp(metric,'ldr')
-%     ylabel('Ldir')
-% end
-% xlabel('age')
-% ax2 = gca;
-% 
-% subplot(2,2,3);hold on
-% for a = 1:length(animals)
-%     x = ages(a);
-%     
-%     if ~isempty(cntrlAniDat{a})
-%         Y = cntrlAniDat{a}.rNull;
-%         y = mean(Y);
-%         n = length(Y);
-%         sem = std(Y)/sqrt(n);
-%         if n < 3
-%             plot(x,y,'ko','MarkerSize',sz1,'LineWidth',lw)
-%         else
-%             plot(x,y,'k.','MarkerSize',sz2)
-%         end
-%         plot(repmat(x,2,1),y+([1;-1]*sem),'k-','LineWidth',lw)
-%     end
-% 
-%     if ~isempty(coolAniDat{a})
-%         Y = coolAniDat{a}.rNull;
-%         y = mean(Y);
-%         n = length(Y);
-%         sem = std(Y)/sqrt(n);
-%         if n < 20
-%             plot(x,y,'co','MarkerSize',sz1,'LineWidth',lw)
-%         else
-%             plot(x,y,'c.','MarkerSize',sz2)
-%         end
-%         plot(repmat(x,2,1),y+([1;-1]*sem),'c-','LineWidth',lw)
-%     end
-% 
-% end
-% ylabel('response to null Hz')
-% xlabel('age')
-% ax3 = gca;
-% 
-% subplot(2,2,4);hold on
-% for a = 1:length(animals)
-%     x = ages(a);
-%     
-%     if ~isempty(cntrlAniDat{a})
-%         Y = cntrlAniDat{a}.rPref;
-%         y = mean(Y);
-%         n = length(Y);
-%         sem = std(Y)/sqrt(n);
-%         if n < 20
-%             plot(x,y,'ko','MarkerSize',sz1,'LineWidth',lw)
-%         else
-%             plot(x,y,'k.','MarkerSize',sz2)
-%         end
-%         plot(repmat(x,2,1),y+([1;-1]*sem),'k-','LineWidth',lw)
-%     end
-% 
-%     if ~isempty(coolAniDat{a})
-%         Y = coolAniDat{a}.rPref;
-%         y = mean(Y);
-%         n = length(Y);
-%         sem = std(Y)/sqrt(n);
-%         if n < 20
-%             plot(x,y,'co','MarkerSize',sz1,'LineWidth',lw)
-%         else
-%             plot(x,y,'c.','MarkerSize',sz2)
-%         end
-%         plot(repmat(x,2,1),y+([1;-1]*sem),'c-','LineWidth',lw)
-%     end
-% 
-% end
-% ylabel('response to pref (Hz)')
-% xlabel('age')
-% ax4 = gca;
-% 
-% linkaxes([ax1 ax2 ax3 ax4],'x')
-% sgtitle([proj ' ' area ' ' anaMode ' ind. animal means'])
-% 
-% 
-% 
-% %Distance analysis
+
+% load('Y:\Brandon\data\dataSets\cooling\V1cool_MU_ori\V1cool_MU_ori_projectTbl.mat')
+load(['/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/cooling/V1cool_MU_ori/V1cool_SU_ori_projectTbl.mat'])
+
+
+coolIdx = projTbl.duringMFlag==1 & strcmp(projTbl.manipDescr,'Cooling') & ...
+          strcmp(projTbl.manipDetail,'V1');
+datTbl = [];
+for a = 1:length(animals)
+    aniIdx = strcmp(projTbl.experimentId,animals{a});
+
+    %cntrl
+    idx = ~coolIdx & aniIdx;
+    cntrlPens = unique(projTbl(idx,:).penNr);
+    for pen = 1:length(cntrlPens)
+        curDat = projTbl(idx & projTbl.penNr==cntrlPens(pen),:);
+        maxGUidx = find( curDat.nGU == max(curDat.nGU) );
+        if length(maxGUidx)>1
+            maxGUidx = maxGUidx(1);
+        end
+        datTbl = vertcat(datTbl,curDat(maxGUidx,:));
+    end
+    
+
+    %cool
+    idx = coolIdx & aniIdx;
+    coolPens = unique(projTbl(idx,:).penNr);
+    for pen = 1:length(coolPens)
+        curDat = projTbl(idx & projTbl.penNr==coolPens(pen),:);
+        maxGUidx = find( curDat.nGU == max(curDat.nGU) );
+        if length(maxGUidx)>1
+            maxGUidx = maxGUidx(1);
+        end
+        datTbl = vertcat(datTbl,curDat(maxGUidx,:));
+    end
+
+end
+
+%Organize sumStats column from datTbl by animal and condition in vars
+%'cntrlAniDat' and 'coolAniDat'
+coolIdx = datTbl.duringMFlag==1 & strcmp(datTbl.manipDescr,'Cooling') & ...
+          strcmp(datTbl.manipDetail,'V1');
+for a = 1:length(animals)
+    aniIdx = strcmp(datTbl.experimentId,animals{a});
+
+    idx = ~coolIdx & aniIdx;
+    cntrlAniDat{a} = vertcat(datTbl.sumStats{idx});
+    if ~isempty(cntrlAniDat{a})
+        cntrlAniDat{a} = cntrlAniDat{a}(cntrlAniDat{a}.goodUnit,:);
+    end
+
+    idx = coolIdx & aniIdx;
+    coolAniDat{a} = vertcat(datTbl.sumStats{idx});
+    if ~isempty(coolAniDat{a})
+        coolAniDat{a} = coolAniDat{a}(coolAniDat{a}.goodUnit,:);
+    end
+
+end
+
+%Organize sumStats from datTbl by age as defined by var 'ageGroups'
+ageGroups = {[28 29],[30 33],[34 37],[38 45],[46 200]};
+for ag = 1:length(ageGroups)
+    agIdx = datTbl.age>=ageGroups{ag}(1) & datTbl.age<=ageGroups{ag}(2);
+
+    idx = ~coolIdx & agIdx;
+    cntrlAgeDat{ag} = vertcat(datTbl.sumStats{idx});
+    if ~isempty(cntrlAgeDat{ag})
+        cntrlAgeDat{ag} = cntrlAgeDat{ag}(cntrlAgeDat{ag}.goodUnit,:);
+    end
+
+    idx = coolIdx & agIdx;
+    coolAgeDat{ag} = vertcat(datTbl.sumStats{idx});
+    if ~isempty(coolAgeDat{ag})
+        coolAgeDat{ag} = coolAgeDat{ag}(coolAgeDat{ag}.goodUnit,:);
+    end
+
+end
+
+
+%% Plot
+
+figure;
+subplot(2,2,1)
+histogram(ages,[20:1:100])
+ylabel('animal count')
+xlabel('age')
+ax1 = gca;
+
+sz1 = 5;
+sz2 = 20;
+lw = 1;
+
+metric = {'ldr','rPref','rNull'};
+for m = 1:length(metric)
+
+    subplot(2,2,m+1);hold on
+    for a = 1:length(animals)
+
+        x = ages(a);
+        for c = 1:2
+
+            if c == 1
+                dat = cntrlAniDat{a};  
+                clr = 'k';
+            elseif c == 2
+                dat = coolAniDat{a};
+                clr = 'c';
+            end
+            if ~isempty(dat)
+                if strcmp(metric{m},'dsi')
+                    Y = dat.dsi;
+                elseif strcmp(metric{m},'ldr')
+                    Y = dat.ldr;
+                elseif strcmp(metric{m},'rPref')
+                    Y = dat.rPref;
+                elseif strcmp(metric{m},'rNull')
+                    Y = dat.rNull;
+                end
+                y = mean(Y,'omitnan');
+                n = length(Y);
+                sem = std(Y,'omitnan')/sqrt(n);
+                if n < 5
+                    plot(x,y,[clr 'o'],'MarkerSize',sz1,'LineWidth',lw)
+                else
+                    plot(x,y,[clr '.'],'MarkerSize',sz2)
+                end
+                plot(repmat(x,2,1),y+([1;-1]*sem),[clr '-'],'LineWidth',lw)
+            end
+
+        end
+    
+    end
+    if strcmp(metric{m},'dsi')
+        ylabel('DSI')
+    elseif strcmp(metric{m},'ldr')
+        ylabel('Ldir')
+    elseif strcmp(metric{m},'rPref')
+        ylabel('response to pref. (Hz)')
+    elseif strcmp(metric{m},'rNull')
+        ylabel('response to null (Hz)')
+    end
+    xlabel('age')
+    ax{m} = gca;
+
+end
+
+linkaxes([ax1 ax{:}],'x')
+sgtitle([proj ' ' area ' ' anaMode ' ind. animal means'])
+
+
+
+%% Distance analysis
+
+figure;
+nAG = length(ageGroups);
+for a = 1:nAG
+    sumStats = cntrlAgeDat{a};
+    if isempty(sumStats)
+        continue
+    end
+    sumStats = sumStats(sumStats.goodUnit,:);
+    if isempty(sumStats)
+        continue
+    end
+    animals_AG = animals(ismember(ages,ageGroups{a}(1):ageGroups{a}(2)));
+    nA(a) = length(animals_AG);
+    nU(a) = height(sumStats);
+
+    [x,y,rCent,tCent,score,D,Dshift,distF,distNull] = anaPCA(sumStats,0);
+%     ttl = ['P' num2str(ageGroup{ag}(1)) '-' num2str(ageGroup{ag}(2)) '; Na=' num2str(nA(ag)) '; Nu=' num2str(nU(ag))];
+%     sgtitle(ttl)
+
+
+
+    subplot(5,nAG,a+(nAG*0));hold on
+    imagesc(x);
+    axis tight
+    yticks(1:size(x,1))
+    yticklabels(num2str(y'))
+    colorbar
+    xlabel('unit')
+    ylabel('direction of motion')
+
+    ttl = ['P' num2str(ageGroups{a}(1)) '-' num2str(ageGroups{a}(2)) '; Na=' num2str(nA(a)) '; Nu=' num2str(nU(a))];
+    title(ttl)
+
+
+    subplot(5,nAG,a+(nAG*1));hold on
+    plot(tCent,rCent) 
+    plot(tCent,mean(rCent,2,'omitnan'),'k','LineWidth',2)
+    plot(repmat(tCent,2,1),mean(rCent,2,'omitnan')'+([1;-1].*(std(rCent,[],2,'omitnan')/sqrt(size(rCent,2)))'),'k','LineWidth',2)
+    xlabel('deg. relative to preferred')
+    ylabel('mean (+/-sem) normalized response')
+
+
+    subplot(5,nAG,a+(nAG*2));hold on
+    np = size(x,1);
+    clrs = hsv(np);
+    for i = 1:np
+    clr = clrs(i,:);
+    pt(i) = plot3(score(i,1),score(i,2),score(i,3),'.','Color',clr,'MarkerSize',20);
+    end
+    plot3([score(:,1);score(1,1)],[score(:,2);score(1,2)],[score(:,3);score(1,3)],'k--','LineWidth',2)
+    if a == 1
+        legend(pt,num2str(y'))
+    end
+    xlabel('PC1');ylabel('PC2');zlabel('PC3')
+
+
+    subplot(5,nAG,a+(nAG*3));hold on
+    imagesc(D);
+    axis tight
+    yticks(1:length(y))
+    yticklabels(num2str(y'))
+    xticks(1:length(y))
+    xticklabels(num2str(y'))
+    colorbar
+    xlabel('direction of motion')
+    ylabel('direction of motion')
+
+
+    subplot(5,nAG,a+(nAG*4));hold on
+    angDisp = y(y<=180);
+    plot(angDisp,distF,'k-o','LineWidth',2)
+    sem = std(Dshift)/sqrt(size(Dshift,1)); sem = sem(y<=180);
+    v = var(Dshift); v = v(y<=180);
+    patch([angDisp fliplr(angDisp)],[distF-v fliplr(distF+v)],'k','EdgeColor','none','FaceAlpha',0.2)
+    
+    plot(angDisp,mean(distNull),'r-o')
+    sem = std(distNull)/sqrt(size(distNull,1));
+    v = var(distNull);
+    sig2 = std(distNull,'omitnan')*2;
+    for i = 1:size(distNull,2)
+        P99(i) = prctile(distNull(:,i),99,'Method','exact');
+        P95(i) = prctile(distNull(:,i),95,'Method','exact');
+        P05(i) = prctile(distNull(:,i),5,'Method','exact');
+        P01(i) = prctile(distNull(:,i),1,'Method','exact');
+    end
+    patch([angDisp fliplr(angDisp)],[mean(distNull)-v fliplr(mean(distNull)+v)],'r','EdgeColor','none','FaceAlpha',0.2)
+    patch([angDisp fliplr(angDisp)],[P05 fliplr(P95)],'r','FaceColor','none','EdgeColor','r','LineStyle','--')
+    patch([angDisp fliplr(angDisp)],[P01 fliplr(P99)],'r','FaceColor','none','EdgeColor','r','LineStyle',':')
+        
+    sigHiX = angDisp(distF>P95);
+    sigHiY = distF(distF>P95);
+    sigLoX = angDisp(distF<P05);
+    sigLoY = distF(distF<P05);
+    text(sigHiX,sigHiY+(sigHiY*0.1),'*')
+    text(sigLoX,sigLoY-(sigLoY*0.1),'*')
+    
+    xticks([0 90 180])
+    xticklabels({'0','90','180'})
+    xlabel('angular disparity (+/- deg)')
+
+%     clear x y rCent tCent score D Dshift distF distNull
+
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 % figure;
 % nAG = length(ageGroups);
 % for ag = 1:nAG

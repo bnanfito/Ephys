@@ -1,7 +1,7 @@
 % close all
 % clear
 
-function [x,y,D,Dshift,distF,distNull] = anaPCA(sumStats)
+function [x,y,rCent,tCent,score,D,Dshift,distF,distNull] = anaPCA(sumStats,plt)
 
 tAve = 1;
 fullDim = 1;
@@ -42,18 +42,19 @@ c = repmat(C,nReps,1);c = c(:)';
 if tAve == 1
     x = rMean;
     y = C;
-    np = nConds;
-    clrs = hsv(np);
 else
     x = rTrial;
     y = c;
-    np = size(x,1);
+end
+np = size(x,1);
+if tAve == 1
+    clrs = hsv(np);
+else
     clrsTmp = hsv(nConds);
     clrs = [];
     for i = 1:nConds
         clrs = vertcat(clrs,repmat(clrsTmp(i,:),nReps,1));
     end
-
 end
 x = x./max(x);
 
@@ -63,6 +64,10 @@ if fullDim == 1
     % D = squareform(pdist(x,'squaredeuclidean'));
 else
     D = dist(score(:,1:3)');
+end
+
+for u = 1:nU
+    [tCent,rCent(:,u)] = alignDirTuning(y,x(:,u)');
 end
 
 %% distance function
@@ -120,24 +125,28 @@ distF_z = (distF-mean(distNull,'omitnan'))./std(distNull,'omitnan');
 
 %% Plot
 
+if plt == 1
+
 figure('Position',[0 0 1000 1500]);
 
 subplot(4,2,1);hold on;
 imagesc(x);
 axis tight
-yticks(1:size(x,1))
-yticklabels(num2str(y'))
+if tAve == 1
+    yticks(1:size(x,1))
+    yticklabels(num2str(y'))
+else
+    yticks(1:nReps:size(x,1))
+    yticklabels(num2str(y(1:nReps:size(x,1))'))
+end
 colorbar
 xlabel('unit')
 ylabel('direction of motion')
 
 subplot(4,2,8);hold on;
-for u = 1:nU
-    [tOut,rOut(:,u)] = alignDirTuning(y,x(:,u)');
-end
-plot(tOut,rOut) 
-plot(tOut,mean(rOut,2,'omitnan'),'k','LineWidth',2)
-plot(repmat(tOut,2,1),mean(rOut,2,'omitnan')'+([1;-1].*(std(rOut,[],2,'omitnan')/sqrt(size(rOut,2)))'),'k','LineWidth',2)
+plot(tCent,rCent) 
+plot(tCent,mean(rCent,2,'omitnan'),'k','LineWidth',2)
+plot(repmat(tCent,2,1),mean(rCent,2,'omitnan')'+([1;-1].*(std(rCent,[],2,'omitnan')/sqrt(size(rCent,2)))'),'k','LineWidth',2)
 xlabel('deg. relative to preferred')
 ylabel('mean (+/-sem) normalized response')
 
@@ -205,10 +214,6 @@ sem = std(distNull)/sqrt(size(distNull,1));
 v = var(distNull);
 sig2 = std(distNull,'omitnan')*2;
 for i = 1:size(distNull,2)
-%     h = cdfplot(distNull(:,i));
-%     P95(i) = h.XData(find(h.YData>=0.95,1));
-%     P05(i) = h.XData(find(h.YData>=0.05,1));
-%     delete(h)
     P99(i) = prctile(distNull(:,i),99,'Method','exact');
     P95(i) = prctile(distNull(:,i),95,'Method','exact');
     P05(i) = prctile(distNull(:,i),5,'Method','exact');
@@ -268,7 +273,7 @@ title('ex. shuffle RDM')
 % figName = [animal '_u' unit '_' expt '_' area '_' anaMode '_distance.fig'];
 % saveas(gcf,fullfile(dataFold,'Ephys',animal,[animal '_u' unit '_' expt],figName))
 
-
+end
 
 
 end

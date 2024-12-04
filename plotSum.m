@@ -89,9 +89,9 @@ for u = uInd
     end
     
     
-    ttl = [dat.exptName{u} ' ' dat.area{u} ' ' dat.uInfo{u} ' ' dat.uID{u}];
-    figName = [dat.exptName{u} '_' dat.area{u} '_' dat.uInfo{u} '_' dat.uID{u} '.fig'];
+    ttl = [dat.exptName{u} ' ' dat.area{u} ' ' dat.uInfo{u} ' ' num2str(dat.uID(u))];
     sgtitle(ttl)
+    figName = [dat.exptName{u} '_' dat.area{u} '_' dat.uInfo{u} '_' num2str(dat.uID(u)) '.fig'];
     if svePlt == 1
         if ~isfolder(figFold)
             mkdir(figFold)
