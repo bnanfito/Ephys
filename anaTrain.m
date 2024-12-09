@@ -2,15 +2,15 @@
 
 function [projectTbl,stats,data] = anaTrain(proj)
 
-    anaMode = 'MU';
+    anaMode = 'SU';
 
 %     dataFold = '/Volumes/Lab drive/Brandon/data/dataSets/training/';
-%     load(fullfile(dataFold,proj,anaMode,'projectTbl.mat'),'projectTbl')
+    dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/training';
+    load(fullfile(dataFold,proj,anaMode,[proj '_' anaMode 'dataSet.mat']),'projectTbl')
 
-%     dataFold = fullfile('Y:\Brandon\data\dataSets\training',proj);
-    dataFold = 'Y:\Brandon\data';
-    projectTbl=getProjectFiles(proj,1,'age','recSite','priorMFlag','priorDescr','duringMFlag','manipDescr','manipDetail');
-    
+%     dataFold = 'Y:\Brandon\data';
+    dataFold = '/Volumes/NielsenHome2/Brandon/data';
+%     projectTbl=getProjectFiles(proj,1,'age','recSite','priorMFlag','priorDescr','duringMFlag','manipDescr','manipDetail');
     for e = 1:height(projectTbl)
         animal = projectTbl.experimentId{e};
         unit = projectTbl.unitNr{e};

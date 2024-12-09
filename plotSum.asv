@@ -50,7 +50,6 @@ for u = uInd
     end
     xlim([-predelay stimTime+postdelay])
     ylim([0 nTrials+1])
-    patch([0 1 1 0],[0 0 max(y)+1 max(y)+1],'k','EdgeColor','none','FaceAlpha',0.2)
 
     subplot(nr,nc,4);hold on
     for t = 1:nTrials
@@ -70,13 +69,10 @@ for u = uInd
     yticIdx = 1:2:nConds;
     yticks(1:2:nConds)
     yticklabels(num2str(dat.cndKey{u}(yticIdx,:)))
-    patch([0 1 1 0],[0 0 max(y)+1 max(y)+1],'k','EdgeColor','none','FaceAlpha',0.2)
     
 
     x = dat.condition{u}(strcmp(dat.paramKey{u},'ori'),:);
     y = dat.response{u};
-    x_pref = dat.oriPref(u);
-    y_pref = dat.rPref(u);
     sem = std(y,'omitnan')/sqrt(size(y,1));
     if plr == 1
         subplot(nr,nc,2,polaraxes);hold on
@@ -91,7 +87,7 @@ for u = uInd
         plot(x,y,'k.')
         plot(x,mean(y,'omitnan'),'k-o')
         plot(repmat(x,2,1),mean(y,'omitnan')+([1;-1]*sem),'k')
-        plot(x_pref,y_pref,'r*')
+        plot(dat.oriPref)
     end
     
     
