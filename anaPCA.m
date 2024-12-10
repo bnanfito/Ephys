@@ -29,13 +29,15 @@ nU = height(sumStats);
 for u = 1:nU
 %     noise(:,:,u) = sumStats.response{u}-mean(sumStats.response{u},'omitnan');
     R(:,:,u) = sumStats.response{u}(1:5,:);
+    rTmp = sumStats.response{u}; rTmp(rTmp<0) = 0;
+    rMean(:,u) = mean(rTmp,'omitnan');
 end
 % R = cat(3,sumStats.response{:});
 R(R<0)=0;
 nReps = size(R,1);
 nConds = size(R,2);
 rTrial = reshape(R,nReps*nConds,nU);
-rMean = squeeze(mean(R,1,'omitnan'));
+% rMean = squeeze(mean(R,1,'omitnan'));
 C = sumStats.condition{1}(strcmp(sumStats.paramKey{1},'ori'),:);
 c = repmat(C,nReps,1);c = c(:)';
 
