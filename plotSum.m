@@ -2,6 +2,7 @@
 function plotSum(dat,plt,svePlt,figFold)
 close all
 plr = 0;
+alignTC = 0;
 
 % dat = data.v1bf;
 dat = dat(dat.goodUnit,:);
@@ -51,6 +52,8 @@ for u = uInd
     xlim([-predelay stimTime+postdelay])
     ylim([0 nTrials+1])
     patch([0 1 1 0],[0 0 max(y)+1 max(y)+1],'k','EdgeColor','none','FaceAlpha',0.2)
+    xlabel('time (sec)')
+    ylabel('trial #')
 
     subplot(nr,nc,4);hold on
     for t = 1:nTrials
@@ -71,10 +74,13 @@ for u = uInd
     yticks(1:2:nConds)
     yticklabels(num2str(dat.cndKey{u}(yticIdx,:)))
     patch([0 1 1 0],[0 0 max(y)+1 max(y)+1],'k','EdgeColor','none','FaceAlpha',0.2)
+    xlabel('time (sec)')
+    ylabel('condition')
     
 
     x = dat.condition{u}(strcmp(dat.paramKey{u},'ori'),:);
     y = dat.response{u};
+    meanY = mean(y,'omitnan');
     x_pref = dat.oriPref(u);
     y_pref = dat.rPref(u);
     sem = std(y,'omitnan')/sqrt(size(y,1));
@@ -88,21 +94,37 @@ for u = uInd
         polarplot(deg2rad([0 dat.meanVec{u}.angDir]),[0 dat.meanVec{u}.magDir*dat.ldr(u)],'g','LineWidth',2)
     else
         subplot(nr,nc,2);hold on
+        if alignTC == 1
+            [x,meanY,i] = alignDirTuning(x,meanY);
+            sem = sem(i);
+            y = y(:,i);
+        end
         plot(x,y,'k.')
-        plot(x,mean(y,'omitnan'),'k-o')
-        plot(repmat(x,2,1),mean(y,'omitnan')+([1;-1]*sem),'k')
-        plot(x_pref,y_pref,'r*')
+        plot(x,meanY,'k-o')
+        plot(repmat(x,2,1),meanY+([1;-1]*sem),'k')
+        if alignTC == 1
+            xlim([-180 180])
+            xticks([-180 -90 0 90 180])
+            xlabel('motion dir. relative to pref. (deg)')
+        else
+            plot(x_pref,y_pref,'r*')
+            xlim([0 360])
+            xticks([0 90 180 270])
+            xlabel('motion direction (deg)')
+        end
+        ylabel('firing rate (Hz)')
     end
     
     
     ttl = [dat.exptName{u} ' ' dat.area{u} ' ' dat.uInfo{u} ' ' num2str(dat.uID(u))];
     sgtitle(ttl)
-    figName = [dat.exptName{u} '_' dat.area{u} '_' dat.uInfo{u} '_' num2str(dat.uID(u)) '.fig'];
+    figName = [dat.exptName{u} '_' dat.area{u} '_' dat.uInfo{u} '_' num2str(dat.uID(u))];
     if svePlt == 1
         if ~isfolder(figFold)
             mkdir(figFold)
         end
-        saveas(gcf,fullfile(figFold,figName))
+        saveas(gcf,fullfile(figFold,figName),'fig')
+        saveas(gcf,fullfile(figFold,figName),'svg')
     end
 
     if plt == 0
