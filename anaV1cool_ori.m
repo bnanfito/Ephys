@@ -176,12 +176,12 @@ area = 'PSS';
 % projTbl.nGU = nGoodUnits;
 
 % load('Y:\Brandon\data\dataSets\cooling\V1cool_MU_ori\V1cool_MU_ori_projectTbl.mat')
-load(['/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/cooling/V1cool_MU_ori/V1cool_SU_ori_projectTbl.mat'])
+load(['/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/cooling/V1cool_MU_ori/V1cool_' anaMode '_ori_projectTbl.mat'])
 
 
 coolIdx = projTbl.duringMFlag==1 & strcmp(projTbl.manipDescr,'Cooling') & ...
           strcmp(projTbl.manipDetail,'V1');
-datTbl = [];
+datTbl = []; %project table without repeated experiments in the same penetration
 for a = 1:length(animals)
     aniIdx = strcmp(projTbl.experimentId,animals{a});
 
@@ -234,7 +234,7 @@ for a = 1:length(animals)
 end
 
 %Organize sumStats from datTbl by age as defined by var 'ageGroups'
-ageGroups = {[28 29],[30 33],[34 37],[38 45],[46 200]};
+ageGroups = {[28 33],[34 45],[46 200]};
 for ag = 1:length(ageGroups)
     agIdx = datTbl.age>=ageGroups{ag}(1) & datTbl.age<=ageGroups{ag}(2);
 
