@@ -2,26 +2,33 @@
 
 function [projectTbl,stats,data] = anaTrain(proj)
 
-    anaMode = 'SU';
+    anaMode = 'MU';
+%% load porject table
+
+%     projectTbl=getProjectFiles(proj,1,'age','recSite','priorMFlag','priorDescr','duringMFlag','manipDescr','manipDetail');
 
 %     dataFold = '/Volumes/Lab drive/Brandon/data/dataSets/training/';
-    dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/training';
-    load(fullfile(dataFold,proj,anaMode,[proj '_' anaMode 'dataSet.mat']),'projectTbl')
+%     dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/training';
+    dataFold = '/Volumes/NielsenHome2/Brandon/data/dataSets/training';
+    load(fullfile(dataFold,proj,[proj '_projectTbl.mat']),'projectTbl')
 
-%     dataFold = 'Y:\Brandon\data';
-    dataFold = '/Volumes/NielsenHome2/Brandon/data';
-%     projectTbl=getProjectFiles(proj,1,'age','recSite','priorMFlag','priorDescr','duringMFlag','manipDescr','manipDetail');
-    for e = 1:height(projectTbl)
-        animal = projectTbl.experimentId{e};
-        unit = projectTbl.unitNr{e};
-        expt = projectTbl.experimentNr{e};
-        probe = projectTbl.probeId(e);
-        exptName = projectTbl.fileBase{e};
-        exptDir = fullfile(dataFold,'Ephys',animal,exptName);
-        disp(['generating sumStats for ' exptName])
-        [sumStats{e,1}] = anaOri(animal,unit,expt,probe,anaMode,dataFold,0,0);
-    end
-    projectTbl.sumStats = sumStats;
+%% Generate SumStats
+
+% %     dataFold = 'Y:\Brandon\data';
+%     dataFold = '/Volumes/NielsenHome2/Brandon/data';
+%     for e = 1:height(projectTbl)
+%         animal = projectTbl.experimentId{e};
+%         unit = projectTbl.unitNr{e};
+%         expt = projectTbl.experimentNr{e};
+%         probe = projectTbl.probeId(e);
+%         exptName = projectTbl.fileBase{e};
+%         exptDir = fullfile(dataFold,'Ephys',animal,exptName);
+%         disp(['generating sumStats for ' exptName])
+%         [sumStats{e,1}] = anaOri(animal,unit,expt,probe,anaMode,dataFold,0,0);
+%     end
+%     projectTbl.sumStats = sumStats;
+
+%% Organize Data
     
     v1bf = vertcat(projectTbl.sumStats{projectTbl.priorMFlag == 0 & strcmp(projectTbl.recSite,'V1')});
     v1af = vertcat(projectTbl.sumStats{projectTbl.priorMFlag == 1 & strcmp(projectTbl.recSite,'V1')});
@@ -31,7 +38,7 @@ function [projectTbl,stats,data] = anaTrain(proj)
     
     animals = unique(projectTbl.experimentId);
     aniMarks = {'o','+','*','x','square','diamond','^','v','<','>'};
-    metrics = {'rPref','dsi','ldr','osi','lor'};
+    metrics = {'rPref','dsi','ldr'};
 
     %% plot
     

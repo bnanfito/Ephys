@@ -4,7 +4,7 @@
 clear all
 close all
 
-anaMode = 'MU';
+anaMode = 'SU';
 trainProj = 'Train_V1Cool';
 % dataFold = 'F:\Brandon\data';
 dataFold = '/Volumes/NielsenHome2/Brandon/data';
@@ -12,54 +12,39 @@ dsFold = fullfile(dataFold,'dataSets','training',trainProj,anaMode);
 load(fullfile(dsFold,[trainProj '_' anaMode 'dataSet.mat']))
 
 
-tbl = data.pssaf;
+tbl = data.v1af;
+tbl = tbl(tbl.goodUnit,:);
+nU = height(tbl);
 
-u = 10;
+expts = unique(tbl.exptName);
+for e = 1:length(expts)
+    eIdx = find(strcmp(tbl.exptName,expts{e}));
+    eIdxStart(e) = eIdx(1);
+    eIdxEnd(e) = eIdx(end);
+end
 
-R = tbl.response{u};
+[~,sortIdx] = sort(tbl.oriPref);
+% tbl = tbl(sortIdx,:);
+
+R = cat(3,tbl.response{:});
+nReps = size(R,1);
+nConds = size(R,2);
+Rt = reshape(R,nReps*nConds,nU);
+Rt(Rt<0) = 0;
+Rtnorm = Rt./max(Rt);
+
 figure;
-plot(mean(R))
-nRep = size(R,1);
-nCnd = size(R,2);
 
-for cnd = 1:nCnd
-for rep = 1:nRep
+subplot(2,2,1)
+imagesc(Rt)
+xticks(eIdxEnd)
 
-    trainIdx = (1:nRep)~=rep;
-    obsR = R(rep,cnd);
+subplot(2,2,2)
+imagesc(Rtnorm)
+xticks(eIdxEnd)
 
-    trainR = R(trainIdx,:);
-    meanTrainR = mean(trainR,'omitnan');
-    sdTrainR = std(trainR,'omitnan');
-
-    Pr = normpdf(obsR,mean(trainR(:),'omitnan'),std(trainR(:),'omitnan'));
-    Ps = 1/nCnd;
-    rPlt = -10:0.1:20;
-    g = normpdf(repmat(rPlt',1,nCnd),meanTrainR,sdTrainR);
-    [x,y] = meshgrid(rPlt,1:size(g,2));
-    if cnd == 1
-        figure;
-%         plot3(x',y',g)
-        imagesc(g)
-    end
-    Pr_s = normpdf(repmat(obsR,1,nCnd),meanTrainR,sdTrainR);
-    Ps_r = (Pr_s*Ps)/Pr;
-
-    pkIdx = Ps_r == max(Ps_r);
-    if sum(pkIdx)>1
-        convP = conv(Ps_r,ones(1,3)/3,'same');
-        pkIdx = convP == max(convP);
-        if sum(pkIdx)>1
-            pks = find(pkIdx);
-            pkIdx(pks(randi(2,1))) = false;
-        end
-    end
-    guess(rep,cnd) = find(pkIdx);
-
-
-end
-end
-
+subplot(2,2,3)
+imagesc(Rtnorm(:,sortIdx))
 
 
 
