@@ -30,10 +30,10 @@ for e = 1:height(projectTbl)
 
 
 
-%     disp(['generating sumStats for ' exptName])
-%     [sumStats{e,1}] = anaOri(animal,unit,expt,probe,anaMode,dataFold,0,0);
+    disp(['generating sumStats for ' exptName])
+    [sumStats{e,1}] = anaOri(animal,unit,expt,probe,anaMode,dataFold,0,0);
 end
-% projectTbl.sumStats = sumStats;
+projectTbl.sumStats = sumStats;
 
 
 
