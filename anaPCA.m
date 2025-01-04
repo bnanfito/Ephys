@@ -3,7 +3,7 @@
 
 function [x,y,rCent,tCent,score,D,Dshift,distF,distNull] = anaPCA(sumStats,plt)
 
-tAve = 1;
+tAve = 0;
 fullDim = 1;
 
 % animal = 'febn2';
@@ -27,18 +27,24 @@ sumStats = sumStats(oriPrefIdx,:);
 
 nU = height(sumStats);
 for u = 1:nU
-%     noise(:,:,u) = sumStats.response{u}-mean(sumStats.response{u},'omitnan');
-    R(:,:,u) = sumStats.response{u}(1:5,:);
-    rTmp = sumStats.response{u}; rTmp(rTmp<0) = 0;
-    rMean(:,u) = mean(rTmp,'omitnan');
+    C = sumStats.condition{u}(strcmp(sumStats.paramKey{1},'ori'),:);
+    if length(C)==12
+        rTrial(:,:,u) = sumStats.response{u}(1:5,:);
+    else
+        cInt = 0:30:330;
+        rTmp = sumStats.response{u}(1:5,:);
+        rInt = interp1([C C(1)+360],[rTmp rTmp(:,1)]',cInt);
+        rTrial(:,:,u) = rInt';
+        C = cInt;
+    end
+    rTrial(rTrial<0)=0;
+    rMean(:,u) = mean(rTrial(:,:,u),'omitnan');
 end
-% R = cat(3,sumStats.response{:});
-R(R<0)=0;
-nReps = size(R,1);
-nConds = size(R,2);
-rTrial = reshape(R,nReps*nConds,nU);
+
+nReps = size(rTrial,1);
+nConds = size(rTrial,2);
+rTrial = reshape(rTrial,nReps*nConds,nU);
 % rMean = squeeze(mean(R,1,'omitnan'));
-C = sumStats.condition{1}(strcmp(sumStats.paramKey{1},'ori'),:);
 c = repmat(C,nReps,1);c = c(:)';
 
 if tAve == 1
