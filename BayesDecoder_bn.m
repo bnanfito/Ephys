@@ -6,13 +6,26 @@ close all
 
 anaMode = 'SU';
 trainProj = 'Train_V1Cool';
+area = 'PSS';
+trainC = 'af';
 % dataFold = 'F:\Brandon\data';
 dataFold = '/Volumes/NielsenHome2/Brandon/data';
 dsFold = fullfile(dataFold,'dataSets','training',trainProj,anaMode);
 load(fullfile(dsFold,[trainProj '_' anaMode 'dataSet.mat']))
 
-
-tbl = data.v1af;
+if strcmp(area,'V1')
+    if strcmp(trainC,'bf')
+        tbl = data.v1bf;
+    elseif strcmp(trainC,'af')
+        tbl = data.v1af;
+    end
+elseif strcmp(area,'PSS')
+    if strcmp(trainC,'bf')
+        tbl = data.pssbf;
+    elseif strcmp(trainC,'af')
+        tbl = data.pssaf;
+    end
+end
 tbl = tbl(tbl.goodUnit,:);
 nU = height(tbl);
 
@@ -38,16 +51,26 @@ figure;
 subplot(2,2,1)
 imagesc(Rt)
 xticks(eIdxEnd)
+title('Response Matrix')
+xlabel('unit')
+ylabel('trial')
 
 subplot(2,2,2)
 imagesc(Rtnorm)
 xticks(eIdxEnd)
+title('norm. Response Matrix')
+xlabel('unit')
+ylabel('trial')
 
 subplot(2,2,3)
 imagesc(Rtnorm(:,sortIdx))
+title('norm. Response Matrix')
+xlabel('unit (sort by oriPref)')
+ylabel('trial')
 
-
-
+sgtitle([trainProj ' ' anaMode ' ' area ' ' trainC])
+figName = [trainProj '_RM_' anaMode '_' area '_' trainC];
+saveas(gcf,fullfile(dsFold,figName),'fig')
 
 
 

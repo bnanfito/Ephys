@@ -9,9 +9,9 @@ dat = dat(dat.goodUnit,:);
 nU = height(dat);
 if plt == 1
     if nU>50
-    uInd = 1:floor(nU/50):nU;
+        uInd = randi(nU,1,50);
     else
-    uInd = 1:nU;
+        uInd = 1:nU;
     end
 else
     uInd = 1:nU;
@@ -124,7 +124,7 @@ for u = uInd
             mkdir(figFold)
         end
         saveas(gcf,fullfile(figFold,figName),'fig')
-        saveas(gcf,fullfile(figFold,figName),'svg')
+%         saveas(gcf,fullfile(figFold,figName),'svg')
     end
 
     if plt == 0

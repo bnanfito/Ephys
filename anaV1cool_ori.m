@@ -147,7 +147,7 @@
 clear
 close all
 
-anaMode = 'MU';
+anaMode = 'SU';
 proj = ['V1cool_MU_ori'];
 area = 'PSS';
 % dataFold = fullfile('Y:\Brandon\data');
@@ -266,7 +266,7 @@ sz1 = 5;
 sz2 = 20;
 lw = 1;
 
-metric = {'ldr','rPref','rNull'};
+metric = {'ldr','rPref','latency'};
 for m = 1:length(metric)
 
     subplot(2,2,m+1);hold on
@@ -291,6 +291,8 @@ for m = 1:length(metric)
                     Y = dat.rPref;
                 elseif strcmp(metric{m},'rNull')
                     Y = dat.rNull;
+                elseif strcmp(metric{m},'latency')
+                    Y = dat.latency;
                 end
                 y = mean(Y,'omitnan');
                 n = length(Y);
@@ -314,6 +316,8 @@ for m = 1:length(metric)
         ylabel('response to pref. (Hz)')
     elseif strcmp(metric{m},'rNull')
         ylabel('response to null (Hz)')
+    elseif strcmp(metric{m},'latency')
+        ylabel('latency')
     end
     xlabel('age')
     ax{m} = gca;
@@ -330,7 +334,7 @@ sgtitle([proj ' ' area ' ' anaMode ' ind. animal means'])
 figure;
 nAG = length(ageGroups);
 for a = 1:nAG
-    sumStats = cntrlAgeDat{a};
+    sumStats = coolAgeDat{a};
     if isempty(sumStats)
         continue
     end
