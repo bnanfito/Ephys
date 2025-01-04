@@ -7,7 +7,7 @@ dataFold = '/Volumes/Lab drive/Brandon/data/dataSets/DSdev';
 % dataFold = 'Y:\Brandon\data\dataSets\DSdev';
 load(fullfile(dataFold,"DSdev_projectTbl.mat"))
 
-area = 'PSS';
+area = 'V1';
 ageGroups = {[0 33],[34 39],[40 300]};
 nAG = length(ageGroups);
 for ag = 1:nAG

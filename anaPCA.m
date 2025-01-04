@@ -3,7 +3,7 @@
 
 function [x,y,rCent,tCent,score,D,Dshift,distF,distNull] = anaPCA(sumStats,plt)
 
-tAve = 0;
+tAve = 1;
 fullDim = 1;
 
 % animal = 'febn2';

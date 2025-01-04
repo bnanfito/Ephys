@@ -6,12 +6,12 @@ close all
 proj = 'DSdev';
 dataFold = '/Volumes/Lab drive/Brandon/data';
 
-load(fullfile(dataFold,'dataSets',proj,'rMean_AG.mat'))
+load(fullfile(dataFold,'dataSets',proj,'rMean_AG_pss.mat'))
 rMean = r;
 cMean = c;
 clear r c
 
-load(fullfile(dataFold,'dataSets',proj,'rTrial_AG.mat'))
+load(fullfile(dataFold,'dataSets',proj,'rTrial_AG_pss.mat'))
 rTrial = r;
 cTrial = c;
 clear r c
@@ -20,12 +20,12 @@ nAG = length(rMean);
 nTrials = length(cTrial);
 nConds = length(cMean);
 nReps = nTrials/nConds;
-for ag = 2
+for ag = 1:nAG
 
     r = rTrial{ag};
     f = rMean{ag};
 
-    for fold = 1:5
+    for fold = 1:nReps
 
         testIdx = zeros(1,nTrials); testIdx(fold:nReps:nTrials) = 1; testIdx = testIdx == 1;
         trainIdx = ~testIdx;
@@ -48,12 +48,16 @@ for ag = 2
 
                 dis(i) = sum((r_cur-f_cur).^2);
             end
-            guess(t) = cMean(dis==min(dis));
+            guess(fold,t) = cMean(dis==min(dis));
         end
-        correct = guess == c_test;
-        acc(fold) = sum(correct)/length(correct);
+        correct = guess(fold,:) == c_test;
+        acc(fold,ag) = sum(correct)/length(correct);
 
         clear f_train dis guess
     end
 
 end
+
+figure;hold on
+plot(1:nAG,acc,'k.')
+plot(1:nAG,mean(acc),'ro')
