@@ -2,7 +2,8 @@ clear all
 close all
 
 anaMode = 'SU';
-dataFold = '/Volumes/Lab drive/Brandon/data/dataSets/DSdev';
+% dataFold = '/Volumes/Lab drive/Brandon/data/dataSets/DSdev';
+dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/DSdev';
 % dataFold = 'F:\Brandon\data\dataSets\DSdev';
 % dataFold = 'Y:\Brandon\data\dataSets\DSdev';
 load(fullfile(dataFold,"DSdev_projectTbl.mat"))

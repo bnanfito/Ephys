@@ -23,7 +23,7 @@ fullDim = 1;
 
 sumStats = sumStats(sumStats.goodUnit,:);
 [~,oriPrefIdx] = sort(sumStats.oriPref);
-sumStats = sumStats(oriPrefIdx,:);
+sumStats = sumStats(oriPrefIdx,:); %sort units by their pref dir of motion
 
 nU = height(sumStats);
 for u = 1:nU
