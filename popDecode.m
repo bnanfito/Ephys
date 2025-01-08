@@ -5,14 +5,15 @@ clear all
 
 proj = 'DSdev';
 % dataFold = '/Volumes/Lab drive/Brandon/data';
-dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
+% dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
+dataFold = 'F:\Brandon\data';
 
-load(fullfile(dataFold,'dataSets',proj,'rMean_AG_v1.mat'))
+load(fullfile(dataFold,'dataSets',proj,'rMean_AG_pss.mat'))
 rMean = r;
 cMean = c;
 clear r c
 
-load(fullfile(dataFold,'dataSets',proj,'rTrial_AG_v1.mat'))
+load(fullfile(dataFold,'dataSets',proj,'rTrial_AG_pss.mat'))
 rTrial = r;
 cTrial = c;
 clear r c

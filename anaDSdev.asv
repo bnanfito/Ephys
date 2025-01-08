@@ -15,7 +15,7 @@ for e = 1:height(projectTbl)
     probe = projectTbl.probeId(e);
     exptName = projectTbl.fileBase{e};
     
-    % make directories if necessary
+    
     aniDir = fullfile(dataFold,'Ephys',animal);
     if ~isfolder(aniDir)
         mkdir(aniDir)
@@ -26,7 +26,6 @@ for e = 1:height(projectTbl)
     end
     cd(exptDir)
 
-    % copy files if necessary
     spkSortFile = [exptName '_p' num2str(probe) '_spkSort.mat'];
     trialInfoFile = [exptName '_trialInfo.mat'];
     idFile = [exptName '_id.mat'];
@@ -45,11 +44,12 @@ for e = 1:height(projectTbl)
         [status(e,4),msg{e,4}] = copyfile(fullfile(zPath,'analyzer',animal,analyzerFile));
     end
 
-    % generate summary statistics
+    
+
+
     disp(['generating sumStats for ' exptName])
     [sumStats{e,1}] = anaOri(animal,unit,expt,probe,anaMode,dataFold,0,0);
     sumStats{e,1} = sumStats{e,1}(sumStats{e,1}.goodUnit,:);
-    
 end
 projectTbl.sumStats = sumStats;
 
