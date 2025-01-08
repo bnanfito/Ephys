@@ -81,6 +81,70 @@ end
 
 
 
+
+
+
+
+
+
+
+
+% figure;hold on
+% for ag = 1:nAG
+% 
+%     r = rTrial{ag};
+%     c = cTrial;
+% %scramble trials
+% scrmbl = randperm(nTrials);
+% [~,unscrmbl] = sort(scrmbl);
+% r = r(scrmbl,:);
+% c = c(scrmbl);
+%     subplot(2,nAG,ag)
+%     imagesc(r(unscrmbl,:))
+% 
+%     for fold = 1:nTrials
+%         testIdx = 1:nTrials == fold;
+%         trainIdx = ~testIdx;
+% 
+%         r_test = r(testIdx,:);
+%         c_test = c(testIdx);
+%         r_train = r(trainIdx,:);
+%         c_train = c(trainIdx);
+%         for i = 1:nConds
+%             f_train{fold,ag}(i,:) = mean(r_train(c_train==cMean(i),:),'omitnan');
+%         end
+% 
+%         for i = 1:nConds
+%             f_cur = f_train{fold,ag}(i,:);
+% 
+%             dis{ag}(fold,i) = sum((r_test-f_cur).^2);
+%         end
+%         truth{ag}(fold) = c_test;
+%         guess{ag}(fold) = cMean(dis{ag}(fold,:)==min(dis{ag}(fold,:)));
+%         correct{ag}(fold) = guess{ag}(fold) == truth{ag}(fold);
+%     end
+% 
+%     acc(ag) = sum(correct{ag})/length(correct{ag});
+%     subplot(2,nAG,ag+nAG)
+%     imagesc(dis{ag}(unscrmbl,:))
+%     axis tight
+%     title(['age group ' num2str(ag) ': ' num2str(sum(correct{ag})) '/' num2str(length(correct{ag})) ' (' num2str(acc(ag)) '%)'])
+% 
+% end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 % figure; hold on
 % for ag = 1:nAG
 % 
