@@ -1,42 +1,31 @@
 %popDecode
 
-clear all
-% close all
+function [dis] = popDecode(sumStats)
 
-proj = 'DSdev';
-% dataFold = '/Volumes/Lab drive/Brandon/data';
-% dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
-dataFold = 'F:\Brandon\data';
-
-load(fullfile(dataFold,'dataSets',proj,'rMean_AG_pss.mat'))
-rMean = r;
-cMean = c;
-clear r c
-
-load(fullfile(dataFold,'dataSets',proj,'rTrial_AG_pss.mat'))
-rTrial = r;
-cTrial = c;
-clear r c
-
-nAG = length(rMean);
-nTrials = length(cTrial);
-nConds = length(cMean);
+[C,c,~,rTrial,~,~,score,coeff,D,Dshift,distF,distNull] = anaPCA(sumStats,0,0,1);
+nTrials = size(rTrial,1);
+nConds = length(C);
 nReps = nTrials/nConds;
+
+cMean = C;
+cTrial = c;
+rTrial = rTrial./max(rTrial);
+
+
 
 
 
 figure;hold on
-for ag = 1:nAG
 
-    r = rTrial{ag};
+    r = score(:,[1:2]);
     c = cTrial;
 %scramble trials
 scrmbl = randperm(nTrials);
 [~,unscrmbl] = sort(scrmbl);
 r = r(scrmbl,:);
 c = c(scrmbl);
-    subplot(2,nAG,ag)
-    imagesc(r(unscrmbl,:))
+%     subplot(2,1,1)
+%     imagesc(r(unscrmbl,:))
 
     for fold = 1:nTrials
         testIdx = 1:nTrials == fold;
@@ -47,30 +36,33 @@ c = c(scrmbl);
         r_train = r(trainIdx,:);
         c_train = c(trainIdx);
         for i = 1:nConds
-            f_train{fold,ag}(i,:) = mean(r_train(c_train==cMean(i),:),'omitnan');
+            f_train{fold}(i,:) = mean(r_train(c_train==cMean(i),:),'omitnan');
         end
 
         for i = 1:nConds
-            f_cur = f_train{fold,ag}(i,:);
+            f_cur = f_train{fold}(i,:);
 
-            dis{ag}(fold,i) = sum((r_test-f_cur).^2);
+            dis(fold,i) = sum((r_test-f_cur).^2);
         end
-        truth{ag}(fold) = c_test;
-        guess{ag}(fold) = cMean(dis{ag}(fold,:)==min(dis{ag}(fold,:)));
-        correct{ag}(fold) = guess{ag}(fold) == truth{ag}(fold);
+        truth(fold) = c_test;
+        guess(fold) = cMean(dis(fold,:)==min(dis(fold,:)));
+        correct(fold) = guess(fold) == truth(fold);
     end
+    dis = dis(unscrmbl,:);
 
-    acc(ag) = sum(correct{ag})/length(correct{ag});
-    subplot(2,nAG,ag+nAG)
-    imagesc(dis{ag}(unscrmbl,:))
+    acc = sum(correct)/length(correct);
+%     subplot(2,1,2)
+    imagesc(dis')
+    colorbar
     axis tight
-    title(['age group ' num2str(ag) ': ' num2str(sum(correct{ag})) '/' num2str(length(correct{ag})) ' (' num2str(acc(ag)) '%)'])
+    title([num2str(sum(correct)) '/' num2str(length(correct)) ' correct (' num2str(acc*100) '%)'])
+    xticks(3:5:size(dis,1)); xticklabels(num2str(cMean'))
+    yticks(1:size(dis,2));yticklabels(num2str(cMean'))
+
+
+
 
 end
-
-
-
-
 
 
 

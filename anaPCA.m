@@ -1,10 +1,10 @@
 % close all
 % clear
 
-function [x,y,rCent,tCent,score,D,Dshift,distF,distNull] = anaPCA(sumStats,plt)
+function [C,c,rMean,rTrial,rCent,tCent,score,coeff,D,Dshift,distF,distNull] = anaPCA(sumStats,plt,tAve,fullDim)
 
-tAve = 1;
-fullDim = 1;
+% tAve = 1;
+% fullDim = 1;
 
 % animal = 'febn2';
 % unit = '000';
@@ -116,7 +116,7 @@ for nr = 1:nNullRep
     if fullDim == 1
         Dnull(:,:,nr) = dist(shuff');
     else
-        Dnull(:,:,nr) = dist(scoreShuff(:,1:3)');
+        Dnull(:,:,nr) = dist(scoreShuff(:,1:2)');
     end
     for i = 1:size(Dnull,1)
         shift = size(Dnull,1)-(i-1);
@@ -135,9 +135,9 @@ distF_z = (distF-mean(distNull,'omitnan'))./std(distNull,'omitnan');
 
 if plt == 1
 
-figure('Position',[0 0 1000 1500]);
+% figure('Position',[0 0 1000 1500]);
 
-subplot(4,2,1);hold on;
+figure;hold on;
 imagesc(x);
 axis tight
 if tAve == 1
@@ -151,15 +151,15 @@ colorbar
 xlabel('unit')
 ylabel('direction of motion')
 
-subplot(4,2,8);hold on;
-plot(tCent,rCent) 
-plot(tCent,mean(rCent,2,'omitnan'),'k','LineWidth',2)
-plot(repmat(tCent,2,1),mean(rCent,2,'omitnan')'+([1;-1].*(std(rCent,[],2,'omitnan')/sqrt(size(rCent,2)))'),'k','LineWidth',2)
-xlabel('deg. relative to preferred')
-ylabel('mean (+/-sem) normalized response')
+% subplot(4,2,8);hold on;
+% plot(tCent,rCent) 
+% plot(tCent,mean(rCent,2,'omitnan'),'k','LineWidth',2)
+% plot(repmat(tCent,2,1),mean(rCent,2,'omitnan')'+([1;-1].*(std(rCent,[],2,'omitnan')/sqrt(size(rCent,2)))'),'k','LineWidth',2)
+% xlabel('deg. relative to preferred')
+% ylabel('mean (+/-sem) normalized response')
 
 
-subplot(4,2,3);hold on;
+figure;hold on;
 imagesc(D);
 axis tight
 yticks(1:length(y))
@@ -169,47 +169,47 @@ xticklabels(num2str(y'))
 colorbar
 xBox = [0 1 1 0]; xOrthOff = [(0.5:11.5) (0.5:3.5)]; xBox = repmat(xBox',1,length(xOrthOff))+xOrthOff;
 yBox = [0 0 1 1]; yOrthOff = [(4.5:15.5) (12.5:15.5)]; yBox = repmat(yBox',1,length(yOrthOff))+yOrthOff;
-patch(yBox,xBox,'r','FaceColor','none','EdgeColor','r','LineWidth',2)
+% patch(yBox,xBox,'r','FaceColor','none','EdgeColor','r','LineWidth',2)
 xlabel('direction of motion')
 ylabel('direction of motion')
 title('RDM')
 
 
-subplot(4,2,2);hold on;
+figure;hold on;
 % for i = 1:np
 % clr = clrs(i,:);
 % pt(i) = plot3(scoreShuff(i,1),scoreShuff(i,2),scoreShuff(i,3),'o','Color',clr,'MarkerSize',10,'LineWidth',1.5);
 % end
 if tAve == 1
-    plot3([scoreShuff(:,1);scoreShuff(1,1)],[scoreShuff(:,2);scoreShuff(1,2)],[scoreShuff(:,3);scoreShuff(1,3)],'--','Color',[0.8 0.8 0.8])
+    plot([scoreShuff(:,1);scoreShuff(1,1)],[scoreShuff(:,2);scoreShuff(1,2)],'--','Color',[0.8 0.8 0.8])
 end
 for i = 1:np
 clr = clrs(i,:);
-pt(i) = plot3(score(i,1),score(i,2),score(i,3),'.','Color',clr,'MarkerSize',20);
+pt(i) = plot(score(i,1),score(i,2),'.','Color',clr,'MarkerSize',20);
 end
 if tAve == 1
-    plot3([score(:,1);score(1,1)],[score(:,2);score(1,2)],[score(:,3);score(1,3)],'k--','LineWidth',2)
+    plot([score(:,1);score(1,1)],[score(:,2);score(1,2)],'k--','LineWidth',2)
     legend(pt,num2str(y'))
 end
 xlabel('PC1');ylabel('PC2');zlabel('PC3')
 
-subplot(4,2,4);hold on
-stem(explained)
-xlabel('PC')
-ylabel('explained variance')
-% ylim([0 100])
+% subplot(4,2,4);hold on
+% stem(explained)
+% xlabel('PC')
+% ylabel('explained variance')
+% % ylim([0 100])
+% 
+% subplot(4,2,6)
+% if tAve == 1
+%     plot(y,score(:,1:4),'LineWidth',2)
+% else
+%     plot(y,score(:,1:4),'o')
+% end
+% % polarplot(deg2rad(C),score(:,1:4),'LineWidth',2)
+% % rlim([-1.5 1.5])
+% legend({'PC1','PC2','PC3','PC4'})
 
-subplot(4,2,6)
-if tAve == 1
-    plot(y,score(:,1:4),'LineWidth',2)
-else
-    plot(y,score(:,1:4),'o')
-end
-% polarplot(deg2rad(C),score(:,1:4),'LineWidth',2)
-% rlim([-1.5 1.5])
-legend({'PC1','PC2','PC3','PC4'})
-
-subplot(4,2,7);hold on
+figure;hold on
 angDisp = y(y<=180);
 % plot(angDisp,distF_z,'k-o','LineWidth',2)
 plot(angDisp,distF,'k-o','LineWidth',2)
@@ -255,31 +255,31 @@ xticks([0 90 180])
 xticklabels({'0','90','180'})
 xlabel('angular disparity (+/- deg)')
 
-subplot(4,2,5)
-% imagesc(mean(Dnull,3,'omitnan'))
-imagesc(Dnull(:,:,end))
-axis tight
-yticks(1:length(y))
-yticklabels(num2str(y'))
-xticks(1:length(y))
-xticklabels(num2str(y'))
-colorbar
-xBox = [0 1 1 0]; xOrthOff = [(0.5:11.5) (0.5:3.5)]; xBox = repmat(xBox',1,length(xOrthOff))+xOrthOff;
-yBox = [0 0 1 1]; yOrthOff = [(4.5:15.5) (12.5:15.5)]; yBox = repmat(yBox',1,length(yOrthOff))+yOrthOff;
-patch(yBox,xBox,'r','FaceColor','none','EdgeColor','r','LineWidth',2)
-xlabel('direction of motion')
-ylabel('direction of motion')
-title('ex. shuffle RDM')
-
-% ttl = [animal ' ' unit ' ' expt ' ' area ' ' anaMode];
-% if fullDim == 1
-%     ttl = [ttl ' full dim.'];
-% else
-%     ttl = [ttl ' first 3 PC'];
-% end
-% sgtitle(ttl)
-% figName = [animal '_u' unit '_' expt '_' area '_' anaMode '_distance.fig'];
-% saveas(gcf,fullfile(dataFold,'Ephys',animal,[animal '_u' unit '_' expt],figName))
+% subplot(4,2,5)
+% % imagesc(mean(Dnull,3,'omitnan'))
+% imagesc(Dnull(:,:,end))
+% axis tight
+% yticks(1:length(y))
+% yticklabels(num2str(y'))
+% xticks(1:length(y))
+% xticklabels(num2str(y'))
+% colorbar
+% xBox = [0 1 1 0]; xOrthOff = [(0.5:11.5) (0.5:3.5)]; xBox = repmat(xBox',1,length(xOrthOff))+xOrthOff;
+% yBox = [0 0 1 1]; yOrthOff = [(4.5:15.5) (12.5:15.5)]; yBox = repmat(yBox',1,length(yOrthOff))+yOrthOff;
+% patch(yBox,xBox,'r','FaceColor','none','EdgeColor','r','LineWidth',2)
+% xlabel('direction of motion')
+% ylabel('direction of motion')
+% title('ex. shuffle RDM')
+% 
+% % ttl = [animal ' ' unit ' ' expt ' ' area ' ' anaMode];
+% % if fullDim == 1
+% %     ttl = [ttl ' full dim.'];
+% % else
+% %     ttl = [ttl ' first 3 PC'];
+% % end
+% % sgtitle(ttl)
+% % figName = [animal '_u' unit '_' expt '_' area '_' anaMode '_distance.fig'];
+% % saveas(gcf,fullfile(dataFold,'Ephys',animal,[animal '_u' unit '_' expt],figName))
 
 end
 

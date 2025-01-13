@@ -151,33 +151,33 @@ anaMode = 'SU';
 proj = ['V1cool_MU_ori'];
 area = 'PSS';
 
-dataFold = fullfile('Y:\Brandon\data');
-projTbl = getProjectFiles(proj,1,'age','recSite','penNr','priorMFlag','priorDescr',...
-                                       'duringMFlag','manipDescr','manipDetail',...
-                                       'looperNameCond1','looperNameCond2',...
-                                       'looperNameCond3','looperNameCond4',...
-                                       'looperNameCond5');
-projTbl = projTbl(strcmp(projTbl.recSite,area),:);
-animals = unique(projTbl.experimentId);
-for a = 1:length(animals)
-    aniIdx = strcmp(projTbl.experimentId,animals{a});
-    ages(a) = unique(projTbl.age(aniIdx));
-end
-for e = 1:height(projTbl)
-    animal = projTbl.experimentId{e};
-    unit = projTbl.unitNr{e};
-    expt = projTbl.experimentNr{e};
-    probe = projTbl.probeId(e);
-    exptName = projTbl.fileBase{e};
-    disp(['generating sumStats for ' exptName])
-    [sumStats{e,1}] = anaOri(animal,unit,expt,probe,anaMode,dataFold,0,0);
-    nGoodUnits(e,1) = sum(sumStats{e}.goodUnit);
-end
-projTbl.sumStats = sumStats;
-projTbl.nGU = nGoodUnits;
+% dataFold = fullfile('Y:\Brandon\data');
+% projTbl = getProjectFiles(proj,1,'age','recSite','penNr','priorMFlag','priorDescr',...
+%                                        'duringMFlag','manipDescr','manipDetail',...
+%                                        'looperNameCond1','looperNameCond2',...
+%                                        'looperNameCond3','looperNameCond4',...
+%                                        'looperNameCond5');
+% projTbl = projTbl(strcmp(projTbl.recSite,area),:);
+% animals = unique(projTbl.experimentId);
+% for a = 1:length(animals)
+%     aniIdx = strcmp(projTbl.experimentId,animals{a});
+%     ages(a) = unique(projTbl.age(aniIdx));
+% end
+% for e = 1:height(projTbl)
+%     animal = projTbl.experimentId{e};
+%     unit = projTbl.unitNr{e};
+%     expt = projTbl.experimentNr{e};
+%     probe = projTbl.probeId(e);
+%     exptName = projTbl.fileBase{e};
+%     disp(['generating sumStats for ' exptName])
+%     [sumStats{e,1}] = anaOri(animal,unit,expt,probe,anaMode,dataFold,0,0);
+%     nGoodUnits(e,1) = sum(sumStats{e}.goodUnit);
+% end
+% projTbl.sumStats = sumStats;
+% projTbl.nGU = nGoodUnits;
 
-% % load('Y:\Brandon\data\dataSets\cooling\V1cool_MU_ori\V1cool_MU_ori_projectTbl.mat')
-% load(['/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/cooling/V1cool_MU_ori/V1cool_' anaMode '_ori_projectTbl.mat'])
+% load('Y:\Brandon\data\dataSets\cooling\V1cool_MU_ori\V1cool_MU_ori_projectTbl.mat')
+load(['/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/cooling/V1cool_MU_ori/V1cool_' anaMode '_ori_projectTbl.mat'])
 
 
 coolIdx = projTbl.duringMFlag==1 & strcmp(projTbl.manipDescr,'Cooling') & ...
@@ -235,7 +235,7 @@ for a = 1:length(animals)
 end
 
 %Organize sumStats from datTbl by age as defined by var 'ageGroups'
-ageGroups = {[28 33],[34 45],[46 200]};
+ageGroups = {[29 32],[33 36],[37 52],[53 300]};
 for ag = 1:length(ageGroups)
     agIdx = datTbl.age>=ageGroups{ag}(1) & datTbl.age<=ageGroups{ag}(2);
 
@@ -335,7 +335,7 @@ sgtitle([proj ' ' area ' ' anaMode ' ind. animal means'])
 figure;
 nAG = length(ageGroups);
 for a = 1:nAG
-    sumStats = coolAgeDat{a};
+    sumStats = cntrlAgeDat{a};
     if isempty(sumStats)
         continue
     end
@@ -347,7 +347,8 @@ for a = 1:nAG
     nA(a) = length(animals_AG);
     nU(a) = height(sumStats);
 
-    [x,y,rCent,tCent,score,D,Dshift,distF,distNull] = anaPCA(sumStats,0);
+    [y,~,x,~,rCent,tCent,score,coeff,D,Dshift,distF,distNull] = anaPCA(sumStats,0,1,1); x = x./max(x);
+%     [x,y,rCent,tCent,score,D,Dshift,distF,distNull] = anaPCA(sumStats,0);
 %     ttl = ['P' num2str(ageGroup{ag}(1)) '-' num2str(ageGroup{ag}(2)) '; Na=' num2str(nA(ag)) '; Nu=' num2str(nU(ag))];
 %     sgtitle(ttl)
 
