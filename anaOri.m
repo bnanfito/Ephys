@@ -11,7 +11,7 @@ figDir = fullfile(dataFold,'Figures');
 
 exptName = [animal '_u' unit '_' expt];
 
-plr = 1;
+plr = 0;
 alignBit = 0;
 visTest = 'ranksum';
 alpha = 0.01;

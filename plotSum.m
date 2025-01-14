@@ -4,8 +4,7 @@ close all
 plr = 0;
 alignTC = 0;
 
-% dat = data.v1bf;
-dat = dat(dat.goodUnit,:);
+% dat = dat(dat.goodUnit,:);
 nU = height(dat);
 if plt == 1
     if nU>50

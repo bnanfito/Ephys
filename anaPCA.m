@@ -144,7 +144,7 @@ if tAve == 1
     yticks(1:size(x,1))
     yticklabels(num2str(y'))
 else
-    yticks(1:nReps:size(x,1))
+    yticks(3:nReps:size(x,1))
     yticklabels(num2str(y(1:nReps:size(x,1))'))
 end
 colorbar
