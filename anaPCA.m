@@ -71,7 +71,7 @@ if fullDim == 1
     D = dist(x');
     % D = squareform(pdist(x,'squaredeuclidean'));
 else
-    D = dist(score(:,1:3)');
+    D = dist(score(:,1:2)');
 end
 
 for u = 1:nU
