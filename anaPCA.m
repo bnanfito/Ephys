@@ -1,42 +1,28 @@
 % close all
 % clear
 
-function [C,c,rMean,rTrial,rCent,tCent,score,coeff,D,Dshift,distF,distNull] = anaPCA(sumStats,plt,tAve,fullDim)
+function [C,c,rMean,rTrial,rCent,tCent,score,coeff,D,Dshift,distF,distNull] = anaPCA(sumStats)
 
-% tAve = 1;
-% fullDim = 1;
+plt = 1;
+tAve = 0;
+fullDim = 1;
 
-% animal = 'febn2';
-% unit = '000';
-% expt = '002';
-% area = 'V1';
-% anaMode = 'SU';
-% % dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
-% % dataFold = '/Volumes/Lab drive/Brandon/data';
-% dataFold = '/Volumes/NielsenHome2/Brandon/data';
-% % dataFold = 'Y:\Brandon\data';
-% 
-% [sumStats] = anaOri(animal,unit,expt,area,anaMode,dataFold,0,0);
-
-% load('/Volumes/NielsenHome2/Brandon/data/dataSets/cooling/V1cool_MU_ori/V1cool_MU_ori_projectTbl.mat')
-% sumStats = vertcat(projTbl.sumStats{projTbl.age>=30 & projTbl.age<=32 & projTbl.duringMFlag == 0});
-
-sumStats = sumStats(sumStats.goodUnit,:);
+sumStats = sumStats(sumStats.goodUnit,:); %only take good units
 [~,oriPrefIdx] = sort(sumStats.oriPref);
 sumStats = sumStats(oriPrefIdx,:); %sort units by their pref dir of motion
 
 nU = height(sumStats);
 for u = 1:nU
     C = sumStats.condition{u}(strcmp(sumStats.paramKey{1},'ori'),:);
-    if length(C)==12
+%     if length(C)==12
         rTrial(:,:,u) = sumStats.response{u}(1:5,:);
-    else
-        cInt = 0:30:330;
-        rTmp = sumStats.response{u}(1:5,:);
-        rInt = interp1([C C(1)+360],[rTmp rTmp(:,1)]',cInt);
-        rTrial(:,:,u) = rInt';
-        C = cInt;
-    end
+%     else
+%         cInt = 0:30:330;
+%         rTmp = sumStats.response{u}(1:5,:);
+%         rInt = interp1([C C(1)+360],[rTmp rTmp(:,1)]',cInt);
+%         rTrial(:,:,u) = rInt';
+%         C = cInt;
+%     end
     rTrial(rTrial<0)=0;
     rMean(:,u) = mean(rTrial(:,:,u),'omitnan');
 end
@@ -151,12 +137,15 @@ colorbar
 xlabel('unit')
 ylabel('direction of motion')
 
+
+
 % subplot(4,2,8);hold on;
 % plot(tCent,rCent) 
 % plot(tCent,mean(rCent,2,'omitnan'),'k','LineWidth',2)
 % plot(repmat(tCent,2,1),mean(rCent,2,'omitnan')'+([1;-1].*(std(rCent,[],2,'omitnan')/sqrt(size(rCent,2)))'),'k','LineWidth',2)
 % xlabel('deg. relative to preferred')
 % ylabel('mean (+/-sem) normalized response')
+
 
 
 figure;hold on;
@@ -173,6 +162,7 @@ yBox = [0 0 1 1]; yOrthOff = [(4.5:15.5) (12.5:15.5)]; yBox = repmat(yBox',1,len
 xlabel('direction of motion')
 ylabel('direction of motion')
 title('RDM')
+
 
 
 figure;hold on;
@@ -193,6 +183,8 @@ if tAve == 1
 end
 xlabel('PC1');ylabel('PC2');zlabel('PC3')
 
+
+
 % subplot(4,2,4);hold on
 % stem(explained)
 % xlabel('PC')
@@ -208,6 +200,8 @@ xlabel('PC1');ylabel('PC2');zlabel('PC3')
 % % polarplot(deg2rad(C),score(:,1:4),'LineWidth',2)
 % % rlim([-1.5 1.5])
 % legend({'PC1','PC2','PC3','PC4'})
+
+
 
 figure;hold on
 angDisp = y(y<=180);
@@ -254,6 +248,8 @@ text(sigLoX,sigLoY-(sigLoY*0.1),'*')
 xticks([0 90 180])
 xticklabels({'0','90','180'})
 xlabel('angular disparity (+/- deg)')
+
+
 
 % subplot(4,2,5)
 % % imagesc(mean(Dnull,3,'omitnan'))

@@ -51,7 +51,6 @@ c = c(scrmbl);
     dis = dis(unscrmbl,:);
 
     acc = sum(correct)/length(correct);
-
     figure;hold on
     imagesc(dis')
     colorbar
@@ -59,6 +58,8 @@ c = c(scrmbl);
     title([num2str(sum(correct)) '/' num2str(length(correct)) ' correct (' num2str(acc*100) '%)'])
     xticks(3:5:size(dis,1)); xticklabels(num2str(cMean'))
     yticks(1:size(dis,2));yticklabels(num2str(cMean'))
+
+
 
 
 end
