@@ -31,6 +31,8 @@ for u = 1:height(sumStats)
         else
             cndInclude = ~blankBit;
         end
+    else
+        cndInclude = ~blankBit;
     end
 
     baseFR = sumStats(u,:).fr.base(:,cndInclude);    baseFR = baseFR(:); 
