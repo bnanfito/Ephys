@@ -1,10 +1,10 @@
 % clear all
 % close all
 
-function anaPCA2
+function [r,cid,tid,bid,binEdges,acc,dat] = anaPCA2(dat)
 
 
-bw = .1;
+bw = .25;
 tBase = 1;
 tStim = 2;
 binEdges = -tBase:bw:tStim;
@@ -16,10 +16,10 @@ nBins = length(binEdges)-1;
 % % dat = vertcat(projTbl.sumStats{61});
 % dat = vertcat(projTbl.sumStats{~coolIdx & ageIdx});
 
-load('DSdev_projectTbl.mat')
+load('DSdev_dataSet.mat')
 cntrlIdx = projectTbl.duringMFlag == 0 & projectTbl.priorMFlag == 0;
 ageIdx = projectTbl.age>=34 & projectTbl.age<=37;
-areaIdx = strcmp(projectTbl.recSite,'V1');
+areaIdx = strcmp(projectTbl.recSite,'PSS');
 dat = vertcat(projectTbl.sumStats{cntrlIdx & ageIdx & areaIdx});
 
 
@@ -61,21 +61,23 @@ for u = 1:nU
 
 end
 
-r = rBoxCar;
-% r = rHist;
-c = repmat(condID',nBins,1);
-t = repmat(trialID',nBins,1);
+% r = rBoxCar;
+r = rHist;
+cid = repmat(condID',nBins,1);
+tid = repmat(trialID',nBins,1);
+bid = repmat((1:nBins)',1,nTrials);
 
 R = reshape(r,nBins*nTrials,nU);
 R = R./max(R);
-C = reshape(c,nBins*nTrials,1);
-T = reshape(t,nBins*nTrials,1);
-trials = unique(T);
+Cid = reshape(cid,nBins*nTrials,1);
+Tid = reshape(tid,nBins*nTrials,1);
+Bid = reshape(bid,nBins*nTrials,1);
+trials = unique(Tid);
 [coeff,score,latent,tsquare,explained] = pca(R);
 
 for b = 1:size(r,1)
 
-    [acc(b),~] = popDecode(squeeze(r(b,:,:)),c(b,:));
+    [acc(b),~] = popDecode(squeeze(r(b,:,:)),cid(b,:));
 
 end
 
@@ -85,28 +87,44 @@ end
 
 figure;hold on
 histogram([spks{:}],binEdges)
+title('PSTH (all trials/units)')
+ylabel('spike count')
+xlabel('time (s) rel. to stim onset')
 
 figure;hold on
-conds = unique(C);
+pcInclude = [2 3 4];
+conds = unique(Cid);
 clrs = hsv(length(conds));
-% for cond = 1:length(conds)
-%     p(cond) = plot3(score(C==cond,4),score(C==cond,2),score(C==cond,3),'o','Color',clrs(cond,:),'MarkerSize',10);
-% end
+for cond = 1:length(conds)
+    p(cond) = plot3(score(Cid==cond,pcInclude(1)),score(Cid==cond,pcInclude(2)),score(Cid==cond,pcInclude(3)),'.','Color',clrs(cond,:),'MarkerSize',10);
+end
 for t = 1:length(trials)
-%     plot3(score(T==trials(t),4),score(T==trials(t),2),score(T==trials(t),3),'k--')
-    plot3(score(T==trials(t),4),score(T==trials(t),2),score(T==trials(t),3),'--','Color',clrs(unique(C(T==trials(t))),:),'LineWidth',1)
+%     plot3(score(Tid==trials(t),pcInclude(1)),score(Tid==trials(t),pcInclude(2)),score(Tid==trials(t),pcInclude(3)),'k--')
+    plot3(score(Tid==trials(t),pcInclude(1)),score(Tid==trials(t),pcInclude(2)),score(Tid==trials(t),pcInclude(3)),'--','Color',clrs(unique(Cid(Tid==trials(t))),:),'LineWidth',1)
 end
 legend(num2str(cndVal))
+xlabel(['PC' num2str(pcInclude(1))])
+ylabel(['PC' num2str(pcInclude(2))])
+zlabel(['PC' num2str(pcInclude(3))])
+
+figure;hold on
+stem(cumsum(explained))
+xlabel('PC')
+ylabel('cum.sum explained variance')
+ylim([0 100])
 
 figure;hold on
 imagesc(R)
 axis tight
-ylabel('trial')
+ylabel('trial/time bin')
 xlabel('unit')
 colorbar
 
 figure;hold on
 plot(acc)
+ylabel('accuracy')
+xlabel('time bin')
+title('decoder performance')
 
 
 

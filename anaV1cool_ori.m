@@ -147,7 +147,7 @@
 clear
 close all
 
-anaMode = 'SU';
+anaMode = 'MU';
 proj = ['V1cool_MU_ori'];
 area = 'PSS';
 
@@ -176,8 +176,8 @@ area = 'PSS';
 % projTbl.sumStats = sumStats;
 % projTbl.nGU = nGoodUnits;
 
-% load('Y:\Brandon\data\dataSets\cooling\V1cool_MU_ori\V1cool_MU_ori_projectTbl.mat')
-load(['/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/cooling/V1cool_MU_ori/V1cool_' anaMode '_ori_projectTbl.mat'])
+load(['Y:\Brandon\data\dataSets\cooling\' proj '\V1cool_' anaMode '_ori_projectTbl.mat'])
+% load(['/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/cooling/V1cool_MU_ori/V1cool_' anaMode '_ori_projectTbl.mat'])
 
 
 coolIdx = projTbl.duringMFlag==1 & strcmp(projTbl.manipDescr,'Cooling') & ...
@@ -235,7 +235,8 @@ for a = 1:length(animals)
 end
 
 %Organize sumStats from datTbl by age as defined by var 'ageGroups'
-ageGroups = {[29 32],[33 36],[37 52],[53 300]};
+% ageGroups = {[29 32],[33 36],[37 52],[53 300]};
+ageGroups = {[29 32],[33 37],[38 300]};
 for ag = 1:length(ageGroups)
     agIdx = datTbl.age>=ageGroups{ag}(1) & datTbl.age<=ageGroups{ag}(2);
 
@@ -267,6 +268,7 @@ sz1 = 5;
 sz2 = 20;
 lw = 1;
 
+rPref = nan(length(animals),2);
 metric = {'ldr','rPref','latency'};
 for m = 1:length(metric)
 
@@ -290,6 +292,7 @@ for m = 1:length(metric)
                     Y = dat.ldr;
                 elseif strcmp(metric{m},'rPref')
                     Y = dat.rPref;
+                    rPref(a,c) = mean(Y,'omitnan');
                 elseif strcmp(metric{m},'rNull')
                     Y = dat.rNull;
                 elseif strcmp(metric{m},'latency')
@@ -328,6 +331,9 @@ end
 linkaxes([ax1 ax{:}],'x')
 sgtitle([proj ' ' area ' ' anaMode ' ind. animal means'])
 
+SI = (rPref(:,2) - rPref(:,1)) ./ rPref(:,1);
+figure;plot(ages,SI,'o')
+
 
 
 %% Distance analysis
@@ -335,7 +341,8 @@ sgtitle([proj ' ' area ' ' anaMode ' ind. animal means'])
 figure;
 nAG = length(ageGroups);
 for a = 1:nAG
-    sumStats = cntrlAgeDat{a};
+
+    sumStats = coolAgeDat{a};
     if isempty(sumStats)
         continue
     end
@@ -343,11 +350,12 @@ for a = 1:nAG
     if isempty(sumStats)
         continue
     end
-    animals_AG = animals(ismember(ages,ageGroups{a}(1):ageGroups{a}(2)));
-    nA(a) = length(animals_AG);
+
+    names = vertcat(sumStats.exptName{:}); names = unique(names(:,1:5),'rows');
+    nA(a) = size(names,1);
     nU(a) = height(sumStats);
 
-    [y,~,x,~,rCent,tCent,score,coeff,D,Dshift,distF,distNull] = anaPCA(sumStats,0,1,1); x = x./max(x);
+    [y,~,x,~,rCent,tCent,score,coeff,D,Dshift,distF,distNull] = anaPCA(sumStats); x = x./max(x);
 %     [x,y,rCent,tCent,score,D,Dshift,distF,distNull] = anaPCA(sumStats,0);
 %     ttl = ['P' num2str(ageGroup{ag}(1)) '-' num2str(ageGroup{ag}(2)) '; Na=' num2str(nA(ag)) '; Nu=' num2str(nU(ag))];
 %     sgtitle(ttl)

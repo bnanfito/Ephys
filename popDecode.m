@@ -52,13 +52,16 @@ c = c(scrmbl);
 
     acc = sum(correct)/length(correct);
 
-    figure;hold on
-    imagesc(dis')
-    colorbar
-    axis tight
-    title([num2str(sum(correct)) '/' num2str(length(correct)) ' correct (' num2str(acc*100) '%)'])
-    xticks(3:5:size(dis,1)); xticklabels(num2str(cMean'))
-    yticks(1:size(dis,2));yticklabels(num2str(cMean'))
+%     figure;hold on
+%     imagesc(dis')
+%     cb = colorbar;
+%     cb.Label.String = 'distance to condition mean';
+%     axis tight
+%     title([num2str(sum(correct)) '/' num2str(length(correct)) ' correct (' num2str(acc*100) '%)'])
+%     xticks(3:5:size(dis,1)); xticklabels(num2str(cMean'))
+%     yticks(1:size(dis,2));yticklabels(num2str(cMean'))
+%     xlabel('trial condition')
+%     ylabel('condition')
 
 
 end

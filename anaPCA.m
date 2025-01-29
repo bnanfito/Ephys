@@ -3,8 +3,8 @@
 
 function [C,c,rMean,rTrial,rCent,tCent,score,coeff,D,Dshift,distF,distNull] = anaPCA(sumStats)
 
-plt = 1;
-tAve = 0;
+plt = 0;
+tAve = 1;
 fullDim = 1;
 
 sumStats = sumStats(sumStats.goodUnit,:); %only take good units
@@ -14,15 +14,15 @@ sumStats = sumStats(oriPrefIdx,:); %sort units by their pref dir of motion
 nU = height(sumStats);
 for u = 1:nU
     C = sumStats.condition{u}(strcmp(sumStats.paramKey{1},'ori'),:);
-%     if length(C)==12
+    if length(C)==12
         rTrial(:,:,u) = sumStats.response{u}(1:5,:);
-%     else
-%         cInt = 0:30:330;
-%         rTmp = sumStats.response{u}(1:5,:);
-%         rInt = interp1([C C(1)+360],[rTmp rTmp(:,1)]',cInt);
-%         rTrial(:,:,u) = rInt';
-%         C = cInt;
-%     end
+    else
+        cInt = 0:30:330;
+        rTmp = sumStats.response{u}(1:5,:);
+        rInt = interp1([C C(1)+360],[rTmp rTmp(:,1)]',cInt);
+        rTrial(:,:,u) = rInt';
+        C = cInt;
+    end
     rTrial(rTrial<0)=0;
     rMean(:,u) = mean(rTrial(:,:,u),'omitnan');
 end
@@ -185,12 +185,12 @@ xlabel('PC1');ylabel('PC2');zlabel('PC3')
 
 
 
-% subplot(4,2,4);hold on
-% stem(explained)
-% xlabel('PC')
-% ylabel('explained variance')
-% % ylim([0 100])
-% 
+figure;hold on
+stem(cumsum(explained))
+xlabel('PC')
+ylabel('cum.sum explained variance')
+ylim([0 100])
+
 % subplot(4,2,6)
 % if tAve == 1
 %     plot(y,score(:,1:4),'LineWidth',2)
