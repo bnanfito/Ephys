@@ -1,7 +1,7 @@
 % close all
 % clear
 
-function [C,c,rMean,rTrial,rCent,tCent,score,coeff,D,Dshift,distF,distNull] = anaPCA(sumStats)
+function [cMean,cTrial,rMean,rTrial,rCent,tCent,score,coeff,D,Dshift,distF,distNull] = anaPCA(sumStats)
 
 plt = 0;
 tAve = 1;
@@ -13,15 +13,15 @@ sumStats = sumStats(oriPrefIdx,:); %sort units by their pref dir of motion
 
 nU = height(sumStats);
 for u = 1:nU
-    C = sumStats.condition{u}(strcmp(sumStats.paramKey{1},'ori'),:);
-    if length(C)==12
+    cMean = sumStats.condition{u}(strcmp(sumStats.paramKey{1},'ori'),:);
+    if length(cMean)==12
         rTrial(:,:,u) = sumStats.response{u}(1:5,:);
     else
         cInt = 0:30:330;
         rTmp = sumStats.response{u}(1:5,:);
-        rInt = interp1([C C(1)+360],[rTmp rTmp(:,1)]',cInt);
+        rInt = interp1([cMean cMean(1)+360],[rTmp rTmp(:,1)]',cInt);
         rTrial(:,:,u) = rInt';
-        C = cInt;
+        cMean = cInt;
     end
     rTrial(rTrial<0)=0;
     rMean(:,u) = mean(rTrial(:,:,u),'omitnan');
@@ -31,14 +31,14 @@ nReps = size(rTrial,1);
 nConds = size(rTrial,2);
 rTrial = reshape(rTrial,nReps*nConds,nU);
 % rMean = squeeze(mean(R,1,'omitnan'));
-c = repmat(C,nReps,1);c = c(:)';
+cTrial = repmat(cMean,nReps,1);cTrial = cTrial(:)';
 
 if tAve == 1
     x = rMean;
-    y = C;
+    y = cMean;
 else
     x = rTrial;
-    y = c;
+    y = cTrial;
 end
 np = size(x,1);
 if tAve == 1
