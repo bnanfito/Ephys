@@ -16,11 +16,11 @@ nBins = length(binEdges)-1;
 % % dat = vertcat(projTbl.sumStats{61});
 % dat = vertcat(projTbl.sumStats{~coolIdx & ageIdx});
 
-load('DSdev_dataSet.mat')
-cntrlIdx = projectTbl.duringMFlag == 0 & projectTbl.priorMFlag == 0;
-ageIdx = projectTbl.age>=34 & projectTbl.age<=37;
-areaIdx = strcmp(projectTbl.recSite,'PSS');
-dat = vertcat(projectTbl.sumStats{cntrlIdx & ageIdx & areaIdx});
+% load('DSdev_dataSet.mat')
+% cntrlIdx = projectTbl.duringMFlag == 0 & projectTbl.priorMFlag == 0;
+% ageIdx = projectTbl.age>=34 & projectTbl.age<=37;
+% areaIdx = strcmp(projectTbl.recSite,'PSS');
+% dat = vertcat(projectTbl.sumStats{cntrlIdx & ageIdx & areaIdx});
 
 
 

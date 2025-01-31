@@ -3,11 +3,11 @@ close all
 
 anaMode = 'SU';
 % dataFold = '/Volumes/Lab drive/Brandon/data/dataSets/DSdev';
-% dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/DSdev';
+dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/DSdev';
 % dataFold = 'F:\Brandon\data\dataSets\DSdev';
-dataFold = 'Y:\Brandon\data\dataSets\DSdev';
-% load(fullfile(dataFold,"DSdev_projectTbl.mat"))
-load(fullfile(dataFold,"DSdev_dataSet.mat"))
+% dataFold = 'Y:\Brandon\data\dataSets\DSdev';
+load(fullfile(dataFold,"DSdev_projectTbl.mat"))
+% load(fullfile(dataFold,"DSdev_dataSet.mat"))
 
 area = 'PSS';
 ageGroups = {[29 32],[33 36],[37 300]};

@@ -3,7 +3,7 @@
 
 function [cMean,cTrial,rMean,rTrial,rCent,tCent,score,coeff,D,Dshift,distF,distNull] = anaPCA(sumStats)
 
-plt = 0;
+plt = 1;
 tAve = 1;
 fullDim = 1;
 
