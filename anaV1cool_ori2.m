@@ -31,8 +31,8 @@ area = 'PSS';
 % projTbl.sumStats = sumStats;
 % projTbl.nGU = nGoodUnits;
 
-% load(['Y:\Brandon\data\dataSets\cooling\' proj '\V1cool_' anaMode '_ori_projectTbl.mat'])
-load(['/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/cooling/' proj '/V1cool_' anaMode '_ori_projectTbl.mat'])
+load(['Y:\Brandon\data\dataSets\cooling\' proj '\V1cool_' anaMode '_ori_projectTbl.mat'])
+% load(['/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/cooling/' proj '/V1cool_' anaMode '_ori_projectTbl.mat'])
 
 coolIdx = projTbl.duringMFlag == 1 & strcmp(projTbl.manipDescr,'Cooling');
 cntrlIdx = projTbl.duringMFlag == 0 & projTbl.priorMFlag == 0;
@@ -46,7 +46,7 @@ for a = 1:length(animals)
         if length(idx) > 1 %if there are repeated expts in a penetration, only take the one with highest yield of good units
             idx = idx( projTbl.nGU(idx) == max(projTbl.nGU(idx)) );
         end
-        dat{a,cntrlPens(p),1} = projTbl.sumStats{idx};
+        dat.cntrl{a,cntrlPens(p)} = projTbl.sumStats{idx};
     end
 
     coolPens = unique(projTbl.penNr(coolIdx & aniIdx));
@@ -56,7 +56,7 @@ for a = 1:length(animals)
         if length(idx) > 1
             idx = idx( projTbl.nGU(idx) == max(projTbl.nGU(idx)) );
         end
-        dat{a,coolPens(p),2} = projTbl.sumStats{idx};
+        dat.cool{a,coolPens(p)} = projTbl.sumStats{idx};
 
     end
 
@@ -72,13 +72,13 @@ meanCool = nan(length(animals),1);
 semCool = nan(length(animals),1);
 for a = 1:length(animals)
 
-    if isempty(dat{a,1,1}) || isempty(dat{a,1,2})
+    if isempty(dat.cntrl{a,1}) || isempty(dat.cool{a,1})
         continue
     end
-    goodId = dat{a,1,1}.uID(dat{a,1,1}.goodUnit);
+    goodId = dat.cntrl{a,1}.uID(dat.cntrl{a,1}.goodUnit);
     nU(a,1) = length(goodId);
-    cntrlDist = dat{a,1,1}.rPref(ismember(dat{a,1,1}.uID,goodId));
-    coolDist = dat{a,1,2}.rPref(ismember(dat{a,1,2}.uID,goodId));
+    cntrlDist = dat.cntrl{a,1}.rPref(ismember(dat.cntrl{a,1}.uID,goodId));
+    coolDist = dat.cool{a,1}.rPref(ismember(dat.cool{a,1}.uID,goo dId));
     siDist = (coolDist-cntrlDist)./cntrlDist;
 
     SI(a) = mean(siDist,'omitnan');
