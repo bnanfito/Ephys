@@ -75,11 +75,6 @@ trialInclude = ismember(trialInfo.triallist,find(cndInclude));
 [spks,trialExclude] = orgSpks(animal,unit,expt,probe,anaMode,dataFold);
 nU = length(spks);
 
-dim{1} = 'response';
-for d = 1:nDom
-    dim{1+d} = trialInfo.dom{d};
-end
-
 for u = 1:nU % u indexes a unit (column) in structure spks
 
     exptID{u} = exptName;

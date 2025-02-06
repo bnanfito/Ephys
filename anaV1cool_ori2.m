@@ -78,7 +78,7 @@ for a = 1:length(animals)
     goodId = dat.cntrl{a,1}.uID(dat.cntrl{a,1}.goodUnit);
     nU(a,1) = length(goodId);
     cntrlDist = dat.cntrl{a,1}.rPref(ismember(dat.cntrl{a,1}.uID,goodId));
-    coolDist = dat.cool{a,1}.rPref(ismember(dat.cool{a,1}.uID,goo dId));
+    coolDist = dat.cool{a,1}.rPref(ismember(dat.cool{a,1}.uID,goodId));
     siDist = (coolDist-cntrlDist)./cntrlDist;
 
     SI(a) = mean(siDist,'omitnan');
