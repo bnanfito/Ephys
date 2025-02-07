@@ -1,5 +1,5 @@
 % anaOri
-function [sumStats] = anaOri(animal,unit,expt,probe,anaMode,dataFold,plt,svePlt)
+function [sumStats] = anaOri(animal,unit,expt,probe,anaMode,dataFold,plt,svePlt,varargin)
 
 %% Initialize
 
@@ -16,6 +16,12 @@ alignBit = 0;
 visTest = 'ranksum';
 alpha = 0.01;
 
+if ~isempty(varargin)
+    % varargin{1} should be a merge file id (1,2,3..)
+    probeId = [num2str(probe) '_' num2str(varargin{1})];
+else
+    probeId = probe;
+end
 
 %% Load Data
 
@@ -72,7 +78,7 @@ trialInclude = ismember(trialInfo.triallist,find(cndInclude));
 
 %% Compute 
 
-[spks,trialExclude] = orgSpks(animal,unit,expt,probe,anaMode,dataFold);
+[spks,trialExclude] = orgSpks(animal,unit,expt,probeId,anaMode,dataFold);
 nU = length(spks);
 
 for u = 1:nU % u indexes a unit (column) in structure spks
@@ -161,7 +167,7 @@ end
 
 if plt == 1
 
-    for u = find(goodUnit)
+    for u = 1:height(sumStats)
 
         
         figure;

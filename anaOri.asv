@@ -1,5 +1,5 @@
 % anaOri
-function [sumStats] = anaOri(animal,unit,expt,probe,anaMode,dataFold,plt,svePlt)
+function [sumStats] = anaOri(animal,unit,expt,probe,anaMode,dataFold,plt,svePlt,varargin)
 
 %% Initialize
 
@@ -11,11 +11,15 @@ figDir = fullfile(dataFold,'Figures');
 
 exptName = [animal '_u' unit '_' expt];
 
-plr = 1;
+plr = 0;
 alignBit = 0;
 visTest = 'ranksum';
 alpha = 0.01;
 
+if ~isempty(varargin)
+    mergeId = varargin{1};
+    
+end
 
 %% Load Data
 
@@ -75,11 +79,6 @@ trialInclude = ismember(trialInfo.triallist,find(cndInclude));
 [spks,trialExclude] = orgSpks(animal,unit,expt,probe,anaMode,dataFold);
 nU = length(spks);
 
-dim{1} = 'response';
-for d = 1:nDom
-    dim{1+d} = trialInfo.dom{d};
-end
-
 for u = 1:nU % u indexes a unit (column) in structure spks
 
     exptID{u} = exptName;
@@ -98,7 +97,7 @@ for u = 1:nU % u indexes a unit (column) in structure spks
 
     dir = C{u}(oriInd,:);
 
-    ori = mod(dir,360);
+    ori = mod(dir,180);
     oris = unique(ori);
     for o = 1:length(oris)
         idx = ori == oris(o);
@@ -117,8 +116,10 @@ for u = 1:nU % u indexes a unit (column) in structure spks
     else
         cPref_ori = oris(rMean_ori==rPref_ori);
     end
-    cNull_ori = mod(cPref_ori+180,360);
-    clear rMean_ori rPref_ori
+    cNull_ori = mod(cPref_ori+90,180);
+    rNull_ori = rMean_ori(oris==cNull_ori);
+    osi(u,1) = abs(rPref_ori-rNull_ori)/rPref_ori;
+    clear rMean_ori rPref_ori rNull_ori
 
     rMean = mean(R{u}(:,:),'omitnan');
     rPref(u) = max(rMean);
@@ -135,21 +136,20 @@ for u = 1:nU % u indexes a unit (column) in structure spks
         cPref(u) = dir(rMean==rPref(u));
     end
     cNull(u) = mod(cPref(u)+180,360);
-    rNull(u) = rMean(C{u}(oriInd,:)==cNull(u));
+    rNull(u) = rMean(dir==cNull(u));
 
     dsi(u,1) = abs(rPref(u)-rNull(u))/rPref(u);
-    mv{u} = meanvec(C{u}(oriInd,:),rMean);
+    mv{u} = meanvec(dir,rMean);
     ldr(u,1) = mv{u}.ldr;
     lor(u,1) = mv{u}.lor;
 
     %double gaussian fit
     G{u} = dirGauss(rMean,dir,0);
 
-
 end
 
-varNames = {'exptName','probe','area','uInfo','uID','spkTimes','latency','fr','paramKey','cndKey','response','condition','gaussFit','meanVec','rPref','oriPref','rNull','oriNull','rBlank','dsi','ldr','lor'};
-sumStats = table(exptID',probeID',areaID',{spks.info}',uID',{spks.stimCent}',vertcat(spks.late),vertcat(spks.fr),paramKey',cndKey',R',C',G',mv',rPref',cPref',rNull',cNull',Rblank',dsi,ldr,lor,'VariableNames',varNames);
+varNames = {'exptName','probe','area','uInfo','uID','spkTimes','latency','fr','paramKey','cndKey','response','condition','gaussFit','meanVec','rPref','oriPref','rNull','oriNull','rBlank','dsi','osi','ldr','lor'};
+sumStats = table(exptID',probeID',areaID',{spks.info}',uID',{spks.stimCent}',vertcat(spks.late),vertcat(spks.fr),paramKey',cndKey',R',C',G',mv',rPref',cPref',rNull',cNull',Rblank',dsi,osi,ldr,lor,'VariableNames',varNames);
 
 [goodUnit,pVis] = screenUnits(sumStats,anaMode,blank,visTest,alpha);
 sumStats.goodUnit = goodUnit';
