@@ -1,6 +1,5 @@
 
 function plotSum(dat,plt,svePlt,figFold)
-close all
 plr = 0;
 alignTC = 0;
 
