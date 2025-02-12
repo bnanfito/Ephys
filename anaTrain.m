@@ -3,30 +3,30 @@
 function [projectTbl,stats,data] = anaTrain(proj)
 
     anaMode = 'MU';
-%% load porject table
+%% load project table
 
-%     projectTbl=getProjectFiles(proj,1,'age','recSite','priorMFlag','priorDescr','duringMFlag','manipDescr','manipDetail');
+    projectTbl=getProjectFiles(proj,1,'age','recSite','priorMFlag','priorDescr','duringMFlag','manipDescr','manipDetail');
 
-%     dataFold = '/Volumes/Lab drive/Brandon/data/dataSets/training/';
-%     dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/training';
-    dataFold = '/Volumes/NielsenHome2/Brandon/data/dataSets/training';
-    load(fullfile(dataFold,proj,[proj '_projectTbl.mat']),'projectTbl')
+% %     dataFold = '/Volumes/Lab drive/Brandon/data/dataSets/training/';
+% %     dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/training';
+%     dataFold = '/Volumes/NielsenHome2/Brandon/data/dataSets/training';
+%     load(fullfile(dataFold,proj,[proj '_projectTbl.mat']),'projectTbl')
 
 %% Generate SumStats
 
-% %     dataFold = 'Y:\Brandon\data';
+    dataFold = 'Y:\Brandon\data';
 %     dataFold = '/Volumes/NielsenHome2/Brandon/data';
-%     for e = 1:height(projectTbl)
-%         animal = projectTbl.experimentId{e};
-%         unit = projectTbl.unitNr{e};
-%         expt = projectTbl.experimentNr{e};
-%         probe = projectTbl.probeId(e);
-%         exptName = projectTbl.fileBase{e};
-%         exptDir = fullfile(dataFold,'Ephys',animal,exptName);
-%         disp(['generating sumStats for ' exptName])
-%         [sumStats{e,1}] = anaOri(animal,unit,expt,probe,anaMode,dataFold,0,0);
-%     end
-%     projectTbl.sumStats = sumStats;
+    for e = 1:height(projectTbl)
+        animal = projectTbl.experimentId{e};
+        unit = projectTbl.unitNr{e};
+        expt = projectTbl.experimentNr{e};
+        probe = projectTbl.probeId(e);
+        exptName = projectTbl.fileBase{e};
+        exptDir = fullfile(dataFold,'Ephys',animal,exptName);
+        disp(['generating sumStats for ' exptName])
+        [sumStats{e,1}] = anaOri(animal,unit,expt,probe,anaMode,dataFold,0,0);
+    end
+    projectTbl.sumStats = sumStats;
 
 %% Organize Data
     
@@ -38,7 +38,7 @@ function [projectTbl,stats,data] = anaTrain(proj)
     
     animals = unique(projectTbl.experimentId);
     aniMarks = {'o','+','*','x','square','diamond','^','v','<','>'};
-    metrics = {'rPref','dsi','ldr'};
+    metrics = {'rPref','dsi','ldr','latency'};
 
     %% plot
     

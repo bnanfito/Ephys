@@ -53,7 +53,9 @@ for e = 1:height(projectTbl)
 end
 projectTbl.sumStats = sumStats;
 
-
+%sort rows of project table by age
+[~,sortIdx] = sort(projectTbl.age);
+projectTbl = projectTbl(sortIdx,:);
 
 
 
