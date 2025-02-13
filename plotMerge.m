@@ -3,16 +3,19 @@ clear all
 close all
 
 %Settings
-animalId = 'febj7';
-mergeId = '000015000017000018';
+animalId = 'febj5';
+mergeId = '000015000018000023';
 probeId = 1;
 mergeName = [animalId '_uMMM_' mergeId];
-dataFold = 'F:\Brandon\data';
+% dataFold = 'F:\Brandon\data';
+dataFold = 'Y:\Brandon\data';
 anaMode = 'SU';
 
 clrs = {'k','c','m'};
 plr = 0;
 alignTC = 0;
+
+splitIntan(fullfile(dataFold,'Ephys'),animalId,mergeId,probeId,'BRN')
 
 %Load merge info
 load(fullfile(dataFold,'Ephys',animalId,mergeName,[mergeName '_mergeInfo.mat']))
