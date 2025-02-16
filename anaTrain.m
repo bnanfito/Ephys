@@ -2,7 +2,7 @@
 
 function [projectTbl,stats,data] = anaTrain(proj)
 
-    anaMode = 'MU';
+    anaMode = 'SU';
 %% load project table
 
     projectTbl=getProjectFiles(proj,1,'age','recSite','priorMFlag','priorDescr','duringMFlag','manipDescr','manipDetail');

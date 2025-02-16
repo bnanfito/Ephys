@@ -81,6 +81,17 @@ for a = 1:length(animals)
     coolDist = dat.cool{a,1}.rPref(ismember(dat.cool{a,1}.uID,goodId));
     siDist = (coolDist-cntrlDist)./cntrlDist;
 
+    goodId_cool = dat.cool{a,1}.uID(dat.cntrl{a,1}.goodUnit);
+    nU_cool(a,1) = length(goodId_cool);
+    cntrlDist_late = dat.cntrl{a,1}.latency(ismember(dat.cntrl{a,1}.uID,goodId));
+    meanLate_cntrl(a) = mean(cntrlDist_late,'omitnan');
+    semLate_cntrl(a) = std(cntrlDist_late,'omitnan')/sqrt(nU(a));
+    coolDist_late = dat.cool{a,1}.latency(ismember(dat.cool{a,1}.uID,goodId_cool));
+    meanLate_cool(a) = mean(coolDist_late,'omitnan');
+    semLate_cool(a) = std(coolDist_late,'omitnan')/sqrt(nU_cool(a));
+    deltaLate(a,1) = meanLate_cool(a)-meanLate_cntrl(a);
+
+
     SI(a) = mean(siDist,'omitnan');
     semSI(a) = std(siDist,'omitnan')/sqrt(length(siDist));
     meanCntrl(a) = mean(cntrlDist,'omitnan');
@@ -108,4 +119,21 @@ plot(ages(nU<uMin),meanCool(nU<uMin),'co','MarkerSize',7,'LineWidth',2)
 plot(repmat(ages,2,1),meanCool'+([1;-1]*semCool'),'c','LineWidth',2)
 xlabel('age (postnatal day)')
 ylabel('rPref (Hz)')
+
+figure;hold on
+plot(ages(nU>=uMin & nU_cool>=uMin),deltaLate(nU>=uMin & nU_cool>=uMin),'k.','MarkerSize',20)
+plot(ages(nU<uMin & nU_cool<uMin),deltaLate(nU<uMin & nU_cool<uMin),'ko','MarkerSize',7,'LineWidth',2)
+xlabel('age (postnatal day)')
+ylabel('delta latency (sec; cool - cntrl)')
+
+figure; hold on
+plot(ages(nU>=uMin),meanLate_cntrl(nU>=uMin),'k.','MarkerSize',20)
+plot(ages(nU<uMin),meanLate_cntrl(nU<uMin),'ko','MarkerSize',7,'LineWidth',2)
+plot(repmat(ages,2,1),meanLate_cntrl+([1;-1]*semLate_cntrl),'k','LineWidth',2)
+plot(ages(nU_cool>=uMin),meanLate_cool(nU_cool>=uMin),'c.','MarkerSize',20)
+plot(ages(nU_cool<uMin),meanLate_cool(nU_cool<uMin),'co','MarkerSize',7,'LineWidth',2)
+plot(repmat(ages,2,1),meanLate_cool+([1;-1]*semLate_cool),'c','LineWidth',2)
+xlabel('age (postnatal day)')
+ylabel('latency (sec)')
+
 

@@ -3,12 +3,12 @@ clear all
 close all
 
 %Settings
-animalId = 'febj5';
-mergeId = '000015000018000023';
+animalId = 'febj6';
+mergeId = '000000000011000016';
 probeId = 1;
 mergeName = [animalId '_uMMM_' mergeId];
-% dataFold = 'F:\Brandon\data';
-dataFold = 'Y:\Brandon\data';
+dataFold = 'F:\Brandon\data';
+% dataFold = 'Y:\Brandon\data';
 anaMode = 'SU';
 
 clrs = {'k','c','m'};
@@ -58,7 +58,7 @@ for u = find(goodUnits(:,1)|goodUnits(:,2))'
         h.FaceColor = clr;
         h.BinCounts = h.BinCounts/(nTrials*binSize);
         if ~isnan(dat.latency(u))
-            xline(dat.latency(u),'--','LineWidth',2)
+            xline(dat.latency(u),'--','LineWidth',2,'Color',clr)
         end
         xlim([bins(1) bins(end)])
 
@@ -71,11 +71,11 @@ for u = find(goodUnits(:,1)|goodUnits(:,2))'
             patch([-predelay stimTime+postdelay stimTime+postdelay -predelay],[t-0.5 t-0.5 t+0.5 t+0.5],'r','EdgeColor','none','FaceAlpha',0.2)
         end
         if ~isnan(dat.latency(u))
-            xline(dat.latency(u),'--','LineWidth',2)
+            xline(dat.latency(u),'--','LineWidth',2,'Color',clr)
         end
         xlim([-predelay stimTime+postdelay])
         ylim([0 nTrials+trialCount])
-        patch([0 1 1 0],[trialCount trialCount nTrials nTrials],'k','EdgeColor','none','FaceAlpha',0.2)
+        patch([0 1 1 0],[trialCount trialCount nTrials+trialCount nTrials+trialCount],'k','EdgeColor','none','FaceAlpha',0.2)
         xlabel('time (sec)')
         ylabel('trial #')
 
