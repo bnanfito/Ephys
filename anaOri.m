@@ -16,13 +16,6 @@ alignBit = 0;
 visTest = 'ranksum';
 alpha = 0.01;
 
-if ~isempty(varargin)
-    % varargin{1} should be a merge file id (1,2,3..)
-    probeId = [num2str(probe) '_' num2str(varargin{1})];
-else
-    probeId = probe;
-end
-
 %% Load Data
 
 exptDir = fullfile(physDir,animal,exptName);
@@ -36,6 +29,15 @@ if strcmp(varInfo.class,'char')
     probe = find(strcmp({id.probes(:).area}',area));
 end
 clear varInfo
+
+if isempty(varargin)
+    probeId = probe;
+else
+    % varargin{1} should be a merge file id (1,2,3..)
+    probeId = [num2str(probe) '_' num2str(varargin{1})];
+end
+
+
 area = id.probes(probe).area;
 sf = id.sampleFreq;
 predelay = getparam('predelay',Analyzer);

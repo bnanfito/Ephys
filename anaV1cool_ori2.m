@@ -2,37 +2,38 @@
 clear
 close all
 
-anaMode = 'MU';
+anaMode = 'SU';
 proj = ['V1cool_MU_ori'];
 area = 'PSS';
 
-% dataFold = fullfile('Y:\Brandon\data');
+dataFold = fullfile('Y:\Brandon\data');
 % projTbl = getProjectFiles(proj,1,'age','recSite','penNr','priorMFlag','priorDescr',...
 %                                        'duringMFlag','manipDescr','manipDetail',...
 %                                        'looperNameCond1','looperNameCond2',...
 %                                        'looperNameCond3','looperNameCond4',...
 %                                        'looperNameCond5');
-% projTbl = projTbl(strcmp(projTbl.recSite,area),:);
-% animals = unique(projTbl.experimentId);
-% for a = 1:length(animals)
-%     aniIdx = strcmp(projTbl.experimentId,animals{a});
-%     ages(a) = unique(projTbl.age(aniIdx));
-% end
-% for e = 1:height(projTbl)
-%     animal = projTbl.experimentId{e};
-%     unit = projTbl.unitNr{e};
-%     expt = projTbl.experimentNr{e};
-%     probe = projTbl.probeId(e);
-%     exptName = projTbl.fileBase{e};
-%     disp(['generating sumStats for ' exptName])
-%     [sumStats{e,1}] = anaOri(animal,unit,expt,probe,anaMode,dataFold,0,0);
-%     nGoodUnits(e,1) = sum(sumStats{e}.goodUnit);
-% end
-% projTbl.sumStats = sumStats;
-% projTbl.nGU = nGoodUnits;
+load(fullfile(dataFold,'dataSets','cooling','V1cool_MU_ori','V1cool_MU_ori_projectTbl.mat'))
+projTbl = projTbl(strcmp(projTbl.recSite,area),:);
+animals = unique(projTbl.experimentId);
+for a = 1:length(animals)
+    aniIdx = strcmp(projTbl.experimentId,animals{a});
+    ages(a) = unique(projTbl.age(aniIdx));
+end
+for e = 1:height(projTbl)
+    animal = projTbl.experimentId{e};
+    unit = projTbl.unitNr{e};
+    expt = projTbl.experimentNr{e};
+    probe = projTbl.probeId(e);
+    exptName = projTbl.fileBase{e};
+    disp(['generating sumStats for ' exptName])
+    [sumStats{e,1}] = anaOri(animal,unit,expt,probe,anaMode,dataFold,0,0);
+    nGoodUnits(e,1) = sum(sumStats{e}.goodUnit);
+end
+projTbl.sumStats = sumStats;
+projTbl.nGU = nGoodUnits;
 
-load(['Y:\Brandon\data\dataSets\cooling\' proj '\V1cool_' anaMode '_ori_projectTbl.mat'])
-% load(['/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/cooling/' proj '/V1cool_' anaMode '_ori_projectTbl.mat'])
+% load(['Y:\Brandon\data\dataSets\cooling\' proj '\V1cool_' anaMode '_ori_projectTbl.mat'])
+% % load(['/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/cooling/' proj '/V1cool_' anaMode '_ori_projectTbl.mat'])
 
 coolIdx = projTbl.duringMFlag == 1 & strcmp(projTbl.manipDescr,'Cooling');
 cntrlIdx = projTbl.duringMFlag == 0 & projTbl.priorMFlag == 0;
