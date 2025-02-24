@@ -19,11 +19,14 @@ legacyFlag = 0;
 baseName = [animal '_u' unit '_' expt];
 
 load(fullfile(physDir,animal,baseName,[baseName '_id.mat']),'id');
-nChannels=sum([id.probes.nChannels]);
-
 hName=fullfile(physDir,animal,baseName,[baseName '_info.rhd']);
 h=read_Intan_Header(hName);
 sf = h.sample_rate;
+if ~isfield(id,'sampleFreq')
+    id.sampleFreq = sf;
+    save(fullfile(physDir,animal,baseName,[baseName '_id.mat']),'id')
+end 
+nChannels=sum([id.probes.nChannels]);
 fileinfo = dir(fullfile(physDir,animal,baseName,[baseName '_amplifier.dat']));
 samples = fileinfo.bytes/(2*nChannels); % Number of samples in amplifier data file
 

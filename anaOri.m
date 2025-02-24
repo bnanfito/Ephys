@@ -93,7 +93,7 @@ for u = 1:nU % u indexes a unit (column) in structure spks
     cndKey{u} = trialInfo.domval;
 
     if ~isempty(trialInfo.blankId)
-        Rblank{u} = spks(u).fr.stim(:,blank);
+        rBlank{u} = spks(u).fr.stim(:,blank);
     end
 
     R{u}(:,:) = spks(u).fr.bc(:,cndInclude);
@@ -101,59 +101,91 @@ for u = 1:nU % u indexes a unit (column) in structure spks
 
     dir = C{u}(oriInd,:);
 
-    ori = mod(dir,180);
-    oris = unique(ori);
-    for o = 1:length(oris)
-        idx = ori == oris(o);
-        rMean_ori(o) = mean(R{u}(:,idx),'all','omitnan');
-    end
-    rPref_ori = max(rMean_ori);
-    if sum(rMean_ori==rPref_ori)>1
-        rIn = rMean_ori;
-        pks = rIn == rPref_ori;
-        rConv = rIn([end 1:end 1]);
-        rConv = conv(rConv,ones(1,3)*(1/3),'same');
-        rConv = rConv(1+1:end-1);
-        rConv(~pks) = 0;
-        cPref_ori = oris(find(rConv==max(rConv),1,'first'));
-        clear rIn pks rConv 
-    else
-        cPref_ori = oris(rMean_ori==rPref_ori);
-    end
-    cNull_ori = mod(cPref_ori+90,180);
-    rNull_ori = rMean_ori(oris==cNull_ori);
-    osi(u,1) = abs(rPref_ori-rNull_ori)/rPref_ori;
-    clear rMean_ori rPref_ori rNull_ori
+    if length(dir)>=4
+        %compute metrics in orientation space
+        ori = mod(dir,180);
+        oris = unique(ori);
+        for o = 1:length(oris)
+            idx = ori == oris(o);
+            rMean_ori(o) = mean(R{u}(:,idx),'all','omitnan');
+        end
+        rPref_ori = max(rMean_ori);
+        if sum(rMean_ori==rPref_ori)>1
+            rIn = rMean_ori;
+            pks = rIn == rPref_ori;
+            rConv = rIn([end 1:end 1]);
+            rConv = conv(rConv,ones(1,3)*(1/3),'same');
+            rConv = rConv(1+1:end-1);
+            rConv(~pks) = 0;
+            cPref_ori = oris(find(rConv==max(rConv),1,'first'));
+            clear rIn pks rConv 
+        else
+            cPref_ori = oris(rMean_ori==rPref_ori);
+        end
+        cNull_ori = mod(cPref_ori+90,180);
+        rNull_ori = rMean_ori(oris==cNull_ori);
+        osi(u,1) = abs(rPref_ori-rNull_ori)/rPref_ori;
+        clear rMean_ori rPref_ori rNull_ori
 
-    rMean = mean(R{u}(:,:),'omitnan');
-    rPref(u) = max(rMean);
-    if sum(rMean==rPref(u))>1
-        rIn = rMean;
-        pks = rIn == rPref(u);
-        rConv = rIn([end 1:end 1]);
-        rConv = conv(rConv,ones(1,3)*(1/3),'same');
-        rConv = rConv(1+1:end-1);
-        rConv(~pks) = 0;
-        cPref(u) = dir(find(rConv==max(rConv),1,'first'));
-        clear rIn pks rConv 
-    else
-        cPref(u) = dir(rMean==rPref(u));
+        %compute metrics in direction space
+        rMean = mean(R{u}(:,:),'omitnan');
+        rPref(u) = max(rMean);
+        if sum(rMean==rPref(u))>1
+            rIn = rMean;
+            pks = rIn == rPref(u);
+            rConv = rIn([end 1:end 1]);
+            rConv = conv(rConv,ones(1,3)*(1/3),'same');
+            rConv = rConv(1+1:end-1);
+            rConv(~pks) = 0;
+            cPref(u) = dir(find(rConv==max(rConv),1,'first'));
+            clear rIn pks rConv 
+        else
+            cPref(u) = dir(rMean==rPref(u));
+        end
+        cNull(u) = mod(cPref(u)+180,360);
+        rNull(u) = rMean(dir==cNull(u));
+        dsi(u,1) = abs(rPref(u)-rNull(u))/rPref(u);
+    
+        %compute resultant vector
+        mv{u} = meanvec(dir,rMean);
+        ldr(u,1) = mv{u}.ldr;
+        lor(u,1) = mv{u}.lor;
+    
+        %double gaussian fit
+        G{u} = dirGauss(rMean,dir,0);
+    elseif length(dir)==2
+        %compute direction preference index
+        rMean = mean(R{u},'omitnan');
+        rPref(u) = max(rMean);
+        if sum(rMean==rPref(u))>1
+            cPref(u) = dir(find(rMean==rPref(u),1,'first'));
+        else
+            cPref(u) = dir(rMean==rPref(u));
+        end
+        cNull(u) = mod(cPref(u)+180,360);
+        rNull(u) = rMean(dir==cNull(u));
+        dpi(u,1) = abs(diff(rMean))/rPref(u);
     end
-    cNull(u) = mod(cPref(u)+180,360);
-    rNull(u) = rMean(dir==cNull(u));
-
-    dsi(u,1) = abs(rPref(u)-rNull(u))/rPref(u);
-    mv{u} = meanvec(dir,rMean);
-    ldr(u,1) = mv{u}.ldr;
-    lor(u,1) = mv{u}.lor;
-
-    %double gaussian fit
-    G{u} = dirGauss(rMean,dir,0);
 
 end
 
-varNames = {'exptName','probe','area','uInfo','uID','spkTimes','latency','fr','paramKey','cndKey','response','condition','gaussFit','meanVec','rPref','oriPref','rNull','oriNull','rBlank','dsi','osi','ldr','lor'};
-sumStats = table(exptID',probeID',areaID',{spks.info}',uID',{spks.stimCent}',vertcat(spks.late),vertcat(spks.fr),paramKey',cndKey',R',C',G',mv',rPref',cPref',rNull',cNull',Rblank',dsi,osi,ldr,lor,'VariableNames',varNames);
+varNames = {'exptName','probe','area','uInfo','uID','spkTimes','latency','fr','paramKey','cndKey','response','condition','rPref','oriPref','rNull','oriNull'};
+sumStats = table(exptID',probeID',areaID',{spks.info}',uID',{spks.stimCent}',vertcat(spks.late),vertcat(spks.fr),paramKey',cndKey',R',C',rPref',cPref',rNull',cNull','VariableNames',varNames);
+
+if exist('rBlank','var')
+    sumStats.rBlank = rBlank';
+end
+
+if exist('dpi','var')
+    sumStats.dpi = dpi;
+else
+    sumStats.meanVec = mv';
+    sumStats.dsi = dsi;
+    sumStats.ldr = ldr;
+    sumStats.osi = osi;
+    sumStats.lor = lor;
+end
+
 
 [goodUnit,pVis] = screenUnits(sumStats,anaMode,blank,visTest,alpha);
 sumStats.goodUnit = goodUnit';
@@ -225,7 +257,7 @@ if plt == 1
         if alignBit == 1
             [xT,yMean,i] = alignDirTuning(xT,yMean);
             yT{u} = yT{u}(:,i);
-        else
+        elseif exist('dsi','var')
             xT = [xT xT(1)+360];
             yT = [yT yT(:,1)];
             yMean = [yMean yMean(1)];
@@ -239,21 +271,22 @@ if plt == 1
             hold on;
 %                 polarplot(xP,yP,'.','Color',clr)
             polarplot(repmat(xT,2,1),yMean+([1;-1]*sem),'Color',clr,'LineWidth',2)
-            
-            polarplot(repmat(deg2rad(sumStats.meanVec{u}.angDir),2,1),...
-                [0 sumStats.meanVec{u}.magDir],'k','LineWidth',2)
-            polarplot(repmat(deg2rad(sumStats.meanVec{u}.angDir),2,1),...
-                [0 sumStats.meanVec{u}.ldr*sumStats.meanVec{u}.magDir],'g','LineWidth',2)
+            if exist('dsi','var')
+                polarplot(repmat(deg2rad(sumStats.meanVec{u}.angDir),2,1),...
+                    [0 sumStats.meanVec{u}.magDir],'k','LineWidth',2)
+                polarplot(repmat(deg2rad(sumStats.meanVec{u}.angDir),2,1),...
+                    [0 sumStats.meanVec{u}.ldr*sumStats.meanVec{u}.magDir],'g','LineWidth',2)
+            end
             polarplot(deg2rad(sumStats.oriPref(u)),sumStats.rPref(u),'r*')
         else
             subplot(1,2,2);hold on
-
             plot(xT,yT','.','Color',clr)
             plot(repmat(xT,2,1),yMean+([1;-1]*sem),'Color',clr)
             plot(xT,yMean,'o','Color',clr);
-
-            plot(repmat(sumStats.meanVec{u}.angDir,2,1),[0;sumStats.meanVec{u}.magDir],'k','LineWidth',2)
-            plot(repmat(sumStats.meanVec{u}.angDir,2,1),[0;sumStats.meanVec{u}.ldr*sumStats.meanVec{u}.magDir],'g','LineWidth',2)
+            if exist('dsi','var')
+                plot(repmat(sumStats.meanVec{u}.angDir,2,1),[0;sumStats.meanVec{u}.magDir],'k','LineWidth',2)
+                plot(repmat(sumStats.meanVec{u}.angDir,2,1),[0;sumStats.meanVec{u}.ldr*sumStats.meanVec{u}.magDir],'g','LineWidth',2)
+            end
             plot(sumStats.oriPref(u),sumStats.rPref(u),'r*')
         end
 
