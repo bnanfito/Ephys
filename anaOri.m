@@ -11,7 +11,7 @@ figDir = fullfile(dataFold,'Figures');
 
 exptName = [animal '_u' unit '_' expt];
 
-plr = 0;
+plr = 1;
 alignBit = 0;
 visTest = 'ranksum';
 alpha = 0.01;
@@ -199,10 +199,14 @@ end
 
 %% Plot
 
+goodUIdx = find(sumStats.goodUnit);
 if plt == 1
 
     for u = 1:height(sumStats)
 
+%         if ~ismember(u,goodUIdx)
+%             continue
+%         end
         
         figure;
         clr = colors{1};
