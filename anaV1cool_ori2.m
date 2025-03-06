@@ -33,7 +33,8 @@ projTbl.sumStats = sumStats;
 projTbl.nGU = nGoodUnits;
 
 % load(['Y:\Brandon\data\dataSets\cooling\' proj '\V1cool_' anaMode '_ori_projectTbl.mat'])
-% % load(['/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/cooling/' proj '/V1cool_' anaMode '_ori_projectTbl.mat'])
+load(['/Volumes/NielsenHome2/Brandon/data/dataSets/cooling/' proj '/V1cool_' anaMode '_ori_projectTbl.mat'])
+% load(['/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/cooling/' proj '/V1cool_' anaMode '_ori_projectTbl.mat'])
 
 coolIdx = projTbl.duringMFlag == 1 & strcmp(projTbl.manipDescr,'Cooling');
 cntrlIdx = projTbl.duringMFlag == 0 & projTbl.priorMFlag == 0;
@@ -80,7 +81,7 @@ for a = 1:length(animals)
     nU(a,1) = length(goodId);
     cntrlDist = dat.cntrl{a,1}.rPref(ismember(dat.cntrl{a,1}.uID,goodId));
     coolDist = dat.cool{a,1}.rPref(ismember(dat.cool{a,1}.uID,goodId));
-    siDist = (coolDist-cntrlDist)./cntrlDist;
+    siDist = (coolDist-cntrlDist)./(coolDist+cntrlDist);
 
     goodId_cool = dat.cool{a,1}.uID(dat.cntrl{a,1}.goodUnit);
     nU_cool(a,1) = length(goodId_cool);
@@ -109,7 +110,7 @@ plot(ages(nU>=uMin),SI(nU>=uMin),'k.','MarkerSize',20)
 plot(ages(nU<uMin),SI(nU<uMin),'ko','MarkerSize',7,'LineWidth',2)
 plot(repmat(ages,2,1),SI'+([1;-1]*semSI'),'k','LineWidth',2)
 xlabel('age (postnatal day)')
-ylabel('delta rPref: (cool- cntrl)/cntrl')
+ylabel('delta rPref: (cool-cntrl)/(cool+cntrl)')
 
 figure; hold on
 plot(ages(nU>=uMin),meanCntrl(nU>=uMin),'k.','MarkerSize',20)
