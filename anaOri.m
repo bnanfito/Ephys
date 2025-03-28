@@ -204,9 +204,9 @@ if plt == 1
 
     for u = 1:height(sumStats)
 
-%         if ~ismember(u,goodUIdx)
-%             continue
-%         end
+        if ~ismember(u,goodUIdx)
+            continue
+        end
         
         figure;
         clr = colors{1};

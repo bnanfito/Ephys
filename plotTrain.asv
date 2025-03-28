@@ -8,7 +8,7 @@ area = 'PSS';
 anaMode = 'MU';
 before = {'febp5_u000_002','febp5_u000_003'};
 during = {'febp5_u000_005','febp5_u000_006'};
-after = {'febp5_u000_007','febp5_u000_008','febp5_u000_009','febp5_u001_000','febp5_u001_001','febp5_u001_002'};
+after = {'febp5_u000_007','febp5_u000_008','febp5_u000_009','febp5_u001_000','febp5_u001_000'};
 
 for e = 1:3
 
