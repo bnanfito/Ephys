@@ -4,11 +4,11 @@ close all
 
 % dataFold = '/Volumes/Lab drive/Brandon/data';
 dataFold = 'Y:\Brandon\data';
-area = 'PSS';
+area = 'V1';
 anaMode = 'MU';
-before = {'febp5_u000_002','febp5_u000_003'};
-during = {'febp5_u000_005','febp5_u000_006'};
-after = {'febp5_u000_007','febp5_u000_008','febp5_u000_009','febp5_u001_000','febp5_u001_001','febp5_u001_002'};
+before = {'febp7_u000_001'};
+during = {'febp7_u000_002'};
+after = {'febp7_u000_004','febp7_u001_000','febp7_u002_001'};
 
 for e = 1:3
 
@@ -54,6 +54,10 @@ for e = 1:3
     end
 
     for l = 1:length(list)
+
+        if isempty(dat{l,e})
+            continue
+        end
     
         count = count+1;
         p(count) = cdfplot(dat{l,e}{:,metric});

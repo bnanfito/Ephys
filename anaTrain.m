@@ -2,7 +2,7 @@
 
 function [projectTbl,stats,data] = anaTrain(proj)
 
-    anaMode = 'SU';
+    anaMode = 'MU';
 %% load project table
 
     projectTbl=getProjectFiles(proj,1,'age','recSite','priorMFlag','priorDescr','duringMFlag','manipDescr','manipDetail');
@@ -37,7 +37,7 @@ function [projectTbl,stats,data] = anaTrain(proj)
     pssaf = vertcat(projectTbl.sumStats{projectTbl.priorMFlag == 1 & strcmp(projectTbl.recSite,'PSS')});
     
     animals = unique(projectTbl.experimentId);
-    aniMarks = {'o','+','*','x','square','diamond','^','v','<','>'};
+    aniMarks = {'o','square','diamond','pentagram','^','v','<','>'};
     metrics = {'rPref','dsi','ldr','latency'};
 
     %% plot

@@ -1,4 +1,11 @@
 %anaDsDev
+
+%This function contructs the project table (including processed data
+%tables produced by 'anaOri.m') for the DsDev project. It also copies the
+%necessary files for processing the data into 'dataFold'. All subsequent
+%analysis for this project is done on the DSdev_dataSet.mat file this function
+%produces.
+
 clear all
 close all
 proj = 'DSdev';

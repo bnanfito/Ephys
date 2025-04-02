@@ -1,7 +1,7 @@
 % close all
 % clear
 
-function [cMean,cTrial,rMean,rTrial,rCent,tCent,score,coeff,D,Dshift,distF,distNull] = anaPCA(sumStats)
+function [cMean,cTrial,rMean,rTrial,rCent,tCent,score,coeff,rdm,Dshift,distF,distNull] = anaPCA(sumStats)
 
 plt = 1  ;
 tAve = 1;
@@ -55,10 +55,10 @@ end
 
 [coeff,score,latent,tsquare,explained] = pca(x);
 if fullDim == 1
-    D = dist(x');
+    rdm = dist(x');
     % D = squareform(pdist(x,'squaredeuclidean'));
 else
-    D = dist(score(:,1:2)');
+    rdm = dist(score(:,1:2)');
 end
 
 for u = 1:nU
@@ -67,9 +67,9 @@ end
 
 %% distance function
 
-for i = 1:size(D,1)
-    shift = size(D,1)-(i-1);
-    Dshift(i,:) = circshift(D(i,:),shift,2);
+for i = 1:size(rdm,1)
+    shift = size(rdm,1)-(i-1);
+    Dshift(i,:) = circshift(rdm(i,:),shift,2);
 end
 distF = mean(Dshift);
 distF = distF(y<=180);
@@ -118,9 +118,21 @@ distNull = distNull(:,y<=180);
 
 distF_z = (distF-mean(distNull,'omitnan'))./std(distNull,'omitnan');
 
+%% Output structure
+
+distDat.cMean = cMean;
+distDat.cTrial = cTrial;
+distDat.rMean = rMean;
+distDat.rTrial = rTrial;
+distDat.rCent = rCent;
+distDat.tCent = tCent;
+
+
 %% Plot
 
 if plt == 1
+
+
 
 figure;hold on;
 imagesc(x);
@@ -148,7 +160,7 @@ ylabel('mean (+/-sem) normalized response')
 
 
 figure;hold on;
-imagesc(D);
+imagesc(rdm);
 axis tight
 yticks(1:length(y))
 yticklabels(num2str(y'))
@@ -161,6 +173,7 @@ yBox = [0 0 1 1]; yOrthOff = [(4.5:15.5) (12.5:15.5)]; yBox = repmat(yBox',1,len
 xlabel('direction of motion')
 ylabel('direction of motion')
 title('RDM')
+
 
 
 figure;hold on;
@@ -246,32 +259,6 @@ xticklabels({'0','90','180'})
 xlabel('angular disparity (+/- deg)')
 
 
-
-% subplot(4,2,5)
-% % imagesc(mean(Dnull,3,'omitnan'))
-% imagesc(Dnull(:,:,end))
-% axis tight
-% yticks(1:length(y))
-% yticklabels(num2str(y'))
-% xticks(1:length(y))
-% xticklabels(num2str(y'))
-% colorbar
-% xBox = [0 1 1 0]; xOrthOff = [(0.5:11.5) (0.5:3.5)]; xBox = repmat(xBox',1,length(xOrthOff))+xOrthOff;
-% yBox = [0 0 1 1]; yOrthOff = [(4.5:15.5) (12.5:15.5)]; yBox = repmat(yBox',1,length(yOrthOff))+yOrthOff;
-% patch(yBox,xBox,'r','FaceColor','none','EdgeColor','r','LineWidth',2)
-% xlabel('direction of motion')
-% ylabel('direction of motion')
-% title('ex. shuffle RDM')
-% 
-% % ttl = [animal ' ' unit ' ' expt ' ' area ' ' anaMode];
-% % if fullDim == 1
-% %     ttl = [ttl ' full dim.'];
-% % else
-% %     ttl = [ttl ' first 3 PC'];
-% % end
-% % sgtitle(ttl)
-% % figName = [animal '_u' unit '_' expt '_' area '_' anaMode '_distance.fig'];
-% % saveas(gcf,fullfile(dataFold,'Ephys',animal,[animal '_u' unit '_' expt],figName))
 
 end
 
