@@ -3,9 +3,10 @@
 function [projectTbl,stats,data] = anaTrain(proj)
 
     anaMode = 'MU';
+    sve = 0;
 %% load project table
 
-    projectTbl=getProjectFiles(proj,1,'age','recSite','priorMFlag','priorDescr','duringMFlag','manipDescr','manipDetail');
+    projectTbl=getProjectFiles(proj,1,'age','recSite','penNr','priorMFlag','priorDescr','duringMFlag','manipDescr','manipDetail');
 
 % %     dataFold = '/Volumes/Lab drive/Brandon/data/dataSets/training/';
 % %     dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/training';
@@ -15,14 +16,13 @@ function [projectTbl,stats,data] = anaTrain(proj)
 %% Generate SumStats
 
     dataFold = 'Y:\Brandon\data';
-%     dataFold = '/Volumes/NielsenHome2/Brandon/data';
+%     dataFold = fullfile(dataFold,'dataSets','training',proj,anaMode,'threshold5');
     for e = 1:height(projectTbl)
         animal = projectTbl.experimentId{e};
         unit = projectTbl.unitNr{e};
         expt = projectTbl.experimentNr{e};
         probe = projectTbl.probeId(e);
         exptName = projectTbl.fileBase{e};
-        exptDir = fullfile(dataFold,'Ephys',animal,exptName);
         disp(['generating sumStats for ' exptName])
         [sumStats{e,1}] = anaOri(animal,unit,expt,probe,anaMode,dataFold,0,0);
     end
@@ -31,18 +31,29 @@ function [projectTbl,stats,data] = anaTrain(proj)
 %% Organize Data
     
     v1bf = vertcat(projectTbl.sumStats{projectTbl.priorMFlag == 0 & strcmp(projectTbl.recSite,'V1')});
+    v1bf = v1bf(v1bf.goodUnit == 1,:);
     v1af = vertcat(projectTbl.sumStats{projectTbl.priorMFlag == 1 & strcmp(projectTbl.recSite,'V1')});
+    v1af = v1af(v1af.goodUnit == 1,:);
     
     pssbf = vertcat(projectTbl.sumStats{projectTbl.priorMFlag == 0 & strcmp(projectTbl.recSite,'PSS')});
+    pssbf = pssbf(pssbf.goodUnit == 1,:);
     pssaf = vertcat(projectTbl.sumStats{projectTbl.priorMFlag == 1 & strcmp(projectTbl.recSite,'PSS')});
-    
+    pssaf = pssaf(pssaf.goodUnit == 1,:);
+
+    data.v1bf = v1bf;
+    data.v1af = v1af;
+    data.pssbf = pssbf;
+    data.pssaf = pssaf;
+
+%% Plot
+
     animals = unique(projectTbl.experimentId);
     aniMarks = {'o','square','diamond','pentagram','^','v','<','>'};
     metrics = {'rPref','dsi','ldr','latency'};
-
-    %% plot
     
+    % plot metric cdf across animals
     for m = 1:length(metrics)
+
         figure; hold on
         for i = 1:4
         
@@ -68,13 +79,11 @@ function [projectTbl,stats,data] = anaTrain(proj)
                 linStyl = '-';
             end
         
-            goodIdx = tbl.goodUnit;
-            N(i) = sum(goodIdx);
-            tbl = tbl(goodIdx,:);
-            clear pVis
-        
             dist = tbl{:,metrics{m}};
+            dist = dist(~isnan(dist));
+            N(i) = length(dist);
             DIST{m,i} = dist;
+
             cdf = cdfplot(dist);
             cdf.Color = clr;
             cdf.LineStyle = linStyl;
@@ -86,6 +95,7 @@ function [projectTbl,stats,data] = anaTrain(proj)
                 
                 tmpAniIdx = contains(tbl.exptName,animals{a});
                 dist = tbl{tmpAniIdx,metrics{m}};
+                dist = dist(~isnan(dist));
                 aniDist{m,i,a} = dist;
                 aniMean(m,i,a) = mean(dist,'omitnan');
                 aniSEM(m,i,a) = std(dist,'omitnan')/sqrt(length(dist));
@@ -95,9 +105,16 @@ function [projectTbl,stats,data] = anaTrain(proj)
         end
         legend({['V1 before; n=' num2str(N(1))],['V1 after; n=' num2str(N(2))],...
                 ['PSS before; n=' num2str(N(3))],['PSS after; n=' num2str(N(4))]})
+        title([proj ' ' anaMode])
+        if sve == 1
+            saveas(gcf,fullfile(dataFold,[proj '_' anaMode 'cdf_' metrics{m}]))
+        end
+
     end
-    
+
+    % plot per animal metrics
     for m = 1:length(metrics)
+
         figure; hold on
         for a = 1:length(animals)
     
@@ -111,6 +128,7 @@ function [projectTbl,stats,data] = anaTrain(proj)
             xticklabels({'before','after'})   
             xlim([0.5 2.5])
             ylabel(metrics{m})
+            title('V1')
 
     
             subplot(1,2,2);hold on
@@ -120,15 +138,21 @@ function [projectTbl,stats,data] = anaTrain(proj)
             xticks(1:2);
             xticklabels({'before','after'})
             xlim([0.5 2.5])
+            title('PSS')
     
         end
         subplot(1,2,1);hold on
         legend(legLbls1Target,legLbls1)
         subplot(1,2,2);hold on
         legend(legLbls2Target, legLbls2)
+        sgtitle([proj ' ' anaMode])
+        if sve == 1
+            saveas(gcf,fullfile(dataFold,[proj '_' anaMode 'animals_' metrics{m}]))
+        end
+
     end
 
-    %% stats
+%% Stats
 
     count = 0;
     for m = 1:length(metrics)
@@ -186,11 +210,10 @@ function [projectTbl,stats,data] = anaTrain(proj)
 
     end
     varNames = {'animal','metric','comparison','test1','h1','p1','test2','h2','p2'};
-    data.v1bf = v1bf;
-    data.v1af = v1af;
-    data.pssbf = pssbf;
-    data.pssaf = pssaf;
     stats = table(aniLbl,metLbl,compLbl,tst1Lbl,h1,p1,tst2Lbl,h2,p2,'VariableNames',varNames);
 
+    if sve == 1
+        save(fullfile(dataFold,[proj '_' anaMode 'dataSet.mat']),'projectTbl','data','stats')
+    end
 
 end

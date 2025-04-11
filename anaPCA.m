@@ -1,10 +1,10 @@
 % close all
 % clear
 
-function [cMean,cTrial,rMean,rTrial,rCent,tCent,score,coeff,rdm,Dshift,distF,distNull] = anaPCA(sumStats)
+function [distDat] = anaPCA(sumStats)
 
-plt = 1  ;
-tAve = 1;
+plt = 1;
+tAve = 0;
 fullDim = 1;
 
 sumStats = sumStats(sumStats.goodUnit,:); %only take good units
@@ -69,10 +69,9 @@ end
 
 for i = 1:size(rdm,1)
     shift = size(rdm,1)-(i-1);
-    Dshift(i,:) = circshift(rdm(i,:),shift,2);
+    rdmShift(i,:) = circshift(rdm(i,:),shift,2);
 end
-distF = mean(Dshift);
-distF = distF(y<=180);
+distF = mean(rdmShift);
 
 %% Null Dist
 
@@ -101,20 +100,19 @@ for nr = 1:nNullRep
     shuff = shuff./max(shuff);
     [coeffShuff,scoreShuff,latentShuff,tsquareShuff,explainedShuff] = pca(shuff);
     if fullDim == 1
-        Dnull(:,:,nr) = dist(shuff');
+        rdmNull(:,:,nr) = dist(shuff');
     else
-        Dnull(:,:,nr) = dist(scoreShuff(:,1:2)');
+        rdmNull(:,:,nr) = dist(scoreShuff(:,1:2)');
     end
-    for i = 1:size(Dnull,1)
-        shift = size(Dnull,1)-(i-1);
-        DnullShift(i,:,nr) = circshift(Dnull(i,:,nr),shift,2);
+    for i = 1:size(rdmNull,1)
+        shift = size(rdmNull,1)-(i-1);
+        rdmNullShift(i,:,nr) = circshift(rdmNull(i,:,nr),shift,2);
     end
-    distNull2{nr} = DnullShift(:,:,nr);
-    distNull(nr,:) = mean(DnullShift(:,:,nr),1,'omitnan');
+    distNull2{nr} = rdmNullShift(:,:,nr);
+    distNull(nr,:) = mean(rdmNullShift(:,:,nr),1,'omitnan');
 
 end
-distNull2 = vertcat(distNull2{:}); distNull2 = distNull2(:,y<=180);
-distNull = distNull(:,y<=180);
+distNull2 = vertcat(distNull2{:});
 
 distF_z = (distF-mean(distNull,'omitnan'))./std(distNull,'omitnan');
 
@@ -126,7 +124,12 @@ distDat.rMean = rMean;
 distDat.rTrial = rTrial;
 distDat.rCent = rCent;
 distDat.tCent = tCent;
-
+distDat.score = score;
+distDat.coeff = coeff;
+distDat.rdm = rdm;
+distDat.rdmShift = rdmShift;
+distDat.distF = distF;
+distDat.distNull = distNull;
 
 %% Plot
 
@@ -213,11 +216,14 @@ legend({'PC1','PC2','PC3','PC4'})
 
 
 figure;hold on
-angDisp = y(y<=180);
+dispIdx = y<=180;
+angDisp = y(dispIdx);
+distF = distF(dispIdx);
+distNull = distNull(:,dispIdx);
 % plot(angDisp,distF_z,'k-o','LineWidth',2)
 plot(angDisp,distF,'k-o','LineWidth',2)
-sem = std(Dshift)/sqrt(size(Dshift,1)); sem = sem(y<=180);
-v = var(Dshift); v = v(y<=180);
+sem = std(rdmShift)/sqrt(size(rdmShift,1)); sem = sem(dispIdx);
+v = var(rdmShift); v = v(dispIdx);
 patch([angDisp fliplr(angDisp)],[distF-v fliplr(distF+v)],'k','EdgeColor','none','FaceAlpha',0.2)
 
 plot(angDisp,mean(distNull),'r-o')

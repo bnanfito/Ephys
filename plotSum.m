@@ -1,17 +1,18 @@
 
-function plotSum(dat,plt,svePlt,figFold)
+function plotSum(dat)
 plr = 0;
 alignTC = 0;
+svePlt = 0;
 
 % dat = dat(dat.goodUnit,:);
 nU = height(dat);
-if plt == 1
+if svePlt == 0
     if nU>50
         uInd = randi(nU,1,50);
     else
         uInd = 1:nU;
     end
-else
+elseif svePlt == 1
     uInd = 1:nU;
 end
 
@@ -118,6 +119,7 @@ for u = uInd
     sgtitle(ttl)
     figName = [dat.exptName{u} '_' dat.area{u} '_' dat.uInfo{u} '_' num2str(dat.uID(u))];
     if svePlt == 1
+        figFold = fullfile('Y:\Brandon\data\Figures',dat.exptName{u}(1:5),dat.exptName{u});
         if ~isfolder(figFold)
             mkdir(figFold)
         end
@@ -125,7 +127,7 @@ for u = uInd
 %         saveas(gcf,fullfile(figFold,figName),'svg')
     end
 
-    if plt == 0
+    if svePlt == 1
         close gcf
     end
 

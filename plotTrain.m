@@ -10,6 +10,8 @@ before = {'febp7_u000_001'};
 during = {'febp7_u000_002'};
 after = {'febp7_u000_004','febp7_u001_000','febp7_u002_001'};
 
+%% Organize Data
+
 for e = 1:3
 
     if e == 1
