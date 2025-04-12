@@ -3,7 +3,7 @@
 function [projectTbl,stats,data] = anaTrain(proj)
 
     anaMode = 'MU';
-    sve = 1;
+    sve = 0;
 %     dataFold = 'Y:\Brandon\data';
     dataFold = '/Volumes/NielsenHome2/Brandon/data';
     dataFold = fullfile(dataFold,'dataSets','training',proj,anaMode,'threshold4');
@@ -13,7 +13,7 @@ function [projectTbl,stats,data] = anaTrain(proj)
 %     projectTbl=getProjectFiles(proj,1,'age','recSite','penNr','priorMFlag','priorDescr','duringMFlag','manipDescr','manipDetail');
 
     load(fullfile(dataFold,[proj '_' anaMode 'dataSet.mat']),'projectTbl')
-    projectTbl = projectTbl(:,~strcmp(projectTbl.Properties.VariableNames,'sumStats'));
+    projectTbl = projectTbl(:,~strcmp(projectTbl.Properties.VariableNames,'sumStats'))
 
 %% Generate SumStats
 
@@ -31,14 +31,14 @@ function [projectTbl,stats,data] = anaTrain(proj)
 %% Organize Data
     
     v1bf = vertcat(projectTbl.sumStats{projectTbl.priorMFlag == 0 & strcmp(projectTbl.recSite,'V1')});
-%     v1bf = v1bf(screenUnits(v1bf,anaMode),:);
+    v1bf = v1bf(screenUnits(v1bf),:);
     v1af = vertcat(projectTbl.sumStats{projectTbl.priorMFlag == 1 & strcmp(projectTbl.recSite,'V1')});
-%     v1af = v1af(screenUnits(v1af,anaMode),:);
+    v1af = v1af(screenUnits(v1af),:);
     
     pssbf = vertcat(projectTbl.sumStats{projectTbl.priorMFlag == 0 & strcmp(projectTbl.recSite,'PSS')});
-%     pssbf = pssbf(screenUnits(pssbf,anaMode),:);
+    pssbf = pssbf(screenUnits(pssbf),:);
     pssaf = vertcat(projectTbl.sumStats{projectTbl.priorMFlag == 1 & strcmp(projectTbl.recSite,'PSS')});
-%     pssaf = pssaf(screenUnits(pssaf,anaMode),:);
+    pssaf = pssaf(screenUnits(pssaf),:);
 
     data.v1bf = v1bf;
     data.v1af = v1af;
@@ -78,7 +78,7 @@ function [projectTbl,stats,data] = anaTrain(proj)
                 clr = 'r';
                 linStyl = '-';
             end
-            tbl = tbl(screenUnits(tbl,anaMode),:);
+        
             dist = tbl{:,metrics{m}};
             dist = dist(~isnan(dist));
             N(i) = length(dist);

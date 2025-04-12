@@ -1,6 +1,6 @@
 % visTest
 
-function [pVis] = visTest(sumStats)
+function [pVis] = visTest(sumStats,blankBit)
 
     for u = 1:height(sumStats)
     
@@ -19,7 +19,7 @@ function [pVis] = visTest(sumStats)
                 cndInclude = cndSize==min(sizes);
             end
         else
-            cndInclude = ones(size(sumStats.cndKey{u},1),1)==1;
+            cndInclude = ~blankBit;
         end
         baseFR = sumStats(u,:).fr.base(:,cndInclude);    baseFR = baseFR(:); baseFR = baseFR(~isnan(baseFR));
         stimFR = sumStats(u,:).fr.stim(:,cndInclude);    stimFR = stimFR(:); stimFR = stimFR(~isnan(stimFR));
@@ -30,6 +30,5 @@ function [pVis] = visTest(sumStats)
         pVis(u).anova = anova1([sumStats.response{u},sumStats.rBlank{u}],[],'off');
 
     end
-    pVis = pVis';
 
 end

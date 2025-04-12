@@ -185,7 +185,7 @@ else
 end
 
 
-[pVis] = visTest(sumStats);
+[pVis] = screenUnits(sumStats);
 sumStats.pVis = pVis;
 
 if strcmp(anaMode,'MU')
@@ -196,7 +196,7 @@ end
 
 %% Plot
 
-goodUnit = screenUnits(sumStats,anaMode);
+goodUnit = sumStats;
 if plt == 1
 
     for u = 1:height(sumStats)

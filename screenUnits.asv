@@ -1,0 +1,29 @@
+function [out] = screenUnits(sumStats,mode)
+ 
+alpha = 0.01;
+for u = 1:height(sumStats)
+
+    isVis(u) = sumStats.pVis(u,1).anova<alpha;
+
+    if strcmp(mode,'SU')
+        isAct(u) = sumStats.rPref(u)>=2;
+        isSU(u) = strcmp(sumStats{u}.uInfo,'SU');
+        maybeSU(u) = strcmp(sumStats{u}.uInfo,'SU?');
+        out = isVis & isAct & isSU;
+    elseif strcmp(mode,'MU')
+        isAct(u) = sumStats.rPref(u)>=2;
+        out = isVis & isAct;
+    end
+
+end
+
+if strcmp(mode,'SU')
+    out = isVis & isAct & isSU;
+    %     out = isVis & isAct & (isSU | maybeSU);
+elseif strcmp(mode,'MU')
+    out = isVis & isAct;
+end
+
+
+
+end
