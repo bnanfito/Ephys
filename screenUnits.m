@@ -1,9 +1,25 @@
-function [out] = screenUnits(sumStats,anaMode)
+function [out] = screenUnits(sumStats,anaMode,varargin)
  
 alpha = 0.01;
+% is a statistical test for visual responsiveness is not specified in the
+% 3rd argin, ranksum will be used by default
+if isempty(varargin)
+    visTest = 'ranksum';
+else
+    visTest = varargin{1};
+end
+
 for u = 1:height(sumStats)
 
-    isVis = sumStats.pVis(u).anova<alpha;
+    switch visTest
+        case 'anova'
+            isVis = sumStats.pVis(u).anova<alpha;
+        case 'ranksum'
+            isVis = sumStats.pVis(u).ranksum<alpha;
+        case 'signrank'
+            isVis = sumStats.pVis(u).signrank<alpha;
+    end
+    
     if strcmp(anaMode,'SU')
         isAct = sumStats.rPref(u)>=2;
         isSU = strcmp(sumStats{u}.uInfo,'SU');

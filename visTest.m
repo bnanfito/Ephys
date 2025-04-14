@@ -5,6 +5,10 @@ function [pVis] = visTest(sumStats)
     for u = 1:height(sumStats)
     
         R = sumStats.response{u};
+
+        % if stimulus size is a variable being changes, only consider
+        % conditions that were used to calculate sumStats (ie the ones that
+        % were used to make the response matrix, R)
         sizeId = contains(sumStats.paramKey{u},'size');
         cndSize = sumStats.cndKey{u}(:,sizeId);
         sizes = unique(cndSize);
@@ -21,6 +25,7 @@ function [pVis] = visTest(sumStats)
         else
             cndInclude = ones(size(sumStats.cndKey{u},1),1)==1;
         end
+        
         baseFR = sumStats(u,:).fr.base(:,cndInclude);    baseFR = baseFR(:); baseFR = baseFR(~isnan(baseFR));
         stimFR = sumStats(u,:).fr.stim(:,cndInclude);    stimFR = stimFR(:); stimFR = stimFR(~isnan(stimFR));
         bcFR = sumStats(u,:).fr.bc(:,cndInclude);        bcFR = bcFR(:); bcFR = bcFR(~isnan(bcFR));

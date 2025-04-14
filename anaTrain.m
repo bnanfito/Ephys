@@ -4,16 +4,17 @@ function [projectTbl,stats,data] = anaTrain(proj)
 
     anaMode = 'MU';
     sve = 1;
-%     dataFold = 'Y:\Brandon\data';
-    dataFold = '/Volumes/NielsenHome2/Brandon/data';
-    dataFold = fullfile(dataFold,'dataSets','training',proj,anaMode,'threshold4');
+
+    dataFold = 'Y:\Brandon\data';
+%     dataFold = '/Volumes/NielsenHome2/Brandon/data';
+    dataFold = fullfile(dataFold,'dataSets','training',proj,anaMode,'threshold5');
 
 %% load project table
 
-%     projectTbl=getProjectFiles(proj,1,'age','recSite','penNr','priorMFlag','priorDescr','duringMFlag','manipDescr','manipDetail');
+    projectTbl=getProjectFiles(proj,1,'age','recSite','penNr','priorMFlag','priorDescr','duringMFlag','manipDescr','manipDetail');
 
-    load(fullfile(dataFold,[proj '_' anaMode 'dataSet.mat']),'projectTbl')
-    projectTbl = projectTbl(:,~strcmp(projectTbl.Properties.VariableNames,'sumStats'));
+%     load(fullfile(dataFold,[proj '_' anaMode 'dataSet.mat']),'projectTbl')
+%     projectTbl = projectTbl(:,~strcmp(projectTbl.Properties.VariableNames,'sumStats'));
 
 %% Generate SumStats
 
