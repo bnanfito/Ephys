@@ -1,6 +1,6 @@
 
 function plotSum(dat)
-plr = 0;
+plr = 1;
 alignTC = 0;
 svePlt = 0;
 
@@ -8,7 +8,7 @@ svePlt = 0;
 nU = height(dat);
 if svePlt == 0
     if nU>50
-        uInd = randi(nU,1,50);
+        uInd = randperm(nU,50);
     else
         uInd = 1:nU;
     end
@@ -22,7 +22,7 @@ for u = uInd
     predelay = 1;
     stimTime = 1;
     postdelay = 1;
-    nTrials = max(max(dat.fr(u).trialNum));
+    nTrials = max(dat.fr(u).trialNum(:));
     nConds = size(dat.cndKey{u},1);
 
     x = dat.spkTimes{u}(1,:);

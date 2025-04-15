@@ -1,7 +1,7 @@
 function [out] = screenUnits(sumStats,anaMode,varargin)
  
 alpha = 0.01;
-% is a statistical test for visual responsiveness is not specified in the
+% if a statistical test for visual responsiveness is not specified in the
 % 3rd argin, ranksum will be used by default
 if isempty(varargin)
     visTest = 'ranksum';
