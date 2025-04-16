@@ -44,8 +44,8 @@ end
 np = size(x,1);
 if tAve == 1
     oriClrs = repmat(hsv(np/2),2,1);
-    dirClrs = hsv(np);
-    clrs = dirClrs;
+    disClrs = hsv(np);
+    clrs = hsv(np);
 else
     clrsTmp = hsv(nConds);
     clrs = [];

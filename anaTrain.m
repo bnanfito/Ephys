@@ -4,10 +4,12 @@ function [projectTbl,stats,data] = anaTrain(proj)
 
     anaMode = 'MU';
     sve = 1;
+    thresh = 'threshold4';
+    visTest = 'ranksum';
 
     dataFold = 'Y:\Brandon\data';
 %     dataFold = '/Volumes/NielsenHome2/Brandon/data';
-    dataFold = fullfile(dataFold,'dataSets','training',proj,anaMode,'threshold5');
+    dataFold = fullfile(dataFold,'dataSets','training',proj,anaMode,thresh);
 
 %% load project table
 
@@ -50,7 +52,7 @@ function [projectTbl,stats,data] = anaTrain(proj)
 
     animals = unique(projectTbl.experimentId);
     aniMarks = {'o','square','diamond','pentagram','^','v','<','>'};
-    metrics = {'rPref','dsi','ldr','latency'};
+    metrics = {'rPref','dsi','ldr','osi','lor','latency'};
     
     % plot metric cdf across animals
     for m = 1:length(metrics)
@@ -79,7 +81,7 @@ function [projectTbl,stats,data] = anaTrain(proj)
                 clr = 'r';
                 linStyl = '-';
             end
-            tbl = tbl(screenUnits(tbl,anaMode),:);
+            tbl = tbl(screenUnits(tbl,anaMode,visTest),:);
             dist = tbl{:,metrics{m}};
             dist = dist(~isnan(dist));
             N(i) = length(dist);

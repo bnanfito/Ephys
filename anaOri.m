@@ -149,8 +149,8 @@ for u = 1:nU % u indexes a unit (column) in structure spks
         ldr(u,1) = mv{u}.ldr;
         lor(u,1) = mv{u}.lor;
     
-        %double gaussian fit
-        G{u} = dirGauss(rMean,dir,0);
+%         %double gaussian fit
+%         G{u} = dirGauss(rMean,dir,0);
     elseif length(dir)==2
         %compute direction preference index
         rMean = mean(R{u},'omitnan');
