@@ -2,11 +2,11 @@ clear all
 close all
 
 anaMode = 'MU';
-proj = {'Train_V1Cool'};
+proj = {'V1cool_MU_ori'};
 
 for p = 1:length(proj)
-% dataFold = 'Y:\Brandon\data';
-dataFold = ['Y:\Brandon\data\dataSets\training\' proj{p} '\' anaMode '\threshold4'];
+dataFold = 'Y:\Brandon\data';
+% dataFold = ['Y:\Brandon\data\dataSets\training\' proj{p} '\' anaMode '\threshold4'];
 projectTbl=getProjectFiles(proj{p},1,'age','recSite','priorMFlag','priorDescr','duringMFlag','manipDescr','manipDetail');
 
 for e = 1:height(projectTbl)

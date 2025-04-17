@@ -196,9 +196,9 @@ end
 
 %% Plot
 
-goodUnit = screenUnits(sumStats,anaMode);
 if plt == 1
 
+    goodUnit = screenUnits(sumStats,anaMode);
     for u = 1:height(sumStats)
 
         if ~ismember(u,find(goodUnit))

@@ -22,13 +22,13 @@ for u = 1:height(sumStats)
     
     if strcmp(anaMode,'SU')
         isAct = sumStats.rPref(u)>=2;
-        isSU = strcmp(sumStats{u}.uInfo,'SU');
-        maybeSU = strcmp(sumStats{u}.uInfo,'SU?');
-        out(u) = isVis & isAct & isSU;
-%         out(u) = isVis & isAct & (isSU | maybeSU);
+        isSU = strcmp(sumStats.uInfo{u},'SU');
+        maybeSU = strcmp(sumStats.uInfo{u},'SU?');
+        out(u,1) = isVis & isAct & isSU;
+%         out(u,1) = isVis & isAct & (isSU | maybeSU);
     elseif strcmp(anaMode,'MU')
         isAct = sumStats.rPref(u)>=2;
-        out(u) = isVis & isAct;
+        out(u,1) = isVis & isAct;
     end
 
     clear isVis isAct isSU maybeSU

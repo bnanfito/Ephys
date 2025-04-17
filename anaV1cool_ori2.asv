@@ -2,18 +2,17 @@
 clear
 close all
 
-anaMode = 'MU';
-proj = 'V1cool_ori';
+anaMode = 'SU';
+proj = ['V1cool_MU_ori'];
 area = 'PSS';
 
-%% Generate Project Table
-
 dataFold = fullfile('Y:\Brandon\data');
-projTbl = getProjectFiles(proj,1,'age','recSite','penNr','priorMFlag','priorDescr',...
-                                       'duringMFlag','manipDescr','manipDetail',...
-                                       'looperNameCond1','looperNameCond2',...
-                                       'looperNameCond3','looperNameCond4',...
-                                       'looperNameCond5');
+% projTbl = getProjectFiles(proj,1,'age','recSite','penNr','priorMFlag','priorDescr',...
+%                                        'duringMFlag','manipDescr','manipDetail',...
+%                                        'looperNameCond1','looperNameCond2',...
+%                                        'looperNameCond3','looperNameCond4',...
+%                                        'looperNameCond5');
+load(fullfile(dataFold,'dataSets','cooling','V1cool_MU_ori','V1cool_MU_ori_projectTbl.mat'))
 projTbl = projTbl(strcmp(projTbl.recSite,area),:);
 animals = unique(projTbl.experimentId);
 for a = 1:length(animals)
@@ -29,17 +28,14 @@ for e = 1:height(projTbl)
     disp(['generating sumStats for ' exptName])
     [sumStats{e,1}] = anaOri(animal,unit,expt,probe,anaMode,dataFold,0,0);
     goodUnits = screenUnits(sumStats{e,1},anaMode);
-    sumStats{e,1}.goodUnit = goodUnits;
     nGoodUnits(e,1) = sum(goodUnits);
 end
 projTbl.sumStats = sumStats;
 projTbl.nGU = nGoodUnits;
 
 % load(['Y:\Brandon\data\dataSets\cooling\' proj '\V1cool_' anaMode '_ori_projectTbl.mat'])
-% load(['/Volumes/NielsenHome2/Brandon/data/dataSets/cooling/' proj '/V1cool_' anaMode '_ori_projectTbl.mat'])
+load(['/Volumes/NielsenHome2/Brandon/data/dataSets/cooling/' proj '/V1cool_' anaMode '_ori_projectTbl.mat'])
 % load(['/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/cooling/' proj '/V1cool_' anaMode '_ori_projectTbl.mat'])
-
-%% Organize Data
 
 coolIdx = projTbl.duringMFlag == 1 & strcmp(projTbl.manipDescr,'Cooling');
 cntrlIdx = projTbl.duringMFlag == 0 & projTbl.priorMFlag == 0;
@@ -69,7 +65,6 @@ for a = 1:length(animals)
 
 end
 
-%% Calculate Metrics
 
 SI = nan(length(animals),1);
 semSI = nan(length(animals),1);
@@ -108,8 +103,6 @@ for a = 1:length(animals)
     semCool(a) = std(coolDist,'omitnan')/sqrt(length(coolDist));
 
 end
-
-%% Plot
 
 uMin = 20;
 
