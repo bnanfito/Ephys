@@ -13,14 +13,14 @@ anaMode = 'SU';
 
 dataFold = fullfile('Y:\Brandon\data\dataSets',proj);
 zPath = 'Z:\EphysNew';
-projectTbl=getProjectFiles(proj,1,'age','recSite','priorMFlag','priorDescr','duringMFlag','manipDescr','manipDetail');
+projTbl=getProjectFiles(proj,1,'age','recSite','priorMFlag','priorDescr','duringMFlag','manipDescr','manipDetail');
 
-for e = 1:height(projectTbl)
-    animal = projectTbl.experimentId{e};
-    unit = projectTbl.unitNr{e};
-    expt = projectTbl.experimentNr{e};
-    probe = projectTbl.probeId(e);
-    exptName = projectTbl.fileBase{e};
+for e = 1:height(projTbl)
+    animal = projTbl.experimentId{e};
+    unit = projTbl.unitNr{e};
+    expt = projTbl.experimentNr{e};
+    probe = projTbl.probeId(e);
+    exptName = projTbl.fileBase{e};
     
     % make directories if necessary
     aniDir = fullfile(dataFold,'Ephys',animal);
@@ -55,14 +55,13 @@ for e = 1:height(projectTbl)
     % generate summary statistics
     disp(['generating sumStats for ' exptName])
     [sumStats{e,1}] = anaOri(animal,unit,expt,probe,anaMode,dataFold,0,0);
-    sumStats{e,1} = sumStats{e,1}(sumStats{e,1}.goodUnit,:);
     
 end
-projectTbl.sumStats = sumStats;
+projTbl.sumStats = sumStats;
 
 %sort rows of project table by age
-[~,sortIdx] = sort(projectTbl.age);
-projectTbl = projectTbl(sortIdx,:);
+[~,sortIdx] = sort(projTbl.age);
+projTbl = projTbl(sortIdx,:);
 
 
 

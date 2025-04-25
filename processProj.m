@@ -2,7 +2,7 @@ clear all
 close all
 
 anaMode = 'MU';
-proj = {'V1cool_MU_ori'};
+proj = {'V1cool_ori'};
 
 for p = 1:length(proj)
 dataFold = 'Y:\Brandon\data';
