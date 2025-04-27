@@ -19,7 +19,7 @@ plr = 0;
 alignTC = 0;
 
 mergeName = [animalId '_uMMM_' mergeId];
-splitIntan(fullfile(dataFold,'Ephys'),animalId,mergeId,probeId,'BRN')
+% splitIntan(fullfile(dataFold,'Ephys'),animalId,mergeId,probeId,'BRN')
 
 %Load merge info
 load(fullfile(dataFold,'Ephys',animalId,mergeName,[mergeName '_mergeInfo.mat']))
@@ -29,7 +29,7 @@ for f = 1:nFiles
     exptName{f,1} = [animalId '_' mergeInfo.files{f}];
 
     sumStats{f} = anaOri(animalId,exptName{f}(8:10),exptName{f}(12:14),probeId,anaMode,dataFold,0,0,f);
-    goodUnits = [goodUnits sumStats{f}.goodUnit];
+    goodUnits = [goodUnits screenUnits(sumStats{f},anaMode)];
 end
 goodIdx = goodUnits(:,1)|goodUnits(:,2);
 %remove units that do not pass inclusion criteria in either control or cool

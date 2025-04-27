@@ -2,7 +2,8 @@
 clear all
 close all
 
-dataFold = 'Y:\Brandon\data';
+dataFold = '/Volumes/NielsenHome2/Brandon/data';
+% dataFold = 'Y:\Brandon\data';
 
 %% list animals
 
@@ -22,7 +23,7 @@ dataFold = 'Y:\Brandon\data';
 % 
 % end
 
-load(fullfile(dataFold,'dataSets','cooling','V1cool_MU_ori','anaMerge_dataSet.mat'))
+load(fullfile(dataFold,'dataSets','cooling','V1cool_ori','anaMerge_dataSet.mat'))
 
 LDR = [];
 RP = [];
