@@ -70,7 +70,7 @@ for ar = 1:nAR
         
         hold on
         score = vertcat(curDat.score,curDat.score(1,:));
-%         plot3(score(:,1),score(:,2),score(:,3),'k','LineWidth',1.5)
+        plot3(score(:,1),score(:,2),score(:,3),'k','LineWidth',1.5)
         np = size(curDat.score,1);
         dirClrs = hsv(np);
         oriClrs = repmat(hsv(np/2),2,1);

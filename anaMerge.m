@@ -2,8 +2,8 @@
 clear all
 close all
 
-dataFold = '/Volumes/NielsenHome2/Brandon/data';
-% dataFold = 'Y:\Brandon\data';
+proj = 'V1cool_ori';
+dataFold = 'Y:\Brandon\data';
 
 %% list animals
 
@@ -23,7 +23,7 @@ dataFold = '/Volumes/NielsenHome2/Brandon/data';
 % 
 % end
 
-load(fullfile(dataFold,'dataSets','cooling','V1cool_ori','anaMerge_dataSet.mat'))
+load(fullfile(dataFold,'dataSets','cooling',proj,'matchedSU','anaMerge_dataSet.mat'))
 
 LDR = [];
 RP = [];
@@ -35,8 +35,11 @@ for a = 1:length(animals)
     dat = sumStats{a};
     nU = height(dat{1});
 
-    cntrlLDR = dat{1}.ldr;
-    coolLDR = dat{2}.ldr;
+    goodUnitsCntrl = dat{1}.goodUnit;
+    goodUnitsCool = dat{2}.goodUnit;
+
+    cntrlLDR = dat{1}.ldr; cntrlLDR(~goodUnitsCntrl) = nan;
+    coolLDR = dat{2}.ldr; coolLDR(~goodUnitsCool) = nan;
     LDR = vertcat(LDR,[cntrlLDR coolLDR]);
 
     cntrlrPref = dat{1}.rPref;
@@ -48,13 +51,15 @@ for a = 1:length(animals)
 end
 
 figure; hold on
-LDRdiff = (LDR(:,2)-LDR(:,1))./(LDR(:,2)+LDR(:,1));
+% LDRdiff = (LDR(:,2)-LDR(:,1))./(LDR(:,2)+LDR(:,1));
+LDRdiff = LDR(:,2)-LDR(:,1);
 plot(AGE,LDRdiff,'k.')
 uAges = unique(ages);
 for a = 1:length(uAges)
     x(a) = mean(LDRdiff(AGE==uAges(a)),'omitnan');
 end
 plot(uAges,x,'ko')
+yline(0,'k--')
 xlabel('age')
 ylabel('delta Ldir')
 clear x
@@ -73,7 +78,8 @@ ylabel('cooled LDR')
 
 
 figure;hold on
-rPrefDiff = (RP(:,2) - RP(:,1))./(RP(:,2) + RP(:,1));
+% rPrefDiff = (RP(:,2) - RP(:,1))./(RP(:,2) + RP(:,1));
+rPrefDiff = RP(:,2)./RP(:,1);
 plot(AGE,rPrefDiff,'k.')
 for a = 1:length(uAges)
     x(a) = mean(rPrefDiff(AGE==uAges(a)),'omitnan');
@@ -83,6 +89,12 @@ xlabel('age')
 ylabel('SI')
 
 
+figure; hold on
+plot(LDRdiff,rPrefDiff,'k.')
+xline(0,'--')
+xlabel('delta Ldir')
+yline(1,'k--')
+ylabel('SI')
 
 
 
