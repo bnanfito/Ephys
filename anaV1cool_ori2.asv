@@ -128,21 +128,17 @@ figure; hold on
 siDist_age = vertcat(siDist_age{:});
 siDist = vertcat(siDist{:});
 plot(siDist_age,siDist,'k.')
-ageBins = min(siDist_age):2:max(siDist_age)+2;
+ageBins = min(siDist_age):2:max(siDist_age);
 for ab = 1:length(ageBins)-1
-    ageIdx = siDist_age>=ageBins(ab) & siDist_age<ageBins(ab+1);
-    binnedSImean(ab) = mean(siDist(ageIdx),'omitnan');
-    binnedSIsem(ab) = std(siDist(ageIdx),'omitnan')/sqrt(sum(ageIdx));
-    binnedSIage(ab) = mean(unique(siDist_age(ageIdx)));
+    ageIdx = siDist_age>ageBins(ab) & siDist_age<=ageBins(ab+1);
+    binnedSImean = mean(siDist(ageIdx),'omitnan');
+    binnedSIsem = std(siDist(ageIdx),'omitnan')/sqrt(sum(ageIdx));
+    binnedSIage = mean(unique(siDist_age(ageIdx)));
 end
 nanIdx = isnan(binnedSImean);
 binnedSImean = binnedSImean(~nanIdx);
 binnedSIsem = binnedSIsem(~nanIdx);
 binnedSIage = binnedSIage(~nanIdx);
-plot(binnedSIage,binnedSImean,'r','LineWidth',2)
-plot(repmat(binnedSIage,2,1),binnedSImean+([-1;1]*binnedSIsem),'r','LineWidth',2)
-
-figure; hold on
 plot(ages(nU>=uMin),SI(nU>=uMin),'k.','MarkerSize',20)
 plot(ages(nU<uMin),SI(nU<uMin),'ko','MarkerSize',7,'LineWidth',2)
 plot(repmat(ages,2,1),SI'+([1;-1]*semSI'),'k','LineWidth',2)
