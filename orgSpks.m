@@ -66,28 +66,20 @@ function [spks,trialExclude] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
         load(fullfile(physDir,[baseName '_p' num2str(probe) '_SUTrial.mat']),'SU','SUinfo')
         nUnits = length(SU);
         trialExclude = zeros(nTrials,1) == 1;
-
         load(fullfile(physDir,[baseName '_p' num2str(probe) '_spkSort.mat']),'spkSort');
         spkStruct = spkSort; 
-
-%         load(fullfile(physDir,[baseName '_p' num2str(probe) '_SULatency.mat']),'SUlatency')
-%         latency = SUlatency;
         latency = computeLatency_bn(SU,SUinfo,trialExclude);
-
+        spkTrialDat = SU;
         clear spkSort SUlatency
     elseif strcmp(anaMode,'MU')
         MUThreshTrialData(fullfile(dataFold,'Ephys'),animal,unit,expt,probe,'id',stimStartID,st,st,0)
         load(fullfile(physDir,[baseName '_p' num2str(probe) '_MUThreshTrial.mat']),'MUThresh','MUThreshInfo')
         nUnits = length(MUThresh);
         trialExclude = MUThreshInfo.trialExclude;
-
         load(fullfile(physDir,[baseName '_p' num2str(probe) '_MUspkMerge.mat']),'MUspkMerge');
         spkStruct = MUspkMerge;
-
-%         load(fullfile(physDir,[baseName '_p' num2str(probe) '_MULatency.mat']),'MUlatency')
-%         latency = MUlatency;
         latency = computeLatency_bn(MUThresh,MUThreshInfo,trialExclude);
-
+        spkTrialDat = MUThresh;
         clear MUspkMerge MUlatency
     end
 
@@ -95,11 +87,11 @@ function [spks,trialExclude] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
     for u = 1:nUnits 
     
         if strcmp(anaMode,'SU')
-            spks(u).unitId = SU(u).unitId;
-            spks(u).info = SU(u).unitClass;
+            spks(u).unitId = spkTrialDat(u).unitId;
+            spks(u).info = spkTrialDat(u).unitClass;
             spks(u).times = spkStruct.spktimes(spkStruct.unitid == spks(u).unitId);
         elseif strcmp(anaMode,'MU')
-            spks(u).unitId = MUThresh(u).detCh;
+            spks(u).unitId = spkTrialDat(u).detCh;
             spks(u).info = 'MU';
             spks(u).times = spkStruct.spktimes(spkStruct.detCh== spks(u).unitId);
             spks(u).xPos = id.probes(probe).x(spks(u).unitId);
@@ -115,7 +107,6 @@ function [spks,trialExclude] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
             trials = find(trialInfo.triallist == c);
             for r = 1:nReps
                 t = trials(r);
-
                 
                 % time vectors for different trial epochs
                 tvPre       = stimStart(t)-(predelay*sf):stimStart(t)-1;
@@ -127,25 +118,17 @@ function [spks,trialExclude] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
                 spks(u).stimCent = [spks(u).stimCent vertcat( (tvTrial( spks(u).train(:,t))-stimStart(t))/sf , ...
                                                                 repmat(t,1,length(find(spks(u).train(:,t)))) ) ];
 
-                if strcmp(anaMode,'MU') 
-                    
-                    if ismember(t,find(trialExclude))
-                        spks(u).fr.base(r,c) = nan;
-                        spks(u).fr.stim(r,c) = nan;
-                        spks(u).fr.bc(r,c) = nan;
-                    else
-                        spks(u).fr.base(r,c) =  MUThresh(u).baseFrate(t);
-                        spks(u).fr.stim(r,c) = MUThresh(u).stimFrate(t);
-                        spks(u).fr.bc(r,c) = spks(u).fr.stim(r,c)-spks(u).fr.base(r,c);
-                    end
-
-                elseif strcmp(anaMode,'SU')
-
-                    spks(u).fr.base(r,c) =  SU(u).baseFrate(t);
-                    spks(u).fr.stim(r,c) = SU(u).stimFrate(t);
+                if strcmp(anaMode,'MU') && ismember(t,find(trialExclude))
+                    spks(u).fr.base(r,c) = nan;
+                    spks(u).fr.stim(r,c) = nan;
+                    spks(u).fr.bc(r,c) = nan;
+                else
+                    spks(u).fr.base(r,c) =  spkTrialDat(u).baseFrate(t);
+                    spks(u).fr.stim(r,c) = spkTrialDat(u).stimFrate(t);
                     spks(u).fr.bc(r,c) = spks(u).fr.stim(r,c)-spks(u).fr.base(r,c);
-
                 end
+
+
 
 %                 s = spks(u).stimCent(1,:);
 %                 tID = spks(u).stimCent(2,:);
@@ -161,9 +144,9 @@ function [spks,trialExclude] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
             end
         end
 
-        baseEst = mean(spks(u).fr.base(:),'omitnan');
-        stdEst = std(spks(u).fr.base(:),'omitnan');
-        spks(u).fr.z = (spks(u).fr.stim - baseEst)./stdEst;
+        meanBase = mean(spks(u).fr.base(:),'omitnan');
+        stdBase = std(spks(u).fr.base(:),'omitnan');
+        spks(u).fr.z = (spks(u).fr.stim - meanBase)./stdBase;
     
     end
 
