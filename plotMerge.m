@@ -14,7 +14,8 @@ function [sumStats] = plotMerge(animalId, mergeId, probeId, dataFold, plt)
 % % dataFold = 'Y:\Brandon\data';
 anaMode = 'SU';
 
-clrs = {'k','c','m'};
+clrs = {'k','c','k'};
+linStyls = {'-','-','--'};
 plr = 0;
 alignTC = 0;
 
@@ -49,6 +50,7 @@ if plt == 1
     
             dat = sumStats{f};
             clr = clrs{f};
+            linStyl = linStyls{f};
     
             predelay = 1;
             stimTime = 1;
@@ -64,7 +66,7 @@ if plt == 1
     
     
     
-            subplot(nr,nc,1);hold on
+            subplot(nr,nc,1);hold on; box on
             binSize = 0.1;
             bins = -predelay:binSize:stimTime+postdelay;
             h = histogram(x,'BinEdges',bins);
@@ -78,7 +80,7 @@ if plt == 1
     
     
     
-            subplot(nr,nc,3);hold on
+            subplot(nr,nc,3);hold on; box on
             idx = x>-predelay & x<(stimTime+postdelay);
             plot(x(idx),y(idx),'.','Color',clr)
             trialExclude = dat.fr(u).trialNum(  isnan(dat.fr(u).bc)  );
@@ -119,7 +121,9 @@ if plt == 1
     %         ylabel('condition')
     
     
-    
+            if f==3
+                continue
+            end
             x = dat.condition{u}(strcmp(dat.paramKey{u},'ori'),:);
             y = dat.response{u};
             meanY = mean(y,'omitnan');
@@ -135,21 +139,26 @@ if plt == 1
                 polarplot(deg2rad([0 dat.meanVec{u}.angDir]),[0 dat.meanVec{u}.magDir],'k','LineWidth',2)
                 polarplot(deg2rad([0 dat.meanVec{u}.angDir]),[0 dat.meanVec{u}.magDir*dat.ldr(u)],'g','LineWidth',2)
             else
-                subplot(nr,nc,2);hold on
+                subplot(nr,nc,2);hold on;box on
                 if alignTC == 1
                     [x,meanY,i] = alignDirTuning(x,meanY);
                     sem = sem(i);
                     y = y(:,i);
+                else
+                    x = [x 360];
+                    y = [y y(:,1)];
+                    meanY = [meanY meanY(1)];
+                    sem = [sem sem(1)];
                 end
-                plot(x,y,'.','Color',clr)
-                plot(x,meanY,'-o','Color',clr)
-                plot(repmat(x,2,1),meanY+([1;-1]*sem),'Color',clr)
+%                 plot(x,y,'.','Color',clr)
+                plot(x,meanY,'-square','Color',clr,'MarkerSize',7,'MarkerFaceColor',clr,'LineStyle',linStyl,'LineWidth',2)
+                plot(repmat(x,2,1),meanY+([1;-1]*sem),'Color',clr,'LineWidth',2)
                 if alignTC == 1
                     xlim([-180 180])
                     xticks([-180 -90 0 90 180])
                     xlabel('motion dir. relative to pref. (deg)')
                 else
-                    plot(x_pref,y_pref,'r*')
+%                     plot(x_pref,y_pref,'r*')
                     xlim([0 360])
                     xticks([0 90 180 270])
                     xlabel('motion direction (deg)')

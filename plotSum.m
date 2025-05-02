@@ -1,6 +1,6 @@
 
 function plotSum(dat)
-plr = 0;
+plr = 1;
 alignTC = 1;
 svePlt = 0;
 
@@ -24,21 +24,35 @@ for u = uInd
     postdelay = 1;
     nTrials = max(dat.fr(u).trialNum(:));
     nConds = size(dat.cndKey{u},1);
+    if strcmp(dat.area{u},'PSS')
+        clr = 'r';
+    elseif strcmp(dat.area{u},'V1')
+        clr = 'b';
+    else
+        clr = 'k';
+    end
 
     x = dat.spkTimes{u}(1,:);
     y = dat.spkTimes{u}(2,:);
-    subplot(nr,nc,1);hold on
+
+    %PSTH
+    subplot(nr,nc,1); hold on; box on
     binSize = 0.1;
     bins = -predelay:binSize:stimTime+postdelay;
     h = histogram(x,'BinEdges',bins);
     h.EdgeColor = 'none';
+    h.FaceColor = clr;
     h.BinCounts = h.BinCounts/(nTrials*binSize);
     if ~isnan(dat.latency(u))
         xline(dat.latency(u),'--','LineWidth',2)
     end
+    maxY = ceil(max(h.BinCounts)+(max(h.BinCounts)/10));
+    patch([0 1 1 0],[0 0 maxY maxY],'k','EdgeColor','none','FaceAlpha',0.2)
     xlim([bins(1) bins(end)])
+    ylim([0 maxY]);
 
-    subplot(nr,nc,3);hold on
+    %RASTER (y = trial)
+    subplot(nr,nc,3); hold on; box on
     idx = x>-1 & x<2;
     plot(x(idx),y(idx),'k.')
     trialExclude = dat.fr(u).trialNum(  isnan(dat.fr(u).bc)  );
@@ -54,7 +68,8 @@ for u = uInd
     xlabel('time (sec)')
     ylabel('trial #')
 
-    subplot(nr,nc,4);hold on
+    %RASTER (y = condition)
+    subplot(nr,nc,4); hold on; box on
     for t = 1:nTrials
         xT = x(y==t & idx);
         if isempty(xT)
@@ -77,6 +92,7 @@ for u = uInd
     ylabel('condition')
     
 
+    %TUNING CURVE
     x = dat.condition{u}(strcmp(dat.paramKey{u},'ori'),:);
     y = dat.response{u};
     meanY = mean(y,'omitnan');
@@ -86,21 +102,23 @@ for u = uInd
     if plr == 1
         subplot(nr,nc,2,polaraxes);hold on
 %         polarplot(deg2rad(x),y,'k.')
-        polarplot(deg2rad([x x(1)]),mean([y y(:,1)],'omitnan') ,'k-o')
-        polarplot(repmat(deg2rad(x),2,1),mean(y,'omitnan')+([1;-1]*sem),'k')
-        polarplot(deg2rad(dat.oriPref(u)),dat.rPref(u),'r*')
-        polarplot(deg2rad([0 dat.meanVec{u}.angDir]),[0 dat.meanVec{u}.magDir],'k','LineWidth',2)
+        polarplot(deg2rad([x x(1)]),mean([y y(:,1)],'omitnan') ,[clr '-'],'LineWidth',2)
+        polarplot(deg2rad([x x(1)]),mean([y y(:,1)],'omitnan')+[sem sem(1)],[clr ':'],'LineWidth',1)
+        polarplot(deg2rad([x x(1)]),mean([y y(:,1)],'omitnan')-[sem sem(1)],[clr ':'],'LineWidth',1)
+%         polarplot(repmat(deg2rad(x),2,1),mean(y,'omitnan')+([1;-1]*sem),clr,'LineWidth',2)
+%         polarplot(deg2rad(dat.oriPref(u)),dat.rPref(u),'r*')
+%         polarplot(deg2rad([0 dat.meanVec{u}.angDir]),[0 dat.meanVec{u}.magDir],clr,'LineWidth',2)
         polarplot(deg2rad([0 dat.meanVec{u}.angDir]),[0 dat.meanVec{u}.magDir*dat.ldr(u)],'g','LineWidth',2)
     else
-        subplot(nr,nc,2);hold on
+        subplot(nr,nc,2); hold on; box on
         if alignTC == 1
             [x,meanY,i] = alignDirTuning(x,meanY);
             sem = sem(i);
             y = y(:,i);
         end
-        plot(x,y,'k.')
-        plot(x,meanY,'k-o')
-        plot(repmat(x,2,1),meanY+([1;-1]*sem),'k')
+%         plot(x,y,[clr '.'])
+        plot(x,meanY,[clr '-'],'Marker','square','MarkerSize',7,'MarkerFaceColor',clr,'LineWidth',2)
+        plot(repmat(x,2,1),meanY+([1;-1]*sem),clr,'LineWidth',2)
         if alignTC == 1
             xlim([-180 180])
             xticks([-180 -90 0 90 180])
@@ -115,7 +133,7 @@ for u = uInd
     end
     
     
-    ttl = [dat.exptName{u} ' ' dat.area{u} ' ' dat.uInfo{u} ' ' num2str(dat.uID(u))];
+    ttl = [dat.exptName{u} ' ' dat.area{u} ' ' dat.uInfo{u} ' ' num2str(dat.uID(u)) ' ldr=' num2str(dat.ldr(u))];
     sgtitle(ttl)
     figName = [dat.exptName{u} '_' dat.area{u} '_' dat.uInfo{u} '_' num2str(dat.uID(u))];
     if svePlt == 1
