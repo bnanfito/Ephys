@@ -3,7 +3,8 @@ clear all
 close all
 
 proj = 'V1cool_ori';
-dataFold = 'Y:\Brandon\data';
+dataFold = '/Volumes/NielsenHome2/Brandon/data';
+% dataFold = 'Y:\Brandon\data';
 anaMode = 'SU';
 
 %% list animals
@@ -89,10 +90,10 @@ ylabel('cooled LDR')
 figure;hold on
 SI = (RP(:,2) - RP(:,1))./(RP(:,2) + RP(:,1));
 plot(AGE,SI,'ko')
-% for a = 1:length(uAges)
-%     x(a) = mean(SI(AGE==uAges(a)),'omitnan');
-% end
-% plot(uAges,x,'ko')
+for a = 1:length(uAges)
+    x(a) = mean(SI(AGE==uAges(a)),'omitnan');
+end
+plot(uAges,x,'k*')
 ageBins = min(uAges):2:max(uAges);
 for ab = 1:length(ageBins)-1
     ageIdx = AGE>ageBins(ab) & AGE<=ageBins(ab+1);
@@ -108,6 +109,19 @@ plot(binnedAgeX,binnedAgeSImean,'r','LineWidth',2)
 plot(repmat(binnedAgeX,2,1),binnedAgeSImean+([-1;1]*binnedAgeSIsem),'r','LineWidth',2)
 xlabel('age')
 ylabel('SI')
+
+ageGroups = {[min(AGE) 32],[33 36],[37 42],[43 max(AGE)]};
+clrs = {[0.4660 0.6740 0.1880],[0.9290 0.6940 0.1250],[0.8500 0.3250 0.0980],[0.6350 0.0780 0.1840]};
+figure;hold on
+for ag = 1:length(ageGroups)
+    cdf = cdfplot(SI(AGE>=ageGroups{ag}(1) & AGE<=ageGroups{ag}(2)));
+    cdf.Color = clrs{ag};
+    cdf.LineWidth = 2;
+    lbl{ag} = ['P' num2str(ageGroups{ag}(1)) '-' num2str(ageGroups{ag}(2))];
+end
+legend(lbl);
+xlabel('SI')
+ylabel('percentile')
 
 
 figure; hold on
