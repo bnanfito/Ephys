@@ -7,7 +7,7 @@ dataFold = '/Volumes/NielsenHome2/Brandon/data';
 % dataFold = 'Y:\Brandon\data';
 anaMode = 'SU';
 
-%% list animals
+%% Build Project Table
 
 % projTbl = getProjectFiles(proj,1,'age','recSite','penNr','priorMFlag','priorDescr',...
 %                                        'duringMFlag','manipDescr','manipDetail',...
@@ -36,6 +36,8 @@ anaMode = 'SU';
 
 load(fullfile(dataFold,'dataSets','cooling',proj,'matchedSU',[proj '_matchedSUdataSet.mat']))
 
+%% Organize Data
+
 LDR = [];
 RP = [];
 AGE = [];
@@ -59,7 +61,25 @@ for a = 1:length(animals)
 
     AGE = vertcat(AGE,repmat(ages(a),nU,1));
 
+    for u = 1:nU
+        meanCntrlY = mean(dat{1}.response{u},'omitnan');
+        [x,cntrlTC{a}(u,:),i{a}(u,:)] = alignDirTuning(dat{1}.condition{u}(strcmp(dat{1}.paramKey{u},'ori'),:),meanCntrlY);
+        coolTC{a}(u,:) = mean(dat{2}.response{u}(:,i{a}(u,:)),'omitnan');
+        postCoolTC{a}(u,:) = mean(dat{3}.response{u}(:,i{a}(u,:)),'omitnan');
+    end
+
 end
+TC(:,:,1) = vertcat(cntrlTC{:});
+TC(:,:,2) = vertcat(coolTC{:});
+TC(:,:,3) = vertcat(postCoolTC{:});
+TC(TC<0) = 0;
+for tId = 1:3
+    maxR = max(TC(:,:,tId),[],2);
+    maxR(maxR==0) = 1;
+    TC(:,:,tId) = TC(:,:,tId)./maxR;
+end
+
+%% Plot
 
 figure; hold on
 LDRdiff = LDR(:,2)-LDR(:,1);
@@ -132,7 +152,13 @@ yline(0,'k--')
 ylabel('SI')
 
 
-
+figure; hold on
+a = TC(:,:,1);
+b = TC(:,:,2);
+c = TC(:,:,3);
+plot(mean(a,'omitnan'))
+plot(mean(b,'omitnan'))
+plot(mean(c,'omitnan'))
 
 
 
