@@ -3,8 +3,9 @@ close all
 
 % dataFold = '/Volumes/Lab drive/Brandon/data/dataSets/DSdev';
 % dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/DSdev';
+dataFold = '/Volumes/NielsenHome2/Brandon/data/dataSets/DSdev';
 % dataFold = 'F:\Brandon\data\dataSets\DSdev';
-dataFold = 'Y:\Brandon\data\dataSets\DSdev';
+% dataFold = 'Y:\Brandon\data\dataSets\DSdev';
 load(fullfile(dataFold,"DSdev_SUdataSet.mat"))
 
 areas = {'V1','PSS'};
@@ -51,41 +52,42 @@ for ar = 1:nAR
         curDat = distDat{ar,ag};
         subplot(nAR,nAG,ag+(nAG*(ar-1)))
         
-%         imagesc(curDat.rdm)
-%         colorbar
-%         if ag == 1
-%             nYtick = length(curDat.cMean);
-%             yticks(1:2:nYtick)
-%             yticklabels(curDat.cMean(1:2:nYtick))
-%         else
-%             yticks([])
-%         end
-%         if ar == nAR
-%             nXtick = length(curDat.cMean);
-%             xticks(1:2:nXtick)
-%             xticklabels(curDat.cMean(1:2:nXtick))
-%         else
-%             xticks([])
-%         end
-        
-        hold on
-        score = vertcat(curDat.score,curDat.score(1,:));
-        plot3(score(:,1),score(:,2),score(:,3),'k','LineWidth',1.5)
-        np = size(curDat.score,1);
-        dirClrs = hsv(np);
-        oriClrs = repmat(hsv(np/2),2,1);
-        for i = 1:np
-            plot3(score(i,1),score(i,2),score(i,3),'.','Color',oriClrs(i,:),'MarkerSize',30)
+        imagesc(curDat.rdm)
+        colorbar
+        if ag == 1
+            nYtick = length(curDat.cMean);
+            yticks(1:2:nYtick)
+            yticklabels(curDat.cMean(1:2:nYtick))
+        else
+            yticks([])
         end
-        xlabel('PC1')
-        ylabel('PC2')
-        zlabel('PC3')
-        view(2)
-        oriID = mod(curDat.cMean,180)';
-        oris = unique(oriID);
-%         for o = 1:length(oris)
-%             plot3(curDat.score(oriID==oris(o),1),curDat.score(oriID==oris(o),2),curDat.score(oriID==oris(o),3),'--','Color',[0.6 0.6 0.6],'LineWidth',1.5)
+        if ar == nAR
+            nXtick = length(curDat.cMean);
+            xticks(1:2:nXtick)
+            xticklabels(curDat.cMean(1:2:nXtick))
+        else
+            xticks([])
+        end
+        
+%         hold on
+%         score = vertcat(curDat.score,curDat.score(1,:));
+%         plot3(score(:,1),score(:,2),score(:,3),'k','LineWidth',1.5)
+%         np = size(curDat.score,1);
+%         dirClrs = hsv(np);
+%         oriClrs = repmat(hsv(np/2),2,1);
+%         for i = 1:np
+%             plot3(score(i,1),score(i,2),score(i,3),'.','Color',oriClrs(i,:),'MarkerSize',30)
 %         end
+%         xlabel('PC1')
+%         ylabel('PC2')
+%         zlabel('PC3')
+%         view(3)
+%         box on
+%         oriID = mod(curDat.cMean,180)';
+%         oris = unique(oriID);
+% %         for o = 1:length(oris)
+% %             plot3(curDat.score(oriID==oris(o),1),curDat.score(oriID==oris(o),2),curDat.score(oriID==oris(o),3),'--','Color',[0.6 0.6 0.6],'LineWidth',1.5)
+% %         end
 
 %         hold on
 %         dispIdx = curDat.cMean>0 & curDat.cMean<=180;

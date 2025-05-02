@@ -34,13 +34,13 @@ cTrial = repmat(cMean,nReps,1);cTrial = cTrial(:)';
 rTrial = rTrial./max(rTrial);
 rMean = rMean./max(rMean);
 
-%scramble Pref oris
-scrmblIdx_mean = randi(nConds,nU,1);
-scrmblIdx_trial = randi(nTrial,nU,1);
-for idx = 1:nU
-    rMean(:,idx) = circshift(rMean(:,idx),scrmblIdx_mean(idx));
-    rTrial(:,idx) = circshift(rTrial(:,idx),scrmblIdx_trial(idx));
-end
+% %scramble Pref oris
+% scrmblIdx_mean = randi(nConds,nU,1);
+% scrmblIdx_trial = randi(nTrial,nU,1);
+% for idx = 1:nU
+%     rMean(:,idx) = circshift(rMean(:,idx),scrmblIdx_mean(idx));
+%     rTrial(:,idx) = circshift(rTrial(:,idx),scrmblIdx_trial(idx));
+% end
 
 if tAve == 1
     x = rMean;
