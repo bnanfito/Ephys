@@ -168,7 +168,7 @@ if plt == 1
     
             trialCount = trialCount+nTrials;
         end
-        ttl = [dat.exptName{u}(1:5) ' ' mergeId ' ' dat.area{u} ' ' dat.uInfo{u} ' ' num2str(dat.uID(u))];
+        ttl = [dat.exptName{u}(1:5) ' '   dat.area{u} ' ' dat.uInfo{u} ' ' num2str(dat.uID(u))];
         sgtitle(ttl)
     end
 
