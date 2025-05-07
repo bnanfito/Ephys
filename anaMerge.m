@@ -9,32 +9,32 @@ anaMode = 'SU';
 
 %% Build Project Table
 
-projTbl = getProjectFiles(proj,1,'age','recSite','penNr','priorMFlag','priorDescr',...
-                                       'duringMFlag','manipDescr','manipDetail',...
-                                       'looperNameCond1','looperNameCond2',...
-                                       'looperNameCond3','looperNameCond4',...
-                                       'looperNameCond5');
-animals = unique(projTbl.experimentId);
-for a = 1:length(animals)
-    aniIdx = strcmp(projTbl.experimentId,animals{a});
-    ages(a) = unique(projTbl.age(aniIdx));
-    cd(fullfile(dataFold,'Ephys',animals{a}))
-    folders = dir;
-    fileIdx = find(contains({folders.name},'MMM'));
-    if isempty(fileIdx)
-        sumStats{a} = [];
-        continue
-    end
-    mergeName{a,1} = folders(fileIdx).name;
-    mergeId = mergeName{a}(12:end);
-    load(fullfile(dataFold,'Ephys',animals{a},mergeName{a},[mergeName{a} '_id.mat']))
-    probeId = find(strcmp({id.probes.area},'PSS'));
-    mergeName{a,1} = [mergeName{a,1} '_p' num2str(probeId)];
-    disp(['generating sumStats for ' mergeName{a,1}])
-    [sumStats{a}] = plotMerge(animals{a}, mergeId, probeId, dataFold, 0);
-end
+% projTbl = getProjectFiles(proj,1,'age','recSite','penNr','priorMFlag','priorDescr',...
+%                                        'duringMFlag','manipDescr','manipDetail',...
+%                                        'looperNameCond1','looperNameCond2',...
+%                                        'looperNameCond3','looperNameCond4',...
+%                                        'looperNameCond5');
+% animals = unique(projTbl.experimentId);
+% for a = 1:length(animals)
+%     aniIdx = strcmp(projTbl.experimentId,animals{a});
+%     ages(a) = unique(projTbl.age(aniIdx));
+%     cd(fullfile(dataFold,'Ephys',animals{a}))
+%     folders = dir;
+%     fileIdx = find(contains({folders.name},'MMM'));
+%     if isempty(fileIdx)
+%         sumStats{a} = [];
+%         continue
+%     end
+%     mergeName{a,1} = folders(fileIdx).name;
+%     mergeId = mergeName{a}(12:end);
+%     load(fullfile(dataFold,'Ephys',animals{a},mergeName{a},[mergeName{a} '_id.mat']))
+%     probeId = find(strcmp({id.probes.area},'PSS'));
+%     mergeName{a,1} = [mergeName{a,1} '_p' num2str(probeId)];
+%     disp(['generating sumStats for ' mergeName{a,1}])
+%     [sumStats{a}] = plotMerge(animals{a}, mergeId, probeId, dataFold, 0);
+% end
 
-% load(fullfile(dataFold,'dataSets','cooling',proj,'matchedSU',[proj '_matchedSUdataSet.mat']))
+load(fullfile(dataFold,'dataSets','cooling',proj,'matchedSU',[proj '_matchedSUdataSet.mat']))
 
 %% Organize Data
 
@@ -109,17 +109,17 @@ ylabel('cooled LDR')
 
 figure;hold on
 SI = (RP(:,2) - RP(:,1))./(RP(:,2) + RP(:,1));
-plot(AGE,SI,'ko')
-for a = 1:length(uAges)
-    x(a) = mean(SI(AGE==uAges(a)),'omitnan');
-end
-plot(uAges,x,'k*')
-ageBins = min(uAges):2:max(uAges);
+plot(AGE,SI,'ko','MarkerSize',3,'MarkerFaceColor','k')
+% for a = 1:length(uAges)
+%     x(a) = mean(SI(AGE==uAges(a)),'omitnan');
+% end
+% plot(uAges,x,'k*')
+ageBins = min(uAges):3:max(uAges);
 for ab = 1:length(ageBins)-1
     ageIdx = AGE>ageBins(ab) & AGE<=ageBins(ab+1);
     binnedAgeSImean(ab) = mean(SI(ageIdx),'omitnan');
     binnedAgeSIsem(ab) = std(SI(ageIdx),'omitnan')/sqrt(sum(ageIdx));
-    binnedAgeX(ab) = mean(unique(AGE(ageIdx)));
+    binnedAgeX(ab) = mean(ageBins(ab:ab+1));
 end
 nanIdx = isnan(binnedAgeSImean);
 binnedAgeSImean = binnedAgeSImean(~nanIdx);
@@ -129,6 +129,7 @@ plot(binnedAgeX,binnedAgeSImean,'r','LineWidth',2)
 plot(repmat(binnedAgeX,2,1),binnedAgeSImean+([-1;1]*binnedAgeSIsem),'r','LineWidth',2)
 xlabel('age')
 ylabel('SI')
+box on
 
 ageGroups = {[min(AGE) 32],[33 36],[37 42],[43 max(AGE)]};
 clrs = {[0.4660 0.6740 0.1880],[0.9290 0.6940 0.1250],[0.8500 0.3250 0.0980],[0.6350 0.0780 0.1840]};
