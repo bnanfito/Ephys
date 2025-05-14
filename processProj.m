@@ -2,7 +2,7 @@ clear all
 close all
 
 anaMode = 'MU';
-proj = {'V1cool_ori'};
+proj = {'Train_V1Cool_stimBlock'};
 
 for p = 1:length(proj)
 dataFold = 'Y:\Brandon\data';
@@ -16,6 +16,10 @@ for e = 1:height(projectTbl)
     expt = projectTbl.experimentNr{e};
     probe = projectTbl.probeId(e);
     exptName = [animal '_u' unit '_' expt];
+    if strcmp(exptName,'febk7_u000_009') || strcmp(exptName,'febl7_u000_031')
+        continue
+    end
+
     % necessary files
     sourceDir = fullfile(dataFold,'Ephys',animal,exptName);
     trialInfoFile = [exptName '_trialInfo.mat'];

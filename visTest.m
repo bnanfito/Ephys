@@ -12,7 +12,9 @@ function [pVis] = visTest(sumStats)
      
         pVis(u).signrank = signrank(bcFR);
         pVis(u).ranksum = ranksum(baseFR,stimFR);
-        pVis(u).anova = anova1([sumStats.response{u},sumStats.rBlank{u}],[],'off');
+        if ismember('rBlank',sumStats.Properties.VariableNames)
+            pVis(u).anova = anova1([sumStats.response{u},sumStats.rBlank{u}],[],'off');
+        end
 
     end
     pVis = pVis';

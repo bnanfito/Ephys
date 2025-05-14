@@ -8,42 +8,42 @@ dataFold = 'Y:\Brandon\data';
 proj = 'Train_V1Cool_stimBlock';
 anaMode = 'MU';
 
-% projectTbl=getProjectFiles(proj,1,'age','recSite','priorMFlag','priorDescr','duringMFlag','manipDescr','manipDetail');
-% for e = 1:height(projectTbl)
-% 
-%     animal = projectTbl.experimentId{e};
-%     unit = projectTbl.unitNr{e};
-%     expt = projectTbl.experimentNr{e};
-%     exptName = [animal '_u' unit '_' expt];
-%     probe = projectTbl.probeId(e);
-% 
-% %     x(e) = isfile(fullfile(dataFold,'Ephys',animal,exptName,[exptName '_p' num2str(probe) '_MUspkMerge.mat']));
-%     if strcmp(exptName,'febk7_u000_009') || strcmp(exptName,'febl7_u000_031')
-%         continue
-%     end
-%     disp(['generating sumStats for ' exptName])
-%     [sumStats{e,1}] = anaOri(animal,unit,expt,probe,anaMode,dataFold,0,0);
-% end
-% projectTbl.sumStats = sumStats;
-% save(fullfile(dataFold,'dataSets','training',proj(1:end-10),anaMode,[proj '_' anaMode 'dataSet.mat']),'proj','projectTbl')
+projectTbl=getProjectFiles(proj,1,'age','recSite','priorMFlag','priorDescr','duringMFlag','manipDescr','manipDetail');
+for e = 1:height(projectTbl)
 
-load(fullfile(dataFold,'dataSets','training',proj(1:end-10),anaMode,[proj '_' anaMode 'dataSet.mat']),'projectTbl')
+    animal = projectTbl.experimentId{e};
+    unit = projectTbl.unitNr{e};
+    expt = projectTbl.experimentNr{e};
+    exptName = [animal '_u' unit '_' expt];
+    probe = projectTbl.probeId(e);
+
+%     x(e) = isfile(fullfile(dataFold,'Ephys',animal,exptName,[exptName '_p' num2str(probe) '_MUspkMerge.mat']));
+    if strcmp(exptName,'febk7_u000_009') || strcmp(exptName,'febl7_u000_031')
+        continue
+    end
+    disp(['generating sumStats for ' exptName])
+    [sumStats{e,1}] = anaOri(animal,unit,expt,probe,anaMode,dataFold,0,0);
+end
+projectTbl.sumStats = sumStats;
+save(fullfile(dataFold,'dataSets','training',proj(1:end-10),anaMode,[proj '_' anaMode 'dataSet.mat']),'proj','projectTbl')
+
+% load(fullfile(dataFold,'dataSets','training',proj(1:end-10),anaMode,[proj '_' anaMode 'dataSet.mat']),'projectTbl')
 
 %% Organize Data
 
-area = 'PSS';
+area = 'V1';
 areaIdx = strcmp(projectTbl.recSite,area);
-projectTbl = projectTbl(areaIdx,:);
+areaTbl = projectTbl(areaIdx,:);
 
-animals = unique(projectTbl.experimentId);
+animals = unique(areaTbl.experimentId);
 for a = 1:length(animals)
     curAni = animals{a};
-    curAniIdx = find(strcmp(projectTbl.experimentId,curAni));
+    curAniIdx = find(strcmp(areaTbl.experimentId,curAni));
     for b = 1:length(curAniIdx)
         curBlockIdx = curAniIdx(b);
-        blockName{b,a} = [projectTbl.experimentId{curBlockIdx} '_u' projectTbl.unitNr{curBlockIdx} '_' projectTbl.experimentNr{curBlockIdx}];
-        if ~isempty(projectTbl.sumStats{curBlockIdx})
-            blockData{b,a} = projectTbl.sumStats{curBlockIdx}(projectTbl.sumStats{curBlockIdx}.goodUnit,:);
+        blockName{b,a} = [areaTbl.experimentId{curBlockIdx} '_u' areaTbl.unitNr{curBlockIdx} '_' areaTbl.experimentNr{curBlockIdx}];
+        if ~isempty(areaTbl.sumStats{curBlockIdx})
+            blockData{b,a} = areaTbl.sumStats{curBlockIdx}(areaTbl.sumStats{curBlockIdx}.goodUnit,:);
         end
     end
 end
