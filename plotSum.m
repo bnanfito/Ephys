@@ -79,7 +79,7 @@ for u = uInd
         plot(xT,yT,'k.')
     end
     xlim([-predelay stimTime+postdelay])
-    if ~isempty(dat.rBlank{u})
+    if ismember('rBlank',dat.Properties.VariableNames)
         ylim([0 nConds+1])
     else
         ylim([0 nConds])
