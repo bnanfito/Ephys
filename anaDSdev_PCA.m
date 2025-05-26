@@ -71,18 +71,20 @@ for ar = 1:nAR
         
 %         hold on
 %         score = vertcat(curDat.score,curDat.score(1,:));
+% %         score = mdscale(curDat.rdm,3); score = vertcat(score,score(1,:));
 %         plot3(score(:,1),score(:,2),score(:,3),'k','LineWidth',1.5)
 %         np = size(curDat.score,1);
 %         dirClrs = hsv(np);
 %         oriClrs = repmat(hsv(np/2),2,1);
 %         for i = 1:np
-%             plot3(score(i,1),score(i,2),score(i,3),'.','Color',oriClrs(i,:),'MarkerSize',30)
+%             plot3(score(i,1),score(i,2),score(i,3),'.','Color',dirClrs(i,:),'MarkerSize',30)
 %         end
 %         xlabel('PC1')
 %         ylabel('PC2')
 %         zlabel('PC3')
 %         view(3)
 %         box on
+%         grid on
 %         oriID = mod(curDat.cMean,180)';
 %         oris = unique(oriID);
 % %         for o = 1:length(oris)

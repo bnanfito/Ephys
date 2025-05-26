@@ -4,7 +4,7 @@ close all
 
 %% Load Project Table
 
-dataFold = 'Y:\Brandon\data';
+dataFold = '/Volumes/NielsenHome2/Brandon/data';
 proj = 'Train_V1Cool_stimBlock';
 anaMode = 'MU';
 
@@ -103,19 +103,19 @@ nAni = size(blockData,2);
 % ylabel(metric)
 
 
-% dat = vertcat(blockData{:});
-% spkTimes = [dat.spkTimes{:}];
-% nTrials = max(spkTimes(2,:));
-% sf = 20000;
-% bw = 1/sf;
-% spkTimes = spkTimes(1,:);
-% nT = floor(min(spkTimes)):bw:ceil(max(spkTimes));
-% h = histcounts(spkTimes,nT);
-% h = h/(height(dat)*(nTrials*nBlk)*bw);
-% figure;hold on
-% kernelL = sf/10;
-% kernel = ones(1,kernelL)*(1/kernelL);
-% plot(nT(2:end),h)
-% plot(nT(2:end),conv(h,kernel,'same'))
+dat = vertcat(blockData{:});
+spkTimes = [dat.spkTimes{:}];
+nTrials = max(spkTimes(2,:));
+sf = 20000;
+bw = 1/sf;
+spkTimes = spkTimes(1,:);
+nT = floor(min(spkTimes)):bw:ceil(max(spkTimes));
+h = histcounts(spkTimes,nT);
+h = h/(height(dat)*(nTrials*nBlk)*bw);
+figure;hold on
+kernelL = sf/10;
+kernel = ones(1,kernelL)*(1/kernelL);
+plot(nT(2:end),h)
+plot(nT(2:end),conv(h,kernel,'same'))
 
 
