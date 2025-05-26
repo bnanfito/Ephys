@@ -9,7 +9,7 @@ function [projectTbl,stats,data] = anaTrain(proj)
 
     dataFold = 'Y:\Brandon\data';
 %     dataFold = '/Volumes/NielsenHome2/Brandon/data';
-    dataFold = fullfile(dataFold,'dataSets','training',proj,anaMode,thresh);
+%     dataFold = fullfile(dataFold,'dataSets','training',proj,anaMode,thresh);
 
 %% load project table
 

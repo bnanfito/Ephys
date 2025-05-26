@@ -4,11 +4,11 @@ close all
 
 % dataFold = '/Volumes/Lab drive/Brandon/data';
 dataFold = 'Y:\Brandon\data';
-area = 'V1';
+area = 'PSS';
 anaMode = 'MU';
-before = {'febp7_u000_001'};
-during = {'febp7_u000_002'};
-after = {'febp7_u000_004','febp7_u001_000','febp7_u002_001'};
+before = {'febj4_u000_003'};
+during = {};
+after = {'febj4_u000_024'};
 
 %% Organize Data
 
@@ -30,7 +30,7 @@ for e = 1:3
         unit = exptName(8:10);
         expt = exptName(12:14);
         [dat{l,e}] = anaOri(animal,unit,expt,area,anaMode,dataFold,0,0);
-        dat{l,e} = dat{l,e}(dat{l,e}.goodUnit==1,:);
+        dat{l,e} = dat{l,e}(screenUnits(dat{l,e},anaMode),:);
     end
 
 end

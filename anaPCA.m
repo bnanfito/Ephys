@@ -68,7 +68,9 @@ end
 [coeff,score,latent,tsquare,explained] = pca(x);
 
 % RDM
-rdm = 1-corr(x','type','Spearman');
+diss = pdist(x,'spearman');
+rdm = squareform(diss);
+% rdm = 1-corr(x','type','Spearman');
 % rdm = dist(x');
 % rdm = squareform(pdist(x,'squaredeuclidean'));
 

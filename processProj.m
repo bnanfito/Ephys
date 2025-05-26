@@ -2,7 +2,7 @@ clear all
 close all
 
 anaMode = 'MU';
-proj = {'Train_V1Cool_stimBlock'};
+proj = {'Train_MonoBiDir'};
 
 for p = 1:length(proj)
 dataFold = 'Y:\Brandon\data';
