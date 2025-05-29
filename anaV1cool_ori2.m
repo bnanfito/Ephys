@@ -5,10 +5,10 @@ close all
 anaMode = 'MU';
 proj = 'V1cool_ori';
 area = 'PSS';
+dataFold = fullfile('Y:\Brandon\data');
 
 %% Generate Project Table
 
-dataFold = fullfile('Y:\Brandon\data');
 % projTbl = getProjectFiles(proj,1,'age','recSite','penNr','priorMFlag','priorDescr',...
 %                                        'duringMFlag','manipDescr','manipDetail',...
 %                                        'looperNameCond1','looperNameCond2',...

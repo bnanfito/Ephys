@@ -3,7 +3,7 @@
 function [projectTbl,stats,data] = anaTrain(proj)
 
     anaMode = 'MU';
-    sve = 0;
+    sve = 1;
     thresh = 'threshold4';
     visTest = 'ranksum';
 
@@ -14,6 +14,7 @@ function [projectTbl,stats,data] = anaTrain(proj)
 %% load project table
 
     projectTbl=getProjectFiles(proj,1,'age','recSite','penNr','priorMFlag','priorDescr','duringMFlag','manipDescr','manipDetail');
+%     projectTbl = projectTbl(~(strcmp(projectTbl.experimentId,'febm8')|strcmp(projectTbl.experimentId,'febn9')),:);
 
 %     load(fullfile(dataFold,[proj '_' anaMode 'dataSet.mat']),'projectTbl')
 %     projectTbl = projectTbl(:,~strcmp(projectTbl.Properties.VariableNames,'sumStats'));

@@ -11,10 +11,6 @@ figDir = fullfile(dataFold,'Figures');
 
 exptName = [animal '_u' unit '_' expt];
 
-visTest = 'ranksum';
-alpha = 0.01;
-
-
 %% Load Data
 
 exptDir = fullfile(physDir,animal,exptName);
@@ -119,8 +115,7 @@ end
 varNames = {'exptName','probe','area','uInfo','uID','spkTimes','latency','fr','paramKey','cndKey','oriPref','response','condition','rPref','nkFit','cF','rBlank'};
 sumStats = table(exptID',probeID',areaID',{spks.info}',uID',{spks.stimCent}',vertcat(spks.late),vertcat(spks.fr),paramKey',cndKey',oriPref',R',C',rPref',nk',cF',Rblank','VariableNames',varNames);
 
-[goodUnit,pVis] = screenUnits(sumStats,anaMode,blank,visTest,alpha);
-sumStats.goodUnit = goodUnit';
+[pVis] = visTest(sumStats);
 sumStats.pVis = pVis;
 
 if strcmp(anaMode,'MU')
