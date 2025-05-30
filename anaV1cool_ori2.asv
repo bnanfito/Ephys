@@ -128,7 +128,7 @@ figure; hold on
 siDist_age = vertcat(siDist_age{:});
 siDist = vertcat(siDist{:});
 plot(siDist_age,siDist,'k.')
-ageBins = min(siDist_age):3:max(siDist_age)+3;
+ageBins = min(siDist_age):2:max(siDist_age)+2;
 for ab = 1:length(ageBins)-1
     ageIdx = siDist_age>=ageBins(ab) & siDist_age<ageBins(ab+1);
     binnedSImean(ab) = mean(siDist(ageIdx),'omitnan');

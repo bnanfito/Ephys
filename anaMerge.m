@@ -15,6 +15,7 @@ anaMode = 'SU';
 %                                        'looperNameCond3','looperNameCond4',...
 %                                        'looperNameCond5');
 % animals = unique(projTbl.experimentId);
+% sumStats = [];
 % for a = 1:length(animals)
 %     aniIdx = strcmp(projTbl.experimentId,animals{a});
 %     ages(a) = unique(projTbl.age(aniIdx));
@@ -22,7 +23,7 @@ anaMode = 'SU';
 %     folders = dir;
 %     fileIdx = find(contains({folders.name},'MMM'));
 %     if isempty(fileIdx)
-%         sumStats{a} = [];
+%         sumStats = vertcat(sumStats,{[],[],[]});
 %         continue
 %     end
 %     mergeName{a,1} = folders(fileIdx).name;
@@ -31,21 +32,29 @@ anaMode = 'SU';
 %     probeId = find(strcmp({id.probes.area},'PSS'));
 %     mergeName{a,1} = [mergeName{a,1} '_p' num2str(probeId)];
 %     disp(['generating sumStats for ' mergeName{a,1}])
-%     [sumStats{a}] = plotMerge(animals{a}, mergeId, probeId, dataFold, 0);
+%     [out] = plotMerge(animals{a}, mergeId, probeId, dataFold, 0);
+%     sumStats = vertcat(sumStats,out);
 % end
 
 load(fullfile(dataFold,'dataSets','cooling',proj,'matchedSU',[proj '_matchedSUdataSet.mat']))
 
 %% Organize Data
 
+preDat = vertcat(sumStats{:,1}); goodId(:,1) = screenUnits(preDat,'SU');
+coolDat = vertcat(sumStats{:,2}); goodId(:,2) = screenUnits(coolDat,'SU');
+postDat = vertcat(sumStats{:,3}); goodId(:,3) = screenUnits(postDat,'SU');
+for u = 1:height(preDat)
+    uAge(u,1) = ages(strcmp(animals,preDat.exptName{u}(1:5)));
+end
+
 LDR = [];
 RP = [];
 AGE = [];
 for a = 1:length(animals)
-    if isempty(sumStats{a}) || (isempty(sumStats{a}{1}) && isempty(sumStats{a}{2}))
+    if isempty(sumStats{a,1})
         continue
     end
-    dat = sumStats{a};
+    dat = sumStats(a,:);
     nU = height(dat{1});
 
     goodUnitsCntrl = screenUnits(dat{1},anaMode);
