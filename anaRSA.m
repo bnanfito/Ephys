@@ -6,12 +6,12 @@ close all
 
 x = 0:22.5:337.5;
 mu = 180;
-std = 10;
+std = 30;
 mu2 = mod(mu+180,360);
 tc1 = normpdf(x,mu,std);
-shift = find(x == mod(180+180,360))-find(x==180);
+shift = find(x == mod(mu+180,360))-find(x==180);
 tc2 = circshift(tc1,shift);
-tc = tc1+tc2;
+tc = tc1;
 tc = repmat(tc,100,1);
 for i = 2:size(tc,1)
     tc(i,:) = circshift(tc(i,:),randi(size(tc,2)));

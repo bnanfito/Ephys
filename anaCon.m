@@ -117,6 +117,7 @@ sumStats = table(exptID',probeID',areaID',{spks.info}',uID',{spks.stimCent}',ver
 
 [pVis] = visTest(sumStats);
 sumStats.pVis = pVis;
+goodUid = screenUnits(sumStats,anaMode);
 
 if strcmp(anaMode,'MU')
     sumStats.xPos = vertcat(spks.xPos);
@@ -183,7 +184,7 @@ if plt == 1
         yline(0,'k')
 
         ttl = [sumStats.uInfo{u} '#' num2str(sumStats.uID(u))];
-        if ~ismember(u,find(sumStats.goodUnit))
+        if ~ismember(u,find(goodUid))
             ttl = ['(BAD) ' ttl];
         end
         sgtitle(ttl)
