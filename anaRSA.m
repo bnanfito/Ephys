@@ -4,7 +4,7 @@ close all
 
 %% generate tuning curves
 
-x = 0:22.5:337.5;
+x = 0:30:330;
 mu = 180;
 std = 30;
 mu2 = mod(mu+180,360);
@@ -32,10 +32,14 @@ rdm = squareform(diss);
 figure
 
 subplot(2,2,1);hold on
-plot(x,tc(1,:))
+plot([x x(1)+360] ,[tc(1,:) tc(1,1)])
+xlim([0 360])
+xticks([0 90 180 270])
 
 subplot(2,2,2);hold on
-plot(x,tc')
+plot([x x(1)+360],([tc tc(:,1)])')
+xlim([0 360])
+xticks([0 90 180 270])
 
 subplot(2,2,3);hold on
 imagesc(rdm)
@@ -43,4 +47,6 @@ axis tight
 
 subplot(2,2,4);hold on
 plot3([score(:,1);score(1,1)],[score(:,2);score(1,2)],[score(:,3);score(1,3)],'o-')
-
+xlabel('PC1');
+ylabel('PC2');
+zlabel('PC3');

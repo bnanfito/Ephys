@@ -138,7 +138,7 @@ distDat.rCent = rCent;
 distDat.tCent = tCent;
 distDat.score = score;
 distDat.coeff = coeff;
-distDat.diss
+distDat.diss = diss;
 distDat.rdm = rdm;
 distDat.rdmShift = rdmShift;
 distDat.distF = distF;
