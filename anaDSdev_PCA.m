@@ -1,12 +1,18 @@
 clear all
 close all
 
+%% Load data
+
 % dataFold = '/Volumes/Lab drive/Brandon/data/dataSets/DSdev';
 % dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/DSdev';
-dataFold = '/Volumes/NielsenHome2/Brandon/data/dataSets/DSdev';
+% dataFold = '/Volumes/NielsenHome2/Brandon/data/dataSets/DSdev';
 % dataFold = 'F:\Brandon\data\dataSets\DSdev';
-% dataFold = 'Y:\Brandon\data\dataSets\DSdev';
+dataFold = 'Y:\Brandon\data\dataSets\DSdev';
 load(fullfile(dataFold,"DSdev_SUdataSet.mat"))
+dir = load(fullfile(dataFold,'anaRSA_dir.mat'));
+ori = load(fullfile(dataFold,'anaRSA_ori.mat'));
+
+%% Organize data by age/area
 
 areas = {'V1','PSS'};
 anaMode = 'SU';
@@ -17,6 +23,7 @@ nAG = length(ageGroups);
 nAR = length(areas);
 for ar = 1:nAR
 for ag = 1:nAG
+
     ageLims = ageGroups{ag};
     areaIdx = strcmp(projTbl.recSite,areas{ar});
     ageLimIdx = projTbl.age>=ageLims(1) & projTbl.age<=ageLims(2);
@@ -36,8 +43,80 @@ for ag = 1:nAG
 end
 end
 
+%% RSA
 
-%% PLOT
+for ar = 1:nAR
+for ag = 1:nAG
+
+%     dirCorr(ar,ag) = corr(dir.diss',distDat{ar,ag}.diss','type','Spearman');
+%     dirNull{ar,ag} = corr(dir.diss',distDat{ar,ag}.dissNull,'type','Spearman');
+%     oriCorr(ar,ag) = corr(ori.diss',distDat{ar,ag}.diss','type','Spearman');
+%     oriNull{ar,ag} = corr(ori.diss',distDat{ar,ag}.dissNull,'type','Spearman');
+
+    dirCorr(ar,ag) = partialcorr(dir.diss',distDat{ar,ag}.diss',ori.diss','type','Spearman');
+    dirNull{ar,ag} = partialcorr(dir.diss',distDat{ar,ag}.dissNull,ori.diss','type','Spearman');
+    oriCorr(ar,ag) = partialcorr(ori.diss',distDat{ar,ag}.diss',dir.diss','type','Spearman');
+    oriNull{ar,ag} = partialcorr(ori.diss',distDat{ar,ag}.dissNull,dir.diss','type','Spearman');
+
+    nBoots = 100;
+    nCond = size(distDat{ar,ag}.rMean,1);
+    boots = randi(nCond,[nBoots,nCond]);
+    for b = 1:size(boots,1)
+        dissBoot = pdist(distDat{ar,ag}.rMean(boots(b,:),:),'spearman');
+%         dirBoots(b) = corr(dir.diss',dissBoot','type','Spearman');
+%         oriBoots(b) = corr(ori.diss',dissBoot','type','Spearman');
+        dirBoots(b) = partialcorr(dir.diss',dissBoot',ori.diss','type','Spearman');
+        oriBoots(b) = partialcorr(ori.diss',dissBoot',dir.diss','type','Spearman');
+    end
+    dirStd(ar,ag) = std(dirBoots);
+    oriStd(ar,ag) = std(oriBoots);
+    clear dirBoots oriBoots
+
+end
+end
+
+
+%% Plot
+
+% f = figure;
+% f.Position = [100 100 1000 600];
+% for ar = 1:nAR
+%     if strcmp(areas{ar},'V1')
+%         clr = 'b';
+%     elseif strcmp(areas{ar},'PSS')
+%         clr = 'r';
+%     end
+%     for ag = 1:nAG
+%     
+%         curDat = distDat{ar,ag};
+%         subplot(nAR,nAG,ag+(nAG*(ar-1)))
+% 
+%         
+% 
+%         title([areas{ar} '; P' num2str(ageGroups{ag}(1)) '-' num2str(ageGroups{ag}(2))])
+%     end
+% end
+% 
+% 
+% f = figure;
+% f.Position = [100 100 1000 600];
+% for ar = 1:nAR
+%     if strcmp(areas{ar},'V1')
+%         clr = 'b';
+%     elseif strcmp(areas{ar},'PSS')
+%         clr = 'r';
+%     end
+%     for ag = 1:nAG
+%     
+%         curDat = distDat{ar,ag};
+%         subplot(nAR,nAG,ag+(nAG*(ar-1)))
+% 
+% 
+% 
+%         title([areas{ar} '; P' num2str(ageGroups{ag}(1)) '-' num2str(ageGroups{ag}(2))])
+%     end
+% end
+
 
 f = figure;
 f.Position = [100 100 1000 600];
@@ -52,22 +131,22 @@ for ar = 1:nAR
         curDat = distDat{ar,ag};
         subplot(nAR,nAG,ag+(nAG*(ar-1)))
         
-        imagesc(curDat.rdm)
-        colorbar
-        if ag == 1
-            nYtick = length(curDat.cMean);
-            yticks(1:2:nYtick)
-            yticklabels(curDat.cMean(1:2:nYtick))
-        else
-            yticks([])
-        end
-        if ar == nAR
-            nXtick = length(curDat.cMean);
-            xticks(1:2:nXtick)
-            xticklabels(curDat.cMean(1:2:nXtick))
-        else
-            xticks([])
-        end
+%         imagesc(curDat.rdm)
+%         colorbar
+%         if ag == 1
+%             nYtick = length(curDat.cMean);
+%             yticks(1:2:nYtick)
+%             yticklabels(curDat.cMean(1:2:nYtick))
+%         else
+%             yticks([])
+%         end
+%         if ar == nAR
+%             nXtick = length(curDat.cMean);
+%             xticks(1:2:nXtick)
+%             xticklabels(curDat.cMean(1:2:nXtick))
+%         else
+%             xticks([])
+%         end
         
 %         hold on
 %         score = vertcat(curDat.score,curDat.score(1,:));
@@ -128,9 +207,68 @@ for ar = 1:nAR
 %             ylabel('Euclidean distance')
 %         end
 
-        
+        hold on
+        hDirNull = histogram(dirNull{ar,ag});
+        hDirNull.FaceColor = 'g';
+        xline(dirCorr(ar,ag),'g')
+        xline(prctile(dirNull{ar,ag},95),'g--')
+        xline(prctile(dirNull{ar,ag},99),'g-.')
+        xline(prctile(dirNull{ar,ag},99.9),'g:')
+        hOriNull = histogram(oriNull{ar,ag});
+        hOriNull.FaceColor = 'r';
+        xline(oriCorr(ar,ag),'r')
+        xline(prctile(oriNull{ar,ag},95),'r--')
+        xline(prctile(oriNull{ar,ag},99),'r-.')
+        xline(prctile(oriNull{ar,ag},99.9),'r:')
+        legend([hDirNull hOriNull],{'dir','ori'})
+
 
         title([areas{ar} '; P' num2str(ageGroups{ag}(1)) '-' num2str(ageGroups{ag}(2))])
     end
 end
+
+
+
+f2 = figure;
+f2.Position = [100 100 800 800];
+
+subplot(2,2,1)
+imagesc(ori.rdm)
+
+subplot(2,2,2); hold on
+b1 = bar(1:numel(oriCorr),oriCorr(:));
+b1.FaceColor = 'flat';
+v1Idx = find(strcmp(areas,'V1')):2:numel(oriCorr);
+pssIdx = find(strcmp(areas,'PSS')):2:numel(oriCorr);
+b1.CData(v1Idx,:) = repmat([0 0 1],length(v1Idx),1);
+b1.CData(pssIdx,:) = repmat([1 0 0],length(pssIdx),1);
+ylabel('partial Spearman corr.')
+xticks([1.5:2:numel(oriCorr)])
+for ag = 1:nAG
+    xtLbl{ag} = ['P' num2str(ageGroups{ag}(1)) '-' num2str(ageGroups{ag}(2))];
+end
+xticklabels(xtLbl)
+er1 = errorbar(1:numel(oriCorr),oriCorr(:),oriStd(:),oriStd(:));
+er1.Color = [0 0 0];
+er1.LineStyle = 'none';
+
+subplot(2,2,3)
+imagesc(dir.rdm)
+
+subplot(2,2,4); hold on
+b2 = bar(1:numel(dirCorr),dirCorr(:));
+b2.FaceColor = 'flat';
+b2.CData(v1Idx,:) = repmat([0 0 1],length(v1Idx),1);
+b2.CData(pssIdx,:) = repmat([1 0 0],length(pssIdx),1);
+ylabel('partial Spearman corr.')
+xticks([1.5:2:numel(dirCorr)])
+for ag = 1:nAG
+    xtLbl{ag} = ['P' num2str(ageGroups{ag}(1)) '-' num2str(ageGroups{ag}(2))];
+end
+xticklabels(xtLbl)
+er2 = errorbar(1:numel(dirCorr),dirCorr(:),dirStd(:),dirStd(:));
+er2.Color = [0 0 0];
+er2.LineStyle = 'none';
+
+
 

@@ -88,43 +88,32 @@ distF = mean(rdmShift);
 
 %% Null Dist
 
-nNullRep = 1000;
-for nr = 1:nNullRep
-    
-%     randIdx = randperm(size(rTrial,1));
-%     rTshuff = rTrial(randIdx,:);
-%     rMshuff = squeeze(mean(reshape(rTshuff,nReps,nConds,nU),1,'omitnan'));
-%     if tAve == 1
-%         shuff = rMshuff;
-%     else
-%         shuff = rTshuff;
-%     end
+nIter = 10000;
+for iter = 1:nIter
 
     if tAve == 1
         randIdx = randperm(size(rMean,1));
-        rMshuff = rMean(randIdx,:);
-        shuff = rMshuff;
+        shuff = rMean(randIdx,:);
     else
         randIdx = randperm(size(rTrial,1));
-        rTshuff = rTrial(randIdx,:);
-        shuff = rTshuff;
+        shuff = rTrial(randIdx,:);
     end
 
     shuff = shuff./max(shuff);
 
     [coeffShuff,scoreShuff,latentShuff,tsquareShuff,explainedShuff] = pca(shuff);
-    rdmNull(:,:,nr) = 1-corr(shuff','type','Spearman');
+    dissNull(:,iter) = pdist(shuff,'spearman');
+    rdmNull(:,:,iter) = squareform(dissNull(:,iter));
+%     rdmNull(:,:,iter) = 1-corr(shuff','type','Spearman');
 %     rdmNull(:,:,nr) = dist(shuff');
 
     for i = 1:size(rdmNull,1)
         shift = size(rdmNull,1)-(i-1);
-        rdmNullShift(i,:,nr) = circshift(rdmNull(i,:,nr),shift,2);
+        rdmNullShift(i,:,iter) = circshift(rdmNull(i,:,iter),shift,2);
     end
-    distNull2{nr} = rdmNullShift(:,:,nr);
-    distNull(nr,:) = mean(rdmNullShift(:,:,nr),1,'omitnan');
+    distNull(iter,:) = mean(rdmNullShift(:,:,iter),1,'omitnan');
 
 end
-distNull2 = vertcat(distNull2{:});
 
 distF_z = (distF-mean(distNull,'omitnan'))./std(distNull,'omitnan');
 
@@ -142,6 +131,8 @@ distDat.diss = diss;
 distDat.rdm = rdm;
 distDat.rdmShift = rdmShift;
 distDat.distF = distF;
+distDat.dissNull = dissNull;
+distDat.rdmNull = rdmNull;
 distDat.distNull = distNull;
 
 %% Plot
