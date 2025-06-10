@@ -5,7 +5,8 @@ close all
 anaMode = 'MU';
 proj = 'V1cool_ori';
 area = 'PSS';
-dataFold = fullfile('Y:\Brandon\data');
+% dataFold = 'Y:\Brandon\data';
+dataFold = '/Volumes/NielsenHome2/Brandon/data';
 
 %% Generate Project Table
 
@@ -20,6 +21,7 @@ dataFold = fullfile('Y:\Brandon\data');
 %     aniIdx = strcmp(projTbl.experimentId,animals{a});
 %     ages(a) = unique(projTbl.age(aniIdx));
 % end
+% load(fullfile(dataFold,'dataSets','cooling','V1cool_ori','MU','V1cool_ori_MUprojTbl.mat'))
 % for e = 1:height(projTbl)
 %     animal = projTbl.experimentId{e};
 %     unit = projTbl.unitNr{e};
@@ -52,7 +54,12 @@ for a = 1:length(animals)
         if length(idx) > 1 
             idx = idx( projTbl.nGU(idx) == max(projTbl.nGU(idx)) );
         end
-        dat.cntrl{a,cntrlPens(p)} = projTbl.sumStats{idx};
+        datCntrl = projTbl.sumStats{idx};
+        goodId = screenUnits(datCntrl,anaMode);
+%         datCntrl = datCntrl(goodId,:);
+        dat.cntrl{a,cntrlPens(p)} = datCntrl;
+        goodIdCntrl{a,cntrlPens(p)} = goodId;
+
     end
 
     coolPens = unique(projTbl.penNr(coolIdx & aniIdx));
@@ -62,7 +69,11 @@ for a = 1:length(animals)
         if length(idx) > 1
             idx = idx( projTbl.nGU(idx) == max(projTbl.nGU(idx)) );
         end
-        dat.cool{a,coolPens(p)} = projTbl.sumStats{idx};
+        datCool = projTbl.sumStats{idx};
+        goodId = screenUnits(datCool,anaMode);
+%         datCool = datCool(goodId,:);
+        dat.cool{a,coolPens(p)} = datCool;
+        goodIdCool{a,coolPens(p)} = goodId;
 
     end
 
@@ -72,7 +83,6 @@ end
 
 SI = nan(length(animals),1);
 semSI = nan(length(animals),1);
-nU = nan(length(animals),1);
 meanCntrl = nan(length(animals),1);
 semCntrl = nan(length(animals),1);
 meanCool = nan(length(animals),1);
@@ -81,19 +91,26 @@ for a = 1:length(animals)
 
     if strcmp(anaMode,'MU') && ~(isempty(dat.cntrl{a,1}) || isempty(dat.cool{a,1}))
 
-        % Suppresion index
-        goodId = dat.cntrl{a,1}.uID(screenUnits(dat.cntrl{a,1},anaMode)); %unit ids that pass inclusion criteria in cntrl condition
-        nU(a,1) = length(goodId);
-        cntrlDist = dat.cntrl{a,1}.rPref(ismember(dat.cntrl{a,1}.uID,goodId));
-        coolDist = dat.cool{a,1}.rPref(ismember(dat.cool{a,1}.uID,goodId));
-        siDist{a} = (coolDist-cntrlDist)./(coolDist+cntrlDist);
-        siDist_age{a} = repmat(ages(a),length(siDist{a}),1);
-        SI(a) = mean(siDist{a},'omitnan');
-        semSI(a) = std(siDist{a},'omitnan')/sqrt(length(siDist{a}));
+        % Distributions
+        cntrlDist = dat.cntrl{a,1}.rPref(goodIdCntrl{a,1});
+        coolDist = dat.cool{a,1}.rPref(goodIdCntrl{a,1});
+%         for u = 1:height(dat.cntrl{a,1})
+%             cntrlDist(u) = mean(std(dat.cntrl{a,1}.response{u},'omitnan'),'omitnan');
+%         end
+%         for u = 1:height(dat.cool{a,1})
+%             coolDist(u) = mean(std(dat.cool{a,1}.response{u},'omitnan'),'omitnan');
+%         end
         meanCntrl(a) = mean(cntrlDist,'omitnan');
         semCntrl(a) = std(cntrlDist,'omitnan')/sqrt(length(cntrlDist));
         meanCool(a) = mean(coolDist,'omitnan');
         semCool(a) = std(coolDist,'omitnan')/sqrt(length(coolDist));
+        nU(a,1) = sum(goodIdCntrl{a,1});
+
+        % Suppression Index
+        siDist{a} = (coolDist-cntrlDist)./(coolDist+cntrlDist);
+        siDist_age{a} = repmat(ages(a),length(siDist{a}),1);
+        SI(a) = mean(siDist{a},'omitnan');
+        semSI(a) = std(siDist{a},'omitnan')/sqrt(length(siDist{a}));
 
 %         % Delta Ldir
 %         goodId_cntrl = dat.cntrl{a,1}.uID(screenUnits(dat.cntrl{a,1},anaMode));
@@ -117,6 +134,7 @@ for a = 1:length(animals)
 
 
 end
+nID = ~isnan(SI);
 
 %% Plot
 
@@ -124,6 +142,18 @@ uMin = 20;
 
 if strcmp(anaMode,'MU')
 
+% Plot distributions
+figure; hold on
+plot(ages(nU>=uMin),meanCntrl(nU>=uMin),'k.','MarkerSize',20)
+plot(ages(nU<uMin),meanCntrl(nU<uMin),'ko','MarkerSize',7,'LineWidth',2)
+plot(repmat(ages,2,1),meanCntrl'+([1;-1]*semCntrl'),'k','LineWidth',2)
+plot(ages(nU>=uMin),meanCool(nU>=uMin),'c.','MarkerSize',20)
+plot(ages(nU<uMin),meanCool(nU<uMin),'co','MarkerSize',7,'LineWidth',2)
+plot(repmat(ages,2,1),meanCool'+([1;-1]*semCool'),'c','LineWidth',2)
+xlabel('age (postnatal day)')
+ylabel('rPref (Hz)')
+
+% Plot SI
 figure; hold on
 siDist_age = vertcat(siDist_age{:});
 siDist = vertcat(siDist{:});
@@ -141,23 +171,35 @@ binnedSIsem = binnedSIsem(~nanIdx);
 binnedSIage = binnedSIage(~nanIdx);
 plot(binnedSIage,binnedSImean,'r','LineWidth',2)
 plot(repmat(binnedSIage,2,1),binnedSImean+([-1;1]*binnedSIsem),'r','LineWidth',2)
+xlabel('age (postnatal day)')
+ylabel('SI: (Rcool-Rcntrl)/(Rcool+Rcntrl)')
 
 figure; hold on
 plot(ages(nU>=uMin),SI(nU>=uMin),'k.','MarkerSize',20)
 plot(ages(nU<uMin),SI(nU<uMin),'ko','MarkerSize',7,'LineWidth',2)
 plot(repmat(ages,2,1),SI'+([1;-1]*semSI'),'k','LineWidth',2)
+for ab = 1:length(ageBins)-1
+    ageIdx = ages>=ageBins(ab) & ages<ageBins(ab+1);
+    binnedSI(ab) = mean(SI(ageIdx),'omitnan');
+    binnedSem(ab) = std(SI(ageIdx),'omitnan')/sqrt(sum(ageIdx));
+    binnedAges(ab) = mean(ages(ageIdx),'omitnan');
+end
+nanIdx = isnan(binnedSI);
+binnedSI = binnedSI(~nanIdx);
+binnedSem = binnedSem(~nanIdx);
+binnedAges = binnedAges(~nanIdx);
+p(1) = plot(binnedAges,binnedSI,'r','LineWidth',2);
+plot(repmat(binnedAges,2,1),binnedSI+([-1;1]*binnedSem),'r','LineWidth',2)
+[linFit,gofLin] = fit(ages(nID)',SI(nID),'(m*x)+b');
+[poly2Fit,gofPoly2] = fit(ages(nID)',SI(nID),'poly2');
+[poly3Fit,gofPoly3] = fit(ages(nID)',SI(nID),'poly3');
+p(2) = plot(linFit,'r--');
+p(3) = plot(poly2Fit,'g--');
+p(4) = plot(poly3Fit,'b--');
+legend(p,{'binned mean',['linear fit; rmse=' num2str(gofLin.rmse)],['poly 2 fit; rmse=' num2str(gofPoly2.rmse)],['poly 3 fit; rmse=' num2str(gofPoly3.rmse)]})
 xlabel('age (postnatal day)')
 ylabel('SI: (Rcool-Rcntrl)/(Rcool+Rcntrl)')
 
-figure; hold on
-plot(ages(nU>=uMin),meanCntrl(nU>=uMin),'k.','MarkerSize',20)
-plot(ages(nU<uMin),meanCntrl(nU<uMin),'ko','MarkerSize',7,'LineWidth',2)
-plot(repmat(ages,2,1),meanCntrl'+([1;-1]*semCntrl'),'k','LineWidth',2)
-plot(ages(nU>=uMin),meanCool(nU>=uMin),'c.','MarkerSize',20)
-plot(ages(nU<uMin),meanCool(nU<uMin),'co','MarkerSize',7,'LineWidth',2)
-plot(repmat(ages,2,1),meanCool'+([1;-1]*semCool'),'c','LineWidth',2)
-xlabel('age (postnatal day)')
-ylabel('rPref (Hz)')
 
 % figure; hold on
 % plot(ages(nU>=uMin),dLDR(nU>=uMin),'k.','MarkerSize',20)
