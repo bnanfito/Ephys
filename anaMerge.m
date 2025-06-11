@@ -162,6 +162,16 @@ yline(0,'k--')
 ylabel('SI')
 
 
+figure;
+u = 11;
+subplot(1,2,1);hold on
+plot(TC(u,:,1),'k')
+plot(TC(u,:,2),'c')
+subplot(1,2,2);hold on
+plot(TC(:,:,1),TC(:,:,2),'.')
+plot([0 1],[0 1],'k-')
+
+
 figure; hold on
 a = TC(:,:,1);
 b = TC(:,:,2);
