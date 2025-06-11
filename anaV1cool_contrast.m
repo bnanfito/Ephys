@@ -34,7 +34,7 @@ dataFold = 'Y:\Brandon\data';
 % projTbl.sumStats = sumStats;
 % projTbl.nGU = nGU;
 
-load(fullfile(dataFold,'dataSets','cooling','V1cool_contrast','V1cool_contrast_MUdataSet.mat'))
+load(fullfile(dataFold,'dataSets','cooling',proj,anaMode,'V1cool_contrast_MUdataSet.mat'))
 
 %% Organize Data
 
@@ -77,9 +77,11 @@ for a = 1:length(animals)
         distCntrl{a} = [];
         meanCntrl(a) = nan;
         semCntrl(a) = nan;
+        nUcntrl(a) = nan;
         distCool{a} = [];
         meanCool(a) = nan;
         semCool(a) = nan;
+        nUcool(a) = nan;
         continue
     end
 
@@ -87,28 +89,26 @@ for a = 1:length(animals)
     distCntrl{a} = cntrlDat(goodIdxCntrl,:).cF;
     meanCntrl(a) = mean(distCntrl{a},'omitnan');
     semCntrl(a) = std(distCntrl{a},'omitnan')/sqrt(length(distCntrl{a}));
+    nUcntrl(a) = length(distCntrl{a});
 
     goodIdxCool = screenUnits(coolDat,anaMode);
     distCool{a} = coolDat(goodIdxCool,:).cF;
     meanCool(a) = mean(distCool{a},'omitnan');
     semCool(a) = std(distCool{a},'omitnan')/sqrt(length(distCool{a}));
+    nUcool(a) = length(distCool{a});
 
 end
 
 %% Plot
 
-figure; hold on
-for a = 1:length(animals)
-
-    plot(ages(a),meanCntrl(a),'ko','MarkerFaceColor','k')
-    plot(repmat(ages(a),2,1),meanCntrl(a)+([1;-1]*semCntrl(a)),'k','LineWidth',2)
-    plot(ages(a),meanCool(a),'co','MarkerFaceColor','c')
-    plot(repmat(ages(a),2,1),meanCool(a)+([1;-1]*semCool(a)),'c','LineWidth',2)
-
-end
+nUmin = 20;
 
 figure; hold on
-plot(ages,meanCntrl,'ko','MarkerFaceColor','k')
+plot(ages(nUcntrl>=nUmin),meanCntrl(nUcntrl>=nUmin),'ko','MarkerFaceColor','k')
+plot(ages(nUcntrl<nUmin),meanCntrl(nUcntrl<nUmin),'ko','LineWidth',2)
 plot(repmat(ages,2,1),meanCntrl+([1;-1]*semCntrl),'k','LineWidth',2)
-plot(ages,meanCool,'co','MarkerFaceColor','c')
+plot(ages(nUcool>=nUmin),meanCool(nUcool>=nUmin),'co','MarkerFaceColor','c')
+plot(ages(nUcool<nUmin),meanCool(nUcool<nUmin),'co','LineWidth',2)
 plot(repmat(ages,2,1),meanCool+([1;-1]*semCool),'c','LineWidth',2)
+xlabel('age (postnatal day)')
+ylabel('C50')
