@@ -5,9 +5,10 @@ close all
 anaMode = 'MU';
 proj = 'V1cool_ori';
 area = 'PSS';
-dataFold = 'Y:\Brandon\data';
-ageGroups = {[28 35],[36 45],[46 150]};
+% dataFold = 'Y:\Brandon\data';
 % dataFold = '/Volumes/NielsenHome2/Brandon/data';
+dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
+ageGroups = {[28 35],[36 45],[46 150]};
 
 %% Generate Project Table
 
@@ -139,11 +140,12 @@ nID = ~isnan(SI);
 %% Plot
 
 uMin = 20;
+scl = 2;
 
 if strcmp(anaMode,'MU')
 
 % Plot distributions
-figure; hold on
+figure('Position',[100 100 600 500]); hold on
 idx1 = nUcntrl>=uMin & (agIdx(:,1) | agIdx(:,2));
 idx2 = nUcntrl<uMin & (agIdx(:,1) | agIdx(:,2));
 mAG3_cntrl = mean(meanCntrl(agIdx(:,3)),'omitnan');
@@ -157,59 +159,55 @@ semAG3_cool = std(meanCool(agIdx(:,3)),'omitnan')/sqrt(sum(agIdx(:,3)));
     y = [mAG3_cool-semAG3_cool mAG3_cool-semAG3_cool mAG3_cool+semAG3_cool mAG3_cool+semAG3_cool];
     patch(x,y,'c','EdgeColor','none','FaceAlpha',0.2)
     yline(mAG3_cool,'c--','LineWidth',2)
-scl = 1.5;
-scatter(ages(idx1 & ~isnan(meanCntrl)),meanCntrl(idx1 & ~isnan(meanCntrl)),nUcntrl(idx1 & ~isnan(meanCntrl))*scl,'k','filled','o','MarkerFaceAlpha',0.5,'MarkerEdgeColor','k')
+errorbar(ages(~isnan(meanCntrl)), meanCntrl(~isnan(meanCntrl)), semCntrl(~isnan(meanCntrl)),'k','LineWidth',2, 'LineStyle','none')
+scatter(ages(idx1 & ~isnan(meanCntrl)),meanCntrl(idx1 & ~isnan(meanCntrl)),nUcntrl(idx1 & ~isnan(meanCntrl))*scl,'k','filled','o','MarkerFaceAlpha',1,'MarkerEdgeColor','k')
 scatter(ages(idx2 & ~isnan(meanCntrl)),meanCntrl(idx2 & ~isnan(meanCntrl)),nUcntrl(idx2 & ~isnan(meanCntrl))*scl,'k','o')
-scatter(ages(idx1 & ~isnan(meanCool)),meanCool(idx1 & ~isnan(meanCool)),nUcool(idx1 & ~isnan(meanCool))*scl,'c','filled','o','MarkerFaceAlpha',0.5,'MarkerEdgeColor','k')
+errorbar(ages(~isnan(meanCool)), meanCool(~isnan(meanCool)), semCool(~isnan(meanCool)),'c','LineWidth',2, 'LineStyle','none')
+scatter(ages(idx1 & ~isnan(meanCool)),meanCool(idx1 & ~isnan(meanCool)),nUcool(idx1 & ~isnan(meanCool))*scl,'c','filled','o','MarkerFaceAlpha',1,'MarkerEdgeColor','k')
 scatter(ages(idx2 & ~isnan(meanCool)),meanCool(idx2 & ~isnan(meanCool)),nUcool(idx2 & ~isnan(meanCool))*scl,'c','o')
-% plot(ages(idx1),meanCntrl(idx1),'k.','MarkerSize',20)
-% plot(ages(idx2),meanCntrl(idx2),'ko','MarkerSize',7,'LineWidth',2)
-% plot(repmat(ages(idx1|idx2),2,1),meanCntrl(idx1|idx2)'+([1;-1]*semCntrl(idx1|idx2)'),'k','LineWidth',2)
-% plot(ages(idx1),meanCool(idx1),'c.','MarkerSize',20)
-% plot(ages(idx2),meanCool(idx2),'co','MarkerSize',7,'LineWidth',2)
-% plot(repmat(ages(idx1|idx2),2,1),meanCool(idx1|idx2)'+([1;-1]*semCool(idx1|idx2)'),'c','LineWidth',2)
 xlabel('age (postnatal day)')
 xlim([min(x) max(x)])
 ylabel(metric)
+box on
 
 if strcmp(metric,'rPref')
 
     % Plot SI
-    figure; hold on
+    figure('Position',[100 100 600 500]); hold on
     mAG3 = mean(SI(agIdx(:,3)),'omitnan');
     semAG3 = std(SI(agIdx(:,3)),'omitnan')/sqrt(sum(agIdx(:,3)));
     x = [min(ages(idx1|idx2))-1  max(ages(idx1|idx2))+1 max(ages(idx1|idx2))+1  min(ages(idx1|idx2))-1];
     y = [mAG3-semAG3 mAG3-semAG3 mAG3+semAG3 mAG3+semAG3];
     patch(x,y,'r','EdgeColor','none','FaceAlpha',0.2)
     yline(mAG3,'r--','LineWidth',2)
-    scatter(ages(idx1 & ~isnan(SI)),SI(idx1 & ~isnan(SI)),nUcntrl(idx1 & ~isnan(SI))*scl,'k','filled','o','MarkerFaceAlpha',0.5,'MarkerEdgeColor','k')
+    errorbar(ages(~isnan(SI)), SI(~isnan(SI)) ,'LineStyle','none')
+    scatter(ages(idx1 & ~isnan(SI)),SI(idx1 & ~isnan(SI)),nUcntrl(idx1 & ~isnan(SI))*scl,'k','filled','o','MarkerFaceAlpha',1,'MarkerEdgeColor','k')
     scatter(ages(idx2 & ~isnan(SI)),SI(idx2 & ~isnan(SI)),nUcntrl(idx2 & ~isnan(SI))*scl,'k','o')
-%     plot(ages(idx1),SI(idx1),'k.','MarkerSize',20)
-%     plot(ages(idx2),SI(idx2),'ko','MarkerSize',7,'LineWidth',2)
-%     plot(repmat(ages(idx1|idx2),2,1),SI(idx1|idx2)'+([1;-1]*semSI(idx1|idx2)'),'k-','LineWidth',2)
     xlabel('age (postnatal day)')
     xlim([min(x) max(x)])
     ylabel('SI: (Rcool-Rcntrl)/(Rcool+Rcntrl)')
+    box on
+
     
-    figure; hold on
-    siDist_age = vertcat(siDist_age{:});
-    siDist = vertcat(siDist{:});
-    plot(siDist_age,siDist,'k.')
-    ageBins = min(siDist_age):3:max(siDist_age)+3;
-    for ab = 1:length(ageBins)-1
-        ageIdx = siDist_age>=ageBins(ab) & siDist_age<ageBins(ab+1);
-        binnedSImean(ab) = mean(siDist(ageIdx),'omitnan');
-        binnedSIsem(ab) = std(siDist(ageIdx),'omitnan')/sqrt(sum(ageIdx));
-        binnedSIage(ab) = mean(unique(siDist_age(ageIdx)));
-    end
-    nanIdx = isnan(binnedSImean);
-    binnedSImean = binnedSImean(~nanIdx);
-    binnedSIsem = binnedSIsem(~nanIdx);
-    binnedSIage = binnedSIage(~nanIdx);
-    plot(binnedSIage,binnedSImean,'r','LineWidth',2)
-    plot(repmat(binnedSIage,2,1),binnedSImean+([-1;1]*binnedSIsem),'r','LineWidth',2)
-    xlabel('age (postnatal day)')
-    ylabel('SI: (Rcool-Rcntrl)/(Rcool+Rcntrl)')
+%     figure; hold on
+%     siDist_age = vertcat(siDist_age{:});
+%     siDist = vertcat(siDist{:});
+%     plot(siDist_age,siDist,'k.')
+%     ageBins = min(siDist_age):3:max(siDist_age)+3;
+%     for ab = 1:length(ageBins)-1
+%         ageIdx = siDist_age>=ageBins(ab) & siDist_age<ageBins(ab+1);
+%         binnedSImean(ab) = mean(siDist(ageIdx),'omitnan');
+%         binnedSIsem(ab) = std(siDist(ageIdx),'omitnan')/sqrt(sum(ageIdx));
+%         binnedSIage(ab) = mean(unique(siDist_age(ageIdx)));
+%     end
+%     nanIdx = isnan(binnedSImean);
+%     binnedSImean = binnedSImean(~nanIdx);
+%     binnedSIsem = binnedSIsem(~nanIdx);
+%     binnedSIage = binnedSIage(~nanIdx);
+%     plot(binnedSIage,binnedSImean,'r','LineWidth',2)
+%     plot(repmat(binnedSIage,2,1),binnedSImean+([-1;1]*binnedSIsem),'r','LineWidth',2)
+%     xlabel('age (postnatal day)')
+%     ylabel('SI: (Rcool-Rcntrl)/(Rcool+Rcntrl)')
 
 else
 
