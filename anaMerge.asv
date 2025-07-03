@@ -232,8 +232,6 @@ errorbar(c,mean(TCnorm(:,:,2),'omitnan'),std(TCnorm(:,:,2),'omitnan')/sqrt(size(
 % plot(mean(TCnorm(:,:,1),'omitnan'),'ko-','LineWidth',2)
 % plot(mean(TCnorm(:,:,2),'omitnan'),'co-','LineWidth',2)
 yyaxis right
-dY = mean(TCnorm(:,:,2),'omitnan')./mean(TCnorm(:,:,1),'omitnan');
-plot(c,dY,'ro-','LineWidth',1)
 errorbar(c,mean(dTCnorm,'omitnan'),std(dTCnorm,'omitnan')/sqrt(size(dTCnorm,1)),'ro-','LineWidth',2)
 % plot(mean(dTCnorm,'omitnan'),'ro-','LineWidth',2)
 ylim([0 1])
