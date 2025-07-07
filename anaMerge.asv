@@ -103,14 +103,14 @@ TCsem(:,:,2) = vertcat(semCoolTC{:});
 TC(:,:,3) = vertcat(postCoolTC{:});
 TCsem(:,:,3) = vertcat(semPostTC{:});
 TC(TC<0) = 0;
-maxR = max(TC(:,:,1),[],2);
-maxR(maxR==0) = 1;
 for tId = 1:3
+    maxR = max(TC(:,:,1),[],2);
+    maxR(maxR==0) = 1;
     TCnorm(:,:,tId) = TC(:,:,tId)./maxR;
 end
-% dTCnorm = (TC(:,:,2)-TC(:,:,1))./(TC(:,:,1)+TC(:,:,2));
+dTCnorm = (TC(:,:,2)-TC(:,:,1))./(TC(:,:,1)+TC(:,:,2));
 % dTCnorm = (TCnorm(:,:,2)-TCnorm(:,:,1))./(TCnorm(:,:,1)+TCnorm(:,:,2));
-dTCnorm = (TC(:,:,2)./(TC(:,:,1)+TC(:,:,2)));
+% dTCnorm = (TC(:,:,2)./(TC(:,:,1)+TC(:,:,2)));
 
 
 
@@ -211,45 +211,85 @@ end
 % xlabel('delta Ldir')
 % yline(0,'k--')
 % ylabel('SI')
-% 
-% 
-% figure;
-% u = 11;
-% subplot(1,2,1);hold on
-% plot(TCnorm(u,:,1),'k')
-% plot(TCnorm(u,:,2),'c')
-% subplot(1,2,2);hold on
-% plot(TCnorm(u,:,1),TCnorm(u,:,2),'ro-')
-% plot([0 1],[0 1],'k-')
-% 
+
+
 
 figure;
-colororder({'k','r'})
+clrs = hsv(length(c)-1); clrs = [clrs;clrs(1,:)];
+
 subplot(1,2,1);hold on
+colororder({'k','r'})
 yyaxis left
-errorbar(c,mean(TCnorm(:,:,1),'omitnan'),std(TCnorm(:,:,1),'omitnan')/sqrt(size(TCnorm,1)),'ko-','LineWidth',2)
-errorbar(c,mean(TCnorm(:,:,2),'omitnan'),std(TCnorm(:,:,2),'omitnan')/sqrt(size(TCnorm,1)),'co-','LineWidth',2)
-% plot(mean(TCnorm(:,:,1),'omitnan'),'ko-','LineWidth',2)
-% plot(mean(TCnorm(:,:,2),'omitnan'),'co-','LineWidth',2)
+x = c;
+y = mean(TCnorm(:,:,1),'omitnan');
+err = std(TCnorm(:,:,1),'omitnan')/sqrt(size(TCnorm,1));
+errorbar(x,y,err,'k-','LineWidth',2)
+y = mean(TCnorm(:,:,2),'omitnan');
+err = std(TCnorm(:,:,2),'omitnan')/sqrt(size(TCnorm,1));
+errorbar(x,y,err,'c-','LineWidth',2)
+ylabel('response (Hz) norm to rPref cntrl')
+scatter(x,0,500,clrs,'.')
 yyaxis right
-errorbar(c,mean(dTCnorm,'omitnan'),std(dTCnorm,'omitnan')/sqrt(size(dTCnorm,1)),'ro-','LineWidth',2)
-% plot(mean(dTCnorm,'omitnan'),'ro-','LineWidth',2)
-ylim([0 1])
+y = mean(dTCnorm,'omitnan');
+err = std(dTCnorm,'omitnan')/sqrt(size(dTCnorm,1));
+errorbar(x,y,err,'r-','LineWidth',2)
+ylabel('SI')
+ylim([-1 1])
+% y = mean(TCnorm(:,:,2),'omitnan')./mean(TCnorm(:,:,1),'omitnan');
+% plot(x,y,'r-','LineWidth',2)
+% ylabel('cool/cntrl')
+% ylim([0 1])
 xticks([-180 -90 0 90 180])
+xlabel('dir rel to pref')
+
 subplot(1,2,2);hold on
-plot(mean(TCnorm(:,:,1),'omitnan'),mean(TCnorm(:,:,2),'omitnan'),'go-','LineWidth',2)
-plot([0 1],[0 1],'k-')
+x = mean(TCnorm(:,:,1),'omitnan');
+y = mean(TCnorm(:,:,2),'omitnan');
+plot(x,y,'k-','LineWidth',2)
+scatter(x,y,300,clrs,'.')
+plot([0 1],[0 1],'k--')
+xlabel('control')
+ylabel('V1 cool')
 
 
 
+figure;hold on
+for ag = 1:length(ageGroups)
 
-% figure;hold on
-% for i = 0
-% 
-%     scatter(TCnorm(:,i==c,1),TCnorm(:,i==c,2))
-% 
-% end
+end
 
+
+
+figure; hold on
+ageGroups = {[29 32],[33 36],[37 40],[41 49],[50 150]};
+agClrs = {[0 0.4470 0.7410],[0.8500 0.3250 0.0980],[0.9290 0.6940 0.1250],[0.4940 0.1840 0.5560],[0.4660 0.6740 0.1880],[0.3010 0.7450 0.9330]};
+for ag = 1:length(ageGroups)
+    idx = uAge>=ageGroups{ag}(1) & uAge<=ageGroups{ag}(2);
+    
+    subplot(1,2,1);hold on
+    yline(0,'--')
+    x = c;
+    y = mean(dTCnorm(idx,:),'omitnan');
+    err = std(dTCnorm(idx,:),'omitnan')/sqrt(sum(idx));
+    p(ag) = errorbar(x,y,err,'-','LineWidth',2,'Color',agClrs{ag});
+%     y = (mean(TCnorm(idx,:,2),'omitnan')-mean(TCnorm(idx,:,1),'omitnan'))./(mean(TCnorm(idx,:,2),'omitnan')+mean(TCnorm(idx,:,1),'omitnan'));
+%     p(ag) = plot(x,y,'-','LineWidth',2,'Color',agClrs{ag});
+    lbl{ag} = ['P' num2str(ageGroups{ag}(1)) '-P' num2str(ageGroups{ag}(2)) '; n=' num2str(sum(idx))];
+    ylabel('SI')
+    ylim([-1 1])
+    xticks([-180 -90 0 90 180])
+    xlabel('dir rel to pref')
+
+    subplot(1,2,2);hold on
+    x = mean(TCnorm(idx,:,1),'omitnan');
+    y = mean(TCnorm(idx,:,2),'omitnan');
+    plot(x,y,'-','LineWidth',2,'Color',agClrs{ag})
+%     scatter(x,y,300,clrs,'.')
+    plot([0 1],[0 1],'k--')
+    xlabel('control')
+    ylabel('V1 cool')
+end
+legend(p,lbl)
 
 
 % figure; hold on
@@ -263,41 +303,39 @@ plot([0 1],[0 1],'k-')
 
 
 
-for u = 1:size(TC,1)
-figure('Position',[100 100 600 600]); hold on
-tiledlayout(2,2);
-
-nexttile; hold on
-errorbar(c,TC(u,:,1),TCsem(u,:,1),'ko-','LineWidth',2)
-errorbar(c,TC(u,:,2),TCsem(u,:,2),'co-','LineWidth',2)
-errorbar(c,TC(u,:,3),TCsem(u,:,3),'bo-','LineWidth',2)
-xticks([-180 -90 0 90 180])
-
-nexttile; hold on
-plot(c,TCnorm(u,:,1),'ko-','LineWidth',2)
-plot(c,TCnorm(u,:,2),'co-','LineWidth',2)
-plot(c,TCnorm(u,:,3),'bo-','LineWidth',2)
-xticks([-180 -90 0 90 180])
-box on
-
-nexttile; hold on
-plot(edges(2:end),train(u,:,1),'k','LineWidth',2)
-plot(edges(2:end),train(u,:,2),'c','LineWidth',2)
-plot(edges(2:end),train(u,:,3),'b','LineWidth',2)
-
-nexttile; hold on
-plot(c,dTCnorm(u,:),'ro-','LineWidth',2)
-xticks([-180 -90 0 90 180])
-
-end
-
-
-
-
-
-
-
-
+% for u = 1:size(TC,1)
+% figure('Position',[100 100 600 600]); hold on
+% tiledlayout(2,2);
+% 
+% nexttile; hold on
+% errorbar(c,TC(u,:,1),TCsem(u,:,1),'ko-','LineWidth',2)
+% errorbar(c,TC(u,:,2),TCsem(u,:,2),'co-','LineWidth',2)
+% errorbar(c,TC(u,:,3),TCsem(u,:,3),'bo-','LineWidth',2)
+% xticks([-180 -90 0 90 180])
+% xlabel('dir rel to pref')
+% box on
+% 
+% nexttile; hold on
+% plot(c,TCnorm(u,:,1),'ko-','LineWidth',2)
+% plot(c,TCnorm(u,:,2),'co-','LineWidth',2)
+% plot(c,TCnorm(u,:,3),'bo-','LineWidth',2)
+% xticks([-180 -90 0 90 180])
+% xlabel('dir rel to pref')
+% box on
+% 
+% nexttile; hold on
+% plot(edges(2:end),train(u,:,1),'k','LineWidth',2)
+% plot(edges(2:end),train(u,:,2),'c','LineWidth',2)
+% plot(edges(2:end),train(u,:,3),'b','LineWidth',2)
+% box on
+% 
+% nexttile; hold on
+% plot(c,dTCnorm(u,:),'ro-','LineWidth',2)
+% xticks([-180 -90 0 90 180])
+% xlabel('dir rel to pref')
+% box on
+% 
+% end
 
 
 
