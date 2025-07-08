@@ -113,7 +113,7 @@ dTCnorm = (TC(:,:,2)-TC(:,:,1))./(TC(:,:,1)+TC(:,:,2));
 % dTCnorm = (TC(:,:,2)./(TC(:,:,1)+TC(:,:,2)));
 
 
-
+% Compute PSTH for each unit
 for j = 1:3
     if j == 1
         data = preDat;
@@ -122,17 +122,17 @@ for j = 1:3
     elseif j == 3
         data = postDat;
     end
-binSize = 0.05;
-edges = -1:binSize:2;
-for u = 1:height(data)
-    prefTrials = ismember(data.spkTimes{u}(2,:),  find(data.condition{u}(contains(data.paramKey{u},'ori'),:) == data.oriPref(u)) );
-train(u,:,j) = histcounts(data.spkTimes{u}(1,:),edges)/(max(data.fr(u).trialNum,[],'all')*binSize);
-% train(u,:,j) = train(u,:,j)/max(train(u,:,j));
-end
-%[s,i] = sort(data.latency(~isnan(data.latency)));
-%[s,i] = sort(uAge);
-% train = train(i,:,j);
-% figure; imagesc(train(:,:,j))
+    binSize = 0.05;
+    edges = -1:binSize:2;
+    for u = 1:height(data)
+        prefTrials = ismember(data.spkTimes{u}(2,:),  find(data.condition{u}(contains(data.paramKey{u},'ori'),:) == data.oriPref(u)) );
+    train(u,:,j) = histcounts(data.spkTimes{u}(1,:),edges)/(max(data.fr(u).trialNum,[],'all')*binSize);
+    % train(u,:,j) = train(u,:,j)/max(train(u,:,j));
+    end
+    %[s,i] = sort(data.latency(~isnan(data.latency)));
+    %[s,i] = sort(uAge);
+    % train = train(i,:,j);
+    % figure; imagesc(train(:,:,j))
 end
 
 
@@ -214,10 +214,9 @@ end
 
 
 
-figure;
 clrs = hsv(length(c)-1); clrs = [clrs;clrs(1,:)];
 
-subplot(1,2,1);hold on
+figure;hold on
 colororder({'k','r'})
 yyaxis left
 x = c;
@@ -241,8 +240,11 @@ ylim([-1 1])
 % ylim([0 1])
 xticks([-180 -90 0 90 180])
 xlabel('dir rel to pref')
+box on
 
-subplot(1,2,2);hold on
+
+
+figure;hold on
 x = mean(TCnorm(:,:,1),'omitnan');
 y = mean(TCnorm(:,:,2),'omitnan');
 plot(x,y,'k-','LineWidth',2)
@@ -250,6 +252,7 @@ scatter(x,y,300,clrs,'.')
 plot([0 1],[0 1],'k--')
 xlabel('control')
 ylabel('V1 cool')
+box on
 
 
 
@@ -262,20 +265,22 @@ for ag = 1:length(ageGroups)
     x = c;
     y = mean(TCnorm(idx,:,1),'omitnan');
     err = std(TCnorm(idx,:,1),'omitnan')/sqrt(sum(idx));
-    p(ag) = errorbar(x,y,err,'-','Color',agClrs{ag},'LineWidth',2);
-    lbl{ag} = ['P' num2str(ageGroups{ag}(1)) '-P' num2str(ageGroups{ag}(2)) '; n=' num2str(sum(idx))];
+    errorbar(x,y,err,'-','Color',agClrs{ag},'LineWidth',2);
+    lbl = ['P' num2str(ageGroups{ag}(1)) '-P' num2str(ageGroups{ag}(2)) '; n=' num2str(sum(idx))];
     y = mean(TCnorm(idx,:,2),'omitnan');
     err = std(TCnorm(idx,:,2),'omitnan')/sqrt(sum(idx));
     errorbar(x,y,err,'--','Color',agClrs{ag},'LineWidth',2)
+    xticks([-180 -90 0 90 180])
+    title(lbl)
 end
+box on
+clear p lbl
 
 
 
 figure; hold on
 for ag = 1:length(ageGroups)
     idx = uAge>=ageGroups{ag}(1) & uAge<=ageGroups{ag}(2);
-    
-    subplot(1,2,1);hold on
     yline(0,'--')
     x = c;
     y = mean(dTCnorm(idx,:),'omitnan');
@@ -288,17 +293,29 @@ for ag = 1:length(ageGroups)
     ylim([-1 1])
     xticks([-180 -90 0 90 180])
     xlabel('dir rel to pref')
+end
+box on
+legend(p,lbl)
+clear p lbl
 
-    subplot(1,2,2);hold on
+
+
+figure; hold on
+for ag = 1:length(ageGroups)
+    idx = uAge>=ageGroups{ag}(1) & uAge<=ageGroups{ag}(2);
     x = mean(TCnorm(idx,:,1),'omitnan');
     y = mean(TCnorm(idx,:,2),'omitnan');
-    plot(x,y,'-','LineWidth',2,'Color',agClrs{ag})
+    p(ag) = plot(x,y,'-','LineWidth',2,'Color',agClrs{ag});
 %     scatter(x,y,300,clrs,'.')
     plot([0 1],[0 1],'k--')
+    lbl{ag} = ['P' num2str(ageGroups{ag}(1)) '-P' num2str(ageGroups{ag}(2)) '; n=' num2str(sum(idx))];
     xlabel('control')
     ylabel('V1 cool')
 end
+box on
 legend(p,lbl)
+clear p lbl
+
 
 
 % figure; hold on

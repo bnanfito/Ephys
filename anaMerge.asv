@@ -214,10 +214,9 @@ end
 
 
 
-figure;
 clrs = hsv(length(c)-1); clrs = [clrs;clrs(1,:)];
 
-subplot(1,2,1);hold on
+figure;hold on
 colororder({'k','r'})
 yyaxis left
 x = c;
@@ -242,7 +241,7 @@ ylim([-1 1])
 xticks([-180 -90 0 90 180])
 xlabel('dir rel to pref')
 
-subplot(1,2,2);hold on
+figure;hold on
 x = mean(TCnorm(:,:,1),'omitnan');
 y = mean(TCnorm(:,:,2),'omitnan');
 plot(x,y,'k-','LineWidth',2)
@@ -253,20 +252,29 @@ ylabel('V1 cool')
 
 
 
+ageGroups = {[29 32],[33 36],[37 40],[41 49],[50 150]};
+agClrs = {[0 0.4470 0.7410],[0.8500 0.3250 0.0980],[0.9290 0.6940 0.1250],[0.4940 0.1840 0.5560],[0.4660 0.6740 0.1880],[0.3010 0.7450 0.9330]};
 figure;hold on
 for ag = 1:length(ageGroups)
-
+    idx = uAge>=ageGroups{ag}(1) & uAge<=ageGroups{ag}(2);
+    subplot(1,length(ageGroups),ag);hold on
+    x = c;
+    y = mean(TCnorm(idx,:,1),'omitnan');
+    err = std(TCnorm(idx,:,1),'omitnan')/sqrt(sum(idx));
+    p = errorbar(x,y,err,'-','Color',agClrs{ag},'LineWidth',2);
+    lbl = ['P' num2str(ageGroups{ag}(1)) '-P' num2str(ageGroups{ag}(2)) '; n=' num2str(sum(idx))];
+    y = mean(TCnorm(idx,:,2),'omitnan');
+    err = std(TCnorm(idx,:,2),'omitnan')/sqrt(sum(idx));
+    errorbar(x,y,err,'--','Color',agClrs{ag},'LineWidth',2)
+    legend(p,lbl)
 end
+clear p lbl
 
 
 
 figure; hold on
-ageGroups = {[29 32],[33 36],[37 40],[41 49],[50 150]};
-agClrs = {[0 0.4470 0.7410],[0.8500 0.3250 0.0980],[0.9290 0.6940 0.1250],[0.4940 0.1840 0.5560],[0.4660 0.6740 0.1880],[0.3010 0.7450 0.9330]};
 for ag = 1:length(ageGroups)
     idx = uAge>=ageGroups{ag}(1) & uAge<=ageGroups{ag}(2);
-    
-    subplot(1,2,1);hold on
     yline(0,'--')
     x = c;
     y = mean(dTCnorm(idx,:),'omitnan');
@@ -279,17 +287,24 @@ for ag = 1:length(ageGroups)
     ylim([-1 1])
     xticks([-180 -90 0 90 180])
     xlabel('dir rel to pref')
+end
+legend(p,lbl)
+clear p lbl
 
-    subplot(1,2,2);hold on
+figure; hold on
+for ag = 1:length(ageGroups)
+    idx = uAge>=ageGroups{ag}(1) & uAge<=ageGroups{ag}(2);
     x = mean(TCnorm(idx,:,1),'omitnan');
     y = mean(TCnorm(idx,:,2),'omitnan');
-    plot(x,y,'-','LineWidth',2,'Color',agClrs{ag})
+    p(ag) = plot(x,y,'-','LineWidth',2,'Color',agClrs{ag});
 %     scatter(x,y,300,clrs,'.')
     plot([0 1],[0 1],'k--')
+    lbl{ag} = ['P' num2str(ageGroups{ag}(1)) '-P' num2str(ageGroups{ag}(2)) '; n=' num2str(sum(idx))];
     xlabel('control')
     ylabel('V1 cool')
 end
 legend(p,lbl)
+clear p lbl
 
 
 % figure; hold on

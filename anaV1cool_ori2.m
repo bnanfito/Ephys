@@ -5,9 +5,9 @@ close all
 anaMode = 'MU';
 proj = 'V1cool_ori';
 area = 'PSS';
-% dataFold = 'Y:\Brandon\data';
+dataFold = 'Y:\Brandon\data';
 % dataFold = '/Volumes/NielsenHome2/Brandon/data';
-dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
+% dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
 ageGroups = {[28 35],[36 45],[46 150]};
 
 %% Generate Project Table
@@ -180,6 +180,7 @@ if strcmp(metric,'rPref')
     y = [mAG3-semAG3 mAG3-semAG3 mAG3+semAG3 mAG3+semAG3];
     patch(x,y,'r','EdgeColor','none','FaceAlpha',0.2)
     yline(mAG3,'r--','LineWidth',2)
+    yline(0,'k--','LineWidth',2)
     errorbar(ages(~isnan(SI)), SI(~isnan(SI)), semSI(~isnan(SI)),'k','LineWidth',2,'LineStyle','none')
     scatter(ages(idx1 & ~isnan(SI)),SI(idx1 & ~isnan(SI)),10*scl,'k','filled','o','MarkerFaceAlpha',1,'MarkerEdgeColor','k')
     scatter(ages(idx2 & ~isnan(SI)),SI(idx2 & ~isnan(SI)),10*scl,'k','o','LineWidth',2)
