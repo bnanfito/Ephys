@@ -1,6 +1,6 @@
 clear all
 close all
-exptFold = 'Z:\EphysNew\data\febk7';
+exptFold = 'Z:\EphysNew\data\feav2';
 cd(exptFold)
 expts = dir;
 expts = expts(vertcat(expts.isdir)==1,:);

@@ -3,7 +3,6 @@
 % INPUTS
 % 1. r = vector of responses for each corresponding contrast value in c
 % 2. c = vector of contrast values for each corresponding response in r
-%           value should be 0 >= c <= 100
 % 3. mod = 
 
 function [x,y,cF,resnorm,residuals,aic,bic] = nakaRush(r,c,mod,p)

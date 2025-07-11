@@ -1,5 +1,5 @@
 % anaCon
-function [sumStats] = anaCon(animal,unit,expt,probe,anaMode,dataFold,plt,svePlt)
+function [sumStats,spks] = anaCon(animal,unit,expt,probe,anaMode,dataFold,plt,svePlt)
 
 %% Initialize
 

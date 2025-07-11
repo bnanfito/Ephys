@@ -1,5 +1,5 @@
 % anaOri
-function [sumStats] = anaOri(animal,unit,expt,probe,anaMode,dataFold,plt,svePlt,varargin)
+function [sumStats,spks] = anaOri(animal,unit,expt,probe,anaMode,dataFold,plt,svePlt,varargin)
 
 %% Initialize
 
