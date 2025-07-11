@@ -1,5 +1,5 @@
 % anaCon
-function [sumStats,spks] = anaCon(animal,unit,expt,probe,anaMode,dataFold,plt,svePlt)
+function [sumStats,spks] = anaCon(animal,unit,expt,probe,anaMode,dataFold,plt)
 
 %% Initialize
 
@@ -193,10 +193,6 @@ if plt == 1
     end
 
 end
-
-%     figure;
-%     cdfplot(sumStats.cF(sumStats.goodUnit))
-
 
 
 
