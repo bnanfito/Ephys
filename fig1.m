@@ -119,14 +119,14 @@ sgtitle([animal ' ' unit ' ' expt])
 
 end
 
-figure; hold on
-scatter([spks.xPos],[spks.zPos])
-scatter([spks(~goodIdx).xPos],[spks(~goodIdx).zPos],'rx')
-scatter(sumStats.xPos(goodIdx),sumStats.zPos(goodIdx),200,repmat( warmR', 1,3 ),'.')
-
-figure; hold on
-scatter([spks.xPos],[spks.zPos])
-scatter([spks(~goodIdx).xPos],[spks(~goodIdx).zPos],'rx')
-scatter(sumStats.xPos(goodIdx),sumStats.zPos(goodIdx),200,repmat( coldR', 1,3 ),'.')
+% figure; hold on
+% scatter([spks.xPos],[spks.zPos])
+% scatter([spks(~goodIdx).xPos],[spks(~goodIdx).zPos],'rx')
+% scatter(sumStats.xPos(goodIdx),sumStats.zPos(goodIdx),200,repmat( warmR', 1,3 ),'.')
+% 
+% figure; hold on
+% scatter([spks.xPos],[spks.zPos])
+% scatter([spks(~goodIdx).xPos],[spks(~goodIdx).zPos],'rx')
+% scatter(sumStats.xPos(goodIdx),sumStats.zPos(goodIdx),200,repmat( coldR', 1,3 ),'.')
 
 

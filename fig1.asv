@@ -15,8 +15,7 @@ load(fullfile(dataFold,'Ephys',animal,exptName,[exptName '_trialInfo.mat']))
 load(fullfile(dataFold,'Ephys',animal,exptName,[exptName '_id.mat']))
 load(fullfile(dataFold,'Ephys',animal,exptName,[exptName '.analyzer']),'-mat')
 load('F:\Brandon\data\Ephys\febl4\febl4_u000_011\goodUnits.mat')
-[spks,trialExclude] = orgSpks(animal,unit,expt,probe,anaMode,dataFold);
-[sumStats] = anaOri('febl4','000','012',1,'MU',dataFold,0,0);
+[sumStats,spks] = anaOri('febl4','000','012',1,'MU',dataFold,0,0);
 
 pre = getparam('predelay',Analyzer);
 stimTime = getparam('stim_time',Analyzer);
@@ -40,12 +39,19 @@ blankTrials = sumStats.fr(1).trialNum(:,trialInfo.blankId);
 coldTrials = coldTrials(~ismember(coldTrials,blankTrials));
 warmTrials = warmTrials(~ismember(warmTrials,blankTrials));
 
-for u = 1:height(sumStats)
-    coldR(:,u) = sumStats.fr(u).bc(ismember(sumStats.fr(u).trialNum,coldTrials));
-    warmR(:,u) = sumStats.fr(u).bc(ismember(sumStats.fr(u).trialNum,warmTrials));
-end
-warmR = mean(warmR(:,goodIdx),1,'omitnan');
-coldR = mean(coldR(:,goodIdx),1,'omitnan');
+% for u = 1:height(sumStats)
+%     coldR(:,u) = sumStats.fr(u).bc(ismember(sumStats.fr(u).trialNum,coldTrials));
+%     warmR(:,u) = sumStats.fr(u).bc(ismember(sumStats.fr(u).trialNum,warmTrials));
+% end
+% warmR = mean(warmR(:,goodIdx),1,'omitnan');
+% warmR(warmR<0) = 0;
+% maxR = max(warmR);
+% warmR = warmR/maxR;
+% warmR = 1-warmR;
+% coldR = mean(coldR(:,goodIdx),1,'omitnan');
+% coldR(coldR<0) = 0;
+% coldR = coldR/maxR;
+% coldR = 1-coldR;
 
 eventIDdiff = [1;diff(trialInfo.eventId)];
 eventTimes = trialInfo.eventTimes;
@@ -56,11 +62,13 @@ trialEnd = eventTimes(eventIDdiff==-1);
 
 %% plot
 
+for u = goodUnitId'
+
 figure;
 tiledlayout(2,2)
-bw = id.sampleFreq;
+bw = id.sampleFreq*1;
 
-uIdx = [spks.unitId] == 84;
+uIdx = [spks.unitId] == u;
 nexttile; hold on
 spkTimes = spks(uIdx).stimCent;
 patch([0 1 1 0],[0 0 nTrials+1 nTrials+1],'k','EdgeColor','none','FaceAlpha',0.2)
@@ -109,10 +117,16 @@ box on
 
 sgtitle([animal ' ' unit ' ' expt])
 
+end
 
+% figure; hold on
+% scatter([spks.xPos],[spks.zPos])
+% scatter([spks(~goodIdx).xPos],[spks(~goodIdx).zPos],'rx')
+% scatter(sumStats.xPos(goodIdx),sumStats.zPos(goodIdx),200,repmat( warmR', 1,3 ),'.')
+% 
+% figure; hold on
+% scatter([spks.xPos],[spks.zPos])
+% scatter([spks(~goodIdx).xPos],[spks(~goodIdx).zPos],'rx')
+% scatter(sumStats.xPos(goodIdx),sumStats.zPos(goodIdx),200,repmat( coldR', 1,3 ),'.')
 
-figure; hold on
-scatter([spks.xPos],[spks.zPos])
-scatter([spks(~goodIdx).xPos],[spks(~goodIdx).zPos],'rx')
-scatter(sumStats.xPos(goodIdx),sumStats.zPos(goodIdx),5,repmat(warmR/max(warmR)))
 
