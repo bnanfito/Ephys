@@ -103,17 +103,17 @@ for u = 1:nU % u indexes a unit (column) in structure spks
     rMean{u} = mean(R{u}(:,:,oriPref(u)),'omitnan');
     cont = C{u}(contInd,:,oriPref(u));
 
-    [nk{u}.x,nk{u}.y,nk{u}.cF,nk{u}.resnorm,nk{u}.residuals,nk{u}.aic,nk{u}.bic] = nakaRush(rMean{u},cont,0,0);
-    if nk{u}.cF>100
-        cF(u) = nan;
+    nk{u} = nakaRush(rMean{u},cont,0);
+    if nk{u}.c50>100
+        c50(u) = nan;
     else
-        cF(u) = nk{u}.cF;
+        c50(u) = nk{u}.c50;
     end
 
 end
 
 varNames = {'exptName','probe','area','uInfo','uID','spkTimes','latency','fr','paramKey','cndKey','oriPref','response','condition','rPref','nkFit','cF','rBlank'};
-sumStats = table(exptID',probeID',areaID',{spks.info}',uID',{spks.stimCent}',vertcat(spks.late),vertcat(spks.fr),paramKey',cndKey',oriPref',R',C',rPref',nk',cF',Rblank','VariableNames',varNames);
+sumStats = table(exptID',probeID',areaID',{spks.info}',uID',{spks.stimCent}',vertcat(spks.late),vertcat(spks.fr),paramKey',cndKey',oriPref',R',C',rPref',nk',c50',Rblank','VariableNames',varNames);
 
 [pVis] = visTest(sumStats);
 sumStats.pVis = pVis;
@@ -179,8 +179,10 @@ if plt == 1
         subplot(1,2,2);hold on
         plot(xT,rMean{u},'o','Color',clr)
         plot(repmat(xT,size(yT,1),1),yT,'.','Color',clr)
-        plot(nk{u}.x,nk{u}.y)
-        xline(nk{u}.cF,'g--')
+        plot(1:100,nk{u}.fit(1:100))
+        disp(nk{u}.c50)
+        disp(isreal(nk{u}.c50))
+        xline(nk{u}.c50,'g--')
         yline(0,'k')
 
         ttl = [sumStats.uInfo{u} '#' num2str(sumStats.uID(u))];

@@ -1,69 +1,77 @@
-% naka rushton function
+% nakaRush.m
+% written by Brandon Nanfito
+% function for fitting the naka rushton function to empirical data
 
 % INPUTS
 % 1. r = vector of responses for each corresponding contrast value in c
 % 2. c = vector of contrast values for each corresponding response in r
 %           value should be 0 >= c <= 100
-% 3. mod = 
+% 3. p = plot the results? 1:yes, 0:no
 
-function [x,y,cF,resnorm,residuals,aic,bic] = nakaRush(r,c,mod,p)
+% OUTPUTS
+% 1. nk = structure with fields:
+%           1. fit = function that takes in vector of contrast values and
+%           outputs the predicted response from the model fit.
+%           2. rMax = model parameter for the asymptotic value the response
+%           saturates to at high contrast
+%           3. c50 = model parameter for contrast value at which response
+%           reaches half of its maximum
+%           4. n = model parameter controling the steepness of the
+%           inflection point in the curve
+%           5. resnorm = the sum of squared residuals (measure of error)
+%           6. residuals = the difference (error) between the model fit and
+%           empirical data points
+%           7. aic = akaike information criterion
+%           8. bic = bayesian information criterion
 
-if mod == 1
-    
-    x = linspace(1,100);
+function [nk] = nakaRush(r,c,p)
 
-    rM = max(r);
+    %initial guesses at model parameters
+    rMax = max(r); 
+    c50 = 50;
+    n = 1;
+    x0 = [n c50 rMax]; %initial guesses for model parameters
+    lb = []; %lower bound on model parameters
+    ub = []; %upper bound on model parameters
 
-    err = @(pars) (rM*((c.^pars(1))./((c.^(pars(3)*pars(1)))+(pars(2)^(pars(3)*pars(1))))))-r;
-    [params,resnorm,residuals] = lsqnonlin(err,[1 50 1]);
-    n = params(1);
-    cF = params(2);
-    s = params(3);
+    %define error function that computes the residuals between observed
+    %response (r) and the model predictions given a set of parameters
+    %(pars) for the empirically evaluated contrast values (c)
+    err = @(pars) (pars(1)*( (c.^pars(3))./((c.^pars(3))+(pars(2)^pars(3))) )) - r;
+    [params,resnorm,residuals] = lsqnonlin(err,x0,lb,ub);
+    rMax = params(1);
+    c50 = params(2);
+    n = params(3);
 
-    %nakaruston fit
-    y = rM* ( (x.^n) ./ ((x.^(s*n))+(cF^(s*n))) ) ;
-    
-    %Find the contrast for the nr fit that is closest to 50% response (the modified NakaRush gives)
-    dif = abs(y-0.5);
-    cF = find(dif == min(dif))/1000;
-    
+    fit = @(cont) rMax*( (cont.^n)./((cont.^n)+(c50^n)) );
+        
+    %calculate goodness of fit metrics
+    nC = length(c);
+    nP = length(params);
+    rms = sqrt(resnorm/nC);
+    aic = (nC*log(rms))+(2*nP);
+    bic = (nC*log(rms))+(log(nC)*nP);
+
+    %create output structure
+    nk.fit = fit;
+    nk.rMax = rMax;
+    nk.c50 = c50;
+    nk.n = n;
+    nk.resnorm = resnorm;
+    nk.residuals = residuals;
+    nk.aic = aic;
+    nk.bic = bic;
+
     if p == 1
         figure; hold on
-        plot(c,r,'b','LineWidth',2)
-        plot(x,y,'k','LineWidth',2)
-        plot([0 cF],[rM/2 rM/2],'r')
-        plot([cF cF],[0 rM/2],'r')
+        pl(1) = plot(c,r,'bo','LineWidth',2); %plot empirical data points
+        x = 1:100;
+        pl(2) = plot(x,nk.fit(x),'k','LineWidth',2); %plot model fit
+        pl(3) = yline(rMax,'r--'); %plot asymptotic saturation point of response at high contrasts
+        pl(4) = plot([0 c50],[rMax/2 rMax/2],'r'); %plot the c50 value and its corresponding response value
+        plot([c50 c50],[0 rMax/2],'r')
         xlim([0 100])
+        legend(pl,{'empirical data','model fit','response saturation','c50/half max response'},'Location','southeast')
     end
-    
-elseif mod == 0
-    
-    x = linspace(1,100);
-
-    rM = max(r);
-    
-    err = @(pars) (rM*((c.^pars(1))./((c.^pars(1))+(pars(2)^pars(1)))))-r;
-    [params,resnorm,residuals] = lsqnonlin(err,[1 50]);
-    n = params(1);
-    cF = params(2);
-
-    y = rM * ( (x.^n) ./ ((x.^n)+(cF^n)) ) ;
-    
-    if p == 1
-        figure; hold on
-        plot(c,r,'b','LineWidth',2)
-        plot(x,y,'k','LineWidth',2)
-        plot([0 cF],[rM/2 rM/2],'r')
-        plot([cF cF],[0 rM/2],'r')
-        xlim([0 100])
-    end
-    
-end
-
-n = length(c);
-p = length(params);
-rms = sqrt(resnorm/n);
-aic = (n*log(rms))+(2*p);
-bic = (n*log(rms))+(log(n)*p);
 
 end
