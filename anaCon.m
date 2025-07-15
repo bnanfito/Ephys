@@ -117,7 +117,7 @@ sumStats = table(exptID',probeID',areaID',{spks.info}',uID',{spks.stimCent}',ver
 
 [pVis] = visTest(sumStats);
 sumStats.pVis = pVis;
-goodUid = screenUnits(sumStats,anaMode);
+goodUidx = screenUnits(sumStats,anaMode);
 
 if strcmp(anaMode,'MU')
     sumStats.xPos = vertcat(spks.xPos);
@@ -129,6 +129,10 @@ end
 if plt == 1
 
     for u = 1:height(sumStats)
+
+        if ~ismember(u,find(goodUidx))
+            continue
+        end
 
         figure;
 
@@ -186,7 +190,7 @@ if plt == 1
         yline(0,'k')
 
         ttl = [sumStats.uInfo{u} '#' num2str(sumStats.uID(u))];
-        if ~ismember(u,find(goodUid))
+        if ~ismember(u,find(goodUidx))
             ttl = ['(BAD) ' ttl];
         end
         sgtitle(ttl)

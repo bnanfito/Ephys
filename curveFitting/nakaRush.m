@@ -31,8 +31,8 @@ function [nk] = nakaRush(r,c,p)
     c50 = 50;
     n = 1;
     x0 = [n c50 rMax]; %initial guesses for model parameters
-    lb = []; %lower bound on model parameters
-    ub = []; %upper bound on model parameters
+    lb = [0 0 0]; %lower bound on model parameters
+    ub = [inf 100 inf]; %upper bound on model parameters
 
     %define error function that computes the residuals between observed
     %response (r) and the model predictions given a set of parameters
