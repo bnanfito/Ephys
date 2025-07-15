@@ -121,33 +121,24 @@ for u = 4
     errorbar(conds,tc(u,:,1),tc_sem(u,:,1),'k')
     errorbar(conds,tc(u,:,2),tc_sem(u,:,2),'c')
 %     errorbar(conds,tc(u,:,3),tc_sem(u,:,3),'b')
-    xlabel('dir of motion (deg)')
-    ylabel('firing rate')
+    xlabel('dir ()')
     box on
 
     nexttile; hold on
     plot(c_aligned,tc_norm(u,:,1),'k')
     plot(c_aligned,tc_norm(u,:,2),'c')
 %     plot(c_aligned,tc_norm(u,:,3),'b')
-    xlabel('dir rel to pref')
-    ylabel('normalized response')
     box on
 
     nexttile; hold on
     plot(bins(2:end),psth(u,:,1),'k')
     plot(bins(2:end),psth(u,:,2),'c')
 %     plot(bins(2:end),psth(u,:,3),'b')
-    xlabel('time (sec)')
-    ylabel('firing rate')
     box on
 
     nexttile; hold on
     plot(tc_norm(u,:,1),tc_norm(u,:,2),'ko-')
-    plot([0 1],[0 1],'k--')
-    xlabel('control norm response')
-    ylabel('v1 cooled norm response')
-    box on
-
+    
 end
 
 figure;tiledlayout(2,1)
