@@ -88,13 +88,16 @@ for e = 1:3
         bw(u,e) = dirDat.BW;
         bwS(u,e) = dirDat.BWSmooth;
 
-
         %tuning curve
         tc_temp = mean(rMat,1,'omitnan');
         tc_sem_temp = std(rMat,[],1,'omitnan')/sqrt(size(rMat,1));
         
-        [c_aligned,tc_aligned,alignIdx] = alignDirTuning(conds,tc_temp);
-        tc_sem_algined = tc_sem_temp(alignIdx);
+        if e == 1
+            [c_aligned,tc_aligned,alignIdx(u,:)] = alignDirTuning(conds,tc_temp);
+        else
+            tc_aligned = tc_temp(alignIdx(u,:));
+        end
+        tc_sem_algined = tc_sem_temp(alignIdx(u,:));
 
         maxR = max(tc_aligned);
         tc_norm(u,:,e) = tc_aligned/maxR;
@@ -112,45 +115,36 @@ for e = 1:3
     end
 end
 
+%Are pref and null scaled the same during cooling?
+scl = rPref(:,2)./rPref(:,1);
+scldNull = rNull(:,1).*scl;
+scldTc = tc(:,:,1).*scl;
+scl_null = rNull(:,2)./rNull(:,1);
+
 %% Plot
 
-for u = 4
-    figure; tiledlayout(2,2)
-
-    nexttile; hold on
-    errorbar(conds,tc(u,:,1),tc_sem(u,:,1),'k')
-    errorbar(conds,tc(u,:,2),tc_sem(u,:,2),'c')
+u = 4;
+figure; tiledlayout(2,3)
+nexttile; hold on
+errorbar(conds,tc(u,:,1),tc_sem(u,:,1),'k')
+errorbar(conds,tc(u,:,2),tc_sem(u,:,2),'c')
 %     errorbar(conds,tc(u,:,3),tc_sem(u,:,3),'b')
-    xlabel('dir of motion (deg)')
-    ylabel('firing rate')
-    box on
-
-    nexttile; hold on
-    plot(c_aligned,tc_norm(u,:,1),'k')
-    plot(c_aligned,tc_norm(u,:,2),'c')
+plot(conds,scldTc(u,:),'c--')
+legend('cntrl','cool','scaled cool')
+xlabel('dir of motion (deg)')
+ylabel('firing rate')
+title('example unit')
+box on
+axis square
+nexttile; hold on
+plot(c_aligned,tc_norm(u,:,1),'k')
+plot(c_aligned,tc_norm(u,:,2),'c')
 %     plot(c_aligned,tc_norm(u,:,3),'b')
-    xlabel('dir rel to pref')
-    ylabel('normalized response')
-    box on
-
-    nexttile; hold on
-    plot(bins(2:end),psth(u,:,1),'k')
-    plot(bins(2:end),psth(u,:,2),'c')
-%     plot(bins(2:end),psth(u,:,3),'b')
-    xlabel('time (sec)')
-    ylabel('firing rate')
-    box on
-
-    nexttile; hold on
-    plot(tc_norm(u,:,1),tc_norm(u,:,2),'ko-')
-    plot([0 1],[0 1],'k--')
-    xlabel('control norm response')
-    ylabel('v1 cooled norm response')
-    box on
-
-end
-
-figure;tiledlayout(2,1)
+xlabel('dir rel to pref')
+ylabel('normalized response')
+title('normalized example unit')
+box on
+axis square
 nexttile; hold on
 y = mean(tc_norm(:,:,1),'omitnan');
 sem = std(tc_norm(:,:,1),'omitnan')/sqrt(size(tc_norm,1));
@@ -161,13 +155,31 @@ errorbar(c_aligned,y,sem,'c')
 xticks([-180 -90 0 90 180])
 xlabel('dir rel to pref')
 ylabel('normalized response')
+title('normalized population')
 box on
+axis square
+nexttile; hold on
+plot(bins(2:end),psth(u,:,1),'k')
+plot(bins(2:end),psth(u,:,2),'c')
+%     plot(bins(2:end),psth(u,:,3),'b')
+xlabel('time (sec)')
+ylabel('firing rate')
+box on
+axis square
+nexttile; hold on
+plot(tc_norm(u,:,1),tc_norm(u,:,2),'ko-')
+plot([0 1],[0 1],'k--')
+xlabel('control norm response')
+ylabel('v1 cooled norm response')
+box on
+axis square
 nexttile;hold on
 plot(mean(tc_norm(:,:,1),'omitnan'),mean(tc_norm(:,:,2),'omitnan'),'k-o')
 plot([0 1],[0 1],'k--')
 xlabel('control response')
 ylabel('V1 cooled response')
 box on
+axis square
 
 figure;tiledlayout(2,2)
 nexttile;hold on
@@ -176,18 +188,21 @@ plot([0 max(bw,[],'all')],[0 max(bw,[],'all')],'k--')
 xlabel('control bandwidth')
 ylabel('v1 cooled bandwidth')
 box on
+axis square
 nexttile;hold on
 scatter(bwS(:,1),bwS(:,2),'k.')
 plot([0 max(bwS,[],'all')],[0 max(bwS,[],'all')],'k--')
 xlabel('control bandwidth (smooth)')
 ylabel('v1 cooled bandwidth (smooth)')
 box on
+axis square
 nexttile;hold on
 scatter(ldr(:,1),ldr(:,2),'k.')
 plot([0 1],[0 1],'k--')
 xlabel('control ldr')
 ylabel('v1 cooled ldr')
 box on
+axis square
 nexttile;hold on
 scatter(dsi(:,1),dsi(:,2),'k.')
 plot([0 1],[0 1],'k--')
@@ -195,20 +210,29 @@ xlabel('control dsi')
 ylabel('v1 cooled dsi')
 sgtitle('tuning metrics')
 box on
+axis square
 
 figure;tiledlayout(2,2)
 nexttile;hold on
-scatter(rPref(:,1),rPref(:,2),'k.')
-plot([0 max(rPref,[],'all')],[0 max(rPref,[],'all')],'k--')
-xlabel('control rPref')
-ylabel('v1 cooled rPref')
+x = rPref(:,1);
+y = rPref(:,2);
+scatter(x,y,'k.')
+plot([0 max([x y],[],'all')],[0 max([x y],[],'all')],'k--')
+title('rPref')
+xlabel('cntrl')
+ylabel('cool')
 box on
+axis square
 nexttile;hold on
-scatter(rNull(:,1),rNull(:,2),'k.')
-plot([0 max(rNull,[],'all')],[0 max(rNull,[],'all')],'k--')
-xlabel('control rNull')
-ylabel('v1 cooled rNull')
+x = rNull(:,1);
+y = rNull(:,2);
+scatter(x,y,'k.')
+plot([0 max([x y],[],'all')],[0 max([x y],[],'all')],'k--')
+title('rNull')
+xlabel('cntrl')
+ylabel('cool')
 box on
+axis square
 nexttile;hold on
 cdf = cdfplot(rPref(:,1));
 cdf.Color = 'k';
@@ -220,6 +244,7 @@ yticks([0 0.5 1])
 yline(0.5,'k--')
 grid off
 box on
+axis square
 nexttile;hold on
 cdf = cdfplot(rNull(:,1));
 cdf.Color = 'k';
@@ -231,5 +256,61 @@ yticks([0 0.5 1])
 yline(0.5,'k--')
 grid off
 box on
+axis square
 
+figure; tiledlayout(2,2)
+nexttile; hold on
+x = scldNull;
+y = rNull(:,2);
+dRnull_scl = y-x;
+scatter(x,y,'k.')
+plot([0 max([x y],[],'all')],[0 max([x y],[],'all')],'k--')
+title('rNull')
+xlabel('scaled')
+ylabel('cool')
+box on
+axis square
+nexttile; hold on
+idx = c_aligned==180;
+x = tc_norm(:,idx,1);
+y = tc_norm(:,idx,2);
+dRnull_norm = y-x;
+scatter(x,y,'k.')
+plot([0 1],[0 1],'k--')
+title('normalized null')
+xlabel('cntrl')
+ylabel('cool')
+box on
+axis square
+nexttile; hold on
+histogram(dRnull_scl)
+[p,h] = signrank(dRnull_scl);
+xline(mean(dRnull_scl,'omitnan'),'r')
+xline(median(dRnull_scl,'omitnan'),'g')
+ylabel('count')
+xlabel('cool null - scaled null')
+title(['signrank: p=' num2str(p)])
+box on
+axis square
+nexttile; hold on
+histogram(dRnull_norm)
+[p,h] = signrank(dRnull_norm);
+xline(mean(dRnull_norm,'omitnan'),'r')
+xline(median(dRnull_norm,'omitnan'),'g')
+ylabel('count')
+xlabel('delta norm. rNull (cool-cntrl)')
+title(['signrank: p=' num2str(p)])
+box on
+axis square
 
+figure;hold on
+x = scl;
+y = scl_null;
+sc = scatter(x,y,'k.');
+dt = dataTipTextRow('uID',dat{1}.uID);
+sc.DataTipTemplate.DataTipRows(end+1) = dt;
+plot([0 2],[0 2],'k--')
+xline(1,'k--')
+yline(1,'k--')
+xlabel('scale pref')
+ylabel('scale null')

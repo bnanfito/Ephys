@@ -32,11 +32,11 @@ for f = 1:nFiles
     sumStats{f} = anaOri(animalId,exptName{f}(8:10),exptName{f}(12:14),probeId,anaMode,dataFold,0,0,f);
     goodUnits = [goodUnits screenUnits(sumStats{f},anaMode)];
 end
-%remove units that do not pass inclusion criteria in either control or cool
-goodIdx = goodUnits(:,1)|goodUnits(:,2);
-for f = 1:nFiles
-    sumStats{f} = sumStats{f}(goodIdx,:);
-end
+% %remove units that do not pass inclusion criteria in either control or cool
+% goodIdx = goodUnits(:,1)|goodUnits(:,2);
+% for f = 1:nFiles
+%     sumStats{f} = sumStats{f}(goodIdx,:);
+% end
 
 %% Plot 
 if plt == 1
