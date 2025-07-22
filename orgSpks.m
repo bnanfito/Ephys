@@ -123,7 +123,8 @@ function [spks,trialExclude] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
                     spks(u).fr.stim(r,c) = nan;
                     spks(u).fr.bc(r,c) = nan;
                 else
-                    spks(u).fr.base(r,c) =  mean(spkTrialDat(u).baseFrate,'omitnan');
+%                     spks(u).fr.base(r,c) = mean(spkTrialDat(u).baseFrate,'omitnan');
+                    spks(u).fr.base(r,c) = spkTrialDat(u).baseFrate(t);
                     spks(u).fr.stim(r,c) = spkTrialDat(u).stimFrate(t);
                     spks(u).fr.bc(r,c) = spks(u).fr.stim(r,c)-spks(u).fr.base(r,c);
                 end
