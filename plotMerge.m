@@ -1,26 +1,11 @@
 %plotMerge
 
-function [sumStats] = plotMerge(animalId, mergeId, probeId, dataFold, plt)
+function [sumStats] = plotMerge(animalId, mergeId, probe, dataFold, plt)
 
-
-% clear all
-% close all
-% 
-% %Settings
-% animalId = 'febo6';
-% mergeId = '000009000016000017';
-% probeId = 2;
-% dataFold = 'F:\Brandon\data';
-% % dataFold = 'Y:\Brandon\data';
 anaMode = 'SU';
 
-clrs = {'k','c','k'};
-linStyls = {'-','-','--'};
-plr = 0;
-alignTC = 0;
-
 mergeName = [animalId '_uMMM_' mergeId];
-% splitIntan(fullfile(dataFold,'Ephys'),animalId,mergeId,probeId,'BRN')
+splitIntan(fullfile(dataFold,'Ephys'),animalId,mergeId,probe,'BRN')
 
 %Load merge info
 load(fullfile(dataFold,'Ephys',animalId,mergeName,[mergeName '_mergeInfo.mat']))
@@ -29,7 +14,7 @@ goodUnits = [];
 for f = 1:nFiles
     exptName{f,1} = [animalId '_' mergeInfo.files{f}];
 
-    sumStats{f} = anaOri(animalId,exptName{f}(8:10),exptName{f}(12:14),probeId,anaMode,dataFold,0,0,f);
+    sumStats{f} = anaOri(animalId,exptName{f}(8:10),exptName{f}(12:14),probe,anaMode,dataFold,0,0,f);
     goodUnits = [goodUnits screenUnits(sumStats{f},anaMode)];
 end
 % %remove units that do not pass inclusion criteria in either control or cool
@@ -40,6 +25,11 @@ end
 
 %% Plot 
 if plt == 1
+
+    clrs = {'k','c','k'};
+    linStyls = {'-','-','--'};
+    plr = 0;
+    alignTC = 0;
 
     nU = height(sumStats{1});
     for u = 1:nU

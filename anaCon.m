@@ -1,5 +1,5 @@
 % anaCon
-function [sumStats,spks] = anaCon(animal,unit,expt,probe,anaMode,dataFold,plt)
+function [sumStats,spks] = anaCon(animal,unit,expt,probe,anaMode,dataFold,plt,varargin)
 
 %% Initialize
 
@@ -24,6 +24,14 @@ if strcmp(varInfo.class,'char')
     probe = find(strcmp({id.probes(:).area}',area));
 end
 clear varInfo
+
+if isempty(varargin)
+    probeId = probe;
+else
+    % varargin{1} should be a merge file id (1,2,3..)
+    probeId = [num2str(probe) '_' num2str(varargin{1})];
+end
+
 area = id.probes(probe).area;
 sf = id.sampleFreq;
 predelay = getparam('predelay',Analyzer);
@@ -68,7 +76,7 @@ trialInclude = ismember(trialInfo.triallist,find(cndInclude));
 
 %% Compute 
 
-[spks,trialExclude] = orgSpks(animal,unit,expt,probe,anaMode,dataFold);
+[spks,trialExclude] = orgSpks(animal,unit,expt,probeId,anaMode,dataFold);
 nU = length(spks);
 
 dim{1} = 'response';

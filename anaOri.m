@@ -35,7 +35,6 @@ else
     probeId = [num2str(probe) '_' num2str(varargin{1})];
 end
 
-
 area = id.probes(probe).area;
 sf = id.sampleFreq;
 predelay = getparam('predelay',Analyzer);
