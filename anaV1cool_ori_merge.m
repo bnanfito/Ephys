@@ -43,8 +43,9 @@ for a = 1:length(animals)
         for f = 1:nFiles
             exptName{f,1} = [animals{a} '_' mergeInfo.files{f}];
             load(fullfile(dataFold,'Ephys',animals{a},exptName{f},[exptName{f} '_trialInfo.mat']))
-            isOri = (length(trialInfo.dom)==1 & sum(strcmp(trialInfo.dom,'ori'))==1) |...
-                    (length(trialInfo.dom)==2 & sum(strcmp(trialInfo.dom,'ori'))==1 & sum(contains(trialInfo.dom,'size'))==1 );
+            dom = trialInfo.dom;
+            isOri = (length(dom)==1 & sum(strcmp(dom,'ori'))==1) |...
+                    (length(dom)==2 & sum(strcmp(dom,'ori'))==1 & sum(contains(dom,'size'))==1 );
             if isOri
                 out_tmp = anaOri(animals{a},exptName{f}(8:10),exptName{f}(12:14),probeId,anaMode,dataFold,0,0,f);
                 out{f} = vertcat(out{f},out_tmp);

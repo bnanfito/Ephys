@@ -188,6 +188,7 @@ end
 
 [pVis] = visTest(sumStats);
 sumStats.pVis = pVis;
+goodUnit = screenUnits(sumStats,anaMode);
 
 if strcmp(anaMode,'MU')
     sumStats.xPos = vertcat(spks.xPos);
@@ -199,7 +200,6 @@ end
 
 if plt == 1
 
-    goodUnit = screenUnits(sumStats,anaMode);
     for u = 1:height(sumStats)
 
         if ~ismember(u,find(goodUnit))
@@ -230,11 +230,6 @@ if plt == 1
         subplot(2,2,3);hold on
         if isempty(x(spkIdx)) || isempty(y(spkIdx))
             text(0,0,'no spikes')
-            ttl = [exptName ' p' num2str(probe) ' (' area ') ' anaMode '#' num2str(uID(u))];
-            if ~ismember(u,find(goodUnit))
-                ttl = [ttl '(BAD UNIT)'];
-            end
-            sgtitle(ttl)
             continue
         end
         patch([0 1 1 0],[0 0 max(y(spkIdx))+1 max(y(spkIdx))+1],'k','EdgeColor','none','FaceAlpha',0.2)

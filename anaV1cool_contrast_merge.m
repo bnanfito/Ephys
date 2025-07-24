@@ -43,16 +43,15 @@ for a = 1:length(animals)
         for f = 1:nFiles
             exptName{f,1} = [animals{a} '_' mergeInfo.files{f}];
             load(fullfile(dataFold,'Ephys',animals{a},exptName{f},[exptName{f} '_trialInfo.mat']))
-            isCon = length(trialInfo.dom)==2 & sum(strcmp(trialInfo.dom,'ori'))==1 & sum(strcmp(trialInfo.dom,'contrast'))==1 ;
+            dom = trialInfo.dom;
+            isCon = (length(dom)==2 && sum(strcmp(dom,'ori'))==1 && sum(strcmp(dom,'contrast'))==1) ||...
+                    (length(dom)==3 && sum(strcmp(dom,'ori'))==1 && sum(strcmp(dom,'contrast'))==1 && sum(contains(dom,'size'))==1);
             if isCon
                 out_tmp = anaCon(animals{a},exptName{f}(8:10),exptName{f}(12:14),probeId,anaMode,dataFold,0,f);
                 out{f} = vertcat(out{f},out_tmp);
             end
         end
     end
-
-%     [out] = plotMerge(animals{a}, mergeId, probeId, dataFold, 0);
-
     sumStats = vertcat(sumStats,out);
 end
 
@@ -66,9 +65,9 @@ dat{2} = vertcat(sumStats{:,2});
 dat{3} = vertcat(sumStats{:,3});
 
 % determine which units pass inclusion criteria for each phase of the expt
-goodId(:,1) = screenUnits(dat{1},'SU');
-goodId(:,2) = screenUnits(dat{2},'SU');
-goodId(:,3) = screenUnits(dat{3},'SU');
+goodId(:,1) = screenUnits(dat{1},anaMode);
+goodId(:,2) = screenUnits(dat{2},anaMode);
+goodId(:,3) = screenUnits(dat{3},anaMode);
 
 keepIdx = goodId(:,1)&goodId(:,2);
 dat{1} = dat{1}(keepIdx,:);

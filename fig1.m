@@ -1,12 +1,13 @@
 clear all
 close all
 
-animal = 'febl4';
-unit = '000';
-expt = '012';
+animal = 'febq5';
+unit = '001';
+expt = '007';
 probe = 1;
 anaMode = 'MU';
-dataFold = 'F:\Brandon\data';
+% dataFold = 'F:\Brandon\data';
+dataFold = 'C:\Users\brand\Documents\data';
 exptName = [animal '_u' unit '_' expt];
 
 % load necessary data
@@ -14,8 +15,8 @@ load(fullfile(dataFold,'Ephys',animal,exptName,[exptName '_temp.mat']))
 load(fullfile(dataFold,'Ephys',animal,exptName,[exptName '_trialInfo.mat']))
 load(fullfile(dataFold,'Ephys',animal,exptName,[exptName '_id.mat']))
 load(fullfile(dataFold,'Ephys',animal,exptName,[exptName '.analyzer']),'-mat')
-load('F:\Brandon\data\Ephys\febl4\febl4_u000_011\goodUnits.mat')
-[sumStats,spks] = anaOri('febl4','000','012',1,'MU',dataFold,0,0);
+% load('F:\Brandon\data\Ephys\febl4\febl4_u000_011\goodUnits.mat')
+[sumStats,spks] = anaOri(animal,unit,expt,probe,anaMode,dataFold,0,0);
 
 pre = getparam('predelay',Analyzer);
 stimTime = getparam('stim_time',Analyzer);
@@ -23,7 +24,7 @@ post = getparam('postdelay',Analyzer);
 
 sf = id.sampleFreq;
 nTrials = length(trialInfo.triallist);
-goodIdx = ismember([spks.unitId],goodUnitId);
+% goodIdx = ismember([spks.unitId],goodUnitId);
 pumpKey = vertcat(trialId, pumpBit, [1 diff(pumpBit)] == 1, [1 diff(pumpBit)] == -1);
 tPumpOff = pumpKey(1,pumpKey(4,:) == 1);
 tPumpOn = pumpKey(1,pumpKey(3,:) == 1); tPumpOn = tPumpOn(2:end);
@@ -104,8 +105,8 @@ title("'good' channels")
 box on
 
 nexttile; hold on
-[psth,edges] = histcounts([spks(goodIdx).times],'BinWidth',bw);
-psth = psth/sum(goodIdx);
+[psth,edges] = histcounts([spks.times],'BinWidth',bw);
+psth = psth;
 yyaxis left
 plot(edges(2:end)/(sf*60),psth)
 ylabel('firing rate (hz)')

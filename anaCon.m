@@ -125,7 +125,7 @@ sumStats = table(exptID',probeID',areaID',{spks.info}',uID',{spks.stimCent}',ver
 
 [pVis] = visTest(sumStats);
 sumStats.pVis = pVis;
-goodUidx = screenUnits(sumStats,anaMode);
+goodUnit = screenUnits(sumStats,anaMode);
 
 if strcmp(anaMode,'MU')
     sumStats.xPos = vertcat(spks.xPos);
@@ -138,7 +138,7 @@ if plt == 1
 
     for u = 1:height(sumStats)
 
-        if ~ismember(u,find(goodUidx))
+        if ~ismember(u,find(goodUnit))
             continue
         end
 
@@ -192,13 +192,11 @@ if plt == 1
         plot(xT,rMean{u},'o','Color',clr)
         plot(repmat(xT,size(yT,1),1),yT,'.','Color',clr)
         plot(1:100,nk{u}.fit(1:100))
-        disp(nk{u}.c50)
-        disp(isreal(nk{u}.c50))
         xline(nk{u}.c50,'g--')
         yline(0,'k')
 
         ttl = [sumStats.uInfo{u} '#' num2str(sumStats.uID(u))];
-        if ~ismember(u,find(goodUidx))
+        if ~ismember(u,find(goodUnit))
             ttl = ['(BAD) ' ttl];
         end
         sgtitle(ttl)

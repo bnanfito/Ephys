@@ -23,7 +23,6 @@ exptName = [animal '_u' unit '_' expt];
 
 plr = 1;
 alignBit = 0;
-visTest = 'ranksum';
 alpha = 0.01;
 
 
@@ -138,9 +137,9 @@ if exist('Rblank','var')
     sumStats.rBlank = Rblank';
 end
 
-[goodUnit,pVis] = screenUnits(sumStats,anaMode,blank,visTest,alpha);
-sumStats.goodUnit = goodUnit';
+[pVis] = visTest(sumStats);
 sumStats.pVis = pVis;
+goodUnit = screenUnits(sumStats,anaMode);
 
 
 %% plotting
@@ -149,7 +148,7 @@ if plt == 1
 
 for u = 1:nU
 
-    if ~sumStats.goodUnit(u)
+    if ~ismember(u,find(goodUnit))
         continue
     end
 
