@@ -193,6 +193,7 @@ goodUnit = screenUnits(sumStats,anaMode);
 if strcmp(anaMode,'MU')
     sumStats.xPos = vertcat(spks.xPos);
     sumStats.zPos = vertcat(spks.zPos);
+    sumStats.shaft = vertcat(spks.shaft);
 end
 
 

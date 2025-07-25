@@ -96,6 +96,7 @@ function [spks,trialExclude] = orgSpks(animal,unit,expt,probe,anaMode,dataFold)
             spks(u).times = spkStruct.spktimes(spkStruct.detCh== spks(u).unitId);
             spks(u).xPos = id.probes(probe).x(spks(u).unitId);
             spks(u).zPos = id.probes(probe).z(spks(u).unitId);
+            spks(u).shaft = id.probes(probe).shaft(spks(u).unitId);
         end
 
         spks(u).stimCent = [];
