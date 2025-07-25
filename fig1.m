@@ -7,9 +7,10 @@ expt = '007';
 probe = 1;
 anaMode = 'MU';
 % dataFold = 'F:\Brandon\data';
+dataFold = 'Y:\Brandon\data';
 % dataFold = 'C:\Users\brand\Documents\data';
 % dataFold = '/Volumes/Lab drive/Brandon/data';
-dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
+% dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
 exptName = [animal '_u' unit '_' expt];
 
 % load necessary data
@@ -45,19 +46,19 @@ nTrials = length(trialInfo.triallist);
 
 % cooling pump information
 pumpKey = vertcat(trialId, pumpBit, [1 diff(pumpBit)] == 1, [1 diff(pumpBit)] == -1);
-tPumpOff = pumpKey(1,pumpKey(4,:) == 1);
+tPumpOff = pumpKey(1,pumpKey(4,:) == 1); tPumpOff = [tPumpOff nTrials];
 tPumpOn = pumpKey(1,pumpKey(3,:) == 1); tPumpOn = tPumpOn(2:end);
 warmTrials = [];
 coldTrials = [];
 for t = 1:length(tPumpOff)
-    coldTrials = [coldTrials tPumpOff(t)-16:tPumpOff(t)-1];
+    coldTrials = [coldTrials tPumpOff(t)-20:tPumpOff(t)-1];
 end
 for t = 1:length(tPumpOn)
-    warmTrials = [warmTrials tPumpOn(t)-16:tPumpOn(t)-1];
+    warmTrials = [warmTrials tPumpOn(t)-20:tPumpOn(t)-1];
 end
 blankTrials = sumStats.fr(1).trialNum(:,trialInfo.blankId);
-coldTrials = coldTrials(~ismember(coldTrials,blankTrials));
-warmTrials = warmTrials(~ismember(warmTrials,blankTrials));
+coldTrials = coldTrials(~ismember(coldTrials,blankTrials) & ~(coldTrials<1));
+warmTrials = warmTrials(~ismember(warmTrials,blankTrials) & ~(warmTrials<1));
 
 % trial-wise firing rate
 for u = 1:nU
@@ -69,62 +70,90 @@ end
 fr_norm = fr./max(fr,[],2);
 
 % psth
-bw = 30;
+bw = 6;
 edges = (trialStart(1):sf*bw:trialEnd(end))/sf;
 for u = 1:nU
-    psth(u,:) = histcounts(spks(u).times/sf,edges)/(nTrials*bw);
+    psth(u,:) = histcounts(spks(u).times/sf,edges)/bw;
 end
 psth_norm = psth./max(psth,[],2);
 
 %% plot
 
+% stim period (baseline corrected) firing rate
 figure; hold on
+yyaxis left
 plot(fr_trialId(1,:),mean(fr(goodUIdx,:),'omitnan'),'o-')
+ylim([0 18])
+ylabel('firing rate (Hz)')
+yyaxis right
+plot(trialId,tempDat,'LineWidth',2)
+ylabel('temperature (C)')
+xlim([1 nTrials])
+xlabel('trial #')
 
 figure; hold on
 for sh = 1:nShaft
     plot(fr_trialId(1,:),mean(fr(shaftIdx{sh},:),'omitnan'),'o-')
 end
+ylabel('firing rate (Hz)')
+xlim([1 nTrials])
+xlabel('trial #')
 
-figure; tiledlayout(nShaft+1,1)
+figure('Position',[100 100 600 1100]); tiledlayout(nShaft+1,1)
 for sh = 1:nShaft+1
     nexttile;hold on
     if sh == nShaft+1
+        xline(coldTrials,'c--')
+        xline(warmTrials,'r--')
         yyaxis left
-        plot(trialId,tempDat)
+        plot(trialId,tempDat,'LineWidth',2)
         ylabel('temperature (c)')
         yyaxis right
-        plot(trialId,pumpBit)
+        plot(trialId,pumpBit,'LineWidth',2)
         ylabel('pump on/off')
         xlabel('trial #')
     else
         imagesc(fr_norm(shaftIdx{sh},:))
         colorbar
+        caxis([0 1])
         axis tight
         ylabel(['shaft #' num2str(sh)])
     end
     xlim([1 nTrials])
 end
 
+% psth
 figure; hold on
-plot(edges(2:end),mean(psth_norm(goodUIdx,:),'omitnan'))
+yyaxis left
+plot(edges(2:end)/60,mean(psth_norm(goodUIdx,:),'omitnan'))
+ylabel('mean normalized response')
+yyaxis right
+plot(trialStart(trialId)/(sf*60),tempDat,'LineWidth',2)
+ylabel('temperature (C)')
+xlim([trialStart(1) trialStart(end)]/(sf*60))
+xlabel('time (min)')
 
 figure; hold on
 for sh = 1:nShaft
-    p(sh) = plot(edges(2:end),mean(psth_norm(shaftIdx{sh},:),'omitnan'));
+    p(sh) = plot(edges(2:end)/60,mean(psth_norm(shaftIdx{sh},:),'omitnan'));
     legLbl{sh} = ['shaft #' num2str(sh)];
 end
+ylabel('mean normalized response')
+xlim([trialStart(1) trialStart(end)]/(sf*60))
+xlabel('time (min)')
 legend(p,legLbl)
 
-figure; tiledlayout(nShaft+1,1);
+figure('Position',[100 100 600 1100]); tiledlayout(nShaft+1,1);
 for sh = 1:nShaft+1
     nexttile; hold on
     if sh == nShaft+1
+        xline(trialStart(coldTrials)/(sf*60),'c--')
+        xline(trialStart(warmTrials)/(sf*60),'r--')
         yyaxis left
-        plot(trialStart(trialId)/(sf*60),tempDat)
+        plot(trialStart(trialId)/(sf*60),tempDat,'LineWidth',2)
         ylabel('temperature (c)')
         yyaxis right
-        plot(trialStart(trialId)/(sf*60),pumpBit)
+        plot(trialStart(trialId)/(sf*60),pumpBit,'LineWidth',2)
         ylabel('pump on/off')
         xlim([trialStart(1) trialStart(end)]/(sf*60))
         xlabel('time (min)')
@@ -141,7 +170,28 @@ for sh = 1:nShaft+1
     end
 end
 
+% probe layout
+x = sumStats.xPos;
+y = sumStats.zPos;
+rWarm = mean(fr(:,warmTrials),2,'omitnan');
+rCold = mean(fr(:,coldTrials),2,'omitnan');
 
+figure('Position',[100 100 1100 1100]); tiledlayout(1,2)
+rLims = [0 70];
+nexttile; hold on
+bubblechart(x, y, rWarm, rWarm)
+bubblelim(rLims)
+caxis(rLims)
+scatter(x(~goodUIdx), y(~goodUIdx),'rx')
+set(gca,'YDir','reverse')
+nexttile; hold on
+bubblechart(x, y, rCold, rCold)
+bubblelegend('firing rate','Location','eastoutside')
+bubblelim(rLims)
+caxis(rLims)
+colorbar
+scatter(x(~goodUIdx), y(~goodUIdx),'rx')
+set(gca,'YDir','reverse')
 
 % for u = goodUnitId'
 % 
