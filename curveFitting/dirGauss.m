@@ -85,7 +85,7 @@ Rnull = params(4);%r(dir == null);
 null = params(5);%mod(pref+180,360);
 sigma2 = params(6);%10;
 
-g.auss = @(x) rPref*exp(-((x-cPref).^2/(2*sigma1^2))) + Rnull*exp(-((x-null).^2/(2*sigma2^2)))...
+g.fit = @(x) rPref*exp(-((x-cPref).^2/(2*sigma1^2))) + Rnull*exp(-((x-null).^2/(2*sigma2^2)))...
     + Rnull*exp(-((x-(null-360)).^2/(2*sigma2^2))) + rPref*exp(-((x-(cPref-360)).^2/(2*sigma1^2)));
 g.Rpref = rPref;
 g.pref = cPref;
@@ -93,18 +93,18 @@ g.sigma1 = sigma1;
 g.Rnull = Rnull;
 g.null = null;
 g.sigma2 = sigma2;
-g.residuals = g.auss(c)-r;
+g.residuals = residuals;
 
 
-% g.auss = @(x) Rpref*exp(-(mod(x-pref,360).^2/(2*sigma1^2))) + Rnull*exp(-(mod(x-null,360).^2/(2*sigma2^2)));
-% g.auss = @(x) Rpref*exp(-((mod(x,360)-mod(pref,360)).^2/(2*sigma1^2))) + Rnull*exp(-((mod(x,360)-mod(null,360)).^2/(2*sigma2^2)));
+% g.fit = @(x) Rpref*exp(-(mod(x-pref,360).^2/(2*sigma1^2))) + Rnull*exp(-(mod(x-null,360).^2/(2*sigma2^2)));
+% g.fit = @(x) Rpref*exp(-((mod(x,360)-mod(pref,360)).^2/(2*sigma1^2))) + Rnull*exp(-((mod(x,360)-mod(null,360)).^2/(2*sigma2^2)));
 
 
 if p
     subplot(2,2,3);hold on
     plot(c,r,'ko')
     plot(cShift,r,'r*')
-    plot(X,g.auss(X),'g-')
+    plot(X,g.fit(X),'g-')
     plot([0 0],[0 max(r)],'r--')
     plot([360 360],[0 max(r)],'r--')
 end

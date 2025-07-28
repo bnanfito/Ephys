@@ -119,8 +119,9 @@ for u = 1:nU
                     sem = [sem sem(1)];
                 end
 %                 plot(x,y,'.','Color',clr)
-                plot(x,meanY,'-square','Color',clr,'MarkerSize',7,'MarkerFaceColor',clr,'LineStyle',linStyl,'LineWidth',2)
-                plot(repmat(x,2,1),meanY+([1;-1]*sem),'Color',clr,'LineWidth',2)
+                plot(x,meanY,'-square','Color',clr,'MarkerSize',7,'MarkerFaceColor',clr,'LineStyle',linStyl,'LineWidth',1)
+                plot(repmat(x,2,1),meanY+([1;-1]*sem),'Color',clr,'LineWidth',1)
+                plot(0:360,dat.gauss{u}.fit(0:360),'Color',clr,'LineWidth',2)
                 if alignTC == 1
                     xlim([-180 180])
                     xticks([-180 -90 0 90 180])

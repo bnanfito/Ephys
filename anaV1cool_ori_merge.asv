@@ -144,7 +144,7 @@ scl_null = rNull(:,2)./rNull(:,1);
 
 %% Plot
 
-u = 25;
+u = 4;
 figure; tiledlayout(2,3)
 nexttile; hold on
 errorbar(conds,tc(u,:,1),tc_sem(u,:,1),'k')
@@ -239,11 +239,10 @@ axis square
 nexttile;hold on
 x = dsi(:,2);
 y = dsi(:,1);
-scatter(x,y,'k.')
+scatter(dsi(:,1),dsi(:,2),'k.')
 plot([0 1],[0 1],'k--')
-xlabel('cool')
-ylabel('cntrl')
-title('DSI')
+xlabel('control dsi')
+ylabel('v1 cooled dsi')
 sgtitle('tuning metrics')
 box on
 axis square
