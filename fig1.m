@@ -26,7 +26,7 @@ for sh = 1:nShaft
     shaftIdx{sh} = find(sumStats.shaft==sh);
     [~,sortZidx{sh}] = sort(sumStats.zPos(shaftIdx{sh}),'descend');
     shaftIdx{sh} = shaftIdx{sh}(sortZidx{sh});
-    shaftIdx{sh} = shaftIdx{sh}(ismember(shaftIdx{sh},find(goodUIdx)));
+%     shaftIdx{sh} = shaftIdx{sh}(ismember(shaftIdx{sh},find(goodUIdx)));
 end
 
 % trial information
@@ -51,10 +51,10 @@ tPumpOn = pumpKey(1,pumpKey(3,:) == 1); tPumpOn = tPumpOn(2:end);
 warmTrials = [];
 coldTrials = [];
 for t = 1:length(tPumpOff)
-    coldTrials = [coldTrials tPumpOff(t)-20:tPumpOff(t)-1];
+    coldTrials = [coldTrials tPumpOff(t)-32:tPumpOff(t)-1];
 end
 for t = 1:length(tPumpOn)
-    warmTrials = [warmTrials tPumpOn(t)-20:tPumpOn(t)-1];
+    warmTrials = [warmTrials tPumpOn(t)-32:tPumpOn(t)-1];
 end
 blankTrials = sumStats.fr(1).trialNum(:,trialInfo.blankId);
 coldTrials = coldTrials(~ismember(coldTrials,blankTrials) & ~(coldTrials<1));
@@ -62,7 +62,11 @@ warmTrials = warmTrials(~ismember(warmTrials,blankTrials) & ~(warmTrials<1));
 
 % trial-wise firing rate
 for u = 1:nU
-    fr(u,:) = mean(sumStats.fr(u).stim(:);
+    prefC = find(sumStats.condition{u}==sumStats.oriPref(u));
+    prefIdx = sumStats.fr(u).trialCond==prefC;
+    fr_pref(u,:) = sumStats.fr(u).stim(prefIdx);
+    fr_pref_trialId(u,:) = sumStats.fr(u).trialNum(prefIdx);
+    fr(u,:) = sumStats.fr(u).stim(:);
     fr_trialId(u,:) = sumStats.fr(u).trialNum(:);
     [fr_trialId(u,:),sortIdx] = sort(fr_trialId(u,:));
     fr(u,:) = fr(u,sortIdx);
@@ -76,6 +80,13 @@ for u = 1:nU
     psth(u,:) = histcounts(spks(u).times/sf,edges)/bw;
 end
 psth_norm = psth./max(psth,[],2);
+
+% Organize groups by depth
+depthLims = min(sumStats.zPos):100:max(sumStats.zPos);
+for d = 1:(length(depthLims)-1)
+    depthIdx{d} = find(sumStats.zPos>=depthLims(d) & sumStats.zPos<depthLims(d+1));
+end
+depthIdx{d+1} = find(sumStats.zPos>=depthLims(d+1) & sumStats.zPos<=max(sumStats.zPos));
 
 %% plot
 
@@ -186,6 +197,50 @@ scatter(x(~goodUIdx), y(~goodUIdx),'rx')
 set(gca,'YDir','reverse')
 nexttile; hold on
 bubblechart(x, y, rCold, rCold)
+bubblelegend('firing rate','Location','eastoutside')
+bubblelim(rLims)
+caxis(rLims)
+colorbar
+scatter(x(~goodUIdx), y(~goodUIdx),'rx')
+set(gca,'YDir','reverse')
+
+clear rWarm rCold
+for u = 1:nU
+    warmTrialIdx = ismember(fr_pref_trialId(u,:),warmTrials);
+    rWarm(u) = mean(fr_pref(u,warmTrialIdx),'omitnan');
+    nWarmTrials(u) = sum(warmTrialIdx);
+    coldTrialIdx = ismember(fr_pref_trialId(u,:),coldTrials);
+    rCold(u) = mean(fr_pref(u,coldTrialIdx),'omitnan');
+    nColdTrials(u) = sum(coldTrialIdx);
+end
+
+figure('Position',[100 100 1100 1100]); tiledlayout(1,2)
+rLims = [0 70];
+nexttile; hold on
+bubblechart(x, y, rWarm, rWarm)
+bubblelim(rLims)
+caxis(rLims)
+scatter(x(~goodUIdx), y(~goodUIdx),'rx')
+set(gca,'YDir','reverse')
+nexttile; hold on
+bubblechart(x, y, rCold, rCold)
+bubblelegend('firing rate','Location','eastoutside')
+bubblelim(rLims)
+caxis(rLims)
+colorbar
+scatter(x(~goodUIdx), y(~goodUIdx),'rx')
+set(gca,'YDir','reverse')
+
+figure('Position',[100 100 1100 1100]); tiledlayout(1,2)
+rLims = [0 10];
+nexttile; hold on
+bubblechart(x, y, nWarmTrials, nWarmTrials)
+bubblelim(rLims)
+caxis(rLims)
+scatter(x(~goodUIdx), y(~goodUIdx),'rx')
+set(gca,'YDir','reverse')
+nexttile; hold on
+bubblechart(x, y, nColdTrials, nColdTrials)
 bubblelegend('firing rate','Location','eastoutside')
 bubblelim(rLims)
 caxis(rLims)
