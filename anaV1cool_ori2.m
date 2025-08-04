@@ -86,7 +86,7 @@ end
 
 %% Calculate Metrics
 
-metric = 'rPref';
+metric = 'latency';
 
 SI = nan(length(animals),1);
 semSI = nan(length(animals),1);

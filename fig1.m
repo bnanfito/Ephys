@@ -22,12 +22,17 @@ load(fullfile(dataFold,'Ephys',animal,exptName,[exptName '.analyzer']),'-mat')
 nU = height(sumStats);
 nShaft = length(unique(sumStats.shaft));
 goodUIdx = screenUnits(sumStats,'MU');
-for sh = 1:nShaft
-    shaftIdx{sh} = find(sumStats.shaft==sh);
-    [~,sortZidx{sh}] = sort(sumStats.zPos(shaftIdx{sh}),'descend');
-    shaftIdx{sh} = shaftIdx{sh}(sortZidx{sh});
-%     shaftIdx{sh} = shaftIdx{sh}(ismember(shaftIdx{sh},find(goodUIdx)));
+
+% Organize groups by shaft
+shaftIdx = sumStats.shaft;
+
+% Organize groups by depth
+depthLims = min(sumStats.zPos):100:max(sumStats.zPos);
+depthIdx = zeros(1,nU);
+for d = 1:(length(depthLims)-1)
+    depthIdx(sumStats.zPos>=depthLims(d) & sumStats.zPos<depthLims(d+1)) = d;
 end
+depthIdx(sumStats.zPos>=depthLims(d+1) & sumStats.zPos<=max(sumStats.zPos)) = d+1;
 
 % trial information
 pre = getparam('predelay',Analyzer);
@@ -43,20 +48,36 @@ trialEnd = eventTimes(eventIDdiff==-1);
 
 sf = id.sampleFreq;
 nTrials = length(trialInfo.triallist);
+blankTrials = sumStats.fr(1).trialNum(:,trialInfo.blankId);
 
 % cooling pump information
-pumpKey = vertcat(trialId, pumpBit, [1 diff(pumpBit)] == 1, [1 diff(pumpBit)] == -1);
-tPumpOff = pumpKey(1,pumpKey(4,:) == 1); tPumpOff = [tPumpOff nTrials];
-tPumpOn = pumpKey(1,pumpKey(3,:) == 1); tPumpOn = tPumpOn(2:end);
 warmTrials = [];
+warmT = trialId(tempDat>30);
+gapInd = [0 diff(warmT)]>5;
+warmStart = [warmT(1) warmT(gapInd)];
+warmEnd = [warmT(find(gapInd)-1) warmT(end)];
+for t = 1:length(warmStart)
+    warmTrials = [warmTrials warmStart(t):warmEnd(t)];
+end
 coldTrials = [];
-for t = 1:length(tPumpOff)
-    coldTrials = [coldTrials tPumpOff(t)-32:tPumpOff(t)-1];
+coldT = trialId(tempDat<8);
+gapInd = [0 diff(coldT)]>5;
+coldStart = [coldT(1) coldT(gapInd)];
+coldEnd = [coldT(find(gapInd)-1) coldT(end)];
+for t = 1:length(coldStart)
+    coldTrials = [coldTrials coldStart(t):coldEnd(t)];
 end
-for t = 1:length(tPumpOn)
-    warmTrials = [warmTrials tPumpOn(t)-32:tPumpOn(t)-1];
-end
-blankTrials = sumStats.fr(1).trialNum(:,trialInfo.blankId);
+% pumpKey = vertcat(trialId, pumpBit, [1 diff(pumpBit)] == 1, [1 diff(pumpBit)] == -1);
+% tPumpOff = pumpKey(1,pumpKey(4,:) == 1); tPumpOff = [tPumpOff nTrials];
+% tPumpOn = pumpKey(1,pumpKey(3,:) == 1); tPumpOn = tPumpOn(2:end);
+% warmTrials = [];
+% coldTrials = [];
+% for t = 1:length(tPumpOff)
+%     coldTrials = [coldTrials tPumpOff(t)-32:tPumpOff(t)-1];
+% end
+% for t = 1:length(tPumpOn)
+%     warmTrials = [warmTrials tPumpOn(t)-32:tPumpOn(t)-1];
+% end
 coldTrials = coldTrials(~ismember(coldTrials,blankTrials) & ~(coldTrials<1));
 warmTrials = warmTrials(~ismember(warmTrials,blankTrials) & ~(warmTrials<1));
 
@@ -74,19 +95,22 @@ end
 fr_norm = fr./max(fr,[],2);
 
 % psth
-bw = 6;
+bw = 12;
 edges = (trialStart(1):sf*bw:trialEnd(end))/sf;
 for u = 1:nU
     psth(u,:) = histcounts(spks(u).times/sf,edges)/bw;
 end
 psth_norm = psth./max(psth,[],2);
 
-% Organize groups by depth
-depthLims = min(sumStats.zPos):100:max(sumStats.zPos);
-for d = 1:(length(depthLims)-1)
-    depthIdx{d} = find(sumStats.zPos>=depthLims(d) & sumStats.zPos<depthLims(d+1));
+for u = 1:nU
+    warmTrialIdx = ismember(fr_pref_trialId(u,:),warmTrials);
+    rWarm(u) = mean(fr_pref(u,warmTrialIdx),'omitnan');
+    nWarmTrials(u) = sum(warmTrialIdx);
+    coldTrialIdx = ismember(fr_pref_trialId(u,:),coldTrials);
+    rCold(u) = mean(fr_pref(u,coldTrialIdx),'omitnan');
+    nColdTrials(u) = sum(coldTrialIdx);
 end
-depthIdx{d+1} = find(sumStats.zPos>=depthLims(d+1) & sumStats.zPos<=max(sumStats.zPos));
+si = (rCold-rWarm)./(rCold+rWarm);
 
 %% plot
 
@@ -104,7 +128,7 @@ xlabel('trial #')
 
 figure; hold on
 for sh = 1:nShaft
-    plot(fr_trialId(1,:),mean(fr(shaftIdx{sh},:),'omitnan'),'o-')
+    plot(fr_trialId(1,:),mean(fr(shaftIdx==sh,:),'omitnan'),'o-')
 end
 ylabel('firing rate (Hz)')
 xlim([1 nTrials])
@@ -124,7 +148,9 @@ for sh = 1:nShaft+1
         ylabel('pump on/off')
         xlabel('trial #')
     else
-        imagesc(fr_norm(shaftIdx{sh},:))
+        [~,zPosSort] = sort(sumStats.zPos(shaftIdx==sh),'descend');
+        r = fr_norm(shaftIdx==sh,:);
+        imagesc(r(zPosSort,:))
         colorbar
         caxis([0 1])
         axis tight
@@ -146,7 +172,7 @@ xlabel('time (min)')
 
 figure; hold on
 for sh = 1:nShaft
-    p(sh) = plot(edges(2:end)/60,mean(psth_norm(shaftIdx{sh},:),'omitnan'));
+    p(sh) = plot(edges(2:end)/60,mean(psth_norm(shaftIdx==sh,:),'omitnan'));
     legLbl{sh} = ['shaft #' num2str(sh)];
 end
 ylabel('mean normalized response')
@@ -169,10 +195,13 @@ for sh = 1:nShaft+1
         xlim([trialStart(1) trialStart(end)]/(sf*60))
         xlabel('time (min)')
     else
-        imagesc(psth_norm(shaftIdx{sh},:))
+        [~,zPosSort] = sort(sumStats.zPos(shaftIdx==sh),'descend');
+        r = psth_norm(shaftIdx==sh,:);
+        imagesc(r(zPosSort,:))
         colorbar
         axis tight
         ylabel(['shaft #' num2str(sh)])
+        xticks((5:5:30)/(bw/60))
         xt = xticks*(bw/60);
         for tic = 1:length(xt)
             xt_lbl{tic} = num2str(xt(tic));
@@ -184,8 +213,6 @@ end
 % probe layout
 x = sumStats.xPos;
 y = sumStats.zPos;
-rWarm = mean(fr(:,warmTrials),2,'omitnan');
-rCold = mean(fr(:,coldTrials),2,'omitnan');
 
 figure('Position',[100 100 1100 1100]); tiledlayout(1,2)
 rLims = [0 70];
@@ -204,32 +231,13 @@ colorbar
 scatter(x(~goodUIdx), y(~goodUIdx),'rx')
 set(gca,'YDir','reverse')
 
-clear rWarm rCold
-for u = 1:nU
-    warmTrialIdx = ismember(fr_pref_trialId(u,:),warmTrials);
-    rWarm(u) = mean(fr_pref(u,warmTrialIdx),'omitnan');
-    nWarmTrials(u) = sum(warmTrialIdx);
-    coldTrialIdx = ismember(fr_pref_trialId(u,:),coldTrials);
-    rCold(u) = mean(fr_pref(u,coldTrialIdx),'omitnan');
-    nColdTrials(u) = sum(coldTrialIdx);
-end
-
-figure('Position',[100 100 1100 1100]); tiledlayout(1,2)
-rLims = [0 70];
-nexttile; hold on
-bubblechart(x, y, rWarm, rWarm)
-bubblelim(rLims)
-caxis(rLims)
-scatter(x(~goodUIdx), y(~goodUIdx),'rx')
-set(gca,'YDir','reverse')
-nexttile; hold on
-bubblechart(x, y, rCold, rCold)
-bubblelegend('firing rate','Location','eastoutside')
-bubblelim(rLims)
-caxis(rLims)
+figure('Position',[100 100 600 1100]);hold on
+scatter(x, y, repmat(100,1,length(si)), si,'filled')
+caxis([-1 1])
 colorbar
 scatter(x(~goodUIdx), y(~goodUIdx),'rx')
 set(gca,'YDir','reverse')
+xlim([-200 1200])
 
 figure('Position',[100 100 1100 1100]); tiledlayout(1,2)
 rLims = [0 10];
@@ -247,6 +255,61 @@ caxis(rLims)
 colorbar
 scatter(x(~goodUIdx), y(~goodUIdx),'rx')
 set(gca,'YDir','reverse')
+
+
+
+
+
+
+chs = find(sumStats.xPos>800 & (sumStats.zPos>400 & sumStats.zPos<600));
+spks = [sumStats.spkTimes{chs}];
+figure;
+subplot(2,2,2); hold on
+for i = 1:length(coldStart)
+patch([-1 2 2 -1],[coldStart(i) coldStart(i) coldEnd(i) coldEnd(i)],'c','EdgeColor','none','FaceAlpha',0.2)
+end
+for i = 1:length(warmStart)
+patch([-1 2 2 -1],[warmStart(i) warmStart(i) warmEnd(i) warmEnd(i)],'r','EdgeColor','none','FaceAlpha',0.2)
+end
+plot(spks(1,:),spks(2,:),'k.','MarkerSize',3)
+ylim([0 nTrials+1])
+ylabel('trial number')
+xlim([-1 2])
+xlabel('time (sec)')
+box on
+subplot(2,2,4); hold on
+y = mean(psth_norm(chs,:),'omitnan');
+x = edges(2:end)/60;
+plot(x,y,'k')
+ylabel('mean norm. psth')
+yyaxis right
+plot(trialStart(trialId)/(sf*60),tempDat,'LineWidth',2)
+ylabel('temperature (C)')
+xlabel('time (min)')
+box on
+subplot(1,2,1); hold on
+scatter(sumStats.xPos, sumStats.zPos,'k')
+scatter(sumStats.xPos, sumStats.zPos,[],si,'filled')
+patch([900 1100 1100 900],[600 600 400 400],'r','EdgeColor','r','FaceColor','none')
+colormap cool
+cb = colorbar;
+cb.Label.String = 'SI';
+cb.Label.FontSize = 10;
+set(gca,'YDir','reverse')
+xlim([-200 1200])
+ylabel('depth')
+xlabel('distance from cooling loop')
+box on
+sgtitle('febq5 001 007: disinhibited channels')
+
+
+
+
+
+
+
+
+
 
 % for u = goodUnitId'
 % 
