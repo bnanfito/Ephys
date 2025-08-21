@@ -17,6 +17,12 @@ elseif svePlt == 1
 end
 
 for u = uInd
+    dom = dat.paramKey{u};
+    isOri = (length(dom)==1 & sum(strcmp(dom,'ori'))==1) |...
+            (length(dom)==2 & sum(strcmp(dom,'ori'))==1 & sum(contains(dom,'size'))==1 );
+    isCon = (length(dom)==2 && sum(strcmp(dom,'ori'))==1 && sum(strcmp(dom,'contrast'))==1) ||...
+            (length(dom)==3 && sum(strcmp(dom,'ori'))==1 && sum(strcmp(dom,'contrast'))==1 && sum(contains(dom,'size'))==1);
+
     figure;hold on
     nr = 2; nc = 2;
     predelay = 1;
@@ -91,49 +97,60 @@ for u = uInd
     xlabel('time (sec)')
     ylabel('condition')
     
+    ttl = [dat.exptName{u} ' ' dat.area{u} ' ' dat.uInfo{u} ' ' num2str(dat.uID(u))];
 
     %TUNING CURVE
-    x = dat.condition{u}(strcmp(dat.paramKey{u},'ori'),:);
-    y = dat.response{u};
-    meanY = mean(y,'omitnan');
-    x_pref = dat.oriPref(u);
-    y_pref = dat.rPref(u);
-    sem = std(y,'omitnan')/sqrt(size(y,1));
-    if plr == 1
-        subplot(nr,nc,2,polaraxes);hold on
-%         polarplot(deg2rad(x),y,'k.')
-        polarplot(deg2rad([x x(1)]),mean([y y(:,1)],'omitnan') ,[clr '-'],'LineWidth',2)
-        polarplot(deg2rad([x x(1)]),mean([y y(:,1)],'omitnan')+[sem sem(1)],[clr ':'],'LineWidth',1)
-        polarplot(deg2rad([x x(1)]),mean([y y(:,1)],'omitnan')-[sem sem(1)],[clr ':'],'LineWidth',1)
-%         polarplot(repmat(deg2rad(x),2,1),mean(y,'omitnan')+([1;-1]*sem),clr,'LineWidth',2)
-%         polarplot(deg2rad(dat.oriPref(u)),dat.rPref(u),'r*')
-%         polarplot(deg2rad([0 dat.meanVec{u}.angDir]),[0 dat.meanVec{u}.magDir],clr,'LineWidth',2)
-        polarplot(deg2rad([0 dat.meanVec{u}.angDir]),[0 dat.meanVec{u}.magDir*dat.ldr(u)],'g','LineWidth',2)
-    else
-        subplot(nr,nc,2); hold on; box on
-        if alignTC == 1
-            [x,meanY,i] = alignDirTuning(x,meanY);
-            sem = sem(i);
-            y = y(:,i);
+    if isOri
+        ttl = [ttl  ' ldr=' num2str(dat.ldr(u))];
+        x = dat.condition{u}(strcmp(dom,'ori'),:);
+        y = dat.response{u};
+        meanY = mean(y,'omitnan');
+        x_pref = dat.oriPref(u);
+        y_pref = dat.rPref(u);
+        sem = std(y,'omitnan')/sqrt(size(y,1));
+        if plr == 1
+            subplot(nr,nc,2,polaraxes);hold on
+    %         polarplot(deg2rad(x),y,'k.')
+            polarplot(deg2rad([x x(1)]),mean([y y(:,1)],'omitnan') ,[clr '-'],'LineWidth',2)
+            polarplot(deg2rad([x x(1)]),mean([y y(:,1)],'omitnan')+[sem sem(1)],[clr ':'],'LineWidth',1)
+            polarplot(deg2rad([x x(1)]),mean([y y(:,1)],'omitnan')-[sem sem(1)],[clr ':'],'LineWidth',1)
+    %         polarplot(repmat(deg2rad(x),2,1),mean(y,'omitnan')+([1;-1]*sem),clr,'LineWidth',2)
+    %         polarplot(deg2rad(dat.oriPref(u)),dat.rPref(u),'r*')
+    %         polarplot(deg2rad([0 dat.meanVec{u}.angDir]),[0 dat.meanVec{u}.magDir],clr,'LineWidth',2)
+            polarplot(deg2rad([0 dat.meanVec{u}.angDir]),[0 dat.meanVec{u}.magDir*dat.ldr(u)],'g','LineWidth',2)
+        else
+            subplot(nr,nc,2); hold on; box on
+            if alignTC == 1
+                [x,meanY,i] = alignDirTuning(x,meanY);
+                sem = sem(i);
+                y = y(:,i);
+            end
+    %         plot(x,y,[clr '.'])
+            plot(x,meanY,[clr '-'],'Marker','square','MarkerSize',7,'MarkerFaceColor',clr,'LineWidth',2)
+            plot(repmat(x,2,1),meanY+([1;-1]*sem),clr,'LineWidth',2)
+            if alignTC == 1
+                xlim([-180 180])
+                xticks([-180 -90 0 90 180])
+                xlabel('motion dir. relative to pref. (deg)')
+            else
+                plot(x_pref,y_pref,'r*')
+                xlim([0 360])
+                xticks([0 90 180 270])
+                xlabel('motion direction (deg)')
+            end
+            ylabel('firing rate (Hz)')
         end
-%         plot(x,y,[clr '.'])
+    elseif isCon
+        ttl = [ttl  ' c50=' num2str(dat.c50(u))];
+        x = dat.condition{u}(strcmp(dom,'contrast'),:,dat.oriPref(u));
+        y = dat.response{u}(:,:,dat.oriPref(u));
+        meanY = mean(y,'omitnan');
+        sem = std(y,'omitnan')/sqrt(size(y,1));
+        subplot(nr,nc,2); hold on; box on
         plot(x,meanY,[clr '-'],'Marker','square','MarkerSize',7,'MarkerFaceColor',clr,'LineWidth',2)
         plot(repmat(x,2,1),meanY+([1;-1]*sem),clr,'LineWidth',2)
-        if alignTC == 1
-            xlim([-180 180])
-            xticks([-180 -90 0 90 180])
-            xlabel('motion dir. relative to pref. (deg)')
-        else
-            plot(x_pref,y_pref,'r*')
-            xlim([0 360])
-            xticks([0 90 180 270])
-            xlabel('motion direction (deg)')
-        end
-        ylabel('firing rate (Hz)')
     end
     
-    
-    ttl = [dat.exptName{u} ' ' dat.area{u} ' ' dat.uInfo{u} ' ' num2str(dat.uID(u)) ' ldr=' num2str(dat.ldr(u))];
     sgtitle(ttl)
     figName = [dat.exptName{u} '_' dat.area{u} '_' dat.uInfo{u} '_' num2str(dat.uID(u))];
     if svePlt == 1
