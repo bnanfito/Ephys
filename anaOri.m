@@ -13,6 +13,7 @@ exptName = [animal '_u' unit '_' expt];
 
 plr = 1;
 alignBit = 0;
+ff = 0;
 
 %% Load Data
 
@@ -68,12 +69,20 @@ elseif nDom == 2 && sum(sizeInd)==1
     sizes = unique(trialInfo.domval(:,sizeInd));
     ffIdx = sizes>100;
     hemiIdx =  sizes<100;
-    cndInclude = trialInfo.domval(:,sizeInd) == sizes(hemiIdx);
+    if ff == 1
+        cndInclude = trialInfo.domval(:,sizeInd) == sizes(ffIdx);
+    else
+        cndInclude = trialInfo.domval(:,sizeInd) == sizes(hemiIdx);
+    end
 elseif nDom == 2 && sum(posInd)==1 
     pos = unique(trialInfo.domval(:,posInd));
     ffIdx = pos==min(pos);
     hemiIdx = pos==max(pos);
-    cndInclude = trialInfo.domval(:,sizeInd) == pos(hemiIdx);
+    if ff == 1
+        cndInclude = trialInfo.domval(:,sizeInd) == pos(ffIdx);
+    else
+        cndInclude = trialInfo.domval(:,sizeInd) == pos(hemiIdx);
+    end
 end
 trialInclude = ismember(trialInfo.triallist,find(cndInclude));
 

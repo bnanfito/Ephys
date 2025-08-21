@@ -11,6 +11,8 @@ figDir = fullfile(dataFold,'Figures');
 
 exptName = [animal '_u' unit '_' expt];
 
+ff = 0;
+
 %% Load Data
 
 exptDir = fullfile(physDir,animal,exptName);
@@ -65,12 +67,20 @@ elseif nDom == 3 && sum(sizeInd)==1
     sizes = unique(trialInfo.domval(:,sizeInd));
     ffIdx = sizes>100;
     hemiIdx =  sizes<100;
-    cndInclude = trialInfo.domval(:,sizeInd) == sizes(hemiIdx);
+    if ff == 1
+        cndInclude = trialInfo.domval(:,sizeInd) == sizes(ffIdx);
+    else
+        cndInclude = trialInfo.domval(:,sizeInd) == sizes(hemiIdx);
+    end
 elseif nDom == 3 && sum(posInd)==1
     pos = unique(trialInfo.domval(:,posInd));
     ffIdx = pos==min(pos);
     hemiIdx = pos==max(pos);
-    cndInclude = trialInfo.domval(:,sizeInd) == pos(hemiIdx);
+    if ff == 1
+        cndInclude = trialInfo.domval(:,sizeInd) == pos(ffIdx);
+    else
+        cndInclude = trialInfo.domval(:,sizeInd) == pos(hemiIdx);
+    end
 end
 trialInclude = ismember(trialInfo.triallist,find(cndInclude));
 
@@ -120,7 +130,7 @@ for u = 1:nU % u indexes a unit (column) in structure spks
 
 end
 
-varNames = {'exptName','probe','area','uInfo','uID','spkTimes','latency','fr','paramKey','cndKey','oriPref','response','condition','rPref','nkFit','cF','rBlank'};
+varNames = {'exptName','probe','area','uInfo','uID','spkTimes','latency','fr','paramKey','cndKey','oriPref','response','condition','rPref','nkFit','c50','rBlank'};
 sumStats = table(exptID',probeID',areaID',{spks.info}',uID',{spks.stimCent}',vertcat(spks.late),vertcat(spks.fr),paramKey',cndKey',oriPref',R',C',rPref',nk',c50',Rblank','VariableNames',varNames);
 
 [pVis] = visTest(sumStats);
