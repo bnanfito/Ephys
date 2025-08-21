@@ -52,9 +52,6 @@ for a = 1:length(animals)
             end
         end
     end
-
-%     [out] = plotMerge(animals{a}, mergeId, probeId, dataFold, 0);
-
     sumStats = vertcat(sumStats,out);
 end
 
@@ -145,65 +142,87 @@ scl_null = rNull(:,2)./rNull(:,1);
 %% Plot
 
 u = 25;
-figure; tiledlayout(2,3)
+figure; tiledlayout('flow')
 nexttile; hold on
-errorbar(conds,tc(u,:,1),tc_sem(u,:,1),'k')
-errorbar(conds,tc(u,:,2),tc_sem(u,:,2),'c')
-%     errorbar(conds,tc(u,:,3),tc_sem(u,:,3),'b')
-plot(conds,scldTc(u,:),'c--')
-legend('cntrl','cool','scaled cool')
+errorbar(conds,tc(u,:,1),tc_sem(u,:,1),'k','LineWidth',2)
+errorbar(conds,tc(u,:,2),tc_sem(u,:,2),'c','LineWidth',2)
+% errorbar(conds,tc(u,:,3),tc_sem(u,:,3),'b')
+plot(conds,tc(u,:,2)*(rPref(u,1)/rPref(u,2)),'c--','LineWidth',2)
+% legend('cntrl','cool','scaled cool')
 xticks([0 90 180 270])
 xlim([0 360])
 xlabel('dir of motion (deg)')
 ylabel('firing rate')
-title('example unit')
 box on
 axis square
 nexttile; hold on
-plot(c_aligned,tc_norm(u,:,1),'k')
-plot(c_aligned,tc_norm(u,:,2),'c')
-%     plot(c_aligned,tc_norm(u,:,3),'b')
-xticks([-180 -90 0 90 180])
-xlabel('dir rel to pref')
-ylabel('normalized response')
-title('normalized example unit')
+countTrials = 0;
+for i = 1:3
+    if i==1
+        clr = 'k';
+    elseif i==2
+        clr = 'c';
+    elseif i==3
+        clr = 'k';
+    end
+    x = dat{i}.spkTimes{u}(1,:);
+    y = dat{i}.spkTimes{u}(2,:);
+    y = y+countTrials;
+    scatter(x,y,[clr '.'])
+    countTrials = countTrials+max(dat{i}.fr(u).trialNum,[],'all');
+end
+xlim([-1 2])
+ylim([0 countTrials+1])
+patch([0 1 1 0],[0 0 countTrials+1 countTrials+1],'k','EdgeColor','none','FaceAlpha',0.2)
 box on
 axis square
-nexttile; hold on
-y = mean(tc_norm(:,:,1),'omitnan');
-sem = std(tc_norm(:,:,1),'omitnan')/sqrt(size(tc_norm,1));
-errorbar(c_aligned,y,sem,'k')
-y = mean(tc_norm(:,:,2),'omitnan');
-sem = std(tc_norm(:,:,2),'omitnan')/sqrt(size(tc_norm,1));
-errorbar(c_aligned,y,sem,'c')
-xticks([-180 -90 0 90 180])
-xlabel('dir rel to pref')
-ylabel('normalized response')
-title('normalized population')
-box on
-axis square
-nexttile; hold on
-plot(bins(2:end),psth(u,:,1),'k')
-plot(bins(2:end),psth(u,:,2),'c')
-%     plot(bins(2:end),psth(u,:,3),'b')
-xlabel('time (sec)')
-ylabel('firing rate')
-box on
-axis square
-nexttile; hold on
-plot(tc_norm(u,:,1),tc_norm(u,:,2),'ko-')
-plot([0 1],[0 1],'k--')
-xlabel('control norm response')
-ylabel('v1 cooled norm response')
-box on
-axis square
-nexttile;hold on
-plot(mean(tc_norm(:,:,1),'omitnan'),mean(tc_norm(:,:,2),'omitnan'),'k-o')
-plot([0 1],[0 1],'k--')
-xlabel('control response')
-ylabel('V1 cooled response')
-box on
-axis square
+sgtitle(['example unit: ' dat{1}.exptName{u} ' ' dat{1}.uInfo{u} num2str(dat{1}.uID(u))])
+
+% nexttile; hold on
+% plot(c_aligned,tc_norm(u,:,1),'k')
+% plot(c_aligned,tc_norm(u,:,2),'c')
+% %     plot(c_aligned,tc_norm(u,:,3),'b')
+% xticks([-180 -90 0 90 180])
+% xlabel('dir rel to pref')
+% ylabel('normalized response')
+% title('normalized example unit')
+% box on
+% axis square
+% nexttile; hold on
+% y = mean(tc_norm(:,:,1),'omitnan');
+% sem = std(tc_norm(:,:,1),'omitnan')/sqrt(size(tc_norm,1));
+% errorbar(c_aligned,y,sem,'k')
+% y = mean(tc_norm(:,:,2),'omitnan');
+% sem = std(tc_norm(:,:,2),'omitnan')/sqrt(size(tc_norm,1));
+% errorbar(c_aligned,y,sem,'c')
+% xticks([-180 -90 0 90 180])
+% xlabel('dir rel to pref')
+% ylabel('normalized response')
+% title('normalized population')
+% box on
+% axis square
+% nexttile; hold on
+% plot(bins(2:end),psth(u,:,1),'k')
+% plot(bins(2:end),psth(u,:,2),'c')
+% %     plot(bins(2:end),psth(u,:,3),'b')
+% xlabel('time (sec)')
+% ylabel('firing rate')
+% box on
+% axis square
+% nexttile; hold on
+% plot(tc_norm(u,:,1),tc_norm(u,:,2),'ko-')
+% plot([0 1],[0 1],'k--')
+% xlabel('control norm response')
+% ylabel('v1 cooled norm response')
+% box on
+% axis square
+% nexttile;hold on
+% plot(mean(tc_norm(:,:,1),'omitnan'),mean(tc_norm(:,:,2),'omitnan'),'k-o')
+% plot([0 1],[0 1],'k--')
+% xlabel('control response')
+% ylabel('V1 cooled response')
+% box on
+% axis square
 
 figure;tiledlayout(2,2)
 nexttile;hold on

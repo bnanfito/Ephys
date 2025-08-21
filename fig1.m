@@ -67,9 +67,13 @@ coldEnd = [coldT(find(gapInd)-1) coldT(end)];
 for t = 1:length(coldStart)
     coldTrials = [coldTrials coldStart(t):coldEnd(t)];
 end
-% pumpKey = vertcat(trialId, pumpBit, [1 diff(pumpBit)] == 1, [1 diff(pumpBit)] == -1);
-% tPumpOff = pumpKey(1,pumpKey(4,:) == 1); tPumpOff = [tPumpOff nTrials];
-% tPumpOn = pumpKey(1,pumpKey(3,:) == 1); tPumpOn = tPumpOn(2:end);
+pumpKey = vertcat(trialId, pumpBit, [1 diff(pumpBit)] == 1, [1 diff(pumpBit)] == -1);
+tPumpOff = pumpKey(1,pumpKey(4,:) == 1); tPumpOff = [tPumpOff nTrials];
+tPumpOn = pumpKey(1,pumpKey(3,:) == 1); tPumpOn = tPumpOn(2:end);
+pumpSqWv = [0;1];
+for i = 1:length(tPumpOn)
+    pumpSqWv = [pumpSqWv,[0;tPumpOn(i)],[1;tPumpOn(i)],[1;tPumpOff(i)],[0;tPumpOff(i)]];
+end
 % warmTrials = [];
 % coldTrials = [];
 % for t = 1:length(tPumpOff)
@@ -134,7 +138,7 @@ ylabel('firing rate (Hz)')
 xlim([1 nTrials])
 xlabel('trial #')
 
-figure('Position',[100 100 600 1100]); tiledlayout(nShaft+1,1)
+figure; tiledlayout(nShaft+1,1)
 for sh = 1:nShaft+1
     nexttile;hold on
     if sh == nShaft+1
@@ -144,7 +148,8 @@ for sh = 1:nShaft+1
         plot(trialId,tempDat,'LineWidth',2)
         ylabel('temperature (c)')
         yyaxis right
-        plot(trialId,pumpBit,'LineWidth',2)
+%         plot(trialId,pumpBit,'LineWidth',2)
+        plot(pumpSqWv(2,:),pumpSqWv(1,:),'LineWidth',2)
         ylabel('pump on/off')
         xlabel('trial #')
     else
@@ -180,7 +185,7 @@ xlim([trialStart(1) trialStart(end)]/(sf*60))
 xlabel('time (min)')
 legend(p,legLbl)
 
-figure('Position',[100 100 600 1100]); tiledlayout(nShaft+1,1);
+figure; tiledlayout(nShaft+1,1);
 for sh = 1:nShaft+1
     nexttile; hold on
     if sh == nShaft+1
@@ -190,7 +195,8 @@ for sh = 1:nShaft+1
         plot(trialStart(trialId)/(sf*60),tempDat,'LineWidth',2)
         ylabel('temperature (c)')
         yyaxis right
-        plot(trialStart(trialId)/(sf*60),pumpBit,'LineWidth',2)
+%         plot(trialStart(trialId)/(sf*60),pumpBit,'LineWidth',2)
+        plot(trialStart(pumpSqWv(2,:))/(sf*60),pumpSqWv(1,:),'LineWidth',2)
         ylabel('pump on/off')
         xlim([trialStart(1) trialStart(end)]/(sf*60))
         xlabel('time (min)')
@@ -211,12 +217,13 @@ for sh = 1:nShaft+1
 end
 
 % probe layout
-x = sumStats.xPos;
-y = sumStats.zPos;
 
-figure('Position',[100 100 1100 1100]); tiledlayout(1,2)
+figure
+tiledlayout(1,2)
 rLims = [0 70];
 nexttile; hold on
+x = sumStats.xPos;
+y = sumStats.zPos;
 bubblechart(x, y, rWarm, rWarm)
 bubblelim(rLims)
 caxis(rLims)
@@ -231,40 +238,29 @@ colorbar
 scatter(x(~goodUIdx), y(~goodUIdx),'rx')
 set(gca,'YDir','reverse')
 
-figure('Position',[100 100 600 1100]);hold on
-scatter(x, y, repmat(100,1,length(si)), si,'filled')
+figure;
+chs = 97;%(depthIdx==1|depthIdx==2) & shaftIdx'==4;
+subplot(1,2,2);hold on
+x = sumStats.xPos;
+y = sumStats.zPos;
+z = si;
+scatter(x, y,'k')
+scatter(x, y,[],z,'filled')
+scatter(x(chs),y(chs),'g')
 caxis([-1 1])
-colorbar
-scatter(x(~goodUIdx), y(~goodUIdx),'rx')
+colormap cool
+cb = colorbar;
+cb.Label.String = 'SI';
+cb.Label.FontSize = 10;
+% scatter(x(~goodUIdx), y(~goodUIdx),'rx')
 set(gca,'YDir','reverse')
 xlim([-200 1200])
-
-figure('Position',[100 100 1100 1100]); tiledlayout(1,2)
-rLims = [0 10];
-nexttile; hold on
-bubblechart(x, y, nWarmTrials, nWarmTrials)
-bubblelim(rLims)
-caxis(rLims)
-scatter(x(~goodUIdx), y(~goodUIdx),'rx')
-set(gca,'YDir','reverse')
-nexttile; hold on
-bubblechart(x, y, nColdTrials, nColdTrials)
-bubblelegend('firing rate','Location','eastoutside')
-bubblelim(rLims)
-caxis(rLims)
-colorbar
-scatter(x(~goodUIdx), y(~goodUIdx),'rx')
-set(gca,'YDir','reverse')
-
-
-
-
-
-
-chs = find(sumStats.xPos>800 & (sumStats.zPos>400 & sumStats.zPos<600));
+ylabel('depth')
+xlabel('distance from cooling loop')
+box on
+subplot(2,2,1);hold on
 spks = [sumStats.spkTimes{chs}];
-figure;
-subplot(2,2,2); hold on
+patch([0 1 1 0],[0 0 nTrials+1 nTrials+1],'k','EdgeColor','none','FaceAlpha',0.2)
 for i = 1:length(coldStart)
 patch([-1 2 2 -1],[coldStart(i) coldStart(i) coldEnd(i) coldEnd(i)],'c','EdgeColor','none','FaceAlpha',0.2)
 end
@@ -277,30 +273,106 @@ ylabel('trial number')
 xlim([-1 2])
 xlabel('time (sec)')
 box on
-subplot(2,2,4); hold on
-y = mean(psth_norm(chs,:),'omitnan');
+axis square
+subplot(2,2,3);hold on
 x = edges(2:end)/60;
+y = psth(chs,:);
 plot(x,y,'k')
 ylabel('mean norm. psth')
 yyaxis right
 plot(trialStart(trialId)/(sf*60),tempDat,'LineWidth',2)
 ylabel('temperature (C)')
 xlabel('time (min)')
+% xlim([0 nTrials])
 box on
-subplot(1,2,1); hold on
-scatter(sumStats.xPos, sumStats.zPos,'k')
-scatter(sumStats.xPos, sumStats.zPos,[],si,'filled')
-patch([900 1100 1100 900],[600 600 400 400],'r','EdgeColor','r','FaceColor','none')
-colormap cool
-cb = colorbar;
-cb.Label.String = 'SI';
-cb.Label.FontSize = 10;
-set(gca,'YDir','reverse')
-xlim([-200 1200])
-ylabel('depth')
-xlabel('distance from cooling loop')
+axis square
+
+figure; hold on
+cntrlStats = anaOri('febq5','001','004',1,'MU',dataFold,0,0);
+x = cntrlStats.rPref;
+axLim = [0 80];
+scatter(x,rCold,'c.')
+scatter(x(chs),rCold(chs),'go')
+fit1 = polyfit(x,rCold,1);
+plot(axLim,polyval(fit1,axLim),'c-')
+scatter(x,rWarm,'k.')
+scatter(x(chs),rWarm(chs),'go')
+fit2 = polyfit(x,rWarm,1);
+plot(axLim,polyval(fit2,axLim),'k-')
+plot(axLim,axLim,'k--')
+xlim(axLim)
+xlabel('pre-cooling firing rate (Hz)')
+ylim(axLim)
+ylabel('firing rate (Hz)')
 box on
-sgtitle('febq5 001 007: disinhibited channels')
+axis square
+
+
+% figure; hold on
+% cntrlStats = anaOri('febq5','001','004',1,'MU',dataFold,0,0);
+% x = cntrlStats.rPref;
+% axLim = [0 80];
+% shapes = {'o','square','diamond','^'};
+% for sh = unique(shaftIdx)'
+%     idx = shaftIdx == sh;
+%     scatter(x(idx),rCold(idx),['c' shapes{sh}])
+%     fit1 = polyfit(x(idx),rCold(idx),1);
+%     plot(axLim,polyval(fit1,axLim),'c-')
+%     scatter(x(idx),rWarm(idx),['k' shapes{sh}])
+%     fit2 = polyfit(x(idx),rWarm(idx),1);
+%     plot(axLim,polyval(fit2,axLim),'k-')
+% end
+% plot(axLim,axLim,'k--')
+% xlim(axLim)
+% ylim(axLim)
+% box on
+% axis square
+
+
+
+
+
+% % for febq5_u001_007: plot disinhibited channels on shaft 1
+% figure;
+% subplot(1,2,1); hold on
+% scatter(sumStats.xPos, sumStats.zPos,'k')
+% scatter(sumStats.xPos, sumStats.zPos,[],si,'filled')
+% patch([900 1100 1100 900],[600 600 400 400],'r','EdgeColor','r','FaceColor','none')
+% colormap cool
+% cb = colorbar;
+% cb.Label.String = 'SI';
+% cb.Label.FontSize = 10;
+% set(gca,'YDir','reverse')
+% xlim([-200 1200])
+% ylabel('depth')
+% xlabel('distance from cooling loop')
+% box on
+% subplot(2,2,2); hold on
+% chs = find(sumStats.xPos>800 & (sumStats.zPos>400 & sumStats.zPos<600));
+% spks = [sumStats.spkTimes{chs}];
+% for i = 1:length(coldStart)
+% patch([-1 2 2 -1],[coldStart(i) coldStart(i) coldEnd(i) coldEnd(i)],'c','EdgeColor','none','FaceAlpha',0.2)
+% end
+% for i = 1:length(warmStart)
+% patch([-1 2 2 -1],[warmStart(i) warmStart(i) warmEnd(i) warmEnd(i)],'r','EdgeColor','none','FaceAlpha',0.2)
+% end
+% plot(spks(1,:),spks(2,:),'k.','MarkerSize',3)
+% ylim([0 nTrials+1])
+% ylabel('trial number')
+% xlim([-1 2])
+% xlabel('time (sec)')
+% box on
+% subplot(2,2,4); hold on
+% y = mean(psth_norm(chs,:),'omitnan');
+% x = edges(2:end)/60;
+% plot(x,y,'k')
+% ylabel('mean norm. psth')
+% yyaxis right
+% plot(trialStart(trialId)/(sf*60),tempDat,'LineWidth',2)
+% ylabel('temperature (C)')
+% xlabel('time (min)')
+% box on
+% sgtitle('febq5 001 007: disinhibited channels')
 
 
 
