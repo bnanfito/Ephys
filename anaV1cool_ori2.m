@@ -90,39 +90,59 @@ end
 for a = 1:length(animals)
     if ~(isempty(dat.cntrl{a,1}) || isempty(dat.cool{a,1}))
 
-        rPref.cntrl.dist{a} = dat.cntrl{a,1}.rPref(goodIdCntrl{a,1});
-        rPref.cntrl.ave(a) = mean(rPref.cntrl.dist{a},'omitnan');
-        rPref.cntrl.sem(a) = std(rPref.cntrl.dist{a},'omitnan')/sqrt(length(rPref.cntrl.dist{a}));
-        rPref.cntrl.n(a) = length(rPref.cntrl.dist{a});
+        i = goodIdCntrl{a,1};
 
-        rPref.cool.dist{a} = dat.cool{a,1}.rPref(goodIdCntrl{a,1});
-        rPref.cool.ave(a) = mean(rPref.cool.dist{a},'omitnan');
-        rPref.cool.sem(a) = std(rPref.cool.dist{a},'omitnan')/sqrt(length(rPref.cool.dist{a}));
-        rPref.cool.n(a) = length(rPref.cool.dist{a});
+        r1 = dat.cntrl{a,1}.rPref(i);
+        rPref.cntrl.dist{a} = r1;
+        rPref.cntrl.ave(a) = mean(r1,'omitnan');
+        rPref.cntrl.sem(a) = std(r1,'omitnan')/sqrt(length(r1));
+        rPref.cntrl.n(a) = length(r1);
 
-        si.dist{a} = (rPref.cool.dist{a}-rPref.cntrl.dist{a})./(rPref.cool.dist{a}+rPref.cntrl.dist{a});
+        r2 = dat.cool{a,1}.rPref(i);
+        rPref.cool.dist{a} = r2;
+        rPref.cool.ave(a) = mean(r2,'omitnan');
+        rPref.cool.sem(a) = std(r2,'omitnan')/sqrt(length(r2));
+        rPref.cool.n(a) = length(r2);
+
+        si.dist{a} = (r2-r1)./(r2+r1);
         si.ave(a) = mean(si.dist{a},'omitnan');
         si.sem(a) = std(si.dist{a},'omitnan')/sqrt(length(si.dist{a}));
         si.n(a) = length(si.dist{a});
 
-        late.cntrl.dist{a} = dat.cntrl{a,1}.latency(goodIdCntrl{a,1});
-        late.cntrl.ave(a) = mean(late.cntrl.dist{a},'omitnan');
-        late.cntrl.sem(a) = std(late.cntrl.dist{a},'omitnan')/sqrt(length(late.cntrl.dist{a}));
-        late.cntrl.n(a) = length(late.cntrl.dist{a});
+        if ~(isempty(r1)||isempty(r2))
+            rPref.stats.sRank.p(a) = signrank(r1-r2);
+            si.stats.sRank.p(a) = signrank(si.dist{a});
+        else
+            rPref.stats.sRank.p(a) = nan;
+            si.stats.sRank.p(a) = nan;
+        end
 
-        late.cool.dist{a} = dat.cool{a,1}.latency(goodIdCool{a,1});
-        late.cool.ave(a) = mean(late.cool.dist{a},'omitnan');
-        late.cool.sem(a) = std(late.cool.dist{a},'omitnan')/sqrt(length(late.cool.dist{a}));
-        late.cool.n(a) = length(late.cool.dist{a});
+        i = (goodIdCntrl{a,1}&goodIdCool{a,1}) & ~(isnan(dat.cntrl{a,1}.latency)|isnan(dat.cool{a,1}.latency));
+        
+        l1 = dat.cntrl{a,1}.latency(i);
+        late.cntrl.dist{a} = l1;
+        late.cntrl.ave(a) = mean(l1,'omitnan');
+        late.cntrl.sem(a) = std(l1,'omitnan')/sqrt(length(l1));
+        late.cntrl.n(a) = length(l1);
 
-%         dLate.dist{a} = (late.cool.dist{a}-late.cntrl.dist{a})./(late.cool.dist{a}+late.cntrl.dist{a});
-        l1 = dat.cntrl{a,1}.latency(goodIdCntrl{a,1}&goodIdCool{a,1});
-        l2 = dat.cool{a,1}.latency(goodIdCntrl{a,1}&goodIdCool{a,1});
+        l2 = dat.cool{a,1}.latency(i);
+        late.cool.dist{a} = l2;
+        late.cool.ave(a) = mean(l2,'omitnan');
+        late.cool.sem(a) = std(l2,'omitnan')/sqrt(length(l2));
+        late.cool.n(a) = length(l2);
+
         dLate.dist{a} = l2-l1;
         dLate.ave(a) = mean(dLate.dist{a},'omitnan');
         dLate.sem(a) = std(dLate.dist{a},'omitnan')/sqrt(length(dLate.dist{a}));
         dLate.n(a) = length(dLate.dist{a});
-%         dLate(a) = (late.cool.ave(a)-late.cntrl.ave(a))./(late.cool.ave(a)+late.cntrl.ave(a));
+
+        if ~(isempty(l1)||isempty(l2))
+            late.stats.sRank.p(a) = signrank(l1-l2);
+            dLate.stats.sRank.p(a) = signrank(dLate.dist{a});
+        else
+            late.stats.sRank.p(a) = nan;
+            dLate.stats.sRank.p(a) = nan;
+        end
 
     else
         rPref.cntrl.dist{a} = [];
@@ -140,6 +160,9 @@ for a = 1:length(animals)
         si.sem(a) = nan;
         si.n(a) = nan;
 
+        rPref.stats.sRank.p(a) = nan;
+        si.stats.sRank.p(a) = nan;
+
         late.cntrl.dist{a} = [];
         late.cntrl.ave(a) = nan;
         late.cntrl.sem(a) = nan;
@@ -154,9 +177,69 @@ for a = 1:length(animals)
         dLate.ave(a) = nan;
         dLate.sem(a) = nan;
         dLate.n(a) = nan;
-%         dLate(a) = nan;
+
+        late.stats.sRank.p(a) = nan;
+        dLate.stats.sRank.p(a) = nan;
+
     end
 end
+
+%% Make data table
+
+animalData1 = table();
+animalData1.id = repmat(animals,2,1);
+animalData1.age = repmat(ages',2,1);
+animalData1.manip = [zeros(length(animals),1);ones(length(animals),1)];
+animalData1.R_mean = [rPref.cntrl.ave';rPref.cool.ave'];
+animalData1.R_sem = [rPref.cntrl.sem';rPref.cool.sem'];
+animalData1.R_n = [rPref.cntrl.n';rPref.cool.n'];
+animalData1.L_mean = [late.cntrl.ave';late.cool.ave'];
+animalData1.L_sem = [late.cntrl.sem';late.cool.sem'];
+animalData1.L_n = [late.cntrl.n';late.cool.n'];
+
+animalData2 = table();
+animalData2.id = animals;
+animalData2.age = ages';
+animalData2.SI_mean = si.ave';
+animalData2.SI_sem = si.sem';
+animalData2.SI_n = si.n';
+animalData2.dL_mean = dLate.ave';
+animalData2.dL_sem = dLate.sem';
+animalData2.dL_sem = dLate.n';
+
+% animalData.id = animals;
+% animalData.age = ages';
+% animalData.Rcntrl_mean = rPref.cntrl.ave';
+% animalData.Rcntrl_sem = rPref.cntrl.sem';
+% animalData.Rcntrl_n = rPref.cntrl.n';
+% % animalData.Rcntrl_dist = rPref.cntrl.dist';
+% animalData.Rcool_mean = rPref.cool.ave';
+% animalData.Rcool_sem = rPref.cool.sem';
+% animalData.Rcool_n = rPref.cool.n';
+% % animalData.Rcool_dist = rPref.cool.dist';
+% animalData.SI_mean = si.ave';
+% animalData.SI_sem = si.sem';
+% animalData.SI_n = si.n';
+% % animalData.SI_dist = si.dist';
+% animalData.Lcntrl_mean = late.cntrl.ave';
+% animalData.Lcntrl_sem = late.cntrl.sem';
+% animalData.Lcntrl_n = late.cntrl.n';
+% % animalData.Lcntrl_dist = late.cntrl.dist';
+% animalData.Lcool_mean = late.cool.ave';
+% animalData.Lcool_sem = late.cool.sem';
+% animalData.Lcool_n = late.cool.n';
+% % animalData.Lcool_dist = late.cool.dist';
+% animalData.dL_mean = dLate.ave';
+% animalData.dL_sem = dLate.sem';
+% animalData.dL_n = dLate.n';
+% % animalData.dL_dist = dLate.dist';
+% 
+% [~,sIdx] = sort(animalData.age);
+% animalData = animalData(sIdx,:);
+% 
+% unitData.cntrl = vertcat(dat.cntrl{:});
+% unitData.cool = vertcat(dat.cool{:});
+
 
 %% Plot
 
@@ -178,6 +261,14 @@ maxH = 60;%max([h1 h2],[],'all')+1;
 patch([0 1 1 0],[0 0 maxH maxH],'k','EdgeColor','none','FaceAlpha',0.2)
 plot(bins(2:end),h1,'k')
 plot(bins(2:end),h2,'c')
+l1 = dat.cntrl{a}.latency(u);
+l2 = dat.cool{a}.latency(u);
+if ~isnan(l1)
+    xline(l1,'k--')
+end
+if ~isnan(l2)
+    xline(l2,'c--')
+end
 xlim([-1 2])
 xlabel('time (sec)')
 ylim([0 maxH])
@@ -205,16 +296,20 @@ minN = 20;
 xL = [26 48];
 xT = [25,30,35,40];
 xTlbl = {'25','30','35','40+'};
+
 subplot(3,2,3);hold on
 sclSem = 100;
+pVal = rPref.stats.sRank.p<0.01;
 y1 = rPref.cntrl.ave;
 sem1 = rPref.cntrl.sem;
 n1 = rPref.cntrl.n;
-scatter(x(n1>=minN),y1(n1>=minN),sem1(n1>=minN)*sclSem,'ko','MarkerFaceColor','flat','MarkerFaceAlpha',0.2,'LineWidth',1)
+scatter(x(n1>=minN&pVal),y1(n1>=minN&pVal),sem1(n1>=minN&pVal)*sclSem,'ko','MarkerFaceColor','flat','MarkerFaceAlpha',0.2,'LineWidth',1)
+scatter(x(n1>=minN&~pVal),y1(n1>=minN&~pVal),sem1(n1>=minN&~pVal)*sclSem,'ko','MarkerFaceColor','none','MarkerFaceAlpha',0.2,'LineWidth',1)
 y2 = rPref.cool.ave;
 sem2 = rPref.cool.sem;
 n2 = rPref.cool.n;
-scatter(x(n2>=minN),y2(n2>=minN),sem2(n2>=minN)*sclSem,'co','MarkerFaceColor','flat','MarkerFaceAlpha',0.2,'LineWidth',1)
+scatter(x(n2>=minN&pVal),y2(n2>=minN&pVal),sem2(n2>=minN&pVal)*sclSem,'co','MarkerFaceColor','flat','MarkerFaceAlpha',0.2,'LineWidth',1)
+scatter(x(n2>=minN&~pVal),y2(n2>=minN&~pVal),sem2(n2>=minN&~pVal)*sclSem,'co','MarkerFaceColor','none','MarkerFaceAlpha',0.2,'LineWidth',1)
 plot([x(n1>=minN);x(n2>=minN)],[y1(n1>=minN);y2(n2>=minN)],'k')
 xlim(xL)
 xticks(xT)
@@ -224,11 +319,13 @@ box on
 
 subplot(3,2,4);hold on
 sclSem = 5000;
+pVal = si.stats.sRank.p<0.01;
 y3 = si.ave;
 sem3 = si.sem;
 n3 = si.n;
 yline(0,'k--')
-scatter(x(n3>=minN),y3(n3>=minN),sem3(n3>=minN)*sclSem,'ko','MarkerFaceColor','flat','MarkerFaceAlpha',0.2,'LineWidth',1)
+scatter(x(n3>=minN&pVal),y3(n3>=minN&pVal),sem3(n3>=minN&pVal)*sclSem,'ko','MarkerFaceColor','flat','MarkerFaceAlpha',0.2,'LineWidth',1)
+scatter(x(n3>=minN&~pVal),y3(n3>=minN&~pVal),sem3(n3>=minN&~pVal)*sclSem,'ko','MarkerFaceColor','none','MarkerFaceAlpha',0.2,'LineWidth',1)
 ylim([-1,0.1])
 xlim(xL)
 xticks(xT)
@@ -238,14 +335,17 @@ box on
 
 subplot(3,2,5);hold on
 sclSem = 5000;
+pVal = late.stats.sRank.p<0.01;
 y4 = late.cntrl.ave;
 sem4 = late.cntrl.sem;
 n4 = late.cntrl.n;
-scatter(x(n4>=minN),y4(n4>=minN),sem4(n4>=minN)*sclSem,'ko','MarkerFaceColor','flat','MarkerFaceAlpha',0.2,'LineWidth',1)
+scatter(x(n4>=minN&pVal),y4(n4>=minN&pVal),sem4(n4>=minN&pVal)*sclSem,'ko','MarkerFaceColor','flat','MarkerFaceAlpha',0.2,'LineWidth',1)
+scatter(x(n4>=minN&~pVal),y4(n4>=minN&~pVal),sem4(n4>=minN&~pVal)*sclSem,'ko','MarkerFaceColor','none','MarkerFaceAlpha',0.2,'LineWidth',1)
 y5 = late.cool.ave;
 sem5 = late.cool.sem;
 n5 = late.cool.n;
-scatter(x(n5>=minN),y5(n5>=minN),sem5(n5>=minN)*sclSem,'co','MarkerFaceColor','flat','MarkerFaceAlpha',0.2,'LineWidth',1)
+scatter(x(n5>=minN&pVal),y5(n5>=minN&pVal),sem5(n5>=minN&pVal)*sclSem,'co','MarkerFaceColor','flat','MarkerFaceAlpha',0.2,'LineWidth',1)
+scatter(x(n5>=minN&~pVal),y5(n5>=minN&~pVal),sem5(n5>=minN&~pVal)*sclSem,'co','MarkerFaceColor','none','MarkerFaceAlpha',0.2,'LineWidth',1)
 i = n4>=minN & n5>=minN;
 plot([x(i);x(i)],[y4(i);y5(i)],'k')
 xlim(xL)
@@ -257,11 +357,13 @@ box on
 
 subplot(3,2,6);hold on
 sclSem = 2000;
+pVal = dLate.stats.sRank.p<0.01;
 y6 = dLate.ave;
 sem6 = dLate.sem;
 n6 = dLate.n;
 yline(0,'k--')
-scatter(x(n6>=minN),y6(n6>=minN),sem6(n6>=minN)*sclSem,'ko','MarkerFaceColor','flat','MarkerFaceAlpha',0.2,'LineWidth',1)
+scatter(x(n6>=minN&pVal),y6(n6>=minN&pVal),sem6(n6>=minN&pVal)*sclSem,'ko','MarkerFaceColor','flat','MarkerFaceAlpha',0.2,'LineWidth',1)
+scatter(x(n6>=minN&~pVal),y6(n6>=minN&~pVal),sem6(n6>=minN&~pVal)*sclSem,'ko','MarkerFaceColor','none','MarkerFaceAlpha',0.2,'LineWidth',1)
 xlim(xL)
 xticks(xT)
 xticklabels(xTlbl)
