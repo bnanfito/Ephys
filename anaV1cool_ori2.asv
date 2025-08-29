@@ -2,7 +2,7 @@
 clear
 close all
 
-anaMode = 'MU';
+anaMode = 'SU';
 proj = 'V1cool_ori';
 area = 'PSS';
 dataFold = 'Y:\Brandon\data';
@@ -12,34 +12,34 @@ ageGroups = {[28 32],[33 40],[41 80],[81 120]};
 
 %% Generate Project Table
 
-% projTbl = getProjectFiles(proj,1,'age','recSite','penNr','priorMFlag','priorDescr',...
-%                                        'duringMFlag','manipDescr','manipDetail',...
-%                                        'looperNameCond1','looperNameCond2',...
-%                                        'looperNameCond3','looperNameCond4',...
-%                                        'looperNameCond5');
-% projTbl = projTbl(strcmp(projTbl.recSite,area),:);
-% animals = unique(projTbl.experimentId);
-% for a = 1:length(animals)
-%     aniIdx = strcmp(projTbl.experimentId,animals{a});
-%     ages(a) = unique(projTbl.age(aniIdx));
-% end
-% load(fullfile(dataFold,'dataSets','cooling','V1cool_ori','MU','V1cool_ori_MUprojTbl.mat'))
-% for e = 1:height(projTbl)
-%     animal = projTbl.experimentId{e};
-%     unit = projTbl.unitNr{e};
-%     expt = projTbl.experimentNr{e};
-%     probe = projTbl.probeId(e);
-%     exptName = projTbl.fileBase{e};
-%     disp(['generating sumStats for ' exptName])
-%     [sumStats{e,1}] = anaOri(animal,unit,expt,probe,anaMode,dataFold,0,0);
-%     nGU(e,1) = sum(screenUnits(sumStats{e,1},anaMode));
-% end
-% projTbl.sumStats = sumStats;
-% projTbl.nGU = nGU;
+projTbl = getProjectFiles(proj,1,'age','recSite','penNr','priorMFlag','priorDescr',...
+                                       'duringMFlag','manipDescr','manipDetail',...
+                                       'looperNameCond1','looperNameCond2',...
+                                       'looperNameCond3','looperNameCond4',...
+                                       'looperNameCond5');
+projTbl = projTbl(strcmp(projTbl.recSite,area),:);
+animals = unique(projTbl.experimentId);
+for a = 1:length(animals)
+    aniIdx = strcmp(projTbl.experimentId,animals{a});
+    ages(a) = unique(projTbl.age(aniIdx));
+end
+load(fullfile(dataFold,'dataSets','cooling','V1cool_ori','MU','V1cool_ori_MUprojTbl.mat'))
+for e = 1:height(projTbl)
+    animal = projTbl.experimentId{e};
+    unit = projTbl.unitNr{e};
+    expt = projTbl.experimentNr{e};
+    probe = projTbl.probeId(e);
+    exptName = projTbl.fileBase{e};
+    disp(['generating sumStats for ' exptName])
+    [sumStats{e,1}] = anaOri(animal,unit,expt,probe,anaMode,dataFold,0,0);
+    nGU(e,1) = sum(screenUnits(sumStats{e,1},anaMode));
+end
+projTbl.sumStats = sumStats;
+projTbl.nGU = nGU;
 
-load(fullfile(dataFold,'dataSets','cooling',proj,anaMode,[proj '_' anaMode 'dataSet.mat']))
-% load(['/Volumes/NielsenHome2/Brandon/data/dataSets/cooling/' proj '/V1cool_' anaMode '_ori_projectTbl.mat'])
-% load(['/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/cooling/' proj '/V1cool_' anaMode '_ori_projectTbl.mat'])
+% load(fullfile(dataFold,'dataSets','cooling',proj,anaMode,[proj '_' anaMode 'dataSet.mat']))
+% % load(['/Volumes/NielsenHome2/Brandon/data/dataSets/cooling/' proj '/V1cool_' anaMode '_ori_projectTbl.mat'])
+% % load(['/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/cooling/' proj '/V1cool_' anaMode '_ori_projectTbl.mat'])
 
 %% Organize Data
 
@@ -710,113 +710,3 @@ clear id uAge uAG manip g
 unitData = vertcat(unitDataCntrl,unitDataCool);
 unitData = unitData(unitData.good,:);
 
-%% split distribution
-
-D = unitDataCntrl;
-idx1 = unitDataCntrl.good;
-idx2 = unitDataCool.good;
-idx3 = idx1&idx2;
-idx4 = idx1&(~idx2);
-idx5 = (~idx1)&idx2;
-
-figure; tiledlayout(5,2)
-nexttile; hold on
-cdfplot(D.latency(idx1))
-cdfplot(D.latency(idx3))
-cdfplot(D.latency(idx4))
-xticks([0:0.2:1])
-xlim([0 1])
-xlabel('latency (s)')
-yticks([0 0.5 1])
-ylabel('percentile')
-title('All ages')
-
-nexttile; hold on
-histogram(D.latency(idx1),[0:0.05:1])
-histogram(D.latency(idx3),[0:0.05:1])
-histogram(D.latency(idx4),[0:0.05:1])
-xlabel('latency (s)')
-ylabel('count')
-legend({['pass cntrl; n=' num2str(sum(idx1))],...
-        ['pass cntrl & cool; n=' num2str(sum(idx3))],...
-        ['pass cntrl & ~cool; n=' num2str(sum(idx4))]},'Location','northeast')
-
-for ag = 1:4
-    nexttile; hold on
-    cdfplot(D.latency(idx1&D.AG==ag))
-    cdfplot(D.latency(idx3&D.AG==ag))
-    cdfplot(D.latency(idx4&D.AG==ag))
-    xticks([0:0.2:1])
-    xlim([0 1])
-    xlabel('latency (s)')
-    yticks([0 0.5 1])
-    ylabel('percentile')
-    title(['Age group:' num2str(ag)])
-    
-    nexttile; hold on
-    histogram(D.latency(idx1&D.AG==ag),[0:0.05:1])
-    histogram(D.latency(idx3&D.AG==ag),[0:0.05:1])
-    histogram(D.latency(idx4&D.AG==ag),[0:0.05:1])
-    xlabel('latency (s)')
-    ylabel('count')
-    legend({['pass cntrl; n=' num2str(sum(idx1&D.AG==ag))],...
-            ['pass cntrl & cool; n=' num2str(sum(idx3&D.AG==ag))],...
-            ['pass cntrl & ~cool; n=' num2str(sum(idx4&D.AG==ag))]},'Location','northeast')
-end
-
-sgtitle('control MU response latency')
-
-
-D = unitDataCool;
-idx1 = unitDataCool.good;
-idx2 = unitDataCntrl.good;
-idx3 = idx1&idx2;
-idx4 = idx1&(~idx2);
-idx5 = (~idx1)&idx2;
-
-figure; tiledlayout(5,2)
-nexttile; hold on
-cdfplot(D.latency(idx1))
-cdfplot(D.latency(idx3))
-cdfplot(D.latency(idx4))
-xticks([0:0.2:1])
-xlim([0 1])
-xlabel('latency (s)')
-yticks([0 0.5 1])
-ylabel('percentile')
-title('All ages')
-
-nexttile; hold on
-histogram(D.latency(idx1),[0:0.05:1])
-histogram(D.latency(idx3),[0:0.05:1])
-histogram(D.latency(idx4),[0:0.05:1])
-xlabel('latency (s)')
-ylabel('count')
-legend({['pass cool; n=' num2str(sum(idx1))],...
-        ['pass cool & cntrl; n=' num2str(sum(idx3))],...
-        ['pass cool & ~cntrl; n=' num2str(sum(idx4))]},'Location','northeast')
-
-for ag = 1:4
-    nexttile; hold on
-    cdfplot(D.latency(idx1&D.AG==ag))
-    cdfplot(D.latency(idx3&D.AG==ag))
-    cdfplot(D.latency(idx4&D.AG==ag))
-    xticks([0:0.2:1])
-    xlim([0 1])
-    xlabel('latency (s)')
-    yticks([0 0.5 1])
-    ylabel('percentile')
-    title(['Age group:' num2str(ag)])
-    
-    nexttile; hold on
-    histogram(D.latency(idx1&D.AG==ag),[0:0.05:1])
-    histogram(D.latency(idx3&D.AG==ag),[0:0.05:1])
-    histogram(D.latency(idx4&D.AG==ag),[0:0.05:1])
-    xlabel('latency (s)')
-    ylabel('count')
-    legend({['pass cool; n=' num2str(sum(idx1&D.AG==ag))],...
-            ['pass cool & cntrl; n=' num2str(sum(idx3&D.AG==ag))],...
-            ['pass cool & ~cntrl; n=' num2str(sum(idx4&D.AG==ag))]},'Location','northeast')
-end
-
-sgtitle('cool V1 MU response latency')
