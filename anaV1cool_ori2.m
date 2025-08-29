@@ -8,7 +8,7 @@ area = 'PSS';
 dataFold = 'Y:\Brandon\data';
 % dataFold = '/Volumes/NielsenHome2/Brandon/data';
 % dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
-ageGroups = {[28 32],[33 40],[41 150]};
+ageGroups = {[28 32],[33 40],[41 80],[81 120]};
 
 %% Generate Project Table
 
@@ -49,6 +49,14 @@ for ag = 1:length(ageGroups)
     curAGidx = find(ages>=ageGroups{ag}(1) & ages<=ageGroups{ag}(2));
     agIdx(curAGidx) = ag;
 end
+
+agesJit = double(ages);
+for u = unique(agesJit)
+    if sum(agesJit==u)>1
+        agesJit(agesJit==u) = agesJit(agesJit==u)+(-0.2:0.4/(sum(agesJit==u)-1):0.2);
+    end
+end
+
 for a = 1:length(animals)
     aniIdx = strcmp(projTbl.experimentId,animals{a});
 
@@ -184,62 +192,6 @@ for a = 1:length(animals)
     end
 end
 
-%% Make data table
-
-animalData1 = table();
-animalData1.id = repmat(animals,2,1);
-animalData1.age = repmat(ages',2,1);
-animalData1.manip = [zeros(length(animals),1);ones(length(animals),1)];
-animalData1.R_mean = [rPref.cntrl.ave';rPref.cool.ave'];
-animalData1.R_sem = [rPref.cntrl.sem';rPref.cool.sem'];
-animalData1.R_n = [rPref.cntrl.n';rPref.cool.n'];
-animalData1.L_mean = [late.cntrl.ave';late.cool.ave'];
-animalData1.L_sem = [late.cntrl.sem';late.cool.sem'];
-animalData1.L_n = [late.cntrl.n';late.cool.n'];
-
-animalData2 = table();
-animalData2.id = animals;
-animalData2.age = ages';
-animalData2.SI_mean = si.ave';
-animalData2.SI_sem = si.sem';
-animalData2.SI_n = si.n';
-animalData2.dL_mean = dLate.ave';
-animalData2.dL_sem = dLate.sem';
-animalData2.dL_sem = dLate.n';
-
-% animalData.id = animals;
-% animalData.age = ages';
-% animalData.Rcntrl_mean = rPref.cntrl.ave';
-% animalData.Rcntrl_sem = rPref.cntrl.sem';
-% animalData.Rcntrl_n = rPref.cntrl.n';
-% % animalData.Rcntrl_dist = rPref.cntrl.dist';
-% animalData.Rcool_mean = rPref.cool.ave';
-% animalData.Rcool_sem = rPref.cool.sem';
-% animalData.Rcool_n = rPref.cool.n';
-% % animalData.Rcool_dist = rPref.cool.dist';
-% animalData.SI_mean = si.ave';
-% animalData.SI_sem = si.sem';
-% animalData.SI_n = si.n';
-% % animalData.SI_dist = si.dist';
-% animalData.Lcntrl_mean = late.cntrl.ave';
-% animalData.Lcntrl_sem = late.cntrl.sem';
-% animalData.Lcntrl_n = late.cntrl.n';
-% % animalData.Lcntrl_dist = late.cntrl.dist';
-% animalData.Lcool_mean = late.cool.ave';
-% animalData.Lcool_sem = late.cool.sem';
-% animalData.Lcool_n = late.cool.n';
-% % animalData.Lcool_dist = late.cool.dist';
-% animalData.dL_mean = dLate.ave';
-% animalData.dL_sem = dLate.sem';
-% animalData.dL_n = dLate.n';
-% % animalData.dL_dist = dLate.dist';
-% 
-% [~,sIdx] = sort(animalData.age);
-% animalData = animalData(sIdx,:);
-% 
-% unitData.cntrl = vertcat(dat.cntrl{:});
-% unitData.cool = vertcat(dat.cool{:});
-
 
 %% Plot
 
@@ -279,18 +231,13 @@ box on
 count = count+1;
 end
 
-x = double(ages);
-i = find(agIdx==max(agIdx));
+x = agesJit;
+i = find(agIdx==3|agIdx==4);
 xA = [x(i);i];
 [~,sIdx] = sort(xA(1,:));
 xA = xA(:,sIdx);
-xA(1,:) = (0:5/(size(xA,2)-1):5)+ageGroups{end}(1);
+xA(1,:) = (0:5/(size(xA,2)-1):5)+ageGroups{3}(1);
 x(xA(2,:)) = xA(1,:);
-for u = unique(x)
-    if sum(x==u)>1
-        x(x==u) = x(x==u)+(-0.2:0.4/(sum(x==u)-1):0.2);
-    end
-end
 
 minN = 20;
 xL = [26 48];
@@ -630,4 +577,136 @@ box on
 
 
 
+%% Make data table
+
+animalData1 = table();
+animalData1.id = repmat(animals,2,1);
+% animalData1.age = repmat(ages',2,1);
+animalData1.ageJit = repmat(agesJit',2,1);
+animalData1.manip = [zeros(length(animals),1);ones(length(animals),1)];
+animalData1.R_mean = [rPref.cntrl.ave';rPref.cool.ave'];
+animalData1.R_sem = [rPref.cntrl.sem';rPref.cool.sem'];
+animalData1.R_n = [rPref.cntrl.n';rPref.cool.n'];
+animalData1.L_mean = [late.cntrl.ave';late.cool.ave'];
+animalData1.L_sem = [late.cntrl.sem';late.cool.sem'];
+animalData1.L_n = [late.cntrl.n';late.cool.n'];
+
+animalData2 = table();
+animalData2.id = animals;
+% animalData2.age = ages';
+animalData2.ageJit = agesJit';
+animalData2.SI_mean = si.ave';
+animalData2.SI_sem = si.sem';
+animalData2.SI_n = si.n';
+animalData2.dL_mean = dLate.ave';
+animalData2.dL_sem = dLate.sem';
+animalData2.dL_n = dLate.n';
+
+animalData = table();
+animalData.id = animals;
+% animalData.age = ages';
+animalData.ageJit = agesJit';
+animalData.Rcntrl_mean = rPref.cntrl.ave';
+animalData.Rcntrl_sem = rPref.cntrl.sem';
+animalData.Rcntrl_n = rPref.cntrl.n';
+% animalData.Rcntrl_dist = rPref.cntrl.dist';
+animalData.Rcool_mean = rPref.cool.ave';
+animalData.Rcool_sem = rPref.cool.sem';
+animalData.Rcool_n = rPref.cool.n';
+% animalData.Rcool_dist = rPref.cool.dist';
+animalData.SI_mean = si.ave';
+animalData.SI_sem = si.sem';
+animalData.SI_n = si.n';
+% animalData.SI_dist = si.dist';
+animalData.Lcntrl_mean = late.cntrl.ave';
+animalData.Lcntrl_sem = late.cntrl.sem';
+animalData.Lcntrl_n = late.cntrl.n';
+% animalData.Lcntrl_dist = late.cntrl.dist';
+animalData.Lcool_mean = late.cool.ave';
+animalData.Lcool_sem = late.cool.sem';
+animalData.Lcool_n = late.cool.n';
+% animalData.Lcool_dist = late.cool.dist';
+animalData.dL_mean = dLate.ave';
+animalData.dL_sem = dLate.sem';
+animalData.dL_n = dLate.n';
+% animalData.dL_dist = dLate.dist';
+
+[~,sIdx] = sort(animalData.ageJit);
+animalData = animalData(sIdx,:);
+
+
+unitDataCool = table();
+cntrl = vertcat(dat.cntrl{~ismember(1:length(animals),[3,11,13]),1});
+for u = 1:height(cntrl)
+    id{u,1} = [cntrl.exptName{u} '_p' num2str(cntrl.probe(u)) '_' cntrl.uInfo{u} num2str(cntrl.uID(u))];
+    uAge(u,1) = ages(strcmp(cntrl.exptName{u}(1:5),animals));
+    uAG(u,1) = agIdx(strcmp(cntrl.exptName{u}(1:5),animals));
+    manip(u,1) = 0;
+    switch [num2str(uAG(u,1)) num2str(manip(u,1))]
+        case '10'
+            g(u,1) = 1;
+        case '11'
+            g(u,1) = 2;
+        case '20'
+            g(u,1) = 3;
+        case '21'
+            g(u,1) = 4;
+        case '30'
+            g(u,1) = 5;
+        case '31'
+            g(u,1) = 6;
+        case '40'
+            g(u,1) = 7;
+        case '41'
+            g(u,1) = 8;
+    end
+end
+unitDataCool.id = id;
+unitDataCool.age = uAge;
+unitDataCool.AG = uAG;
+unitDataCool.manip = manip;
+unitDataCool.g = g;
+unitDataCool.rPref = cntrl.rPref;
+unitDataCool.latency = cntrl.latency;
+unitDataCool.good = screenUnits(cntrl,'MU');
+clear id uAge uAG manip g
+
+unitDataCntrl = table();
+cool = vertcat(dat.cool{~ismember(1:length(animals),[3,11,13]),1});
+for u = 1:height(cool)
+    id{u,1} = [cool.exptName{u} '_p' num2str(cool.probe(u)) '_' cool.uInfo{u} num2str(cool.uID(u))];
+    uAge(u,1) = ages(strcmp(cool.exptName{u}(1:5),animals));
+    uAG(u,1) = agIdx(strcmp(cool.exptName{u}(1:5),animals));
+    manip(u,1) = 1;
+    switch [num2str(uAG(u,1)) num2str(manip(u,1))]
+        case '10'
+            g(u,1) = 1;
+        case '11'
+            g(u,1) = 2;
+        case '20'
+            g(u,1) = 3;
+        case '21'
+            g(u,1) = 4;
+        case '30'
+            g(u,1) = 5;
+        case '31'
+            g(u,1) = 6;
+        case '40'
+            g(u,1) = 7;
+        case '41'
+            g(u,1) = 8;
+    end
+end
+unitDataCntrl.id = id;
+unitDataCntrl.age = uAge;
+unitDataCntrl.AG = uAG;
+unitDataCntrl.manip = manip;
+unitDataCntrl.g = g;
+unitDataCntrl.rPref = cool.rPref;
+unitDataCntrl.latency = cool.latency;
+unitDataCntrl.good = screenUnits(cool,'MU');
+clear id uAge uAG manip g
+
+unitData = vertcat(unitDataCool,unitDataCntrl);
+unitData = unitData(unitData.good,:);
 
