@@ -2,7 +2,7 @@
 clear
 close all
 
-anaMode = 'MU';
+anaMode = 'SU';
 proj = 'V1cool_ori';
 area = 'PSS';
 dataFold = 'Y:\Brandon\data';

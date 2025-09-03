@@ -200,11 +200,11 @@ for ag = unique(uAG)
     p(ag) = plot(x(uAG==ag),y(uAG==ag),['k' agShapes{ag}],'MarkerSize',4,'LineWidth',1);
     lbl{ag} = ['P' num2str(ageGroups{ag}(1)) '-P' num2str(ageGroups{ag}(2)) '; n=' num2str(sum(uAG==ag))];
 end
-plot(x(exUs(1)),y(exUs(1)),'o','Color',exUclrs{1},'LineWidth',1)
-plot(x(exUs(2)),y(exUs(2)),'o','Color',exUclrs{2},'LineWidth',1)
+plot(x(exUs(1)),y(exUs(1)),'o','Color',exUclrs{1})
+plot(x(exUs(2)),y(exUs(2)),'o','Color',exUclrs{2})
 plot([0 1],[0 1],'k--')
-xlabel('V1 cooled')
-ylabel('control')
+xlabel('cool')
+ylabel('cntrl')
 title('LDR')
 legend(p,lbl,'Location','northwest')
 box on
@@ -215,13 +215,13 @@ x = dsi(:,2);
 y = dsi(:,1);
 % plot(x,y,'k.','MarkerSize',4)
 for ag = 1:length(ageGroups)
-    plot(x(uAG==ag),y(uAG==ag),['k' agShapes{ag}],'MarkerSize',4,'LineWidth',1)
+    plot(x(uAG==ag),y(uAG==ag),['k' agShapes{ag}],'MarkerSize',4)
 end
-plot(x(exUs(1)),y(exUs(1)),'o','Color',exUclrs{1},'LineWidth',1)
-plot(x(exUs(2)),y(exUs(2)),'o','Color',exUclrs{2},'LineWidth',1)
+plot(x(exUs(1)),y(exUs(1)),'o','Color',exUclrs{1})
+plot(x(exUs(2)),y(exUs(2)),'o','Color',exUclrs{2})
 plot([0 1],[0 1],'k--')
-xlabel('V1 cooled')
-ylabel('control')
+xlabel('cool')
+ylabel('cntrl')
 title('DSI')
 sgtitle('tuning metrics')
 box on
@@ -232,13 +232,13 @@ x = bwS(:,2);
 y = bwS(:,1);
 % plot(x,y,'k.','MarkerSize',4)
 for ag = 1:length(ageGroups)
-    plot(x(uAG==ag),y(uAG==ag),['k' agShapes{ag}],'MarkerSize',4,'LineWidth',1)
+    plot(x(uAG==ag),y(uAG==ag),['k' agShapes{ag}],'MarkerSize',4)
 end
-plot(x(exUs(1)),y(exUs(1)),'o','Color',exUclrs{1},'LineWidth',1)
-plot(x(exUs(2)),y(exUs(2)),'o','Color',exUclrs{2},'LineWidth',1)
+plot(x(exUs(1)),y(exUs(1)),'o','Color',exUclrs{1})
+plot(x(exUs(2)),y(exUs(2)),'o','Color',exUclrs{2})
 plot([0 200],[0 200],'k--')
-xlabel('V1 cooled')
-ylabel('control')
+xlabel('cool')
+ylabel('cntrl')
 title('bandwidth (smooth)')
 box on
 axis square
@@ -250,14 +250,14 @@ y = tc_norm(:,idx,1);
 dRnull_norm = x-y;
 % plot(x,y,'k.','MarkerSize',4)
 for ag = 1:length(ageGroups)
-    plot(x(uAG==ag),y(uAG==ag),['k' agShapes{ag}],'MarkerSize',4,'LineWidth',1)
+    plot(x(uAG==ag),y(uAG==ag),['k' agShapes{ag}],'MarkerSize',4)
 end
-plot(x(exUs(1)),y(exUs(1)),'o','Color',exUclrs{1},'LineWidth',1)
-plot(x(exUs(2)),y(exUs(2)),'o','Color',exUclrs{2},'LineWidth',1)
+plot(x(exUs(1)),y(exUs(1)),'o','Color',exUclrs{1})
+plot(x(exUs(2)),y(exUs(2)),'o','Color',exUclrs{2})
 plot([0 1],[0 1],'k--')
 title('normalized null')
-xlabel('V1 cooled')
-ylabel('control')
+xlabel('cool')
+ylabel('cntrl')
 box on
 axis square
 
