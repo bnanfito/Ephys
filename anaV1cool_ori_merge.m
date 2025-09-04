@@ -115,17 +115,23 @@ for e = 1:3
         tc_sem_temp = std(rMat,[],1,'omitnan')/sqrt(size(rMat,1));
         
 %         if e == 1
-            [c_aligned,tc_aligned,alignIdx(u,:)] = alignDirTuning(conds,tc_temp);
+            [c_aligned,tc_aligned(u,:,e),alignIdx(u,:)] = alignDirTuning(conds,tc_temp);
 %         else
 %             tc_aligned = tc_temp(alignIdx(u,:));
 %         end
         tc_sem_algined = tc_sem_temp(alignIdx(u,:));
 
-        maxR = max(tc_aligned);
-        tc_norm(u,:,e) = tc_aligned/maxR;
+        maxR = max(tc_aligned(u,:,e));
+        tc_norm(u,:,e) = tc_aligned(u,:,e)/maxR;
 
         tc(u,:,e) = tc_temp;
         tc_sem(u,:,e) = tc_sem_temp;
+
+        c = unique(abs(c_aligned));
+        for i = 1:length(c)
+            tc_alignedH(u,i,e) = mean(tc_aligned(u,abs(c_aligned)==c(i),e),'omitnan');
+            tc_normH(u,i,e) = mean(tc_norm(u,abs(c_aligned)==c(i),e),'omitnan');
+        end
 
         %PSTH
         binSize = 0.02;
@@ -142,6 +148,23 @@ scl = rPref(:,2)./rPref(:,1);
 scldNull = rNull(:,1).*scl;
 scldTc = tc(:,:,1).*scl;
 scl_null = rNull(:,2)./rNull(:,1);
+
+%% data table
+
+r1 = tc_alignedH(:,:,1);
+r1_norm = tc_normH(:,:,1);
+r2 = tc_alignedH(:,:,2);
+r2_norm = tc_normH(:,:,2);
+c = repmat(c,55,1);
+
+d = table();
+d.r1 = r1(:);
+d.r1_norm = r1_norm(:);
+d.r2 = r2(:);
+d.r2_norm = r2_norm(:);
+d.si = (d.r2-d.r1)./(d.r2+d.r1);
+d.logRatio = log(d.r2./d.r1);
+d.c = c(:);
 
 %% Plot
 
@@ -163,7 +186,7 @@ for u = exUs
     xlabel('dir of motion (deg)')
     ylabel('firing rate')
     box on
-%     axis square
+    axis square
     
     subplot(3,4,2+(count*2)); hold on
     countTrials = 0;
@@ -187,12 +210,12 @@ for u = exUs
     ylabel('trial number')
     patch([0 1 1 0],[0 0 countTrials+1 countTrials+1],'k','EdgeColor','none','FaceAlpha',0.2)
     box on
-%     axis square
+    axis square
     
     count = count+1;
 end
 
-subplot(3,2,3); hold on
+subplot(3,3,4); hold on
 x = ldr(:,2);
 y = ldr(:,1);
 % plot(x,y,'k.','MarkerSize',4)
@@ -210,7 +233,7 @@ legend(p,lbl,'Location','northwest')
 box on
 axis square
 
-subplot(3,2,4); hold on
+subplot(3,3,5); hold on
 x = dsi(:,2);
 y = dsi(:,1);
 % plot(x,y,'k.','MarkerSize',4)
@@ -227,40 +250,53 @@ sgtitle('tuning metrics')
 box on
 axis square
 
-subplot(3,2,5); hold on
+subplot(3,3,6); hold on
 x = bwS(:,2);
 y = bwS(:,1);
+lims = [10 60];
+out = x>lims(2)|y>lims(2);
 % plot(x,y,'k.','MarkerSize',4)
 for ag = 1:length(ageGroups)
     plot(x(uAG==ag),y(uAG==ag),['k' agShapes{ag}],'MarkerSize',4,'LineWidth',1)
+end
+x(x>lims(2)) = lims(2);
+y(y>lims(2)) = lims(2);
+for ag = 1:length(ageGroups)
+    plot(x(uAG==ag & out'),y(uAG==ag & out'),['r' agShapes{ag}],'MarkerSize',4,'LineWidth',1)
 end
 plot(x(exUs(1)),y(exUs(1)),'o','Color',exUclrs{1},'LineWidth',1)
 plot(x(exUs(2)),y(exUs(2)),'o','Color',exUclrs{2},'LineWidth',1)
 plot([0 200],[0 200],'k--')
 xlabel('V1 cooled')
+xlim(lims)
+ylim(lims)
 ylabel('control')
 title('bandwidth (smooth)')
 box on
 axis square
 
-subplot(3,2,6); hold on
-idx = c_aligned==180;
-x = tc_norm(:,idx,2);
-y = tc_norm(:,idx,1);
-dRnull_norm = x-y;
-% plot(x,y,'k.','MarkerSize',4)
-for ag = 1:length(ageGroups)
-    plot(x(uAG==ag),y(uAG==ag),['k' agShapes{ag}],'MarkerSize',4,'LineWidth',1)
-end
-plot(x(exUs(1)),y(exUs(1)),'o','Color',exUclrs{1},'LineWidth',1)
-plot(x(exUs(2)),y(exUs(2)),'o','Color',exUclrs{2},'LineWidth',1)
-plot([0 1],[0 1],'k--')
-title('normalized null')
-xlabel('V1 cooled')
-ylabel('control')
-box on
-axis square
+% subplot(3,2,6); hold on
+% idx = c_aligned==180;
+% x = tc_norm(:,idx,2);
+% y = tc_norm(:,idx,1);
+% dRnull_norm = x-y;
+% % plot(x,y,'k.','MarkerSize',4)
+% for ag = 1:length(ageGroups)
+%     plot(x(uAG==ag),y(uAG==ag),['k' agShapes{ag}],'MarkerSize',4,'LineWidth',1)
+% end
+% plot(x(exUs(1)),y(exUs(1)),'o','Color',exUclrs{1},'LineWidth',1)
+% plot(x(exUs(2)),y(exUs(2)),'o','Color',exUclrs{2},'LineWidth',1)
+% plot([0 1],[0 1],'k--')
+% title('normalized null')
+% xlabel('V1 cooled')
+% ylabel('control')
+% box on
+% axis square
 
+subplot(3,1,3); hold on
+boxplot(d.si,d.c,'notch','on')
+xlabel('Angular disparity (relative to pref)')
+ylabel('SI')
 
 
 % u = 25;
