@@ -3,8 +3,8 @@ clear all
 close all
 
 proj = 'V1cool_ori';
-% dataFold = '/Volumes/NielsenHome2/Brandon/data';
-dataFold = 'Y:\Brandon\data';
+dataFold = '/Volumes/NielsenHome2/Brandon/data';
+% dataFold = 'Y:\Brandon\data';
 % dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
 anaMode = 'SU';
 ageGroups = {[28 32],[33 40],[41 80],[81 120]};
@@ -159,16 +159,20 @@ c = repmat(c,55,1);
 
 d = table();
 d.r1 = r1(:);
+d.r1L = log(d.r1+1);
 d.r1_norm = r1_norm(:);
 d.r2 = r2(:);
+d.r2L = log(d.r2+1);
 d.r2_norm = r2_norm(:);
 d.si = (d.r2-d.r1)./(d.r2+d.r1);
+d.siL = (d.r2L-d.r1L)./(d.r2L+d.r1L);
 d.logRatio = log(d.r2./d.r1);
-d.c = c(:);
+d.ori = c(:);
 
 %% Plot
 
 figure('Position',[100 100 1000 1000]);
+mSize = 7;
 
 count = 0;
 exUs = [4 25];
@@ -220,11 +224,11 @@ x = ldr(:,2);
 y = ldr(:,1);
 % plot(x,y,'k.','MarkerSize',4)
 for ag = unique(uAG)
-    p(ag) = plot(x(uAG==ag),y(uAG==ag),['k' agShapes{ag}],'MarkerSize',4,'LineWidth',1);
+    p(ag) = plot(x(uAG==ag),y(uAG==ag),['k' agShapes{ag}],'MarkerSize',mSize,'LineWidth',1);
     lbl{ag} = ['P' num2str(ageGroups{ag}(1)) '-P' num2str(ageGroups{ag}(2)) '; n=' num2str(sum(uAG==ag))];
 end
-plot(x(exUs(1)),y(exUs(1)),'o','Color',exUclrs{1},'LineWidth',1)
-plot(x(exUs(2)),y(exUs(2)),'o','Color',exUclrs{2},'LineWidth',1)
+plot(x(exUs(1)),y(exUs(1)),'o','MarkerSize',mSize,'Color',exUclrs{1},'LineWidth',1)
+plot(x(exUs(2)),y(exUs(2)),'o','MarkerSize',mSize,'Color',exUclrs{2},'LineWidth',1)
 plot([0 1],[0 1],'k--')
 xlabel('V1 cooled')
 ylabel('control')
@@ -238,10 +242,10 @@ x = dsi(:,2);
 y = dsi(:,1);
 % plot(x,y,'k.','MarkerSize',4)
 for ag = 1:length(ageGroups)
-    plot(x(uAG==ag),y(uAG==ag),['k' agShapes{ag}],'MarkerSize',4,'LineWidth',1)
+    plot(x(uAG==ag),y(uAG==ag),['k' agShapes{ag}],'MarkerSize',mSize,'LineWidth',1)
 end
-plot(x(exUs(1)),y(exUs(1)),'o','Color',exUclrs{1},'LineWidth',1)
-plot(x(exUs(2)),y(exUs(2)),'o','Color',exUclrs{2},'LineWidth',1)
+plot(x(exUs(1)),y(exUs(1)),'o','MarkerSize',mSize,'Color',exUclrs{1},'LineWidth',1)
+plot(x(exUs(2)),y(exUs(2)),'o','MarkerSize',mSize,'Color',exUclrs{2},'LineWidth',1)
 plot([0 1],[0 1],'k--')
 xlabel('V1 cooled')
 ylabel('control')
@@ -257,17 +261,17 @@ lims = [10 60];
 out = x>lims(2)|y>lims(2);
 % plot(x,y,'k.','MarkerSize',4)
 for ag = 1:length(ageGroups)
-    plot(x(uAG==ag),y(uAG==ag),['k' agShapes{ag}],'MarkerSize',4,'LineWidth',1)
+    plot(x(uAG==ag),y(uAG==ag),['k' agShapes{ag}],'MarkerSize',mSize,'LineWidth',1)
 end
 x(x>lims(2)) = lims(2);
 y(y>lims(2)) = lims(2);
 for ag = 1:length(ageGroups)
-    plot(x(uAG==ag & out'),y(uAG==ag & out'),['r' agShapes{ag}],'MarkerSize',4,'LineWidth',1)
+    plot(x(uAG==ag & out'),y(uAG==ag & out'),['r' agShapes{ag}],'MarkerSize',mSize,'LineWidth',1)
 end
-plot(x(exUs(1)),y(exUs(1)),'o','Color',exUclrs{1},'LineWidth',1)
-plot(x(exUs(2)),y(exUs(2)),'o','Color',exUclrs{2},'LineWidth',1)
+plot(x(exUs(1)),y(exUs(1)),'o','MarkerSize',mSize,'Color',exUclrs{1},'LineWidth',1)
+plot(x(exUs(2)),y(exUs(2)),'o','MarkerSize',mSize,'Color',exUclrs{2},'LineWidth',1)
 plot([0 200],[0 200],'k--')
-xlabel('V1 cooled')
+xlabel('V1 cooled') 
 xlim(lims)
 ylim(lims)
 ylabel('control')
@@ -275,28 +279,33 @@ title('bandwidth (smooth)')
 box on
 axis square
 
-% subplot(3,2,6); hold on
-% idx = c_aligned==180;
-% x = tc_norm(:,idx,2);
-% y = tc_norm(:,idx,1);
-% dRnull_norm = x-y;
-% % plot(x,y,'k.','MarkerSize',4)
-% for ag = 1:length(ageGroups)
-%     plot(x(uAG==ag),y(uAG==ag),['k' agShapes{ag}],'MarkerSize',4,'LineWidth',1)
-% end
-% plot(x(exUs(1)),y(exUs(1)),'o','Color',exUclrs{1},'LineWidth',1)
-% plot(x(exUs(2)),y(exUs(2)),'o','Color',exUclrs{2},'LineWidth',1)
-% plot([0 1],[0 1],'k--')
-% title('normalized null')
-% xlabel('V1 cooled')
-% ylabel('control')
-% box on
-% axis square
 
-subplot(3,1,3); hold on
-boxplot(d.si,d.c,'notch','on')
+subplot(3,2,5); hold on
+colororder({'k','c'})
+x = table();
+x.ori = repmat(d.ori,2,1);
+x.manip = vertcat(repmat({'control'},height(d),1),repmat({'cool'},height(d),1));
+% x.r = vertcat(d.r1,d.r2);
+x.r = vertcat(d.r1L,d.r2L);
+boxchart(categorical(x.ori),x.r,'GroupByColor',x.manip,'Notch','on')
+% ylabel('R')
+ylabel('log(R+1)')
 xlabel('Angular disparity (relative to pref)')
-ylabel('SI')
+box on
+
+subplot(3,2,6); hold on
+% boxchart(categorical(d.ori),d.si,'notch','on')
+% ylabel('SI')
+boxchart(categorical(d.ori),d.siL,'notch','on')
+ylabel('SI (log)')
+xlabel('Angular disparity (relative to pref)')
+box on
+
+
+
+
+
+
 
 
 % u = 25;
