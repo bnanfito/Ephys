@@ -138,31 +138,34 @@ ylabel('firing rate (Hz)')
 xlim([1 nTrials])
 xlabel('trial #')
 
-figure; tiledlayout(nShaft+1,1)
-for sh = 1:nShaft+1
-    nexttile;hold on
-    if sh == nShaft+1
-        xline(coldTrials,'c--')
-        xline(warmTrials,'r--')
-        yyaxis left
-        plot(trialId,tempDat,'LineWidth',2)
-        ylabel('temperature (c)')
-        yyaxis right
+figure; tiledlayout(nShaft+2,1)
+nexttile; hold on
+xline(coldTrials,'c--')
+xline(warmTrials,'r--')
+plot(trialId,tempDat,'k','LineWidth',2)
+ylabel('temperature (c)')
+xlim([1 nTrials])
+nexttile; hold on
 %         plot(trialId,pumpBit,'LineWidth',2)
-        plot(pumpSqWv(2,:),pumpSqWv(1,:),'LineWidth',2)
-        ylabel('pump on/off')
-        xlabel('trial #')
-    else
-        [~,zPosSort] = sort(sumStats.zPos(shaftIdx==sh),'descend');
-        r = fr_norm(shaftIdx==sh,:);
-        imagesc(r(zPosSort,:))
-        colorbar
-        caxis([0 1])
-        axis tight
-        ylabel(['shaft #' num2str(sh)])
-    end
+plot(pumpSqWv(2,:),pumpSqWv(1,:),'k','LineWidth',2)
+ylabel('pump on/off')
+xlabel('trial number')
+xlim([1 nTrials])
+
+% figure; tiledlayout(nShaft,1)
+for sh = 1:nShaft
+    nexttile;hold on
+    [~,zPosSort] = sort(sumStats.zPos(shaftIdx==sh),'descend');
+    r = fr_norm(shaftIdx==sh,:);
+    imagesc(r(zPosSort,:))
+    colormap gray
+    colorbar
+    caxis([0 1])
+    axis tight
+    ylabel(['shaft #' num2str(sh)])
     xlim([1 nTrials])
 end
+xlabel('trial number')
 
 % psth
 figure; hold on
@@ -204,6 +207,7 @@ for sh = 1:nShaft+1
         [~,zPosSort] = sort(sumStats.zPos(shaftIdx==sh),'descend');
         r = psth_norm(shaftIdx==sh,:);
         imagesc(r(zPosSort,:))
+        colormap gray
         colorbar
         axis tight
         ylabel(['shaft #' num2str(sh)])
