@@ -89,9 +89,9 @@ warmTrials = warmTrials(~ismember(warmTrials,blankTrials) & ~(warmTrials<1));
 for u = 1:nU
     prefC = find(sumStats.condition{u}==sumStats.oriPref(u));
     prefIdx = sumStats.fr(u).trialCond==prefC;
-    fr_pref(u,:) = sumStats.fr(u).stim(prefIdx);
+    fr_pref(u,:) = sumStats.fr(u).bc(prefIdx);
     fr_pref_trialId(u,:) = sumStats.fr(u).trialNum(prefIdx);
-    fr(u,:) = sumStats.fr(u).stim(:);
+    fr(u,:) = sumStats.fr(u).bc(:);
     fr_trialId(u,:) = sumStats.fr(u).trialNum(:);
     [fr_trialId(u,:),sortIdx] = sort(fr_trialId(u,:));
     fr(u,:) = fr(u,sortIdx);
@@ -158,7 +158,7 @@ for sh = 1:nShaft
     [~,zPosSort] = sort(sumStats.zPos(shaftIdx==sh),'descend');
     r = fr_norm(shaftIdx==sh,:);
     imagesc(r(zPosSort,:))
-%     colormap gray
+    colormap gray
     colorbar
     caxis([0 1])
     axis tight
@@ -297,7 +297,7 @@ shapes = {'o','square','^','v'};
 cntrlStats = anaOri('febq5','001','004',1,'MU',dataFold,0,0);
 x = cntrlStats.rPref;
 y = rCold;
-x = log(x+1); y = log(y+1);
+x = log2(x+1); y = log2(y+1);
 axLim = [0 80];
 for i = 1:height(sumStats)
     scatter(x(i),y(i),'c','Marker',shapes{shaftIdx(i)},'MarkerFaceColor','c','MarkerFaceAlpha',1-(sumStats.zPos(i)/max(sumStats.zPos)))
@@ -306,7 +306,7 @@ scatter(x(chs),y(chs),'go')
 fit1 = polyfit(x,y,1);
 plot(axLim,polyval(fit1,axLim),'c-')
 y = rWarm;
-y = log(y+1);
+y = log2(y+1);
 for i = 1:height(sumStats)
     scatter(x(i),y(i),'k','Marker',shapes{shaftIdx(i)},'MarkerFaceColor','k','MarkerFaceAlpha',1-(sumStats.zPos(i)/max(sumStats.zPos)))
 end
