@@ -670,8 +670,7 @@ unitDataCntrl.rPref = cntrl.rPref;
 unitDataCntrl.latency = cntrl.latency;
 unitDataCntrl.dsi = cntrl.dsi;
 unitDataCntrl.ldr = cntrl.ldr;
-unitDataCntrl.osi = cntrl.osi;
-unitDataCntrl.lor = cntrl.lor;
+u
 unitDataCntrl.good = screenUnits(cntrl,'MU');
 clear id uAge uAG manip g
 
@@ -727,13 +726,11 @@ idx3 = idx1&idx2;
 idx4 = idx1&(~idx2);
 idx5 = (~idx1)&idx2;
 
-Y = D.latency;
-
 figure; tiledlayout(length(ageGroups)+1,2)
 nexttile; hold on
-cdfplot(Y(idx1))
-cdfplot(Y(idx3))
-cdfplot(Y(idx4))
+cdfplot(D.latency(idx1))
+cdfplot(D.latency(idx3))
+cdfplot(D.latency(idx4))
 xticks([0:0.2:1])
 xlim([0 1])
 xlabel('latency (s)')
@@ -743,9 +740,9 @@ title('All ages')
 
 nexttile; hold on
 bins = [0:0.05:1];
-histogram(Y(idx1),bins)
-histogram(Y(idx3),bins)
-histogram(Y(idx4),bins)
+histogram(D.latency(idx1),bins)
+histogram(D.latency(idx3),bins)
+histogram(D.latency(idx4),bins)
 xlabel('latency (s)')
 ylabel('count')
 legend({['pass cntrl; n=' num2str(sum(idx1))],...
@@ -754,9 +751,9 @@ legend({['pass cntrl; n=' num2str(sum(idx1))],...
 
 for ag = 1:length(ageGroups)
     nexttile; hold on
-    cdfplot(Y(idx1&D.AG==ag))
-    cdfplot(Y(idx3&D.AG==ag))
-    cdfplot(Y(idx4&D.AG==ag))
+    cdfplot(D.latency(idx1&D.AG==ag))
+    cdfplot(D.latency(idx3&D.AG==ag))
+    cdfplot(D.latency(idx4&D.AG==ag))
     xticks([0:0.2:1])
     xlim([0 1])
     xlabel('latency (s)')
@@ -765,9 +762,9 @@ for ag = 1:length(ageGroups)
     title(['Age group: P' num2str(ageGroups{ag}(1)) '-' num2str(ageGroups{ag}(2))])
     
     nexttile; hold on
-    histogram(Y(idx1&D.AG==ag),bins)
-    histogram(Y(idx3&D.AG==ag),bins)
-    histogram(Y(idx4&D.AG==ag),bins)
+    histogram(D.latency(idx1&D.AG==ag),bins)
+    histogram(D.latency(idx3&D.AG==ag),bins)
+    histogram(D.latency(idx4&D.AG==ag),bins)
     xlabel('latency (s)')
     ylabel('count')
     legend({['pass cntrl; n=' num2str(sum(idx1&D.AG==ag))],...
