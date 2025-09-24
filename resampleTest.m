@@ -17,9 +17,9 @@ for i = 1:10000
     d(i) = median(y)-median(Y(i,:));
 end
 
-figure; tiledlayout(2,2)
+figure;
 
-nexttile; hold on
+subplot(2,2,1); hold on
 cX = cdfplot(x);
 cX.Color = 'r';
 xline(median(x),'r--')
@@ -28,7 +28,7 @@ cY.Color = 'b';
 xline(median(y),'b--')
 legend([cX,cY],{['n=' num2str(length(x))],['n=' num2str(length(y))]})
 
-nexttile;hold on
+subplot(2,2,2);hold on
 cX = cdfplot(x);
 cX.Color = 'r';
 cX.LineWidth = 2;
@@ -43,9 +43,9 @@ for i = 1:100
     xline(median(Y(i,:)),'b--')
 end
 
-nexttile; hold on
-histogram(d)
-xline(median(x)-median(y))
+subplot(2,2,4); hold on
+cdfplot(d)
+xline(median(y)-median(x))
 
 p = [];
 
