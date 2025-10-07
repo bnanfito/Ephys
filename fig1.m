@@ -296,30 +296,25 @@ figure; hold on
 shapes = {'o','square','^','v'};
 cntrlStats = anaOri('febq5','001','004',1,'MU',dataFold,0,0);
 x = cntrlStats.rPref;
-y = rCold;
-x = log(x+1); y = log(y+1);
-axLim = [0 80];
+y1 = rCold;
+y2 = rWarm;
+x = x+1; y1 = y1+1; y2 = y2+1;
 for i = 1:height(sumStats)
-    scatter(x(i),y(i),'c','Marker',shapes{shaftIdx(i)},'MarkerFaceColor','c','MarkerFaceAlpha',1-(sumStats.zPos(i)/max(sumStats.zPos)))
+    scatter(x(i),y1(i),'c','Marker',shapes{shaftIdx(i)},'MarkerFaceColor','c','MarkerFaceAlpha',1-(sumStats.zPos(i)/max(sumStats.zPos)))
 end
-scatter(x(chs),y(chs),'go')
-fit1 = polyfit(x,y,1);
-plot(axLim,polyval(fit1,axLim),'c-')
-y = rWarm;
-y = log(y+1);
+scatter(x(chs),y1(chs),'go')
+
 for i = 1:height(sumStats)
-    scatter(x(i),y(i),'k','Marker',shapes{shaftIdx(i)},'MarkerFaceColor','k','MarkerFaceAlpha',1-(sumStats.zPos(i)/max(sumStats.zPos)))
+    scatter(x(i),y2(i),'k','Marker',shapes{shaftIdx(i)},'MarkerFaceColor','k','MarkerFaceAlpha',1-(sumStats.zPos(i)/max(sumStats.zPos)))
 end
-scatter(x(chs),y(chs),'go')
-fit2 = polyfit(x,y,1);
-plot(axLim,polyval(fit2,axLim),'k-')
-plot(axLim,axLim,'k--')
-xlim(axLim)
+scatter(x(chs),y2(chs),'go')
 xlabel('pre-cooling firing rate (Hz)')
-ylim(axLim)
 ylabel('firing rate (Hz)')
+set(gca, 'YScale', 'log')
+set(gca, 'XScale', 'log')
 box on
 axis square
+plot([1 100],[1 100],'k--')
 
 
 % figure; hold on

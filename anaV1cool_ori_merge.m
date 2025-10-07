@@ -12,55 +12,55 @@ ageGroups = {[28 32],[33 40],[41 80],[81 120]};
 
 %% Build Project Table
 
-projTbl = getProjectFiles(proj,1,'age','recSite','penNr','priorMFlag','priorDescr',...
-                                       'duringMFlag','manipDescr','manipDetail',...
-                                       'looperNameCond1','looperNameCond2',...
-                                       'looperNameCond3','looperNameCond4',...
-                                       'looperNameCond5');
-animals = unique(projTbl.experimentId);
-sumStats = [];
-for a = 1:length(animals)
-%     if ~strcmp(animals{a},'febn2')
+% projTbl = getProjectFiles(proj,1,'age','recSite','penNr','priorMFlag','priorDescr',...
+%                                        'duringMFlag','manipDescr','manipDetail',...
+%                                        'looperNameCond1','looperNameCond2',...
+%                                        'looperNameCond3','looperNameCond4',...
+%                                        'looperNameCond5');
+% animals = unique(projTbl.experimentId);
+% sumStats = [];
+% for a = 1:length(animals)
+% %     if ~strcmp(animals{a},'febn2')
+% %         continue
+% %     end
+%     aniIdx = strcmp(projTbl.experimentId,animals{a});
+%     ages(a) = unique(projTbl.age(aniIdx));
+%     cd(fullfile(dataFold,'Ephys',animals{a}))
+%     folders = dir;
+%     fileIdx = find(contains({folders.name},'MMM'));
+%     if isempty(fileIdx)
+%         sumStats = vertcat(sumStats,{[],[],[]});
 %         continue
 %     end
-    aniIdx = strcmp(projTbl.experimentId,animals{a});
-    ages(a) = unique(projTbl.age(aniIdx));
-    cd(fullfile(dataFold,'Ephys',animals{a}))
-    folders = dir;
-    fileIdx = find(contains({folders.name},'MMM'));
-    if isempty(fileIdx)
-        sumStats = vertcat(sumStats,{[],[],[]});
-        continue
-    end
+% 
+%     out = cell(1,3);
+%     for fId = 1:length(fileIdx)
+%         mergeName{a,fId} = folders(fileIdx(fId)).name;
+%         mergeId = mergeName{a,fId}(12:end);
+%         load(fullfile(dataFold,'Ephys',animals{a},mergeName{a,fId},[mergeName{a,fId} '_id.mat']))
+%         probeId = find(strcmp({id.probes.area},'PSS'));
+%         disp(['generating sumStats for ' mergeName{a,fId}])
+%     
+% %         splitIntan(fullfile(dataFold,'Ephys'),animals{a},mergeId,probeId,'BRN')
+%         %Load merge info
+%         load(fullfile(dataFold,'Ephys',animals{a},mergeName{a,fId},[mergeName{a,fId} '_mergeInfo.mat']))
+%         nFiles = length(mergeInfo.files);
+%         for f = 1:nFiles
+%             exptName{f,1} = [animals{a} '_' mergeInfo.files{f}];
+%             load(fullfile(dataFold,'Ephys',animals{a},exptName{f},[exptName{f} '_trialInfo.mat']))
+%             dom = trialInfo.dom;
+%             isOri = (length(dom)==1 & sum(strcmp(dom,'ori'))==1) |...
+%                     (length(dom)==2 & sum(strcmp(dom,'ori'))==1 & sum(contains(dom,'size'))==1 );
+%             if isOri
+%                 out_tmp = anaOri(animals{a},exptName{f}(8:10),exptName{f}(12:14),probeId,anaMode,dataFold,0,0,f);
+%                 out{f} = vertcat(out{f},out_tmp);
+%             end
+%         end
+%     end
+%     sumStats = vertcat(sumStats,out);
+% end
 
-    out = cell(1,3);
-    for fId = 1:length(fileIdx)
-        mergeName{a,fId} = folders(fileIdx(fId)).name;
-        mergeId = mergeName{a,fId}(12:end);
-        load(fullfile(dataFold,'Ephys',animals{a},mergeName{a,fId},[mergeName{a,fId} '_id.mat']))
-        probeId = find(strcmp({id.probes.area},'PSS'));
-        disp(['generating sumStats for ' mergeName{a,fId}])
-    
-%         splitIntan(fullfile(dataFold,'Ephys'),animals{a},mergeId,probeId,'BRN')
-        %Load merge info
-        load(fullfile(dataFold,'Ephys',animals{a},mergeName{a,fId},[mergeName{a,fId} '_mergeInfo.mat']))
-        nFiles = length(mergeInfo.files);
-        for f = 1:nFiles
-            exptName{f,1} = [animals{a} '_' mergeInfo.files{f}];
-            load(fullfile(dataFold,'Ephys',animals{a},exptName{f},[exptName{f} '_trialInfo.mat']))
-            dom = trialInfo.dom;
-            isOri = (length(dom)==1 & sum(strcmp(dom,'ori'))==1) |...
-                    (length(dom)==2 & sum(strcmp(dom,'ori'))==1 & sum(contains(dom,'size'))==1 );
-            if isOri
-                out_tmp = anaOri(animals{a},exptName{f}(8:10),exptName{f}(12:14),probeId,anaMode,dataFold,0,0,f);
-                out{f} = vertcat(out{f},out_tmp);
-            end
-        end
-    end
-    sumStats = vertcat(sumStats,out);
-end
-
-% load(fullfile(dataFold,'dataSets','cooling',proj,'matchedSU',[proj '_matchedSUdataSet.mat']))
+load(fullfile(dataFold,'dataSets','cooling',proj,'matchedSU',[proj '_matchedSUdataSet.mat']))
 
 %% Organize Data
 
