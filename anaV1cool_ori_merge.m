@@ -289,11 +289,12 @@ colororder({'k','c'})
 x = table();
 x.ori = repmat(d.ori,2,1);
 x.manip = vertcat(repmat({'control'},height(d),1),repmat({'cool'},height(d),1));
-% x.r = vertcat(d.r1,d.r2);
-x.r = vertcat(d.r1L,d.r2L);
+x.r = vertcat(d.r1,d.r2)+1;
+% x.r = vertcat(d.r1L,d.r2L);
 boxchart(categorical(x.ori),x.r,'GroupByColor',x.manip,'Notch','on')
 % ylabel('R')
 ylabel('log(R+1)')
+set(gca,'YScale','log')
 xlabel('Angular disparity (relative to pref)')
 box on
 

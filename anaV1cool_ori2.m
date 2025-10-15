@@ -740,6 +740,8 @@ xlabel('latency (s)')
 yticks([0 0.5 1])
 ylabel('percentile')
 title('All ages')
+box on
+axis square
 
 nexttile; hold on
 bins = [0:0.05:1];
@@ -751,6 +753,8 @@ ylabel('count')
 legend({['pass cntrl; n=' num2str(sum(idx1))],...
         ['pass cntrl & cool; n=' num2str(sum(idx3))],...
         ['pass cntrl & ~cool; n=' num2str(sum(idx4))]},'Location','northeast')
+box on
+axis square
 
 for ag = 1:length(ageGroups)
     nexttile; hold on
@@ -763,6 +767,8 @@ for ag = 1:length(ageGroups)
     yticks([0 0.5 1])
     ylabel('percentile')
     title(['Age group: P' num2str(ageGroups{ag}(1)) '-' num2str(ageGroups{ag}(2))])
+    box on
+    axis square
     
     nexttile; hold on
     histogram(Y(idx1&D.AG==ag),bins)
@@ -773,6 +779,8 @@ for ag = 1:length(ageGroups)
     legend({['pass cntrl; n=' num2str(sum(idx1&D.AG==ag))],...
             ['pass cntrl & cool; n=' num2str(sum(idx3&D.AG==ag))],...
             ['pass cntrl & ~cool; n=' num2str(sum(idx4&D.AG==ag))]},'Location','northeast')
+    box on
+    axis square
 end
 
 sgtitle('control MU response latency')

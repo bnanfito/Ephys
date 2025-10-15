@@ -99,7 +99,7 @@ end
 fr_norm = fr./max(fr,[],2);
 
 % psth
-bw = 12;
+bw = 6;
 edges = (trialStart(1):sf*bw:trialEnd(end))/sf;
 for u = 1:nU
     psth(u,:) = histcounts(spks(u).times/sf,edges)/bw;
@@ -188,36 +188,35 @@ xlim([trialStart(1) trialStart(end)]/(sf*60))
 xlabel('time (min)')
 legend(p,legLbl)
 
-figure; tiledlayout(nShaft+1,1);
-for sh = 1:nShaft+1
-    nexttile; hold on
-    if sh == nShaft+1
-        xline(trialStart(coldTrials)/(sf*60),'c--')
-        xline(trialStart(warmTrials)/(sf*60),'r--')
-        yyaxis left
-        plot(trialStart(trialId)/(sf*60),tempDat,'LineWidth',2)
-        ylabel('temperature (c)')
-        yyaxis right
+figure; tiledlayout(nShaft+2,1);
+nexttile; hold on
+xline(trialStart(coldTrials)/(sf*60),'c--')
+xline(trialStart(warmTrials)/(sf*60),'r--')
+plot(trialStart(trialId)/(sf*60),tempDat,'LineWidth',2)
+ylabel('temperature (c)')
+xlim([trialStart(1) trialStart(end)]/(sf*60))
+nexttile; hold on
 %         plot(trialStart(trialId)/(sf*60),pumpBit,'LineWidth',2)
-        plot(trialStart(pumpSqWv(2,:))/(sf*60),pumpSqWv(1,:),'LineWidth',2)
-        ylabel('pump on/off')
-        xlim([trialStart(1) trialStart(end)]/(sf*60))
-        xlabel('time (min)')
-    else
-        [~,zPosSort] = sort(sumStats.zPos(shaftIdx==sh),'descend');
-        r = psth_norm(shaftIdx==sh,:);
-        imagesc(r(zPosSort,:))
-        colormap gray
-        colorbar
-        axis tight
-        ylabel(['shaft #' num2str(sh)])
-        xticks((5:5:30)/(bw/60))
-        xt = xticks*(bw/60);
-        for tic = 1:length(xt)
-            xt_lbl{tic} = num2str(xt(tic));
-        end
-        xticklabels(xt_lbl)
+plot(trialStart(pumpSqWv(2,:))/(sf*60),pumpSqWv(1,:),'k','LineWidth',2)
+ylabel('pump on/off')
+xlim([trialStart(1) trialStart(end)]/(sf*60))
+xlabel('time (min)')
+
+for sh = 1:nShaft
+    nexttile; hold on
+    [~,zPosSort] = sort(sumStats.zPos(shaftIdx==sh),'descend');
+    r = psth_norm(shaftIdx==sh,:);
+    imagesc(r(zPosSort,:))
+%     colormap gray
+    colorbar
+    axis tight
+    ylabel(['shaft #' num2str(sh)])
+    xticks((5:5:30)/(bw/60))
+    xt = xticks*(bw/60);
+    for tic = 1:length(xt)
+        xt_lbl{tic} = num2str(xt(tic));
     end
+    xticklabels(xt_lbl)
 end
 
 % probe layout

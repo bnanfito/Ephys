@@ -4,7 +4,8 @@ close all
 
 %% Load Project Table
 
-dataFold = '/Volumes/NielsenHome2/Brandon/data';
+% dataFold = '/Volumes/NielsenHome2/Brandon/data';
+dataFold = 'Y:\Brandon\data';
 proj = 'Train_V1Cool_stimBlock';
 anaMode = 'MU';
 
@@ -44,27 +45,28 @@ for a = 1:length(animals)
         curBlockIdx = curAniIdx(b);
         blockName{b,a} = [areaTbl.experimentId{curBlockIdx} '_u' areaTbl.unitNr{curBlockIdx} '_' areaTbl.experimentNr{curBlockIdx}];
         if ~isempty(areaTbl.sumStats{curBlockIdx})
-%             if contains(proj,'V1Cool') && strcmp(area,'V1')
-                blockData{b,a} = areaTbl.sumStats{curBlockIdx};
-%             else
-%                 blockData{b,a} = areaTbl.sumStats{curBlockIdx}(screenUnits(areaTbl.sumStats{curBlockIdx},anaMode),:);
-%             end
+            blockData{b,a} = areaTbl.sumStats{curBlockIdx};
+            blockData{b,a} = blockData{b,a}(screenUnits(blockData{b,a},anaMode),:);
             nU(b,a) = height(blockData{b,a});
+            blockID{b,a} = repmat(b,nU(b,a),1);
+            animalID{b,a} = repmat(a,nU(b,a),1);
+            rPref{b,a} = blockData{b,a}.rPref;
+            dpi{b,a} = blockData{b,a}.dpi;
 
-            %compute psth for each unit
-            bw = 0.1;
-            bins = -2:bw:5;
-            for u = 1:nU(b,a)
-                nTrials = max(blockData{b,a}.fr(u).trialNum,[],'all');
-                spkTimes = blockData{b,a}.spkTimes{u}(1,:);
-                spkTrial = blockData{b,a}.spkTimes{u}(2,:);
-                for t = 1:nTrials
-                    trialIdx = spkTrial == t;
-                    tmpPsth(t,:) = histcounts(spkTimes,bins);
-                end
-                psth(b,a,u,:) = mean(tmpPsth)/bw;
-                clear tmpPsth
-            end
+%             %compute psth for each unit
+%             bw = 0.1;
+%             bins = -2:bw:5;
+%             for u = 1:nU(b,a)
+%                 nTrials = max(blockData{b,a}.fr(u).trialNum,[],'all');
+%                 spkTimes = blockData{b,a}.spkTimes{u}(1,:);
+%                 spkTrial = blockData{b,a}.spkTimes{u}(2,:);
+%                 for t = 1:nTrials
+%                     trialIdx = spkTrial == t;
+%                     tmpPsth(t,:) = histcounts(spkTimes,bins);
+%                 end
+%                 psth{b,a}(u,:) = mean(tmpPsth)/bw;
+%                 clear tmpPsth
+%             end
 
         end
 
@@ -104,6 +106,7 @@ nAni = size(blockData,2);
 
 
 dat = vertcat(blockData{:});
+dat = dat(screenUnits(dat,'MU'),:);
 spkTimes = [dat.spkTimes{:}];
 nTrials = max(spkTimes(2,:));
 sf = 20000;
