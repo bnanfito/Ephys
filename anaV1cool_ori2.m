@@ -743,6 +743,9 @@ title('All ages')
 box on
 axis square
 
+X = vertcat([Y(idx3),ones(sum(idx3),1),zeros(sum(idx3),1),zeros(sum(idx3),1)],...
+            [Y(idx4),ones(sum(idx4),1)+1,zeros(sum(idx4),1),ones(sum(idx4),1)]);
+
 nexttile; hold on
 bins = [0:0.05:1];
 histogram(Y(idx1),bins)
@@ -781,6 +784,10 @@ for ag = 1:length(ageGroups)
             ['pass cntrl & ~cool; n=' num2str(sum(idx4&D.AG==ag))]},'Location','northeast')
     box on
     axis square
+
+    Xtmp = vertcat([Y(idx3&D.AG==ag),repmat(((2*ag)-1)+2,sum(idx3&D.AG==ag),1),repmat(ag,sum(idx3&D.AG==ag),1),zeros(sum(idx3&D.AG==ag),1)],...
+                   [Y(idx4&D.AG==ag),repmat((2*ag)+2,sum(idx4&D.AG==ag),1),repmat(ag,sum(idx4&D.AG==ag),1),ones(sum(idx4&D.AG==ag),1)]);
+    X = vertcat(X,Xtmp);
 end
 
 sgtitle('control MU response latency')

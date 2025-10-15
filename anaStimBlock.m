@@ -1,6 +1,8 @@
 clear all
 close all
-load('/Volumes/NielsenHome2/Brandon/data/dataSets/training/Train_V1Cool/MU/Train_V1Cool_stimBlock_MUdataSet.mat')
+% dataFold = '/Volumes/NielsenHome2/Brandon/data';
+dataFold = 'Y:\Brandon\data';
+load([dataFold,'/dataSets/training/Train_V1Cool/MU/Train_V1Cool_stimBlock_MUdataSet.mat'])
 %fix block numbers - need to deal with fact that one experiment has missing
 %blocks
 anim=unique(projectTbl.experimentId);
@@ -61,30 +63,54 @@ for b = blocks'
     lbl{b} = ['block #' num2str(b) '; n=' num2str(n(b))];
 end
 legend(lbl)
+view(3)
 
 figure;
 imagesc(meanPsth)
 colorbar
 set(gca,'YDir','reverse')
+tics = xticks*binSize;
+for x = 1:length(tics)
+xlbl{x} = num2str(tics(x)-1);
+end
+xticklabels(xlbl) 
 
-figure; hold on
+figure;
+plot(bins(2:end),mean(meanPsth))
+
+figure
+subplot(2,2,1);hold on%figure; hold on
 for hr = 1:8
     blks = [2*hr-1,2*hr];
     psth_hr{hr} = vertcat(psth{blks});
     meanPsth_hr(hr,:) = mean(psth_hr{hr});
-    plot3(bins(2:end),repmat(hr,1,length(bins)-1),meanPsth_hr(hr,:))
+%     plot3(bins(2:end),repmat(hr,1,length(bins)-1),meanPsth_hr(hr,:))
+    plot(bins(2:end),meanPsth_hr(hr,:)+((hr-1)*10))
     lbl_hr{hr} = ['hour #' num2str(hr) '; n=' num2str(size(psth_hr{hr},1))];
 end
+fill3([0 5 5 0],[0 0 8 8],[0 0 0 0],'k','EdgeColor','k','FaceAlpha',0)
 legend(lbl_hr)
+xlabel('time (s)')
+ylabel('hour')
+zlabel('firing rate (Hz)')
+% view(3)
 
-figure;
+subplot(2,2,2);hold on;%figure;
 imagesc(meanPsth_hr)
 colorbar
 set(gca,'YDir','reverse')
+xticks([-1:6]/binSize)
+tics = xticks*binSize;
+for x = 1:length(tics)
+xlbl{x} = num2str(tics(x)-1);
+end
+xticklabels(xlbl)
+xlabel('time (s)')
+ylabel('hour')
+axis tight
 
-
-clear all
-load('/Volumes/NielsenHome2/Brandon/data/dataSets/training/Train_V1Cool/MU/threshold5/ranksum/Train_V1Cool_MUdataSet.mat')
+clear projectTbl proj blocks b d n psth meanPsth lbl
+load([dataFold,'/dataSets/training/Train_V1Cool/MU/threshold5/ranksum/Train_V1Cool_MUdataSet.mat'])
 
 
 area = 'PSS';
@@ -92,7 +118,7 @@ anaMode = 'MU';
 binSize = 0.01;
 bins = -1:binSize:2;
 
-figure; hold on
+subplot(2,2,3);hold on;%figure; hold on
 for b = 1:2
     if b == 1 && strcmp(area,'V1')
         d = data.v1bf;
@@ -117,10 +143,32 @@ for b = 1:2
 
         nTrials = numel(d.fr(i).trialNum);
         spks = d.spkTimes{i}(1,:);
+%         prefCond = find(d.condition{i}(strcmp(d.paramKey{i},'ori'),:)==d.oriPref(i));
+%         prefTrials = d.fr(i).trialNum(:,prefCond);
+%         spks = d.spkTimes{i}(1, ismember(d.spkTimes{i}(2,:),prefTrials) );
         psth{b}(i,:) = histcounts(spks,bins)/(nTrials*binSize);
+        psth{b}(i,:) = psth{b}(i,:)-mean(psth{b}(i,bins(2:end)<0));
 
     end
     meanPsth(b,:) = mean(psth{b});
     plot(bins(2:end),meanPsth(b,:),linStyl)
+    lbl{b} = [lbl{b} '; n=' num2str(height(d))];
 end
+patch([0 1 1 0],[0 0 10 10],'k','EdgeColor','none','FaceAlpha',0.2)
 legend(lbl)
+xlabel('time (s)')
+ylabel('firing rate (Hz)')
+
+subplot(2,2,4);%figure;
+imagesc(meanPsth)
+colorbar
+yticks([1,2])
+yticklabels({'before','after'})
+xticks([-1:2]/binSize)
+tics = xticks*binSize;
+for x = 1:length(tics)
+xlbl{x} = num2str(tics(x)-1);
+end
+xticklabels(xlbl)
+xlabel('time (s)')
+axis tight
