@@ -5,9 +5,9 @@ close all
 
 % dataFold = '/Volumes/Lab drive/Brandon/data/dataSets/DSdev';
 % dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/DSdev';
-% dataFold = '/Volumes/NielsenHome2/Brandon/data/dataSets/DSdev';
+dataFold = '/Volumes/NielsenHome2/Brandon/data/dataSets/DSdev';
 % dataFold = 'F:\Brandon\data\dataSets\DSdev';
-dataFold = 'Y:\Brandon\data\dataSets\DSdev';
+% dataFold = 'Y:\Brandon\data\dataSets\DSdev';
 load(fullfile(dataFold,"DSdev_SUdataSet.mat"))
 dir = load(fullfile(dataFold,'anaRSA_dir.mat'));
 ori = load(fullfile(dataFold,'anaRSA_ori.mat'));
@@ -48,10 +48,10 @@ end
 for ar = 1:nAR
 for ag = 1:nAG
 
-%     dirCorr(ar,ag) = corr(dir.diss',distDat{ar,ag}.diss','type','Spearman');
-%     dirNull{ar,ag} = corr(dir.diss',distDat{ar,ag}.dissNull,'type','Spearman');
-%     oriCorr(ar,ag) = corr(ori.diss',distDat{ar,ag}.diss','type','Spearman');
-%     oriNull{ar,ag} = corr(ori.diss',distDat{ar,ag}.dissNull,'type','Spearman');
+    dirCorr_1(ar,ag) = corr(dir.diss',distDat{ar,ag}.diss','type','Spearman');
+    dirNull_1{ar,ag} = corr(dir.diss',distDat{ar,ag}.dissNull,'type','Spearman');
+    oriCorr_1(ar,ag) = corr(ori.diss',distDat{ar,ag}.diss','type','Spearman');
+    oriNull_1{ar,ag} = corr(ori.diss',distDat{ar,ag}.dissNull,'type','Spearman');
 
     dirCorr(ar,ag) = partialcorr(dir.diss',distDat{ar,ag}.diss',ori.diss','type','Spearman');
     dirNull{ar,ag} = partialcorr(dir.diss',distDat{ar,ag}.dissNull,ori.diss','type','Spearman');
@@ -63,14 +63,16 @@ for ag = 1:nAG
     boots = randi(nCond,[nBoots,nCond]);
     for b = 1:size(boots,1)
         dissBoot = pdist(distDat{ar,ag}.rMean(boots(b,:),:),'spearman');
-%         dirBoots(b) = corr(dir.diss',dissBoot','type','Spearman');
-%         oriBoots(b) = corr(ori.diss',dissBoot','type','Spearman');
+        dirBoots_1(b) = corr(dir.diss',dissBoot','type','Spearman');
+        oriBoots_1(b) = corr(ori.diss',dissBoot','type','Spearman');
         dirBoots(b) = partialcorr(dir.diss',dissBoot',ori.diss','type','Spearman');
         oriBoots(b) = partialcorr(ori.diss',dissBoot',dir.diss','type','Spearman');
     end
     dirStd(ar,ag) = std(dirBoots);
     oriStd(ar,ag) = std(oriBoots);
-    clear dirBoots oriBoots
+    dirStd_1(ar,ag) = std(dirBoots_1);
+    oriStd_1(ar,ag) = std(oriBoots_1);
+    clear dirBoots oriBoots dirBoots_1 oriBoots_1
 
 end
 end
@@ -293,4 +295,17 @@ er2.Color = [0 0 0];
 er2.LineStyle = 'none';
 
 
-
+figure;hold on
+for a = 1:length(areas)
+if strcmp(areas{a},'V1')
+clr = 'b';
+elseif strcmp(areas{a},'PSS')
+clr = 'r';
+end
+errorbar(oriCorr_1(a,:),dirCorr_1(a,:),dirStd_1(a,:),dirStd_1(a,:),oriStd_1(a,:),oriStd_1(a,:),[clr '--'])
+errorbar(oriCorr(a,:),dirCorr(a,:),dirStd(a,:),dirStd(a,:),oriStd(a,:),oriStd(a,:),[clr 'o-'],'LineWidth',2)
+end
+xlabel('spearman corr. with orientation')
+ylabel('spearman corr. with direction')
+plot([-0.4 1],[-0.4 1],'k--')
+legend({'V1','V1 (partial)','PMLS','PMLS (partial)'})
