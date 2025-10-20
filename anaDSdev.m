@@ -34,11 +34,15 @@ for e = 1:height(projTbl)
     cd(exptDir)
 
     % copy files if necessary
+    MUspkMergeFile = [exptName '_p' num2str(probe) '_MUspkMerge.mat'];
     spkSortFile = [exptName '_p' num2str(probe) '_spkSort.mat'];
     trialInfoFile = [exptName '_trialInfo.mat'];
     idFile = [exptName '_id.mat'];
     analyzerFile = [exptName '.analyzer'];
     
+    if ~isfile(MUspkMergeFile)
+        [status(e,1),msg{e,1}] = copyfile(fullfile(zPath,'processedSpikes',animal,exptName,MUspkMergeFile));
+    end
     if ~isfile(spkSortFile)
         [status(e,1),msg{e,1}] = copyfile(fullfile(zPath,'processedSpikes',animal,exptName,spkSortFile));
     end

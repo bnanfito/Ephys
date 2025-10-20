@@ -160,7 +160,7 @@ for ar = 1:nAR
         oriClrs = repmat(hsv(length(conds)/2),2,1);
         for i = conds
             idx = cID == i;
-            plot3(score(idx,1),score(idx,2),score(idx,3),'.','Color',dirClrs(conds==i,:),'MarkerSize',30)
+            plot3(score(idx,1),score(idx,2),score(idx,3),'.','Color',ditClrs(conds==i,:),'MarkerSize',30)
         end
         xlabel('PC1')
         ylabel('PC2')

@@ -23,8 +23,7 @@ nBins = length(binEdges)-1;
 % dat = vertcat(projectTbl.sumStats{cntrlIdx & ageIdx & areaIdx});
 
 
-
-dat = dat(dat.goodUnit,:);
+dat = dat(screenUnits(dat,'MU'),:);
 [~,oriPrefIdx] = sort(dat.oriPref);
 dat = dat(oriPrefIdx,:);
 nU = height(dat);
@@ -75,11 +74,11 @@ Bid = reshape(bid,nBins*nTrials,1);
 trials = unique(Tid);
 [coeff,score,latent,tsquare,explained] = pca(R);
 
-for b = 1:size(r,1)
-
-    [acc(b),~] = popDecode(squeeze(r(b,:,:)),cid(b,:));
-
-end
+% for b = 1:size(r,1)
+% 
+%     [acc(b),~] = popDecode(squeeze(r(b,:,:)),cid(b,:));
+% 
+% end
 
 
 

@@ -1,28 +1,21 @@
 %popDecode
 
-function [acc,dis] = popDecode(r,c)
+function [dis,guess,truth,confusion] = popDecode(r,c)
 
-% [cMean,cTrial,~,rTrial,~,~,score,coeff,D,Dshift,distF,distNull] = anaPCA(sumStats,0,0,1);
-%     r = score(:,[1:2]);
-%     c = cTrial;
+conds = unique(c);
 
-cMean = unique(c);
-
-% r = r./max(r);
-nTrials = size(r,1);
+nTrials = length(c);
 nConds = length(unique(c));
 nReps = nTrials/nConds;
 
-%scramble trials
-scrmbl = randperm(nTrials);
-[~,unscrmbl] = sort(scrmbl);
-r = r(scrmbl,:);
-c = c(scrmbl);
-%     subplot(2,1,1)
-%     imagesc(r(unscrmbl,:))
+% %scramble trials
+% scrmbl = randperm(nTrials);
+% [~,unscrmbl] = sort(scrmbl);
+% r = r(scrmbl,:);
+% c = c(scrmbl);
 
-    for fold = 1:nTrials
-        testIdx = 1:nTrials == fold;
+    for fold = 1:nReps
+        testIdx = ismember(1:nTrials,fold:nReps:nTrials);
         trainIdx = ~testIdx;
 
         r_test = r(testIdx,:);
@@ -30,38 +23,61 @@ c = c(scrmbl);
         r_train = r(trainIdx,:);
         c_train = c(trainIdx);
         for i = 1:nConds
-            f_train{fold}(i,:) = mean(r_train(c_train==cMean(i),:),'omitnan');
+            f_train{fold}(i,:) = mean(r_train(c_train==conds(i),:),'omitnan');
         end
 
-        for i = 1:nConds
-            f_cur = f_train{fold}(i,:);
+        for obs = 1:size(r_test,1)
+            dis(obs,:,fold) = sum((r_test(obs,:)-f_train{fold}).^2,2);
+            truth(obs,fold) = c_test(obs);
+            minDisIdx = find(dis(obs,:,fold)==min(dis(obs,:,fold)));
+            if length(minDisIdx)>1
+                minDisIdx = minDisIdx(randi(length(minDisIdx)));
+            end
+            guess(obs,fold) = conds(minDisIdx);
 
-            dis(fold,i) = sum((r_test-f_cur).^2);
         end
-        truth(fold) = c_test;
-        minC = cMean(dis(fold,:)==min(dis(fold,:)));
-        if length(minC) == 1
-            guess(fold) = minC;
-        elseif length(minC) > 1
-            rndMin = randi(length(minC));
-            guess(fold) = minC(rndMin);
-        end
-        correct(fold) = guess(fold) == truth(fold);
+
+%         for i = 1:nConds
+%             f_cur = f_train{fold}(i,:);
+% 
+%             dis(fold,i) = sum((r_test-f_cur).^2);
+%         end
+%         truth(fold) = c_test;
+%         minC = conds(dis(fold,:)==min(dis(fold,:)));
+%         if length(minC) == 1
+%             guess(fold) = minC;
+%         elseif length(minC) > 1
+%             rndMin = randi(length(minC));
+%             guess(fold) = minC(rndMin);
+%         end
+%         correct(fold) = guess(fold) == truth(fold);
     end
-    dis = dis(unscrmbl,:);
+%     dis = dis(unscrmbl,:);
+%     guess = guess(unscrmbl);
+%     truth = truth(unscrmbl);
+%     acc = sum(correct)/length(correct);
 
-    acc = sum(correct)/length(correct);
+    for c = 1:nConds
+        for g = 1:nConds
+            confusion(g,c) = sum(guess(c,:)==conds(g));
+        end
+    end
 
-%     figure;hold on
-%     imagesc(dis')
+%     figure;
+%     subplot(2,2,1); hold on
+%     imagesc(r)
+%     axis tight
+%     axis square
+%     
+%     subplot(2,2,2); hold on
+%     imagesc(mean(dis,3))
 %     cb = colorbar;
 %     cb.Label.String = 'distance to condition mean';
 %     axis tight
-%     title([num2str(sum(correct)) '/' num2str(length(correct)) ' correct (' num2str(acc*100) '%)'])
-%     xticks(3:5:size(dis,1)); xticklabels(num2str(cMean'))
-%     yticks(1:size(dis,2));yticklabels(num2str(cMean'))
-%     xlabel('trial condition')
-%     ylabel('condition')
+%     axis square
+% 
+%     subplot(2,2,3); hold on
+%     imagesc()
 
 
 end
