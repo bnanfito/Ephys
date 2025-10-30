@@ -9,7 +9,7 @@
 clear all
 close all
 proj = 'DSdev';
-anaMode = 'SU';
+anaMode = 'MU';
 
 dataFold = fullfile('Y:\Brandon\data\dataSets',proj);
 zPath = 'Z:\EphysNew';

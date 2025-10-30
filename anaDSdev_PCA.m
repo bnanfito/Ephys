@@ -3,19 +3,20 @@ close all
 
 %% Load data
 
+anaMode = 'SU';
+
 % dataFold = '/Volumes/Lab drive/Brandon/data/dataSets/DSdev';
 % dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/DSdev';
-dataFold = '/Volumes/NielsenHome2/Brandon/data/dataSets/DSdev';
+% dataFold = '/Volumes/NielsenHome2/Brandon/data/dataSets/DSdev';
 % dataFold = 'F:\Brandon\data\dataSets\DSdev';
-% dataFold = 'Y:\Brandon\data\dataSets\DSdev';
-load(fullfile(dataFold,"DSdev_SUdataSet.mat"))
+dataFold = 'Y:\Brandon\data\dataSets\DSdev';
+load(fullfile(dataFold,['DSdev_' anaMode 'dataSet.mat']))
 dir = load(fullfile(dataFold,'anaRSA_dir.mat'));
 ori = load(fullfile(dataFold,'anaRSA_ori.mat'));
 
 %% Organize data by age/area
 
 areas = {'V1','PSS'};
-anaMode = 'SU';
 ageGroups = {[29 32],[33 36],[37 max(projTbl.age)]};
 % ageGroups = {[28 32],[29 33],[30 34],[31 35],[32 36],[33 37],[34 38],[35 39],[36 40],[37 41],[38 42],[39 43],[40 44],[41 300]};
 
@@ -38,7 +39,7 @@ for ag = 1:nAG
 
     [distDat{ar,ag}] = anaPCA(dat{ar,ag});
 
-    [~,guess{ar,ag},truth{ar,ag},confusion{ar,ag}] = popDecode(distDat{ar,ag}.rTrial,distDat{ar,ag}.cTrial);
+%     [~,guess{ar,ag},truth{ar,ag},confusion{ar,ag}] = popDecode(distDat{ar,ag}.rTrial,distDat{ar,ag}.cTrial);
 
 end
 end

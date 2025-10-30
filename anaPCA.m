@@ -24,6 +24,9 @@ for u = 1:nU
     end
     rTrial(rTrial<0)=0;
     rMean(:,u) = mean(rTrial(:,:,u),'omitnan');
+
+    cPref(1,u) = sumStats.oriPref(u);
+    cPref(2,u) = sumStats.meanVec{u}.angDir;
 end
 nReps = size(rTrial,1);
 nConds = size(rTrial,2);
@@ -31,8 +34,11 @@ rTrial = reshape(rTrial,nReps*nConds,nU);
 nTrial = size(rTrial,1);
 cTrial = repmat(cMean,nReps,1);cTrial = cTrial(:)';
 
-rTrial = rTrial./max(rTrial);
-rMean = rMean./max(rMean);
+%standardize data
+% rTrial = rTrial./max(rTrial);
+% rMean = rMean./max(rMean);
+rTrial = zscore(rTrial);
+rMean = zscore(rMean);
 
 %scramble Pref oris
 if scrmbl == 1
@@ -119,12 +125,13 @@ distF_z = (distF-mean(distNull,'omitnan'))./std(distNull,'omitnan');
 
 %% Output structure
 
-distDat.cMean = cMean;
-distDat.cTrial = cTrial;
+distDat.cPref = cPref;
+distDat.cMean = cMean';
 distDat.rMean = rMean;
+distDat.cTrial = cTrial';
 distDat.rTrial = rTrial;
-distDat.rCent = rCent;
 distDat.tCent = tCent;
+distDat.rCent = rCent;
 distDat.score = score;
 distDat.coeff = coeff;
 distDat.diss = diss;

@@ -337,7 +337,7 @@ for b = 2:length(bins)
     binX(countBin) = mean(curBin);
     binY(countBin) = mean(binD);
     binSem(countBin) = sem(binD);
-    binP(countBin) = signrank(binD);
+    binP(countBin) = signrank(binD,[],'tail','left');
 end
 errorbar(binX,binY,binSem,'k-','LineWidth',2)
 scatter(binX(binP<0.01),binY(binP<0.01),'r*')
