@@ -52,22 +52,21 @@ function [acc] = lda_bn(r,c)
         accDir(cv) = sum(predDir == dirLbl(testIdx))/length(predDir);
         accOri(cv) = sum(predOri == oriLbl(testIdx))/length(predOri);
 
-%         for d1 = 1:length(dirs)
-%         for d2 = 1:length(dirs)
-%             confDir(d1,d2,cv) = sum(predDir==dirs(d1));
-%         end
-%         end
-%         
-%         for o1 = 1:length(oris)
-%         for o2 = 1:length(oris)
-%             confOri(o1,o2,cv) = [];
-%         end
-%         end
+        for d1 = 1:length(dirs)
+        for d2 = 1:length(dirs)
+            confDir(d1,d2,cv)
+        end
+        end
+        
+        for o1 = 1:length(oris)
+        for o2 = 1:length(oris)
+
+        end
+        end
 
         clear dirMdl oriMdl testIdx trainIdx
     end
 
     acc = [mean(accDir),mean(accOri)];
-%     confusion = {confDir, confOri};
 
 end

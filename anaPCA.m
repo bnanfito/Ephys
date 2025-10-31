@@ -5,7 +5,6 @@ function [distDat] = anaPCA(sumStats)
 
 plt = 0;
 tAve = 1;
-scrmbl = 0;
 
 [~,oriPrefIdx] = sort(sumStats.oriPref);
 sumStats = sumStats(oriPrefIdx,:); %sort units by their pref dir of motion
@@ -35,26 +34,17 @@ nTrial = size(rTrial,1);
 cTrial = repmat(cMean,nReps,1);cTrial = cTrial(:)';
 
 %standardize data
-% rTrial = rTrial./max(rTrial);
-% rMean = rMean./max(rMean);
-rTrial = zscore(rTrial);
-rMean = zscore(rMean);
+rTrial_norm = rTrial./max(rTrial);
+rMean_norm = rMean./max(rMean);
+rTrial_z = zscore(rTrial);
+rMean_z = zscore(rMean);
 
-%scramble Pref oris
-if scrmbl == 1
-    scrmblIdx_mean = randi(nConds,nU,1);
-    scrmblIdx_trial = randi(nTrial,nU,1);
-    for idx = 1:nU
-        rMean(:,idx) = circshift(rMean(:,idx),scrmblIdx_mean(idx));
-        rTrial(:,idx) = circshift(rTrial(:,idx),scrmblIdx_trial(idx));
-    end
-end
 
 if tAve == 1
-    x = rMean;
+    x = rMean_z;
     y = cMean;
 else
-    x = rTrial;
+    x = rTrial_z;
     y = cTrial;
 end
 np = size(x,1);
@@ -97,13 +87,8 @@ distF = mean(rdmShift);
 nIter = 10000;
 for iter = 1:nIter
 
-    if tAve == 1
-        randIdx = randperm(size(rMean,1));
-        shuff = rMean(randIdx,:);
-    else
-        randIdx = randperm(size(rTrial,1));
-        shuff = rTrial(randIdx,:);
-    end
+    randIdx = randperm(size(x,1));
+    shuff = x(randIdx,:);
 
     shuff = shuff./max(shuff);
 
@@ -128,8 +113,12 @@ distF_z = (distF-mean(distNull,'omitnan'))./std(distNull,'omitnan');
 distDat.cPref = cPref;
 distDat.cMean = cMean';
 distDat.rMean = rMean;
+distDat.rMean_norm = rMean_norm;
+distDat.rMean_z = rMean_z;
 distDat.cTrial = cTrial';
 distDat.rTrial = rTrial;
+distDat.rTrial_norm = rTrial_norm;
+distDat.rTrial_z = rTrial_z;
 distDat.tCent = tCent;
 distDat.rCent = rCent;
 distDat.score = score;

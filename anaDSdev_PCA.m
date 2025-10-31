@@ -44,6 +44,39 @@ for ag = 1:nAG
 end
 end
 
+%% LDA
+
+% for ar = 1:nAR
+% for ag = 1:nAG
+% 
+%     D = distDat{ar,ag};
+%     [acc{ar,ag}] = lda_bn(D.rTrial,D.cTrial);
+% 
+% end
+% end
+% 
+% figure;hold on
+% plot(v1(:,1),'b-')
+% plot(v1(:,2),'b--')
+% plot(pss(:,1),'r-')
+% plot(pss(:,2),'r--')
+% yline(1/12,'k-')
+% yline(1/6,'k--')
+% legend({'v1 dir','v1 ori','pss dir','pss ori','chance dir','chance ori'})
+% ylabel('5-fold cv mean acc.')
+% xlabel('age group')
+
+D = distDat{1,3}; R = D.rTrial; R = R-mean(R); R = R./max(R); C = D.cTrial;
+[coeff,score] = pca(R);
+figure;hold on
+gscatter(score(:,1),score(:,2),C)
+mdl = fitcdiscr(score(:,1:2),C);
+a = 9; b = 1:length(unique(C)); b = b(b~=a);
+for i = b
+K = mdl.Coeffs(a,i).Const; L = mdl.Coeffs(a,i).Linear; f = @(x1,x2) K + L(1)*x1+L(2)*x2;
+h2 = fimplicit(f); h2.DisplayName = ['boundary between ' num2str(D.cMean(a)) '&' num2str(D.cMean(i))];
+end
+
 %% RSA
 
 for ar = 1:nAR

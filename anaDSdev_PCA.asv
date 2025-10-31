@@ -44,6 +44,17 @@ for ag = 1:nAG
 end
 end
 
+%% LDA
+
+for ar = 1:nAR
+for ag = 1:nAG
+
+    D = distDat{ar,ag};
+    acc{ar,ag} = lda_bn(D.rTrial,D.cTrial);
+
+end
+end
+
 %% RSA
 
 for ar = 1:nAR
