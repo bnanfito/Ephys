@@ -66,15 +66,49 @@ end
 % ylabel('5-fold cv mean acc.')
 % xlabel('age group')
 
-D = distDat{1,3}; R = D.rTrial; R = R-mean(R); R = R./max(R); C = D.cTrial;
-[coeff,score] = pca(R);
+D = distDat{1,3}; R = D.rTrial; 
+R = R-mean(R); R = R./max(R); 
+C_dir = D.cTrial; dirs = unique(C_dir);
+C_ori = mod(C_dir,180); oris = unique(C_ori);
+% [coeff,score] = pca(R);
+score = D.score;
+
+eval = 90;
+a = find(dirs==eval);
+b = find(dirs~=eval)';
+sym(a) = '.'; sym(b) = 'o';
 figure;hold on
-gscatter(score(:,1),score(:,2),C)
-mdl = fitcdiscr(score(:,1:2),C);
-a = 9; b = 1:length(unique(C)); b = b(b~=a);
+gs = gscatter(score(:,1),score(:,2),C_dir,[],sym);
+mdl_dir = fitcdiscr(score(:,1:2),C_dir);
 for i = b
-K = mdl.Coeffs(a,i).Const; L = mdl.Coeffs(a,i).Linear; f = @(x1,x2) K + L(1)*x1+L(2)*x2;
-h2 = fimplicit(f); h2.DisplayName = ['boundary between ' num2str(D.cMean(a)) '&' num2str(D.cMean(i))];
+K = mdl_dir.Coeffs(a,i).Const; L = mdl_dir.Coeffs(a,i).Linear; f = @(x1,x2) K + L(1)*x1+L(2)*x2;
+h2 = fimplicit(f); h2.Color = gs(i).Color; h2.DisplayName = ['boundary between ' num2str(dirs(a)) '&' num2str(dirs(i))];
+end
+
+figure;hold on
+clrs = hsv(length(dirs));
+for i = 1:length(dirs)
+    idx = C_dir==dirs(i);
+    plot3(score(idx,1),score(idx,2),score(idx,3),sym(i),'Color',clrs(i,:));
+end
+mdl_dir = fitcdiscr(score(:,1:3),C_dir);
+for i = b
+K = mdl_dir.Coeffs(a,i).Const; L = mdl_dir.Coeffs(a,i).Linear; f = @(x1,x2,x3) K + L(1)*x1+L(2)*x2+L(3)*x3;
+h2 = fimplicit3(f); h2.EdgeColor = 'none'; h2.FaceColor = clrs(i,:); h2.FaceAlpha = 0.2; h2.DisplayName = ['boundary between ' num2str(dirs(a)) '&' num2str(dirs(i))];
+end
+
+clear sym
+
+eval = mod(eval,180);
+a = find(oris==eval);
+b = find(oris~=eval)';
+sym(a) = '.'; sym(b) = 'o';
+figure;hold on
+gs = gscatter(score(:,1),score(:,2),C_ori,[],sym);
+mdl_ori = fitcdiscr(score(:,1:2),C_ori);
+for i = b
+    K = mdl_ori.Coeffs(a,i).Const; L = mdl_ori.Coeffs(a,i).Linear; f = @(x1,x2) K + L(1)*x1+L(2)*x2;
+    h2 = fimplicit(f); h2.Color = gs(i).Color; h2.DisplayName = ['boundary between ' num2str(oris(a)) '&' num2str(oris(i))];
 end
 
 %% RSA

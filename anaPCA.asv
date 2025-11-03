@@ -4,7 +4,7 @@
 function [distDat] = anaPCA(sumStats)
 
 plt = 0;
-tAve = 1;
+tAve = 0;
 
 [~,oriPrefIdx] = sort(sumStats.oriPref);
 sumStats = sumStats(oriPrefIdx,:); %sort units by their pref dir of motion
@@ -41,10 +41,10 @@ rMean_z = zscore(rMean);
 
 
 if tAve == 1
-    x = rMean_z;
+    x = rMean_norm;
     y = cMean;
 else
-    x = rTrial_z;
+    x = rTrial_norm;
     y = cTrial;
 end
 np = size(x,1);
