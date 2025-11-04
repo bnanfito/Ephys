@@ -4,7 +4,7 @@
 function [distDat] = anaPCA(sumStats)
 
 plt = 0;
-tAve = 0;
+tAve = 1;
 
 [~,oriPrefIdx] = sort(sumStats.oriPref);
 sumStats = sumStats(oriPrefIdx,:); %sort units by their pref dir of motion
