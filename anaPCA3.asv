@@ -1,0 +1,72 @@
+clear all
+close all
+
+%% Load data
+
+anaMode = 'SU';
+
+% dataFold = '/Volumes/Lab drive/Brandon/data/dataSets/DSdev';
+% dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/DSdev';
+% dataFold = '/Volumes/NielsenHome2/Brandon/data/dataSets/DSdev';
+% dataFold = 'F:\Brandon\data\dataSets\DSdev';
+dataFold = 'Y:\Brandon\data\dataSets\DSdev';
+load(fullfile(dataFold,['DSdev_' anaMode 'dataSet.mat']))
+
+%% Organize data
+
+areas = {'V1','PSS'};
+ageGroups = {[29 32],[33 36],[37 max(projTbl.age)]};
+% ageGroups = {[28 32],[29 33],[30 34],[31 35],[32 36],[33 37],[34 38],[35 39],[36 40],[37 41],[38 42],[39 43],[40 44],[41 300]};
+
+nAG = length(ageGroups);
+nAR = length(areas);
+for ar = 1:nAR
+for ag = 1:nAG
+
+    ageLims = ageGroups{ag};
+    areaIdx = strcmp(projTbl.recSite,areas{ar});
+    ageLimIdx = projTbl.age>=ageLims(1) & projTbl.age<=ageLims(2);
+    dat{ar,ag} = vertcat(projTbl(areaIdx & ageLimIdx,:).sumStats{:});
+
+    %only take units that pass inclusion criteria (screenUnits)
+    dat{ar,ag} = dat{ar,ag}(screenUnits(dat{ar,ag},anaMode),:);
+    
+    %only take units with ori12
+    for u = 1:height(dat{ar,ag})
+        isOri12(u) = size(dat{ar,ag}.condition{u},2)==12;
+    end
+    dat{ar,ag} = dat{ar,ag}(isOri12,:);
+    clear isOri12
+
+    nU(ar,ag) = height(dat{ar,ag});
+
+    %sort units by direction preference
+    [~,sortIdx] = sort(dat{ar,ag}.oriPref);
+    dat{ar,ag} = dat{ar,ag}(sortIdx,:);
+
+    %make response matrix
+    conds = dat{ar,ag}.condition{1}(strcmp(dat{ar,ag}.paramKey{1},'ori'),:);
+    nConds = length(conds);
+    nReps = 5;
+    nTrials = nReps*nConds;
+    Rt{ar,ag} = [];
+    for u = 1:height(dat{ar,ag})
+
+        %time resolved
+        binSize = 0.01;
+        bins = -1:binSize:2;
+        spks = dat{ar,ag}.spkTimes{u}(1,:);
+        spkTrial = dat{ar,ag}.spkTimes{u}(2,:);
+        trialIds = dat{ar,ag}.fr(u).trialNum(:);
+        trialConds = dat{ar,ag}.fr(u).trialCond(:);
+        for t = 1:nTrials
+            tId = trialIds(t);
+            psth = histcounts(spks(spkTrial==tId),bins);
+            psth = psth/binSize;
+            Rt{ar,ag}(t,u,:) = psth;
+        end
+    end
+        
+end
+end
+

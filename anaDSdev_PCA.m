@@ -7,9 +7,9 @@ anaMode = 'SU';
 
 % dataFold = '/Volumes/Lab drive/Brandon/data/dataSets/DSdev';
 % dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/DSdev';
-dataFold = '/Volumes/NielsenHome2/Brandon/data/dataSets/DSdev';
+% dataFold = '/Volumes/NielsenHome2/Brandon/data/dataSets/DSdev';
 % dataFold = 'F:\Brandon\data\dataSets\DSdev';
-% dataFold = 'Y:\Brandon\data\dataSets\DSdev';
+dataFold = 'Y:\Brandon\data\dataSets\DSdev';
 load(fullfile(dataFold,['DSdev_' anaMode 'dataSet.mat']))
 dir = load(fullfile(dataFold,'anaRSA_dir.mat'));
 ori = load(fullfile(dataFold,'anaRSA_ori.mat'));
@@ -46,27 +46,46 @@ end
 
 %% LDA
 
+% figure; hold on
+% linStyl = {'-','-','-'};
+% count = 0;
 % for ar = 1:nAR
-% for ag = 1:nAG
+%     if strcmp(areas{ar},'V1')
+%         clrs = {'b','c'};
+%         lblArea = 'V1';
+%     elseif strcmp(areas{ar},'PSS')
+%         clrs = {'r','m'};
+%         lblArea = 'PSS';
+%     end
+% for ag = 3
 % 
-%     D = distDat{ar,ag};
-%     [acc{ar,ag}] = lda_bn(D.rTrial,D.cTrial);
+%     D = distDat{ar,ag}; R = D.rTrial; 
+%     R = R-mean(R); R = R./max(R);
+%     C_dir = D.cTrial; dirs = unique(C_dir);
+%     C_ori = mod(C_dir,180); oris = unique(C_ori);
+%     [coeff,score] = pca(R);
 % 
+%     for pc = 1:size(score,2)
+%         [acc{ar,ag,1}(pc)] = lda_bn(score(:,1:pc),C_dir);
+%         [acc{ar,ag,2}(pc)] = lda_bn(score(:,1:pc),C_ori);
+%     end
+%     count = count+1;
+%     p(count) = plot(acc{ar,ag,1},[clrs{1} linStyl{ag}],'LineWidth',2);
+%     lbl{count} = [lblArea ' dir'];
+%     count = count+1;
+%     p(count) = plot(acc{ar,ag,2},[clrs{2} linStyl{ag}],'LineWidth',2);
+%     lbl{count} = [lblArea ' ori'];
 % end
 % end
-% 
-% figure;hold on
-% plot(v1(:,1),'b-')
-% plot(v1(:,2),'b--')
-% plot(pss(:,1),'r-')
-% plot(pss(:,2),'r--')
-% yline(1/12,'k-')
-% yline(1/6,'k--')
-% legend({'v1 dir','v1 ori','pss dir','pss ori','chance dir','chance ori'})
-% ylabel('5-fold cv mean acc.')
-% xlabel('age group')
+% legend(p,lbl)
+% ylabel('accuracy')
+% xlabel('number of PCs')
+% clear lbl
 
-D = distDat{2,3}; R = D.rTrial; 
+
+
+
+D = distDat{1,3}; R = D.rTrial; 
 R = R-mean(R); R = R./max(R); 
 C_dir = D.cTrial; dirs = unique(C_dir);
 C_ori = mod(C_dir,180); oris = unique(C_ori);
@@ -90,23 +109,29 @@ h2 = fimplicit(f); h2.LineWidth = 2; h2.Color = clrs(i,:); h2.DisplayName = ['bo
 end
 for i = 1:length(dirs)
     idx = C_dir==dirs(i);
-    plot(score(idx,1),score(idx,2),sym(i),'MarkerEdgeColor',clrs(i,:),'MarkerFaceColor',clrs(i,:))
+    p1(i) = plot(score(idx,1),score(idx,2),sym(i),'MarkerEdgeColor',clrs(i,:),'MarkerFaceColor',clrs(i,:));
+    lbl{i} = num2str(dirs(i));
 end
 % gs = gscatter(score(:,1),score(:,2),C_dir,[],sym);
+xlabel('PC1');ylabel('PC2')
+box on
+legend(p1,lbl)
 
 figure;hold on
-for i = b(2)
+for i = b(1)
 K = mdl_dir3.Coeffs(a,i).Const; L = mdl_dir3.Coeffs(a,i).Linear; f = @(x1,x2,x3) K + L(1)*x1+L(2)*x2+L(3)*x3;
-h2 = fimplicit3(f); h2.EdgeColor = 'none'; h2.FaceColor = clrs(i,:); h2.FaceAlpha = 0.2; h2.DisplayName = ['boundary between ' num2str(dirs(a)) '&' num2str(dirs(i))];
+h2 = fimplicit3(f); h2.EdgeColor = 'none'; h2.FaceColor = clrs(i,:); h2.FaceAlpha = 0.3; h2.DisplayName = ['boundary between ' num2str(dirs(a)) '&' num2str(dirs(i))];
 end
 for i = 1:length(dirs)
     idx = C_dir==dirs(i);
-    plot3(score(idx,1),score(idx,2),score(idx,3),sym(i),'MarkerEdgeColor',clrs(i,:),'MarkerFaceColor',clrs(i,:));
+    p2(i) = plot3(score(idx,1),score(idx,2),score(idx,3),sym(i),'MarkerEdgeColor',clrs(i,:),'MarkerFaceColor',clrs(i,:));
 end
+xlabel('PC1');ylabel('PC2');zlabel('PC3')
 view(3)
 box on
+legend(p2,lbl)
 
-clear sym
+clear sym lbl
 
 eval = mod(eval,180);
 a = find(oris==eval);
@@ -121,20 +146,26 @@ for i = b
 end
 for i = 1:length(oris)
     idx = C_ori==oris(i);
-    plot(score(idx,1),score(idx,2),sym(i),'MarkerEdgeColor',clrs(i,:),'MarkerFaceColor',clrs(i,:))
+    p3(i) = plot(score(idx,1),score(idx,2),sym(i),'MarkerEdgeColor',clrs(i,:),'MarkerFaceColor',clrs(i,:));
+    lbl{i} = num2str(oris(i));
 end
 % gs = gscatter(score(:,1),score(:,2),C_ori,[],sym);
+xlabel('PC1');ylabel('PC2')
+box on
+legend(p3,lbl)
 
 figure;hold on
-for i = b(2)
+for i = b(1)
 K = mdl_ori3.Coeffs(a,i).Const; L = mdl_ori3.Coeffs(a,i).Linear; f = @(x1,x2,x3) K + L(1)*x1+L(2)*x2+L(3)*x3;
-h2 = fimplicit3(f); h2.EdgeColor = 'none'; h2.FaceColor = clrs(i,:); h2.FaceAlpha = 0.2; h2.DisplayName = ['boundary between ' num2str(oris(a)) '&' num2str(oris(i))];
+h2 = fimplicit3(f); h2.EdgeColor = 'none'; h2.FaceColor = clrs(i,:); h2.FaceAlpha = 0.3; h2.DisplayName = ['boundary between ' num2str(oris(a)) '&' num2str(oris(i))];
 end
 for i = 1:length(oris)
     idx = C_ori==oris(i);
-    plot3(score(idx,1),score(idx,2),score(idx,3),sym(i),'MarkerEdgeColor',clrs(i,:),'MarkerFaceColor',clrs(i,:));
+    p4(i) = plot3(score(idx,1),score(idx,2),score(idx,3),sym(i),'MarkerEdgeColor',clrs(i,:),'MarkerFaceColor',clrs(i,:));
 end
+xlabel('PC1');ylabel('PC2');zlabel('PC3')
 view(3)
+legend(p4,lbl)
 box on
 
 %% RSA

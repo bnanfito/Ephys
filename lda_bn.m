@@ -31,10 +31,7 @@ function [acc] = lda_bn(r,c)
 %     r = r(shuffIdx,:);
 %     c = c(shuffIdx);
     
-    dirLbl = c;
-    dirs = unique(dirLbl);
-    oriLbl = mod(c,180);
-    oris = unique(oriLbl);
+    classes = unique(c);
     
     % divide data into n-folds for cross validation
     nFold = 5;
@@ -44,30 +41,14 @@ function [acc] = lda_bn(r,c)
         testIdx = foldLbl == cv;
         trainIdx = ~testIdx;
     
-        dirMdl = fitcdiscr(r(trainIdx,:),dirLbl(trainIdx));
-        oriMdl = fitcdiscr(r(trainIdx,:),oriLbl(trainIdx));
+        mdl = fitcdiscr(r(trainIdx,:),c(trainIdx));
     
-        predDir = predict(dirMdl,r(testIdx,:));
-        predOri = predict(oriMdl,r(testIdx,:));
-        accDir(cv) = sum(predDir == dirLbl(testIdx))/length(predDir);
-        accOri(cv) = sum(predOri == oriLbl(testIdx))/length(predOri);
+        pred = predict(mdl,r(testIdx,:));
+        acc(cv) = sum(pred == c(testIdx))/length(pred);
 
-%         for d1 = 1:length(dirs)
-%         for d2 = 1:length(dirs)
-%             confDir(d1,d2,cv) = sum(predDir==dirs(d1));
-%         end
-%         end
-%         
-%         for o1 = 1:length(oris)
-%         for o2 = 1:length(oris)
-%             confOri(o1,o2,cv) = [];
-%         end
-%         end
-
-        clear dirMdl oriMdl testIdx trainIdx
+        clear mdl testIdx trainIdx
     end
 
-    acc = [mean(accDir),mean(accOri)];
-%     confusion = {confDir, confOri};
+    acc = mean(acc);
 
 end
