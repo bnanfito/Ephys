@@ -1,5 +1,5 @@
 clear all
-close all
+% close all
 
 %% Load data
 
@@ -11,6 +11,8 @@ anaMode = 'SU';
 % dataFold = 'F:\Brandon\data\dataSets\DSdev';
 dataFold = 'Y:\Brandon\data\dataSets\DSdev';
 load(fullfile(dataFold,['DSdev_' anaMode 'dataSet.mat']))
+dir = load(fullfile(dataFold,'anaRSA_dir.mat'));
+ori = load(fullfile(dataFold,'anaRSA_ori.mat'));
 
 %% Organize data
 
@@ -20,7 +22,11 @@ ageGroups = {[29 32],[33 36],[37 max(projTbl.age)]};
 
 nAG = length(ageGroups);
 nAR = length(areas);
-Rt = cell(nAR,nAG);
+Rtime = cell(nAR,nAG);
+Rtrial = cell(nAR,nAG);
+binSize = 0.1;
+bins = -1:binSize:2;
+nBins = length(bins)-1;
 for ar = 1:nAR
 for ag = 1:nAG
 
@@ -35,9 +41,10 @@ for ag = 1:nAG
     %only take units with ori12
     for u = 1:height(dat{ar,ag})
         isOri12(u) = size(dat{ar,ag}.condition{u},2)==12;
+        isOri16(u) = size(dat{ar,ag}.condition{u},2)==16;
     end
     dat{ar,ag} = dat{ar,ag}(isOri12,:);
-    clear isOri12
+    clear isOri12 isOri16
 
     nU(ar,ag) = height(dat{ar,ag});
 
@@ -46,34 +53,128 @@ for ag = 1:nAG
     dat{ar,ag} = dat{ar,ag}(sortIdx,:);
 
     %make response matrix
-    conds = dat{ar,ag}.condition{1}(strcmp(dat{ar,ag}.paramKey{1},'ori'),:);
-    nConds = length(conds);
-    nReps = 5;
-    nTrials = nReps*nConds;
     for u = 1:height(dat{ar,ag})
+
         hasBlank = ~isempty(dat{ar,ag}.rBlank{u});
+        oriIdx = contains(dat{ar,ag}.paramKey{u},'ori');
+        sizeIdx = contains(dat{ar,ag}.paramKey{u},'size');
+        posIdx = contains(dat{ar,ag}.paramKey{u},'pos');
+        hasSize = sum(sizeIdx|posIdx)>0;
+        if hasSize
+            cndInclude = find(dat{ar,ag}.cndKey{u}(:,(sizeIdx|posIdx))>100);
+        else
+            cndInclude = 1:size(dat{ar,ag}.cndKey{u},1);
+        end
+
+        conds = dat{ar,ag}.cndKey{u}(cndInclude,oriIdx);
+        nConds = length(conds);
+        nReps = 5;
+        nTrials = nReps*nConds;
+
+        spks = dat{ar,ag}.spkTimes{u}(1,:);
+        spkTrial = dat{ar,ag}.spkTimes{u}(2,:);
+        trialIds = dat{ar,ag}.fr(u).trialNum(1:nReps,cndInclude);
+        trialIds = trialIds(:);
+        trialConds = dat{ar,ag}.fr(u).trialCond(1:nReps,cndInclude);
+        trialConds = trialConds(:);
+        if min(trialConds)~=1
+            trialConds = trialConds-(min(trialConds)-1);
+        end
+
+        dirs = conds;
+        Cdir = dirs(trialConds);
+        oris = unique(mod(dirs,180));
+        Cori = mod(Cdir,180);
 
         %trial wise stim response
         rTmp = dat{ar,ag}.response{u}(1:nReps,:);
-        R{ar,ag}(:,u) = rTmp(:);
+        Rtrial{ar,ag}(:,u) = rTmp(:);
+
+        %trial averaged response (by direction class)
+        for d = 1:length(unique(dirs))
+            RmeanDir{ar,ag}(d,u) = mean( Rtrial{ar,ag}(Cdir==dirs(d),u) );
+        end
+
+        %trial averaged response (by orientation class)
+        for o = 1:length(unique(oris))
+            RmeanOri{ar,ag}(o,u) = mean( Rtrial{ar,ag}(Cori==oris(o),u) );
+        end
 
         %trial wise time resolved
-        binSize = 0.01;
-        bins = -1:binSize:2;
-        spks = dat{ar,ag}.spkTimes{u}(1,:);
-        spkTrial = dat{ar,ag}.spkTimes{u}(2,:);
-        trialIds = dat{ar,ag}.fr(u).trialNum(1:nReps,1:end-hasBlank);
-        trialIds = trialIds(:);
-        trialConds = dat{ar,ag}.fr(u).trialCond(1:nReps,1:end-hasBlank);
-        trialConds = trialConds(:);
         for t = 1:nTrials
             tId = trialIds(t);
             psth = histcounts(spks(spkTrial==tId),bins);
             psth = psth/binSize;
-            Rt{ar,ag}(t,u,:) = psth;
+            Rtime{ar,ag}(t,u,:) = psth;
         end
+
+        for d = 1:length(unique(dirs))
+            Rtime_meanDir{ar,ag}(d,u,:) = mean( squeeze(Rtime{ar,ag}(Cdir==dirs(d),u,:)) );
+        end
+
+        for o = 1:length(unique(oris))
+            Rtime_meanOri{ar,ag}(o,u,:) = mean( squeeze(Rtime{ar,ag}(Cori==oris(o),u,:)) );
+        end
+
+
+
     end
         
 end
 end
+
+ar = 2; ag = 3;
+
+figure;
+
+x = Rtrial{ar,ag};
+y = Cdir;
+uY = unique(y);
+subplot(3,2,1);hold on
+% x = x./max(x);
+x = zscore(x);
+imagesc(x)
+axis square
+axis tight
+
+subplot(3,2,2);hold on
+[coeff,score] = pca(x);
+clrs = hsv(length(uY));
+for c = 1:length(uY)
+    idx = y==uY(c);
+    plot3(score(idx,1),score(idx,2),score(idx,3),'ko','MarkerFaceColor',clrs(c,:))
+end
+axis square
+box on
+clear score
+
+x = Rtime{ar,ag};
+y = Cdir;
+uY = unique(y);
+subplot(3,2,3);hold on
+for b = 1:nBins
+    rB = x(:,:,b);
+    score(:,:,b) = rB*coeff;
+end
+clrs = hsv(length(uY));
+for o = 1:size(x,1)
+    plot3(squeeze(score(o,4,:)),squeeze(score(o,2,:)),squeeze(score(o,3,:)),'Color',clrs(uY==y(o),:))
+end
+
+x = Rtime_meanDir{ar,ag};
+for b = 1:nBins
+    rB = x(:,:,b);
+    rdm(:,:,b) = squareform(pdist(rB));
+    pcorrDir(b) = partialcorr(dir.diss',pdist(rB)',ori.diss','Type','Spearman');
+    pcorrOri(b) = partialcorr(ori.diss',pdist(rB)',dir.diss','Type','Spearman');
+end
+subplot(3,2,5);hold on
+plot(pcorrDir)
+plot(pcorrOri)
+legend({'dir pcorr','ori pcorr'})
+
+subplot(3,2,6);hold on
+plot(pcorrDir,pcorrOri)
+plot([0 1],[0 1],'k--')
+
 
