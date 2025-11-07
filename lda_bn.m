@@ -41,7 +41,7 @@ function [acc] = lda_bn(r,c)
         testIdx = foldLbl == cv;
         trainIdx = ~testIdx;
     
-        mdl = fitcdiscr(r(trainIdx,:),c(trainIdx));
+        mdl = fitcdiscr(r(trainIdx,:),c(trainIdx),'DiscrimType','pseudolinear');
     
         pred = predict(mdl,r(testIdx,:));
         acc(cv) = sum(pred == c(testIdx))/length(pred);

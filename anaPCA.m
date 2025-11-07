@@ -10,8 +10,19 @@ tAve = 1;
 sumStats = sumStats(oriPrefIdx,:); %sort units by their pref dir of motion
 
 nU = height(sumStats);
+
+% keepIdx = [];
+% for u = 1:nU
+%     cMean = sumStats.condition{u}(strcmp(sumStats.paramKey{u},'ori'),:);
+%     if length(cMean)==12
+%         keepIdx = [keepIdx u];
+%     end    
+% end
+% sumStats = sumStats(keepIdx,:);
+% nU = height(sumStats);
+
 for u = 1:nU
-    cMean = sumStats.condition{u}(strcmp(sumStats.paramKey{1},'ori'),:);
+    cMean = sumStats.condition{u}(strcmp(sumStats.paramKey{u},'ori'),:);
     if length(cMean)==12
         rTrial(:,:,u) = sumStats.response{u}(1:5,:);
     else

@@ -1,5 +1,5 @@
 clear all
-% close all
+close all
 
 %% Load data
 
@@ -24,9 +24,13 @@ nAG = length(ageGroups);
 nAR = length(areas);
 Rtime = cell(nAR,nAG);
 Rtrial = cell(nAR,nAG);
-binSize = 0.1;
-bins = -1:binSize:2;
-nBins = length(bins)-1;
+binSpacing = 0.1;
+bins = -1:0.1:2;
+binOverlap = 0.05;
+binSize = binSpacing;
+binRight = bins+(binSize/2);
+binLeft = bins-(binSize/2);
+nBins = length(bins);
 for ar = 1:nAR
 for ag = 1:nAG
 
@@ -38,13 +42,13 @@ for ag = 1:nAG
     %only take units that pass inclusion criteria (screenUnits)
     dat{ar,ag} = dat{ar,ag}(screenUnits(dat{ar,ag},anaMode),:);
     
-    %only take units with ori12
-    for u = 1:height(dat{ar,ag})
-        isOri12(u) = size(dat{ar,ag}.condition{u},2)==12;
-        isOri16(u) = size(dat{ar,ag}.condition{u},2)==16;
-    end
-    dat{ar,ag} = dat{ar,ag}(isOri12,:);
-    clear isOri12 isOri16
+%     %only take units with ori12
+%     for u = 1:height(dat{ar,ag})
+%         isOri12(u) = size(dat{ar,ag}.condition{u},2)==12;
+%         isOri16(u) = size(dat{ar,ag}.condition{u},2)==16;
+%     end
+%     dat{ar,ag} = dat{ar,ag}(isOri12,:);
+%     clear isOri12 isOri16
 
     nU(ar,ag) = height(dat{ar,ag});
 
@@ -65,6 +69,7 @@ for ag = 1:nAG
         else
             cndInclude = 1:size(dat{ar,ag}.cndKey{u},1);
         end
+%         cndInclude = cndInclude(ismember(dat{ar,ag}.cndKey{u}(cndInclude,oriIdx),[0 90 180 270]));
 
         conds = dat{ar,ag}.cndKey{u}(cndInclude,oriIdx);
         nConds = length(conds);
@@ -82,12 +87,13 @@ for ag = 1:nAG
         end
 
         dirs = conds;
-        Cdir = dirs(trialConds);
+        Cdir = reshape(repmat(dirs,1,nReps)',20,1);%dirs(trialConds);
         oris = unique(mod(dirs,180));
         Cori = mod(Cdir,180);
 
         %trial wise stim response
-        rTmp = dat{ar,ag}.response{u}(1:nReps,:);
+        rTmp = dat{ar,ag}.response{u}(1:nReps,(cndInclude-(min(cndInclude)-1)));
+        rTmp(rTmp<0) = 0;
         Rtrial{ar,ag}(:,u) = rTmp(:);
 
         %trial averaged response (by direction class)
@@ -103,9 +109,13 @@ for ag = 1:nAG
         %trial wise time resolved
         for t = 1:nTrials
             tId = trialIds(t);
-            psth = histcounts(spks(spkTrial==tId),bins);
-            psth = psth/binSize;
+%             psth = histcounts(spks(spkTrial==tId),bins);
+%             psth = psth/binSize;
+            for b = 1:nBins
+                psth(b) = sum(spks(spkTrial==tId)>binLeft(b)&spks(spkTrial==tId)<=binRight(b))/binSize;
+            end
             Rtime{ar,ag}(t,u,:) = psth;
+            clear psth
         end
 
         for d = 1:length(unique(dirs))
@@ -123,15 +133,16 @@ for ag = 1:nAG
 end
 end
 
-ar = 2; ag = 2;
+ar = 2; ag = 3;
 
 figure;
 
+subplot(3,2,1);hold on
 x = Rtrial{ar,ag};
 y = Cdir;
 uY = unique(y);
-subplot(3,2,1);hold on
-% x = x./max(x);
+% x = x./max(x); 
+x = x-mean(x);
 x = zscore(x);
 imagesc(x)
 axis square
@@ -139,42 +150,51 @@ axis tight
 
 subplot(3,2,2);hold on
 [coeff,score] = pca(x);
+score2 = zscore(RmeanDir{ar,ag})*coeff;
 clrs = hsv(length(uY));
 for c = 1:length(uY)
     idx = y==uY(c);
-    plot3(score(idx,1),score(idx,2),score(idx,3),'ko','MarkerFaceColor',clrs(c,:))
+    idx2 = dirs == dirs(c);
+    plot3(score(idx,1),score(idx,2),score(idx,3),'o','Color',clrs(c,:))
+    plot3(score2(idx2,1),score2(idx2,2),score2(idx2,3),'o','MarkerFaceColor',clrs(c,:))
 end
+plot3([score2(:,1);score2(1,1)],[score2(:,2);score2(1,2)],[score2(:,3);score2(1,3)],'k-o')
 axis square
 box on
 clear score
 
-x = Rtime{ar,ag};
-y = Cdir;
-uY = unique(Y);
 subplot(3,2,3);hold on
-for b = 1:nBins
-    rB = x(:,:,b);
-    score(:,:,b) = coeff*zscore(rB);
+x = [];
+for i = 1:size(Rtime_meanDir{2,3},3)
+x = vertcat(x,Rtime_meanDir{2,3}(:,:,i));
 end
-clrs = hsv(length(uY))
+y = repmat(dirs,nBins,1);
+uY = unique(y);
+[coeff,score] = pca(zscore(x));
+clrs = hsv(length(uY));
 for c = 1:length(uY)
-    
+idx = y==uY(c);
+plot3(score(idx,4),score(idx,2),score(idx,3),'Color',clrs(c,:))
 end
 
+subplot(3,2,5);hold on
 x = Rtime_meanDir{ar,ag};
 for b = 1:nBins
-    rB = x(:,:,b);
-    rdm(:,:,b) = squareform(pdist(rB));
-    pcorrDir(b) = partialcorr(dir.diss',pdist(rB,'euclidean')',ori.diss','Type','Spearman');
-    pcorrOri(b) = partialcorr(ori.diss',pdist(rB,'euclidean')',dir.diss','Type','Spearman');
+    rB = zscore(x(:,:,b));
+    pcorrDir(b) = partialcorr(dir.diss',pdist(rB,'spearman')',ori.diss','Type','Spearman');
+    pcorrOri(b) = partialcorr(ori.diss',pdist(rB,'spearman')',dir.diss','Type','Spearman');
 end
-subplot(3,2,5);hold on
-plot(pcorrDir)
-plot(pcorrOri)
+plot(bins,pcorrDir)
+plot(bins,pcorrOri)
 legend({'dir pcorr','ori pcorr'})
 
 subplot(3,2,6);hold on
-plot(pcorrDir,pcorrOri)
-plot([0 1],[0 1],'k--')
+for b = 1:nBins
+    rB = Rtime{ar,ag}(:,:,b);
+    accDir(b) = lda_bn(rB,Cdir);
+    accOri(b) = lda_bn(rB,Cori);
+end
+plot(bins,accDir)
+plot(bins,accOri)
 
 

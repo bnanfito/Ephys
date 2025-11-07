@@ -17,29 +17,29 @@ for i = 2:size(tc,1)
     tc(i,:) = circshift(tc(i,:),randi(size(tc,2)));
 end
 tc = tc';
-tc = tc./max(tc);
+tc = tc/max(tc)
 
 %% rdm
 
-diss = pdist(tc,'spearman');
+diss = pdist(tc','euclidean');
 rdm = squareform(diss);
 
 %% dimensionality reduction
 
 % score = mdscale(rdm,3);
-[coeff,score] = pca(zscore(tc));
+[coeff,score] = pca(tc');
 
 %% plot
 
 figure
 
 subplot(2,2,1);hold on
-plot([x x(1)+360] ,[tc(:,1);tc(1,1)])
+plot([x x(1)+360] ,[tc(1,:) tc(1,1)])
 xlim([0 360])
 xticks([0 90 180 270])
 
 subplot(2,2,2);hold on
-plot([x x(1)+360],([tc;tc(1,:)]))
+plot([x x(1)+360],([tc tc(:,1)])')
 xlim([0 360])
 xticks([0 90 180 270])
 

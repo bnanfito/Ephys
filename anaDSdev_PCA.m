@@ -3,7 +3,7 @@ close all
 
 %% Load data
 
-anaMode = 'SU';
+anaMode = 'MU';
 
 % dataFold = '/Volumes/Lab drive/Brandon/data/dataSets/DSdev';
 % dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/DSdev';
@@ -85,7 +85,7 @@ end
 
 
 
-D = distDat{1,3}; R = D.rTrial; 
+D = distDat{2,3}; R = D.rTrial; 
 R = R-mean(R); R = R./max(R); 
 C_dir = D.cTrial; dirs = unique(C_dir);
 C_ori = mod(C_dir,180); oris = unique(C_ori);
@@ -285,7 +285,7 @@ for ar = 1:nAR
         np = size(score);
         dirClrs = hsv(length(conds));
         oriClrs = repmat(hsv(length(conds)/2),2,1);
-        for i = conds
+        for i = conds'
             idx = cID == i;
             plot3(score(idx,1),score(idx,2),score(idx,3),'.','Color',dirClrs(conds==i,:),'MarkerSize',30)
         end
@@ -321,7 +321,7 @@ for ar = 1:nAR
 
         hold on
         dispIdx = curDat.cMean>0 & curDat.cMean<=180;
-        angDisp = curDat.cMean(dispIdx);
+        angDisp = curDat.cMean(dispIdx)';
         distF = curDat.distF(dispIdx);
         distNull = curDat.distNull(:,dispIdx);
         plot(angDisp,distF,'k-o','LineWidth',2)
