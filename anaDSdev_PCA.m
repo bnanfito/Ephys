@@ -3,7 +3,7 @@ close all
 
 %% Load data
 
-anaMode = 'MU';
+anaMode = 'SU';
 
 % dataFold = '/Volumes/Lab drive/Brandon/data/dataSets/DSdev';
 % dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/DSdev';
@@ -46,41 +46,41 @@ end
 
 %% LDA
 
-% figure; hold on
-% linStyl = {'-','-','-'};
-% count = 0;
-% for ar = 1:nAR
-%     if strcmp(areas{ar},'V1')
-%         clrs = {'b','c'};
-%         lblArea = 'V1';
-%     elseif strcmp(areas{ar},'PSS')
-%         clrs = {'r','m'};
-%         lblArea = 'PSS';
-%     end
-% for ag = 3
-% 
-%     D = distDat{ar,ag}; R = D.rTrial; 
-%     R = R-mean(R); R = R./max(R);
-%     C_dir = D.cTrial; dirs = unique(C_dir);
-%     C_ori = mod(C_dir,180); oris = unique(C_ori);
-%     [coeff,score] = pca(R);
-% 
-%     for pc = 1:size(score,2)
-%         [acc{ar,ag,1}(pc)] = lda_bn(score(:,1:pc),C_dir);
-%         [acc{ar,ag,2}(pc)] = lda_bn(score(:,1:pc),C_ori);
-%     end
-%     count = count+1;
-%     p(count) = plot(acc{ar,ag,1},[clrs{1} linStyl{ag}],'LineWidth',2);
-%     lbl{count} = [lblArea ' dir'];
-%     count = count+1;
-%     p(count) = plot(acc{ar,ag,2},[clrs{2} linStyl{ag}],'LineWidth',2);
-%     lbl{count} = [lblArea ' ori'];
-% end
-% end
-% legend(p,lbl)
-% ylabel('accuracy')
-% xlabel('number of PCs')
-% clear lbl
+figure; hold on
+linStyl = {'-','-','-'};
+count = 0;
+for ar = 1:nAR
+    if strcmp(areas{ar},'V1')
+        clrs = {'b','c'};
+        lblArea = 'V1';
+    elseif strcmp(areas{ar},'PSS')
+        clrs = {'r','m'};
+        lblArea = 'PSS';
+    end
+for ag = 3
+
+    D = distDat{ar,ag}; R = D.rTrial; 
+    R = R-mean(R); R = R./max(R);
+    C_dir = D.cTrial; dirs = unique(C_dir);
+    C_ori = mod(C_dir,180); oris = unique(C_ori);
+    [coeff,score] = pca(R);
+
+    for pc = 1:size(score,2)
+        [acc{ar,ag,1}(pc)] = lda_bn(score(:,1:pc),C_dir);
+        [acc{ar,ag,2}(pc)] = lda_bn(score(:,1:pc),C_ori);
+    end
+    count = count+1;
+    p(count) = plot(acc{ar,ag,1},[clrs{1} linStyl{ag}],'LineWidth',2);
+    lbl{count} = [lblArea ' dir'];
+    count = count+1;
+    p(count) = plot(acc{ar,ag,2},[clrs{2} linStyl{ag}],'LineWidth',2);
+    lbl{count} = [lblArea ' ori'];
+end
+end
+legend(p,lbl)
+ylabel('accuracy')
+xlabel('number of PCs')
+clear lbl
 
 
 
@@ -218,7 +218,7 @@ for ar = 1:nAR
         curDat = distDat{ar,ag};
         subplot(nAR,nAG,ag+(nAG*(ar-1)))
 
-        imagesc(curDat.rTrial)
+        imagesc(curDat.rTrial_z)
         xlabel('neuron #')
         ylabel('trial #')
 

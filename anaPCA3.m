@@ -24,10 +24,10 @@ nAG = length(ageGroups);
 nAR = length(areas);
 Rtime = cell(nAR,nAG);
 Rtrial = cell(nAR,nAG);
-binSpacing = 0.1;
-bins = -1:0.1:2;
-binOverlap = 0.05;
-binSize = binSpacing;
+binSpacing = 0.05;
+bins = -1:binSpacing:2;
+binOverlap = 0.01;
+binSize = binSpacing+(2*binOverlap);
 binRight = bins+(binSize/2);
 binLeft = bins-(binSize/2);
 nBins = length(bins);
@@ -133,32 +133,30 @@ for ag = 1:nAG
 end
 end
 
-ar = 2; ag = 3;
+ar = 1; ag = 2;
 
-figure;
+figure('Position',[100 100 500 800]);
 
 subplot(3,2,1);hold on
-x = Rtrial{ar,ag};
+x = zscore(Rtrial{ar,ag});
 y = Cdir;
 uY = unique(y);
-% x = x./max(x); 
-% x = x-mean(x);
-x = zscore(x);
 imagesc(x)
+xlabel('neuron')
+ylabel('trial')
 axis square
 axis tight
 
 subplot(3,2,2);hold on
 [coeff,score] = pca(x);
-score2 = zscore(RmeanDir{ar,ag})*coeff;
 clrs = hsv(length(uY));
 for c = 1:length(uY)
     idx = y==uY(c);
     idx2 = dirs == dirs(c);
-    plot3(score(idx,1),score(idx,2),score(idx,3),'o','Color',clrs(c,:))
-    plot3(score2(idx2,1),score2(idx2,2),score2(idx2,3),'o','MarkerFaceColor',clrs(c,:))
+    plot3(score(idx,1),score(idx,2),score(idx,3),'o','MarkerFaceColor',clrs(c,:))
 end
-plot3([score2(:,1);score2(1,1)],[score2(:,2);score2(1,2)],[score2(:,3);score2(1,3)],'k-o')
+plot3(score(:,1),score(:,2),score(:,3),'ko')
+xlabel('PC1');ylabel('PC2');zlabel('PC3')
 axis square
 box on
 clear score
@@ -174,8 +172,28 @@ uY = unique(y);
 clrs = hsv(length(uY));
 for c = 1:length(uY)
 idx = y==uY(c);
-plot3(score(idx,4),score(idx,2),score(idx,3),'Color',clrs(c,:))
+plot3(score(idx,1),score(idx,2),score(idx,3),'Color',clrs(c,:))
 end
+xlabel('PC1');ylabel('PC2');zlabel('PC3')
+axis square
+box on
+clear score
+
+subplot(3,2,4);hold on
+x = zscore(RmeanDir{ar,ag});
+y = dirs;
+uY = unique(y);
+[coeff,score] = pca(x);
+clrs = hsv(length(uY));
+for c = 1:length(uY)
+    idx = y==uY(c);
+    plot3(score(idx,1),score(idx,2),score(idx,3),'o','MarkerFaceColor',clrs(c,:))
+end
+plot3([score(:,1);score(1,1)],[score(:,2);score(1,2)],[score(:,3);score(1,3)],'k-o')
+xlabel('PC1');ylabel('PC2');zlabel('PC3')
+axis square
+box on
+clear score
 
 subplot(3,2,5);hold on
 x = Rtime_meanDir{ar,ag};
@@ -187,6 +205,11 @@ end
 plot(bins,pcorrDir)
 plot(bins,pcorrOri)
 legend({'dir pcorr','ori pcorr'})
+xlabel('time (s)')
+ylabel('partial correlation')
+axis square
+box on
+clear score
 
 subplot(3,2,6);hold on
 for b = 1:nBins
@@ -196,5 +219,24 @@ for b = 1:nBins
 end
 plot(bins,accDir)
 plot(bins,accOri)
+xlabel('time (s)')
+ylabel('LDA decoding accuracy (5-fold cv)')
+axis square
+box on
+clear score
 
+x = Rtime_meanDir{ar,ag};
+y = dirs;
+for b = 1:size(x,3)
+for u = 1:size(x,2)
 
+    mv = meanvec(y,x(:,u,b));
+    ldr(u,b) = mv.ldr;
+    lor(u,b) = mv.lor;
+
+end
+end
+figure;hold on
+idx = bins>=0&bins<=1;
+plot(bins(idx),mean(lor(:,idx),'omitnan'))
+plot(bins(idx),mean(ldr(:,idx),'omitnan'))
