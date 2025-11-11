@@ -163,8 +163,8 @@ clear score
 
 subplot(3,2,3);hold on
 x = [];
-for i = 1:size(Rtime_meanDir{2,3},3)
-x = vertcat(x,Rtime_meanDir{2,3}(:,:,i));
+for i = 1:size(Rtime_meanDir{ar,ag},3)
+x = vertcat(x,Rtime_meanDir{ar,ag}(:,:,i));
 end
 y = repmat(dirs,nBins,1);
 uY = unique(y);

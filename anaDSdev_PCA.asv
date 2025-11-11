@@ -61,9 +61,8 @@ for ar = 1:nAR
 for ag = curAG
 
 
-    D = distDat{ar,ag}; R = D.rTrial_z; 
-%     R = R-mean(R); R = R./max(R);
-%     R = zscore(R);
+    D = distDat{ar,ag}; R = D.rTrial; 
+    R = R-mean(R); R = R./max(R);
     C_dir = D.cTrial; dirs = unique(C_dir);
     C_ori = mod(C_dir,180); oris = unique(C_ori);
     [coeff,score] = pca(R);
@@ -89,8 +88,8 @@ clear lbl
 
 
 
-D = distDat{2,3}; R = D.rTrial_z; 
-% R = R-mean(R); R = R./max(R); 
+D = distDat{2,3}; R = D.rTrial; 
+R = R-mean(R); R = R./max(R); 
 C_dir = D.cTrial; dirs = unique(C_dir);
 C_ori = mod(C_dir,180); oris = unique(C_ori);
 [coeff,score] = pca(R);
