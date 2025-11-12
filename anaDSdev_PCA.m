@@ -272,9 +272,12 @@ for ar = 1:nAR
     end
 end
 
-
+% PCA projection
 f = figure;
 f.Position = [100 100 1000 600];
+nD = 2;
+feat = 'Ori';
+rType = 'rMean';
 for ar = 1:nAR
     if strcmp(areas{ar},'V1')
         clr = 'b';
@@ -284,37 +287,76 @@ for ar = 1:nAR
     for ag = 1:nAG
     
         curDat = distDat{ar,ag};
-        subplot(nAR,nAG,ag+(nAG*(ar-1)))
-        
-        
-        hold on
-        conds = unique(curDat.cMean);
-        score = vertcat(curDat.score,curDat.score(1,:));
-        cID = curDat.cMean;
-%         score = mdscale(curDat.rdm,3); score = vertcat(score,score(1,:));
-        plot3(score(:,1),score(:,2),score(:,3),'k','LineWidth',1.5)
-        np = size(score);
-        dirClrs = hsv(length(conds));
-        oriClrs = repmat(hsv(length(conds)/2),2,1);
-        for i = conds'
-            idx = cID == i;
-            plot3(score(idx,1),score(idx,2),score(idx,3),'.','Color',dirClrs(conds==i,:),'MarkerSize',30)
+        subplot(nAR,nAG,ag+(nAG*(ar-1)));hold on
+
+        if contains(rType,'Trial')
+            c_dir = curDat.cTrial;
+            if contains(rType,'norm')
+                r = curDat.rTrial_norm;
+                if contains(rType,'cent')
+                    r = r-mean(r);  
+                end
+            elseif contains(rType,'z')
+                r = curDat.rTrial_z;    
+            else
+                r = curDat.rTrial;
+            end
+        elseif contains(rType,'Mean')
+            c_dir = curDat.cMean;
+            if contains(rType,'norm')
+                r = curDat.rMean_norm;
+                if contains(rType,'cent')
+                    r = r-mean(r);
+                end
+            elseif contains(rType,'z')
+                r = curDat.rMean_z;
+            else
+                r = curDat.rMean;
+            end
         end
+
+        r = r-mean(r);
+        r = r./std(r);
+
+        dirs = unique(c_dir);
+        c_ori = mod(c_dir,180);
+        oris = unique(c_ori);
+        [coeff,score] = pca(r);
+        score = [score;score(1,:)];
+%         score = vertcat(curDat.score,curDat.score(1,:));
+%         score = mdscale(curDat.rdm,3); score = vertcat(score,score(1,:));
+
+        if contains(rType,'Mean')
+            plot3(score(:,1),score(:,2),score(:,3),'k','LineWidth',1.5)
+        end
+        switch feat
+            case 'Dir'
+                dirClrs = hsv(length(dirs));
+                for i = dirs'
+                    idx = c_dir == i;
+                    plot3(score(idx,1),score(idx,2),score(idx,3),'.','Color',dirClrs(dirs==i,:),'MarkerSize',30)
+                end
+            case 'Ori'
+                oriClrs = hsv(length(oris));
+                for i = oris'
+                    idx = c_ori == i;
+                    plot3(score(idx,1),score(idx,2),score(idx,3),'.','Color',oriClrs(oris==i,:),'MarkerSize',30)
+                end
+        end
+%         for o = 1:length(oris)
+%             plot3(curDat.score(c_ori==oris(o),1),curDat.score(c_ori==oris(o),2),curDat.score(c_ori==oris(o),3),'--','Color',[0.6 0.6 0.6],'LineWidth',1.5)
+%         end
+
         xlabel('PC1')
         ylabel('PC2')
         zlabel('PC3')
-        view(3)
+        view(nD)
         box on
 %         grid on
-        oriID = mod(curDat.cMean,180)';
-        oris = unique(oriID);
-%         for o = 1:length(oris)
-%             plot3(curDat.score(oriID==oris(o),1),curDat.score(oriID==oris(o),2),curDat.score(oriID==oris(o),3),'--','Color',[0.6 0.6 0.6],'LineWidth',1.5)
-%         end
-
         title([areas{ar} '; P' num2str(ageGroups{ag}(1)) '-' num2str(ageGroups{ag}(2))])
     end
 end
+% saveas(gcf,['Y:\Brandon\data\dataSets\DSdev\figs\pca\pca_' num2str(nD) 'd' feat '_' rType],'fig')
 
 
 f = figure;
