@@ -1,10 +1,10 @@
 %anaV1cool_ori_merge
 clear all
-close all
+% close all
 
 proj = 'V1cool_ori';
-dataFold = '/Volumes/NielsenHome2/Brandon/data';
-% dataFold = 'Y:\Brandon\data';
+% dataFold = '/Volumes/NielsenHome2/Brandon/data';
+dataFold = 'Y:\Brandon\data';
 % dataFold = 'C:\Users\brand\Documents\data';
 % dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
 anaMode = 'SU';
@@ -163,10 +163,10 @@ c = repmat(c,height(dat{1}),1);
 
 d = table();
 d.r1 = r1(:);
-d.r1L = log(d.r1+1);
+d.r1L = log10(d.r1+1);
 d.r1_norm = r1_norm(:);
 d.r2 = r2(:);
-d.r2L = log(d.r2+1);
+d.r2L = log10(d.r2+1);
 d.r2_norm = r2_norm(:);
 d.si = (d.r2-d.r1)./(d.r2+d.r1);
 d.siL = (d.r2L-d.r1L)./(d.r2L+d.r1L);
@@ -289,20 +289,21 @@ colororder({'k','c'})
 x = table();
 x.ori = repmat(d.ori,2,1);
 x.manip = vertcat(repmat({'control'},height(d),1),repmat({'cool'},height(d),1));
-x.r = vertcat(d.r1,d.r2)+1;
-% x.r = vertcat(d.r1L,d.r2L);
+% x.r = vertcat(d.r1,d.r2)+1;
+x.r = vertcat(d.r1L,d.r2L);
 boxchart(categorical(x.ori),x.r,'GroupByColor',x.manip,'Notch','on')
 % ylabel('R')
 ylabel('log(R+1)')
-set(gca,'YScale','log')
+% set(gca,'YScale','log')
 xlabel('Angular disparity (relative to pref)')
 box on
 
 subplot(3,2,6); hold on
-% boxchart(categorical(d.ori),d.si,'notch','on')
-% ylabel('SI')
-boxchart(categorical(d.ori),d.siL,'notch','on')
-ylabel('SI (log)')
+boxchart(categorical(d.ori),d.si,'notch','on')
+ylabel('SI')
+% boxchart(categorical(d.ori),d.siL,'notch','on')
+% ylabel('SI (log)')
+yline(0,'k--')
 xlabel('Angular disparity (relative to pref)')
 box on
 
@@ -310,6 +311,16 @@ box on
 
 
 
+% close all
+% clear dirTuning
+% e = 1;
+% for u = 1:height(dat{e})
+% fr = dat{e}.response{u}; fr(fr<0) = 0;
+% dirTuning(u) = getDirTuning(fr,conds,1);
+% sgtitle([dat{e}.exptName{u} ' ' dat{e}.uInfo{u} num2str(dat{e}.uID(u))])
+% saveas(gcf,[dat{e}.uInfo{u} num2str(u)])
+% end
+% save('dirTuning','dirTuning')
 
 
 
