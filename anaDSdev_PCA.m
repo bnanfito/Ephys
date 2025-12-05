@@ -61,7 +61,7 @@ for ar = 1:nAR
 for ag = curAG
 
 
-    D = distDat{ar,ag}; R = D.rTrial_z; 
+    D = distDat{ar,ag}; R = D.rTrial_norm; 
 %     R = R-mean(R); R = R./max(R);
 %     R = zscore(R);
     C_dir = D.cTrial; dirs = unique(C_dir);
@@ -89,8 +89,8 @@ clear lbl
 
 
 
-D = distDat{2,3}; R = D.rTrial_z; 
-% R = R-mean(R); R = R./max(R); 
+D = distDat{2,3}; R = D.rTrial; 
+R = R./max(R); 
 C_dir = D.cTrial; dirs = unique(C_dir);
 C_ori = mod(C_dir,180); oris = unique(C_ori);
 [coeff,score] = pca(R);
@@ -177,31 +177,36 @@ box on
 for ar = 1:nAR
 for ag = 1:nAG
 
-    dirCorr_1(ar,ag) = corr(dir.diss',distDat{ar,ag}.diss','type','Spearman');
+    %compute the spearman correlation between pairwise distance vectors for
+    %template and empirical data
+    dir_Corr(ar,ag) = corr(dir.diss',distDat{ar,ag}.diss','type','Spearman');
     dirNull_1{ar,ag} = corr(dir.diss',distDat{ar,ag}.dissNull,'type','Spearman');
-    oriCorr_1(ar,ag) = corr(ori.diss',distDat{ar,ag}.diss','type','Spearman');
+    ori_Corr(ar,ag) = corr(ori.diss',distDat{ar,ag}.diss','type','Spearman');
     oriNull_1{ar,ag} = corr(ori.diss',distDat{ar,ag}.dissNull,'type','Spearman');
 
-    dirCorr(ar,ag) = partialcorr(dir.diss',distDat{ar,ag}.diss',ori.diss','type','Spearman');
+    %compute the partial spearman correlation between distance vectors
+    dir_pCorr(ar,ag) = partialcorr(dir.diss',distDat{ar,ag}.diss',ori.diss','type','Spearman');
     dirNull{ar,ag} = partialcorr(dir.diss',distDat{ar,ag}.dissNull,ori.diss','type','Spearman');
-    oriCorr(ar,ag) = partialcorr(ori.diss',distDat{ar,ag}.diss',dir.diss','type','Spearman');
+    ori_pCorr(ar,ag) = partialcorr(ori.diss',distDat{ar,ag}.diss',dir.diss','type','Spearman');
     oriNull{ar,ag} = partialcorr(ori.diss',distDat{ar,ag}.dissNull,dir.diss','type','Spearman');
 
+    %estimate the standard deviation of correlation by bootstraping
+    %shuffled data
     nBoots = 100;
     nCond = size(distDat{ar,ag}.rMean,1);
     boots = randi(nCond,[nBoots,nCond]);
     for b = 1:size(boots,1)
         dissBoot = pdist(distDat{ar,ag}.rMean(boots(b,:),:),'spearman');
-        dirBoots_1(b) = corr(dir.diss',dissBoot','type','Spearman');
-        oriBoots_1(b) = corr(ori.diss',dissBoot','type','Spearman');
-        dirBoots(b) = partialcorr(dir.diss',dissBoot',ori.diss','type','Spearman');
-        oriBoots(b) = partialcorr(ori.diss',dissBoot',dir.diss','type','Spearman');
+        dirBoots_Corr(b) = corr(dir.diss',dissBoot','type','Spearman');
+        oriBoots_Corr(b) = corr(ori.diss',dissBoot','type','Spearman');
+        dirBoots_pCorr(b) = partialcorr(dir.diss',dissBoot',ori.diss','type','Spearman');
+        oriBoots_pCorr(b) = partialcorr(ori.diss',dissBoot',dir.diss','type','Spearman');
     end
-    dirStd(ar,ag) = std(dirBoots);
-    oriStd(ar,ag) = std(oriBoots);
-    dirStd_1(ar,ag) = std(dirBoots_1);
-    oriStd_1(ar,ag) = std(oriBoots_1);
-    clear dirBoots oriBoots dirBoots_1 oriBoots_1
+    dirStd_pCorr(ar,ag) = std(dirBoots_pCorr);
+    oriStd_pCorr(ar,ag) = std(oriBoots_pCorr);
+    dirStd_Corr(ar,ag) = std(dirBoots_Corr);
+    oriStd_Corr(ar,ag) = std(oriBoots_Corr);
+    clear dirBoots_pCorr oriBoots_pCorr dirBoots_Corr oriBoots_Corr
 
 end
 end
@@ -209,223 +214,270 @@ end
 
 %% Plot
 
-f = figure;
-f.Position = [100 100 1400 600];
-for ar = 1:nAR
-    if strcmp(areas{ar},'V1')
-        clr = 'b';
-    elseif strcmp(areas{ar},'PSS')
-        clr = 'r';
-    end
-    for ag = 1:nAG
-    
-        curDat = distDat{ar,ag};
-        subplot(nAR,nAG,ag+(nAG*(ar-1)))
-
-        imagesc(curDat.rTrial_z)
-        colorbar
-        colormap gray
-        caxis([-2 5])
-        xlabel('neuron #')
-        ylabel('trial #')
-
-        axis square
-        title([areas{ar} '; P' num2str(ageGroups{ag}(1)) '-' num2str(ageGroups{ag}(2))])
-    end
-end
-
-
-f = figure;
-f.Position = [100 100 1400 600];
-for ar = 1:nAR
-    if strcmp(areas{ar},'V1')
-        clr = 'b';
-    elseif strcmp(areas{ar},'PSS')
-        clr = 'r';
-    end
-    for ag = 1:nAG
-    
-        curDat = distDat{ar,ag};
-        subplot(nAR,nAG,ag+(nAG*(ar-1)))
-
-        imagesc(curDat.rdm)
-        colorbar
-        colormap gray
-        caxis([0 1.4])
-        if ag == 1
-            nYtick = length(curDat.cMean);
-            yticks(1:2:nYtick)
-            yticklabels(curDat.cMean(1:2:nYtick))
-        else
-            yticks([])
-        end
-        if ar == nAR
-            nXtick = length(curDat.cMean);
-            xticks(1:2:nXtick)
-            xticklabels(curDat.cMean(1:2:nXtick))
-        else
-            xticks([])
-        end
-
-        axis square
-        title([areas{ar} '; P' num2str(ageGroups{ag}(1)) '-' num2str(ageGroups{ag}(2))])
-    end
-end
-
-% PCA projection
-f = figure;
-f.Position = [100 100 1000 600];
-nD = 2;
-feat = 'Ori';
-rType = 'rMean';
-for ar = 1:nAR
-    if strcmp(areas{ar},'V1')
-        clr = 'b';
-    elseif strcmp(areas{ar},'PSS')
-        clr = 'r';
-    end
-    for ag = 1:nAG
-    
-        curDat = distDat{ar,ag};
-        subplot(nAR,nAG,ag+(nAG*(ar-1)));hold on
-
-        if contains(rType,'Trial')
-            c_dir = curDat.cTrial;
-            if contains(rType,'norm')
-                r = curDat.rTrial_norm;
-                if contains(rType,'cent')
-                    r = r-mean(r);  
-                end
-            elseif contains(rType,'z')
-                r = curDat.rTrial_z;    
-            else
-                r = curDat.rTrial;
-            end
-        elseif contains(rType,'Mean')
-            c_dir = curDat.cMean;
-            if contains(rType,'norm')
-                r = curDat.rMean_norm;
-                if contains(rType,'cent')
-                    r = r-mean(r);
-                end
-            elseif contains(rType,'z')
-                r = curDat.rMean_z;
-            else
-                r = curDat.rMean;
-            end
-        end
-
-        r = r-mean(r);
-        r = r./std(r);
-
-        dirs = unique(c_dir);
-        c_ori = mod(c_dir,180);
-        oris = unique(c_ori);
-        [coeff,score] = pca(r);
-        score = [score;score(1,:)];
-%         score = vertcat(curDat.score,curDat.score(1,:));
-%         score = mdscale(curDat.rdm,3); score = vertcat(score,score(1,:));
-
-        if contains(rType,'Mean')
-            plot3(score(:,1),score(:,2),score(:,3),'k','LineWidth',1.5)
-        end
-        switch feat
-            case 'Dir'
-                dirClrs = hsv(length(dirs));
-                for i = dirs'
-                    idx = c_dir == i;
-                    plot3(score(idx,1),score(idx,2),score(idx,3),'.','Color',dirClrs(dirs==i,:),'MarkerSize',30)
-                end
-            case 'Ori'
-                oriClrs = hsv(length(oris));
-                for i = oris'
-                    idx = c_ori == i;
-                    plot3(score(idx,1),score(idx,2),score(idx,3),'.','Color',oriClrs(oris==i,:),'MarkerSize',30)
-                end
-        end
-%         for o = 1:length(oris)
-%             plot3(curDat.score(c_ori==oris(o),1),curDat.score(c_ori==oris(o),2),curDat.score(c_ori==oris(o),3),'--','Color',[0.6 0.6 0.6],'LineWidth',1.5)
+% f = figure;
+% f.Position = [100 100 1400 600];
+% for ar = 1:nAR
+%     if strcmp(areas{ar},'V1')
+%         clr = 'b';
+%     elseif strcmp(areas{ar},'PSS')
+%         clr = 'r';
+%     end
+%     for ag = 1:nAG
+%     
+%         curDat = distDat{ar,ag};
+%         subplot(nAR,nAG,ag+(nAG*(ar-1)))
+% 
+%         imagesc(curDat.rTrial_z)
+%         colorbar
+%         colormap gray
+%         caxis([-2 5])
+%         xlabel('neuron #')
+%         ylabel('trial #')
+% 
+%         axis square
+%         title([areas{ar} '; P' num2str(ageGroups{ag}(1)) '-' num2str(ageGroups{ag}(2))])
+%     end
+% end
+% 
+% 
+% f = figure;
+% f.Position = [100 100 1400 600];
+% for ar = 1:nAR
+%     if strcmp(areas{ar},'V1')
+%         clr = 'b';
+%     elseif strcmp(areas{ar},'PSS')
+%         clr = 'r';
+%     end
+%     for ag = 1:nAG
+%     
+%         curDat = distDat{ar,ag};
+%         subplot(nAR,nAG,ag+(nAG*(ar-1)))
+% 
+%         imagesc(curDat.rdm)
+%         colorbar
+%         colormap gray
+%         caxis([0 1.4])
+%         if ag == 1
+%             nYtick = length(curDat.cMean);
+%             yticks(1:2:nYtick)
+%             yticklabels(curDat.cMean(1:2:nYtick))
+%         else
+%             yticks([])
 %         end
-
-        xlabel('PC1')
-        ylabel('PC2')
-        zlabel('PC3')
-        view(nD)
-        box on
-%         grid on
-        title([areas{ar} '; P' num2str(ageGroups{ag}(1)) '-' num2str(ageGroups{ag}(2))])
-    end
-end
-% saveas(gcf,['Y:\Brandon\data\dataSets\DSdev\figs\pca\pca_' num2str(nD) 'd' feat '_' rType],'fig')
-
-
-f = figure;
-f.Position = [100 100 1000 600];
-for ar = 1:nAR
-    if strcmp(areas{ar},'V1')
-        clr = 'b';
-    elseif strcmp(areas{ar},'PSS')
-        clr = 'r';
-    end
-    for ag = 1:nAG
-    
-        curDat = distDat{ar,ag};
-        subplot(nAR,nAG,ag+(nAG*(ar-1)))
-
-        hold on
-        dispIdx = curDat.cMean>0 & curDat.cMean<=180;
-        angDisp = curDat.cMean(dispIdx)';
-        distF = curDat.distF(dispIdx);
-        distNull = curDat.distNull(:,dispIdx);
-        plot(angDisp,distF,'k-o','LineWidth',2)
-        sem = std(curDat.rdmShift)/sqrt(size(curDat.rdmShift,1)); sem = sem(dispIdx);
-        v = var(curDat.rdmShift); v = v(dispIdx);
-        patch([angDisp fliplr(angDisp)],[distF-sem fliplr(distF+sem)],'k','EdgeColor','none','FaceAlpha',0.2)
-        plot(angDisp,mean(distNull),'r-o')
-        sem = std(distNull)/sqrt(size(distNull,1));
-        v = var(distNull);
-        sig2 = std(distNull,'omitnan')*2;
-        for i = 1:size(distNull,2)
-            P99(i) = prctile(distNull(:,i),99,'Method','exact');
-            P95(i) = prctile(distNull(:,i),95,'Method','exact');
-            P05(i) = prctile(distNull(:,i),5,'Method','exact');
-            P01(i) = prctile(distNull(:,i),1,'Method','exact');
-        end
-        patch([angDisp fliplr(angDisp)],[mean(distNull)-sem fliplr(mean(distNull)+sem)],'r','EdgeColor','none','FaceAlpha',0.2)
-        patch([angDisp fliplr(angDisp)],[P05 fliplr(P95)],'r','FaceColor','none','EdgeColor','r','LineStyle','--')
-        patch([angDisp fliplr(angDisp)],[P01 fliplr(P99)],'r','FaceColor','none','EdgeColor','r','LineStyle',':')
-        sigHiX = angDisp(distF>P95);
-        sigHiY = distF(distF>P95);
-        sigLoX = angDisp(distF<P05);
-        sigLoY = distF(distF<P05);
-        text(sigHiX,sigHiY+(sigHiY*0.1),'*')
-        text(sigLoX,sigLoY-(sigLoY*0.1),'*')
-        xticks([min(angDisp) 90 max(angDisp)])
-        xlim([min(angDisp) max(angDisp)])
-        if ar == nAR
-            xlabel('angular disparity (+/- deg)')
-        end
-        if ag == 1
-            ylabel('Euclidean distance')
-        end
-
+%         if ar == nAR
+%             nXtick = length(curDat.cMean);
+%             xticks(1:2:nXtick)
+%             xticklabels(curDat.cMean(1:2:nXtick))
+%         else
+%             xticks([])
+%         end
+% 
+%         axis square
+%         title([areas{ar} '; P' num2str(ageGroups{ag}(1)) '-' num2str(ageGroups{ag}(2))])
+%     end
+% end
+% 
+% % PCA projection
+% f = figure;
+% f.Position = [100 100 1000 600];
+% nD = 2;
+% feat = 'Ori';
+% rType = 'rMean';
+% for ar = 1:nAR
+%     if strcmp(areas{ar},'V1')
+%         clr = 'b';
+%     elseif strcmp(areas{ar},'PSS')
+%         clr = 'r';
+%     end
+%     for ag = 1:nAG
+%     
+%         curDat = distDat{ar,ag};
+%         subplot(nAR,nAG,ag+(nAG*(ar-1)));hold on
+% 
+%         if contains(rType,'Trial')
+%             c_dir = curDat.cTrial;
+%             if contains(rType,'norm')
+%                 r = curDat.rTrial_norm;
+%                 if contains(rType,'cent')
+%                     r = r-mean(r);  
+%                 end
+%             elseif contains(rType,'z')
+%                 r = curDat.rTrial_z;    
+%             else
+%                 r = curDat.rTrial;
+%             end
+%         elseif contains(rType,'Mean')
+%             c_dir = curDat.cMean;
+%             if contains(rType,'norm')
+%                 r = curDat.rMean_norm;
+%                 if contains(rType,'cent')
+%                     r = r-mean(r);
+%                 end
+%             elseif contains(rType,'z')
+%                 r = curDat.rMean_z;
+%             else
+%                 r = curDat.rMean;
+%             end
+%         end
+% 
+%         r = r-mean(r);
+%         r = r./std(r);
+% 
+%         dirs = unique(c_dir);
+%         c_ori = mod(c_dir,180);
+%         oris = unique(c_ori);
+%         [coeff,score] = pca(r);
+%         score = [score;score(1,:)];
+% %         score = vertcat(curDat.score,curDat.score(1,:));
+% %         score = mdscale(curDat.rdm,3); score = vertcat(score,score(1,:));
+% 
+%         if contains(rType,'Mean')
+%             plot3(score(:,1),score(:,2),score(:,3),'k','LineWidth',1.5)
+%         end
+%         switch feat
+%             case 'Dir'
+%                 dirClrs = hsv(length(dirs));
+%                 for i = dirs'
+%                     idx = c_dir == i;
+%                     plot3(score(idx,1),score(idx,2),score(idx,3),'.','Color',dirClrs(dirs==i,:),'MarkerSize',30)
+%                 end
+%             case 'Ori'
+%                 oriClrs = hsv(length(oris));
+%                 for i = oris'
+%                     idx = c_ori == i;
+%                     plot3(score(idx,1),score(idx,2),score(idx,3),'.','Color',oriClrs(oris==i,:),'MarkerSize',30)
+%                 end
+%         end
+% %         for o = 1:length(oris)
+% %             plot3(curDat.score(c_ori==oris(o),1),curDat.score(c_ori==oris(o),2),curDat.score(c_ori==oris(o),3),'--','Color',[0.6 0.6 0.6],'LineWidth',1.5)
+% %         end
+% 
+%         xlabel('PC1')
+%         ylabel('PC2')
+%         zlabel('PC3')
+%         view(nD)
+%         box on
+% %         grid on
+%         title([areas{ar} '; P' num2str(ageGroups{ag}(1)) '-' num2str(ageGroups{ag}(2))])
+%     end
+% end
+% % saveas(gcf,['Y:\Brandon\data\dataSets\DSdev\figs\pca\pca_' num2str(nD) 'd' feat '_' rType],'fig')
+% 
+% 
+% f = figure;
+% f.Position = [100 100 1000 600];
+% for ar = 1:nAR
+%     if strcmp(areas{ar},'V1')
+%         clr = 'b';
+%     elseif strcmp(areas{ar},'PSS')
+%         clr = 'r';
+%     end
+%     for ag = 1:nAG
+%     
+%         curDat = distDat{ar,ag};
+%         subplot(nAR,nAG,ag+(nAG*(ar-1)))
+% 
 %         hold on
-%         hDirNull = histogram(dirNull{ar,ag});
-%         hDirNull.FaceColor = 'g';
-%         xline(dirCorr(ar,ag),'g')
-%         xline(prctile(dirNull{ar,ag},95),'g--')
-%         xline(prctile(dirNull{ar,ag},99),'g-.')
-%         xline(prctile(dirNull{ar,ag},99.9),'g:')
-%         hOriNull = histogram(oriNull{ar,ag});
-%         hOriNull.FaceColor = 'r';
-%         xline(oriCorr(ar,ag),'r')
-%         xline(prctile(oriNull{ar,ag},95),'r--')
-%         xline(prctile(oriNull{ar,ag},99),'r-.')
-%         xline(prctile(oriNull{ar,ag},99.9),'r:')
-%         legend([hDirNull hOriNull],{'dir','ori'})
+%         dispIdx = curDat.cMean>0 & curDat.cMean<=180;
+%         angDisp = curDat.cMean(dispIdx)';
+%         distF = curDat.distF(dispIdx);
+%         distNull = curDat.distNull(:,dispIdx);
+%         plot(angDisp,distF,'k-o','LineWidth',2)
+%         sem = std(curDat.rdmShift)/sqrt(size(curDat.rdmShift,1)); sem = sem(dispIdx);
+%         v = var(curDat.rdmShift); v = v(dispIdx);
+%         patch([angDisp fliplr(angDisp)],[distF-sem fliplr(distF+sem)],'k','EdgeColor','none','FaceAlpha',0.2)
+%         plot(angDisp,mean(distNull),'r-o')
+%         sem = std(distNull)/sqrt(size(distNull,1));
+%         v = var(distNull);
+%         sig2 = std(distNull,'omitnan')*2;
+%         for i = 1:size(distNull,2)
+%             P99(i) = prctile(distNull(:,i),99,'Method','exact');
+%             P95(i) = prctile(distNull(:,i),95,'Method','exact');
+%             P05(i) = prctile(distNull(:,i),5,'Method','exact');
+%             P01(i) = prctile(distNull(:,i),1,'Method','exact');
+%         end
+%         patch([angDisp fliplr(angDisp)],[mean(distNull)-sem fliplr(mean(distNull)+sem)],'r','EdgeColor','none','FaceAlpha',0.2)
+%         patch([angDisp fliplr(angDisp)],[P05 fliplr(P95)],'r','FaceColor','none','EdgeColor','r','LineStyle','--')
+%         patch([angDisp fliplr(angDisp)],[P01 fliplr(P99)],'r','FaceColor','none','EdgeColor','r','LineStyle',':')
+%         sigHiX = angDisp(distF>P95);
+%         sigHiY = distF(distF>P95);
+%         sigLoX = angDisp(distF<P05);
+%         sigLoY = distF(distF<P05);
+%         text(sigHiX,sigHiY+(sigHiY*0.1),'*')
+%         text(sigLoX,sigLoY-(sigLoY*0.1),'*')
+%         xticks([min(angDisp) 90 max(angDisp)])
+%         xlim([min(angDisp) max(angDisp)])
+%         if ar == nAR
+%             xlabel('angular disparity (+/- deg)')
+%         end
+%         if ag == 1
+%             ylabel('Euclidean distance')
+%         end
+% 
+% %         hold on
+% %         hDirNull = histogram(dirNull{ar,ag});
+% %         hDirNull.FaceColor = 'g';
+% %         xline(dirCorr(ar,ag),'g')
+% %         xline(prctile(dirNull{ar,ag},95),'g--')
+% %         xline(prctile(dirNull{ar,ag},99),'g-.')
+% %         xline(prctile(dirNull{ar,ag},99.9),'g:')
+% %         hOriNull = histogram(oriNull{ar,ag});
+% %         hOriNull.FaceColor = 'r';
+% %         xline(oriCorr(ar,ag),'r')
+% %         xline(prctile(oriNull{ar,ag},95),'r--')
+% %         xline(prctile(oriNull{ar,ag},99),'r-.')
+% %         xline(prctile(oriNull{ar,ag},99.9),'r:')
+% %         legend([hDirNull hOriNull],{'dir','ori'})
+% 
+%         title([areas{ar} '; P' num2str(ageGroups{ag}(1)) '-' num2str(ageGroups{ag}(2))])
+%     end
+% end
 
-        title([areas{ar} '; P' num2str(ageGroups{ag}(1)) '-' num2str(ageGroups{ag}(2))])
+close all
+for ar = 1:length(areas)
+for ag = 1:length(ageGroups)
+    D = dat{ar,ag};
+    rMat = create_rMat(D);
+    for b = 1:100
+%     uIdx = randperm(height(D),30);
+    uIdx = randi(height(D),1,min(nU,[],'all')); %bootstrap sample with replacement
+    rdm(:,:,b) = squareform(pdist(rMat.meanNorm(:,uIdx),'spearman'));
     end
+    [coeff,score] = pca(rMat.meanNorm);
+    
+    figure(1);
+    subplot(nAR,nAG,ag+(nAG*(ar-1)));
+    imagesc(rMat.trialNorm);
+    colormap gray
+    axis square
+    box on
+    
+    figure(2);
+    subplot(nAR,nAG,ag+(nAG*(ar-1)));
+    imagesc(mean(rdm,3));
+    colormap gray
+    axis square
+    box on
+    
+    figure(3);
+    subplot(nAR,nAG,ag+(nAG*(ar-1)));hold on
+    clrs = hsv(length(rMat.conds));
+    pc_A = 1;pc_B = 2;pc_C = 3;
+    if size(score,1)==size(rMat.trial,1)
+        for c = 1:size(clrs,1)
+        idx = rMat.trialConds==rMat.conds(c);
+        plot3(score(idx,pc_A),score(idx,pc_B),score(idx,pc_C),'o','Color',clrs(c,:),'MarkerFaceColor',clrs(c,:))
+        end
+    else
+        plot3([score(:,pc_A);score(1,pc_A)],[score(:,pc_B);score(1,pc_B)],[score(:,pc_C);score(1,pc_C)],'k')
+        for c = 1:size(clrs,1)
+        plot3(score(c,pc_A),score(c,pc_B),score(c,pc_C),'o','Color',clrs(c,:),'MarkerFaceColor',clrs(c,:))
+        end
+    end
+    view(2)
+    axis square
+    box on
+end
 end
 
 
@@ -436,39 +488,41 @@ f2.Position = [100 100 800 800];
 
 subplot(2,2,1)
 imagesc(ori.rdm)
+colormap gray
 
 subplot(2,2,2); hold on
-b1 = bar(1:numel(oriCorr),oriCorr(:));
+b1 = bar(1:numel(ori_pCorr),ori_pCorr(:));
 b1.FaceColor = 'flat';
-v1Idx = find(strcmp(areas,'V1')):2:numel(oriCorr);
-pssIdx = find(strcmp(areas,'PSS')):2:numel(oriCorr);
+v1Idx = find(strcmp(areas,'V1')):2:numel(ori_pCorr);
+pssIdx = find(strcmp(areas,'PSS')):2:numel(ori_pCorr);
 b1.CData(v1Idx,:) = repmat([0 0 1],length(v1Idx),1);
 b1.CData(pssIdx,:) = repmat([1 0 0],length(pssIdx),1);
 ylabel('partial Spearman corr.')
-xticks([1.5:2:numel(oriCorr)])
+xticks([1.5:2:numel(ori_pCorr)])
 for ag = 1:nAG
     xtLbl{ag} = ['P' num2str(ageGroups{ag}(1)) '-' num2str(ageGroups{ag}(2))];
 end
 xticklabels(xtLbl)
-er1 = errorbar(1:numel(oriCorr),oriCorr(:),oriStd(:),oriStd(:));
+er1 = errorbar(1:numel(ori_pCorr),ori_pCorr(:),oriStd_pCorr(:),oriStd_pCorr(:));
 er1.Color = [0 0 0];
 er1.LineStyle = 'none';
 
 subplot(2,2,3)
 imagesc(dir.rdm)
+colormap gray
 
 subplot(2,2,4); hold on
-b2 = bar(1:numel(dirCorr),dirCorr(:));
+b2 = bar(1:numel(dir_pCorr),dir_pCorr(:));
 b2.FaceColor = 'flat';
 b2.CData(v1Idx,:) = repmat([0 0 1],length(v1Idx),1);
 b2.CData(pssIdx,:) = repmat([1 0 0],length(pssIdx),1);
 ylabel('partial Spearman corr.')
-xticks([1.5:2:numel(dirCorr)])
+xticks([1.5:2:numel(dir_pCorr)])
 for ag = 1:nAG
     xtLbl{ag} = ['P' num2str(ageGroups{ag}(1)) '-' num2str(ageGroups{ag}(2))];
 end
 xticklabels(xtLbl)
-er2 = errorbar(1:numel(dirCorr),dirCorr(:),dirStd(:),dirStd(:));
+er2 = errorbar(1:numel(dir_pCorr),dir_pCorr(:),dirStd_pCorr(:),dirStd_pCorr(:));
 er2.Color = [0 0 0];
 er2.LineStyle = 'none';
 
@@ -480,10 +534,130 @@ clr = 'b';
 elseif strcmp(areas{a},'PSS')
 clr = 'r';
 end
-errorbar(oriCorr_1(a,:),dirCorr_1(a,:),dirStd_1(a,:),dirStd_1(a,:),oriStd_1(a,:),oriStd_1(a,:),[clr '--'])
-errorbar(oriCorr(a,:),dirCorr(a,:),dirStd(a,:),dirStd(a,:),oriStd(a,:),oriStd(a,:),[clr 'o-'],'LineWidth',2)
+errorbar(ori_Corr(a,:),dir_Corr(a,:),dirStd_Corr(a,:),dirStd_Corr(a,:),oriStd_Corr(a,:),oriStd_Corr(a,:),[clr '--'])
+errorbar(ori_pCorr(a,:),dir_pCorr(a,:),dirStd_pCorr(a,:),dirStd_pCorr(a,:),oriStd_pCorr(a,:),oriStd_pCorr(a,:),[clr 'o-'],'LineWidth',2)
 end
 xlabel('spearman corr. with orientation')
 ylabel('spearman corr. with direction')
 plot([-0.4 1],[-0.4 1],'k--')
-legend({'V1','V1 (partial)','PMLS','PMLS (partial)'})
+axis square
+box on
+legend({'V1','V1 (partial)','PMLS','PMLS (partial)'},'Location','southwest')
+
+figure;hold on
+subplot(2,2,1);hold on
+plot([0 1],[0 1],'k--')
+subplot(2,2,2);hold on
+plot([0 1],[0 1],'k--')
+subplot(2,2,3);hold on
+plot([-0.5 1],[-0.5 1],'k--')
+subplot(2,2,4);hold on
+plot([-0.2 1],[-0.2 1],'k--')
+for ar = 1:length(areas)
+    switch areas{ar}
+        case 'V1'
+            clr = 'b';
+        case 'PSS'
+            clr = 'r';
+    end
+    for ag = 1:length(ageGroups)
+        D = dat{ar,ag};
+        ldr(ar,ag) = mean(D.ldr);
+        ldr_sem(ar,ag) = sem(D.ldr);
+        dsi(ar,ag) = mean(D.dsi);
+        dsi_sem(ar,ag) = sem(D.dsi);
+        lor(ar,ag) = mean(D.lor);
+        lor_sem(ar,ag) = sem(D.lor);
+        osi(ar,ag) = mean(D.osi);
+        osi_sem(ar,ag) = sem(D.osi);
+    end
+    
+    subplot(2,2,1);hold on
+    p(ar) = errorbar(ldr(ar,:),lor(ar,:),lor_sem(ar,:),lor_sem(ar,:),ldr_sem(ar,:),ldr_sem(ar,:),[clr]);
+    xlabel('LDR'); xlim([0 0.6])
+    ylabel('LOR'); ylim([0 0.6])
+    axis square
+    box on
+
+    subplot(2,2,2);hold on
+    errorbar(dsi(ar,:),osi(ar,:),osi_sem(ar,:),osi_sem(ar,:),dsi_sem(ar,:),dsi_sem(ar,:),[clr]);
+    xlabel('DSI'); xlim([0.2 1])
+    ylabel('OSI'); ylim([0.2 1])
+    axis square
+    box on
+
+    subplot(2,2,3);hold on
+    errorbar(dir_Corr(ar,:),ori_Corr(ar,:),oriStd_Corr(ar,:),oriStd_Corr(ar,:),dirStd_Corr(ar,:),dirStd_Corr(ar,:),[clr])
+    xlabel('dir. corr.'); xlim([-0.5 1])
+    ylabel('ori. corr.'); ylim([-0.5 1])
+    axis square
+    box on
+
+    subplot(2,2,4);hold on
+    errorbar(dir_pCorr(ar,:),ori_pCorr(ar,:),oriStd_pCorr(ar,:),oriStd_pCorr(ar,:),dirStd_pCorr(ar,:),dirStd_pCorr(ar,:),[clr])
+    xlabel('dir. pcorr.'); xlim([-0.2 1])
+    ylabel('ori. pcorr.'); ylim([-0.2 1])
+    axis square
+    box on
+end
+subplot(2,2,1);hold on
+legend(p(1:2),areas,'Location','southeast')
+
+for ar = 1:length(areas)
+    for ag = 1:length(ageGroups)
+        rMat = create_rMat(dat{ar,ag});
+        nSmpl = [5,10,30,nU(ar,ag)];
+        for nS = 1:length(nSmpl)
+            for b = 1:100
+%                 uIdx = randperm(nU(ar,ag),nSmpl(nS));
+                uIdx = randi(nU(ar,ag),1,min(nU,[],'all'));
+
+                r = rMat.trialNorm(:,uIdx);
+                cDir = rMat.trialConds;
+                cOri = mod(cDir,180);
+                nObs = length(cDir);
+
+                [ldaAcc_dir_boot(ar,ag,b),ldaAccSem_dir_boot(ar,ag,b)] = lda_bn(r,cDir);
+                [ldaAcc_ori_boot(ar,ag,b),ldaAccSem_ori_boot(ar,ag,b)] = lda_bn(r,cOri);
+                
+                [ldaAcc_dir_bootShuff(ar,ag,b),ldaAccSem_dir_bootShuff(ar,ag,b)] = lda_bn(r,cDir(randperm(nObs,nObs)));
+                [ldaAcc_ori_bootShuff(ar,ag,b),ldaAccSem_ori_bootShuff(ar,ag,b)] = lda_bn(r,cOri(randperm(nObs,nObs)));
+            end
+            ldaAcc_dir(ar,ag,nS) = mean(ldaAcc_dir_boot(ar,ag,:));
+            ldaAccSem_dir(ar,ag,nS) = mean(ldaAccSem_dir_boot(ar,ag,:));
+            ldaAcc_ori(ar,ag,nS) = mean(ldaAcc_ori_boot(ar,ag,:));
+            ldaAccSem_ori(ar,ag,nS) = mean(ldaAccSem_ori_boot(ar,ag,:));
+
+            ldaAcc_dir_shuff(ar,ag,nS) = mean(ldaAcc_dir_bootShuff(ar,ag,:));
+            ldaAccSem_dir_shuff(ar,ag,nS) = mean(ldaAccSem_dir_bootShuff(ar,ag,:));
+            ldaAcc_ori_shuff(ar,ag,nS) = mean(ldaAcc_ori_bootShuff(ar,ag,:));
+            ldaAccSem_ori_shuff(ar,ag,nS) = mean(ldaAccSem_ori_bootShuff(ar,ag,:));
+        end
+    end
+
+end
+figure
+for nS = 1:length(nSmpl)
+    subplot(1,length(nSmpl),nS);hold on
+    plot([0 1],[0 1],'k--')
+    xline(1/12,'k:')
+    yline(1/6,'k:')
+    for ar = 1:length(areas)
+        switch areas{ar}
+            case 'V1'
+                clr = 'b';
+            case 'PSS'
+                clr = 'r';
+        end
+        errorbar(ldaAcc_dir(ar,:,nS),ldaAcc_ori(ar,:,nS),ldaAccSem_ori(ar,:,nS),ldaAccSem_ori(ar,:,nS),ldaAccSem_dir(ar,:,nS),ldaAccSem_dir(ar,:,nS),clr)
+        errorbar(ldaAcc_dir_shuff(ar,:,nS),ldaAcc_ori_shuff(ar,:,nS),ldaAccSem_ori_shuff(ar,:,nS),ldaAccSem_ori_shuff(ar,:,nS),ldaAccSem_dir_shuff(ar,:,nS),ldaAccSem_dir_shuff(ar,:,nS),[clr '--'])
+    end
+    axis square
+    box on
+    xlabel('LDA acc. on dir.')
+    xlim([0 1])
+    ylabel('LDA acc. on ori.')
+    ylim([0 1])
+end
+
+
