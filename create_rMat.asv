@@ -1,0 +1,64 @@
+%create_rMat
+
+function rMat = create_rMat(dat)
+
+    %sort units by their pref dir of motion
+    [~,oriPrefIdx] = sort(dat.oriPref);
+    dat = dat(oriPrefIdx,:);
+    
+    %only keep neurons evaluated on the same number of conditions
+%     keepIdx = [];
+%     for u = 1:nU
+%         cMean = dat.condition{u}(strcmp(dat.paramKey{u},'ori'),:);
+%         if length(cMean)==12
+%             keepIdx = [keepIdx u];
+%         end    
+%     end
+%     dat = dat(keepIdx,:);
+%     nU = height(dat);
+    
+    nU = height(dat);
+    for u = 1:nU
+        cMean = dat.condition{u}(strcmp(dat.paramKey{u},'ori'),:);
+        
+        %interpolate & downsample ori16 to ori12
+        if length(cMean)==12
+            rTrial(:,:,u) = dat.response{u}(1:5,:);
+        else
+            cInt = 0:30:330;
+            rTmp = dat.response{u}(1:5,:);
+            rInt = interp1([cMean cMean(1)+360],[rTmp rTmp(:,1)]',cInt);
+            rTrial(:,:,u) = rInt';
+            cMean = cInt;
+        end
+        
+        rTrial(rTrial<0)=0;
+        rMean(:,u) = mean(rTrial(:,:,u),'omitnan');
+    
+        cPref(1,u) = dat.oriPref(u);
+        cPref(2,u) = dat.meanVec{u}.angDir;
+    end
+    nReps = size(rTrial,1);
+    nConds = size(rTrial,2);
+    rTrial = reshape(rTrial,nReps*nConds,nU);
+    nTrial = size(rTrial,1);
+    cTrial = repmat(cMean,nReps,1);cTrial = cTrial(:)';
+    
+    %standardize data
+    rTrial_norm = rTrial./max(rTrial);
+    rMean_norm = rMean./max(rMean);
+    rTrial_z = zscore(rTrial);
+    rMean_z = zscore(rMean);
+
+    %% output structure
+    rMat.trial = rTrial;
+    rMat.trialNorm = rTrial_norm;
+    rMat.trialZ = rTrial_z;
+    rMat.trial_c = cTrial;
+
+    rMat.mean = rMean;
+    rMat.meanNorm = rMean_norm;
+    rMat.meanZ = rMean_z;
+    rMat.conds = 
+
+end
