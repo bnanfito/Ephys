@@ -13,7 +13,7 @@
 % r = distDat{a,ag}.rTrial;
 % c = distDat{a,ag}.cTrial;
 
-function [acc] = lda_bn(r,c)
+function [acc_mean,acc_sem] = lda_bn(r,c)
 
     %remove observations with missing data
     missingObs = sum(isnan(r),2)>0;
@@ -36,6 +36,7 @@ function [acc] = lda_bn(r,c)
     % divide data into n-folds for cross validation
     nFold = 5;
     foldLbl = repmat(1:nFold,1,floor(nObs/5));
+    foldLbl = foldLbl(randperm(nObs,nObs)); %shuffle -> folds do not correspond to reps
     
     for cv = 1:nFold
         testIdx = foldLbl == cv;
@@ -49,6 +50,7 @@ function [acc] = lda_bn(r,c)
         clear mdl testIdx trainIdx
     end
 
-    acc = mean(acc);
+    acc_sem = sem(acc);
+    acc_mean = mean(acc);
 
 end
