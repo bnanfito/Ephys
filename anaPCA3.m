@@ -26,7 +26,7 @@ Rtime = cell(nAR,nAG);
 Rtrial = cell(nAR,nAG);
 binSpacing = 0.05;
 bins = -1:binSpacing:2;
-binOverlap = 0.01;
+binOverlap = 0.025;
 binSize = binSpacing+(2*binOverlap);
 binRight = bins+(binSize/2);
 binLeft = bins-(binSize/2);
@@ -135,9 +135,8 @@ end
 
 ar = 1; ag = 2;
 
-figure('Position',[100 100 500 800]);
 
-subplot(3,2,1);hold on
+figure;hold on
 x = zscore(Rtrial{ar,ag});
 y = Cdir;
 uY = unique(y);
@@ -146,8 +145,9 @@ xlabel('neuron')
 ylabel('trial')
 axis square
 axis tight
+title([areas{ar} ' P' num2str(ageGroups{ag}(1)) ' - ' num2str(ageGroups{ag}(2))])
 
-subplot(3,2,2);hold on
+figure;hold on
 [coeff,score] = pca(x);
 clrs = hsv(length(uY));
 for c = 1:length(uY)
@@ -160,26 +160,33 @@ xlabel('PC1');ylabel('PC2');zlabel('PC3')
 axis square
 box on
 clear score
+title([areas{ar} ' P' num2str(ageGroups{ag}(1)) ' - ' num2str(ageGroups{ag}(2))])
 
-subplot(3,2,3);hold on
-x = [];
-for i = 1:size(Rtime_meanDir{ar,ag},3)
-x = vertcat(x,Rtime_meanDir{ar,ag}(:,:,i));
+figure('Position',[100 100 1000 600])
+for ar = 1:nAR
+    for ag = 1:nAG
+        subplot(nAR,nAG,ag+(nAG*(ar-1)));hold on
+        x = [];
+        for i = 1:size(Rtime_meanDir{ar,ag},3)
+        x = vertcat(x,Rtime_meanDir{ar,ag}(:,:,i));
+        end
+        y = repmat(dirs,nBins,1);
+        uY = unique(y);
+        [coeff,score] = pca(zscore(x));
+        clrs = hsv(length(uY));
+        for c = 1:length(uY)
+        idx = y==uY(c);
+        plot3(score(idx,2),score(idx,3),score(idx,4),'Color',clrs(c,:))
+        end
+        xlabel('PC2');ylabel('PC3');zlabel('PC4')
+        axis square
+        box on
+        clear score
+        title([areas{ar} ' P' num2str(ageGroups{ag}(1)) ' - ' num2str(ageGroups{ag}(2))])
+    end
 end
-y = repmat(dirs,nBins,1);
-uY = unique(y);
-[coeff,score] = pca(zscore(x));
-clrs = hsv(length(uY));
-for c = 1:length(uY)
-idx = y==uY(c);
-plot3(score(idx,1),score(idx,2),score(idx,3),'Color',clrs(c,:))
-end
-xlabel('PC1');ylabel('PC2');zlabel('PC3')
-axis square
-box on
-clear score
 
-subplot(3,2,4);hold on
+figure;hold on
 x = zscore(RmeanDir{ar,ag});
 y = dirs;
 uY = unique(y);
@@ -194,49 +201,136 @@ xlabel('PC1');ylabel('PC2');zlabel('PC3')
 axis square
 box on
 clear score
+title([areas{ar} ' P' num2str(ageGroups{ag}(1)) ' - ' num2str(ageGroups{ag}(2))])
 
-subplot(3,2,5);hold on
-x = Rtime_meanDir{ar,ag};
-for b = 1:nBins
-    rB = zscore(x(:,:,b));
-    pcorrDir(b) = partialcorr(dir.diss',pdist(rB,'spearman')',ori.diss','Type','Spearman');
-    pcorrOri(b) = partialcorr(ori.diss',pdist(rB,'spearman')',dir.diss','Type','Spearman');
+figure('Position',[100 100 1000 600])
+for ar = 1:nAR
+    for ag = 1:nAG
+        subplot(nAR,nAG,ag+(nAG*(ar-1)));hold on
+        x = Rtime_meanDir{ar,ag};
+        for b = 1:nBins
+            rB = zscore(x(:,:,b));
+            pcorrDir(b) = partialcorr(dir.diss',pdist(rB,'spearman')',ori.diss','Type','Spearman');
+            pcorrOri(b) = partialcorr(ori.diss',pdist(rB,'spearman')',dir.diss','Type','Spearman');
+        end
+        plot(bins,pcorrDir)
+        plot(bins,pcorrOri)
+        legend({'dir pcorr','ori pcorr'})
+        xlabel('time (s)')
+        ylabel('partial correlation')
+        axis square
+        box on
+        clear score
+        title([areas{ar} ' P' num2str(ageGroups{ag}(1)) ' - ' num2str(ageGroups{ag}(2))])
+    end
 end
-plot(bins,pcorrDir)
-plot(bins,pcorrOri)
-legend({'dir pcorr','ori pcorr'})
-xlabel('time (s)')
-ylabel('partial correlation')
-axis square
-box on
-clear score
 
-subplot(3,2,6);hold on
-for b = 1:nBins
-    rB = Rtime{ar,ag}(:,:,b);
-    accDir(b) = lda_bn(rB,Cdir);
-    accOri(b) = lda_bn(rB,Cori);
+figure('Position',[100 100 1000 600])
+for ar = 1:nAR
+    for ag = 1:nAG
+        subplot(nAR,nAG,ag+(nAG*(ar-1)));hold on
+        for b = 1:nBins
+            rB = Rtime{ar,ag}(:,:,b);
+            accDir(b) = lda_bn(rB,Cdir);
+            accOri(b) = lda_bn(rB,Cori);
+        end
+        plot(bins,accDir)
+        plot(bins,accOri)
+        legend({'dir','ori'})
+        xlabel('time (s)')
+        ylabel('LDA decoding accuracy (5-fold cv)')
+        axis square
+        box on
+        clear score
+        title([areas{ar} ' P' num2str(ageGroups{ag}(1)) ' - ' num2str(ageGroups{ag}(2))])
+    end
 end
-plot(bins,accDir)
-plot(bins,accOri)
-xlabel('time (s)')
-ylabel('LDA decoding accuracy (5-fold cv)')
-axis square
-box on
-clear score
 
-x = Rtime_meanDir{ar,ag};
-y = dirs;
-for b = 1:size(x,3)
-for u = 1:size(x,2)
 
-    mv = meanvec(y,x(:,u,b));
-    ldr(u,b) = mv.ldr;
-    lor(u,b) = mv.lor;
 
+figure('Position',[100 100 1000 600]);
+for ar = 1:nAR
+    for ag = 1:nAG
+
+        x = Rtime{ar,ag};
+        y = dirs;
+        for b = 1:size(x,3)
+        for u = 1:size(x,2)
+        
+            fr = x(:,u,b);
+            fr = reshape(fr,nReps,nConds);
+            dirDat = getDirTuning(fr,y,0);
+            oriDat = getOriTuning(fr,y,0);
+        
+            dsi(u,b) = dirDat.DSI;
+            ldr(u,b) = dirDat.Ldir;
+            osi(u,b) = oriDat.OSI;
+            lor(u,b) = oriDat.Lori;
+        
+        end
+        end
+        idx = bins>=0&bins<=1;
+
+        subplot(nAR,nAG,ag+(nAG*(ar-1)));hold on
+        plot(bins(idx),mean(ldr(:,idx),'omitnan'))
+        plot(bins(idx),mean(lor(:,idx),'omitnan'))
+        legend({'Ldir','Lori'})
+        axis square
+        box on
+        ylim([0 1])
+        title([areas{ar} ' P' num2str(ageGroups{ag}(1)) ' - ' num2str(ageGroups{ag}(2))])
+    end
 end
+
+figure('Position',[100 100 1000 600]);
+for ar = 1:nAR
+    for ag = 1:nAG
+
+        x = Rtime{ar,ag};
+        y = dirs;
+        for b = 1:size(x,3)
+        for u = 1:size(x,2)
+        
+            fr = x(:,u,b);
+            fr = reshape(fr,nReps,nConds);
+            dirDat = getDirTuning(fr,y,0);
+            oriDat = getOriTuning(fr,y,0);
+        
+            dsi(u,b) = dirDat.DSI;
+            ldr(u,b) = dirDat.Ldir;
+            osi(u,b) = oriDat.OSI;
+            lor(u,b) = oriDat.Lori;
+        
+        end
+        end
+        idx = bins>=0&bins<=1;
+
+        subplot(nAR,nAG,ag+(nAG*(ar-1)));hold on
+        plot(bins(idx),mean(dsi(:,idx),'omitnan'))
+        plot(bins(idx),mean(osi(:,idx),'omitnan'))
+        legend({'DSI','OSI'})
+        axis square
+        box on
+        ylim([0 1])
+        title([areas{ar} ' P' num2str(ageGroups{ag}(1)) ' - ' num2str(ageGroups{ag}(2))])
+    end
 end
-figure;hold on
-idx = bins>=0&bins<=1;
-plot(bins(idx),mean(lor(:,idx),'omitnan'))
-plot(bins(idx),mean(ldr(:,idx),'omitnan'))
+
+% h=figure;
+% colormap gray
+% ar = 2;ag = 2;
+% A = squareform(pdist(zscore(Rtime_meanDir{ar,ag}(:,:,1)),'spearman'));
+% imagesc(A)
+% ax = gca;
+% ax.NextPlot = 'replaceChildren';
+% frames = 61;
+% M(frames) = struct('cdata',[],'colormap',[]);
+% h.Visible = 'off';
+% for f = 1:frames
+% B = squareform(pdist(zscore(Rtime_meanDir{ar,ag}(:,:,f)),'spearman'));
+% imagesc(B)
+% drawnow
+% M(f) = getframe;
+% end
+% h.Visible = 'on';
+% movie(M,1,6)
