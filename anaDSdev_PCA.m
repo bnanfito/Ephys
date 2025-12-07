@@ -7,9 +7,9 @@ anaMode = 'SU';
 
 % dataFold = '/Volumes/Lab drive/Brandon/data/dataSets/DSdev';
 % dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/DSdev';
-% dataFold = '/Volumes/NielsenHome2/Brandon/data/dataSets/DSdev';
+dataFold = '/Volumes/NielsenHome2/Brandon/data/dataSets/DSdev';
 % dataFold = 'F:\Brandon\data\dataSets\DSdev';
-dataFold = 'Y:\Brandon\data\dataSets\DSdev';
+% dataFold = 'Y:\Brandon\data\dataSets\DSdev';
 load(fullfile(dataFold,['DSdev_' anaMode 'dataSet.mat']))
 dir = load(fullfile(dataFold,'anaRSA_dir.mat'));
 ori = load(fullfile(dataFold,'anaRSA_ori.mat'));
@@ -113,7 +113,7 @@ h2 = fimplicit(f); h2.LineWidth = 2; h2.Color = clrs(i,:); h2.DisplayName = ['bo
 end
 for i = 1:length(dirs)
     idx = C_dir==dirs(i);
-    p1(i) = plot(score(idx,2),score(idx,3),sym(i),'MarkerEdgeColor',clrs(i,:),'MarkerFaceColor',clrs(i,:));
+    p1(i) = plot(score(idx,2),score(idx,3),sym(i),'MarkerEdgeColor','k','MarkerFaceColor',clrs(i,:));
     lbl{i} = num2str(dirs(i));
 end
 % gs = gscatter(score(:,1),score(:,2),C_dir,[],sym);
@@ -128,7 +128,7 @@ h2 = fimplicit3(f); h2.EdgeColor = 'none'; h2.FaceColor = clrs(i,:); h2.FaceAlph
 end
 for i = 1:length(dirs)
     idx = C_dir==dirs(i);
-    p2(i) = plot3(score(idx,1),score(idx,2),score(idx,3),sym(i),'MarkerEdgeColor',clrs(i,:),'MarkerFaceColor',clrs(i,:));
+    p2(i) = plot3(score(idx,1),score(idx,2),score(idx,3),sym(i),'MarkerEdgeColor','k','MarkerFaceColor',clrs(i,:));
 end
 xlabel('PC1');ylabel('PC2');zlabel('PC3')
 view(3)
@@ -150,7 +150,7 @@ for i = b
 end
 for i = 1:length(oris)
     idx = C_ori==oris(i);
-    p3(i) = plot(score(idx,2),score(idx,3),sym(i),'MarkerEdgeColor',clrs(i,:),'MarkerFaceColor',clrs(i,:));
+    p3(i) = plot(score(idx,2),score(idx,3),sym(i),'MarkerEdgeColor','k','MarkerFaceColor',clrs(i,:));
     lbl{i} = num2str(oris(i));
 end
 % gs = gscatter(score(:,1),score(:,2),C_ori,[],sym);
@@ -165,7 +165,7 @@ h2 = fimplicit3(f); h2.EdgeColor = 'none'; h2.FaceColor = clrs(i,:); h2.FaceAlph
 end
 for i = 1:length(oris)
     idx = C_ori==oris(i);
-    p4(i) = plot3(score(idx,1),score(idx,2),score(idx,3),sym(i),'MarkerEdgeColor',clrs(i,:),'MarkerFaceColor',clrs(i,:));
+    p4(i) = plot3(score(idx,1),score(idx,2),score(idx,3),sym(i),'MarkerEdgeColor','k','MarkerFaceColor',clrs(i,:));
 end
 xlabel('PC1');ylabel('PC2');zlabel('PC3')
 view(3)

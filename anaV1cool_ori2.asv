@@ -118,8 +118,8 @@ for ani = sortIdx
         count = count+1;
     end
     subplot(length(ageGroups),nC,(nC*(ag-1))+count); hold on
-    x = dA.rPref;
-    y = dB.rPref;
+    x = dA.latency;
+    y = dB.latecy;
     idA = screenUnits(dA,'MU');
     idB = screenUnits(dB,'MU');
     m = max([x;y]);
