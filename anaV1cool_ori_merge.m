@@ -1,6 +1,6 @@
 %anaV1cool_ori_merge
 clear all
-% close all
+close all
 
 proj = 'V1cool_ori';
 % dataFold = '/Volumes/NielsenHome2/Brandon/data';
@@ -110,7 +110,7 @@ for e = 1:3
         rPref(u,e) = dirDat.prefResp;
         rNull(u,e) = dirDat.nullResp;
         ldr(u,e) = dirDat.Ldir;
-        dsi(u,e) = dirDat.DSI;
+        dsi(u,e) = dirDat.DSI_S;
         bw(u,e) = dirDat.BW;
         bwS(u,e) = dirDat.BWSmooth;
 

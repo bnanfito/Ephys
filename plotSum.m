@@ -1,7 +1,7 @@
 
 function plotSum(dat)
-plr = 1;
-alignTC = 1;
+plr = 0;
+alignTC = 0;
 svePlt = 0;
 
 % dat = dat(dat.goodUnit,:);

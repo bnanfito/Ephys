@@ -10,7 +10,6 @@ alignTC = 0;
 nU = height(sumStats{1});
 for u = 1:nU
     figure; hold on
-    nr = 2; nc = 2;
     trialCount = 0;
     mergeId = [];
     for f = 1:length(sumStats)
@@ -33,7 +32,7 @@ for u = 1:nU
         end
 
         %PSTH
-        subplot(nr,nc,1);hold on; box on
+        subplot(2,2,1);hold on; box on
         binSize = 0.1;
         bins = -predelay:binSize:stimTime+postdelay;
         h = histogram(x,'BinEdges',bins);
@@ -47,7 +46,7 @@ for u = 1:nU
 
 
         %RASTER (trial)
-        subplot(nr,nc,3);hold on; box on
+        subplot(2,2,3);hold on; box on
         idx = x>-predelay & x<(stimTime+postdelay);
         plot(x(idx),y(idx),'.','Color',clr)
         trialExclude = dat.fr(u).trialNum(  isnan(dat.fr(u).bc)  );
@@ -64,29 +63,6 @@ for u = 1:nU
         ylabel('trial #')
 
 
-        %RASTER (condition)
-%             subplot(nr,nc,4);hold on
-%             for t = 1:nTrials
-%                 xT = x(y==t & idx);
-%                 if isempty(xT)
-%                     continue
-%                 end
-%                 yT = unique(dat.fr(u).trialCond(dat.fr(u).trialNum==t));
-%                 plot(xT,yT,'.','Color',clr)
-%             end
-%             xlim([-predelay stimTime+postdelay])
-%             if ~isempty(dat.rBlank{u})
-%                 ylim([0 nConds+1])
-%             else
-%                 ylim([0 nConds])
-%             end
-%             yticIdx = 1:2:nConds;
-%             yticks(yticIdx)
-%             yticklabels(num2str(dat.cndKey{u}(yticIdx,:)))
-%             patch([0 1 1 0],[0 0 nConds+1 nConds+1],'k','EdgeColor','none','FaceAlpha',0.2)
-%             xlabel('time (sec)')
-%             ylabel('condition')
-
         %TUNING CURVE
         dom = dat.paramKey{u};
         isOri = (length(dom)==1 & sum(strcmp(dom,'ori'))==1) |...
@@ -99,7 +75,7 @@ for u = 1:nU
             sem = std(y,'omitnan')/sqrt(size(y,1));
             x = dat.condition{u}(strcmp(dat.paramKey{u},'ori'),:);
             if plr == 1
-                subplot(nr,nc,2,polaraxes);hold on;box on
+                subplot(1,2,2,polaraxes);hold on;box on
 %                 polarplot(deg2rad(x),y,'.','Color',clr)
                 polarplot(deg2rad([x x(1)]),mean([y y(:,1)],'omitnan') ,'-o','Color',clr)
                 polarplot(repmat(deg2rad(x),2,1),mean(y,'omitnan')+([1;-1]*sem),'Color',clr)
@@ -107,7 +83,7 @@ for u = 1:nU
                 polarplot(deg2rad([0 dat.meanVec{u}.angDir]),[0 dat.meanVec{u}.magDir],'k','LineWidth',2)
                 polarplot(deg2rad([0 dat.meanVec{u}.angDir]),[0 dat.meanVec{u}.magDir*dat.ldr(u)],'g','LineWidth',2)
             else
-                subplot(nr,nc,2);hold on;box on
+                subplot(1,2,2);hold on;box on
                 if alignTC == 1
                     [x,meanY,i] = alignDirTuning(x,meanY);
                     sem = sem(i);
@@ -121,7 +97,7 @@ for u = 1:nU
 %                 plot(x,y,'.','Color',clr)
                 plot(x,meanY,'-square','Color',clr,'MarkerSize',7,'MarkerFaceColor',clr,'LineStyle',linStyl,'LineWidth',1)
                 plot(repmat(x,2,1),meanY+([1;-1]*sem),'Color',clr,'LineWidth',1)
-                plot(0:360,dat.gauss{u}.fit(0:360),'Color',clr,'LineWidth',2)
+%                 plot(0:360,dat.gauss{u}.fit(0:360),'Color',clr,'LineWidth',2)
                 if alignTC == 1
                     xlim([-180 180])
                     xticks([-180 -90 0 90 180])
@@ -140,7 +116,7 @@ for u = 1:nU
             meanY = mean(y,'omitnan');
             sem = std(y,'omitnan')/sqrt(size(y,1));
             x = dat.condition{u}(strcmp(dat.paramKey{u},'contrast'),:,oriPref);
-            subplot(nr,nc,2);hold on;box on
+            subplot(1,2,2);hold on;box on
             plot(x,meanY,'square','Color',clr,'MarkerSize',7,'MarkerFaceColor',clr)
             plot(repmat(x,2,1),meanY+([1;-1]*sem),'Color',clr,'LineWidth',2)
             plot([1:100],dat.nkFit{u}.fit(1:100),'Color',clr,'LineStyle',linStyl,'LineWidth',2)

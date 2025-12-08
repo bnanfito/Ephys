@@ -37,9 +37,9 @@ ageGroups = {[28 32],[33 40],[41 80],[81 120]};
 % projTbl.sumStats = sumStats;
 % projTbl.nGU = nGU;
 
-% load(fullfile(dataFold,'dataSets','cooling',proj,anaMode,[proj '_' anaMode 'dataSet.mat']))
+load(fullfile(dataFold,'dataSets','cooling',proj,anaMode,[proj '_' anaMode 'dataSet.mat']))
 % load(['/Volumes/NielsenHome2/Brandon/data/dataSets/cooling/' proj '/V1cool_' anaMode '_ori_projectTbl.mat'])
-load(['/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/cooling/' proj '/' anaMode '/V1cool_ori_' anaMode 'dataSet.mat'])
+% load(['/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/cooling/' proj '/' anaMode '/V1cool_ori_' anaMode 'dataSet.mat'])
 
 %% Organize Data
 
@@ -104,6 +104,8 @@ figure;
 ag = 1;
 count = 0;
 [~,sortIdx] = sort(ages);
+xAG{length(ageGroups)} = [];
+yAG{length(ageGroups)} = [];
 for ani = sortIdx
 
     dA =  dat.cntrl{ani,1};
@@ -119,19 +121,25 @@ for ani = sortIdx
     end
     subplot(length(ageGroups),nC,(nC*(ag-1))+count); hold on
     x = dA.rPref;
+    xAG{ag} = [xAG{ag};x];
     y = dB.rPref;
+    yAG{ag} = [yAG{ag};y];
     idA = screenUnits(dA,'MU');
     idB = screenUnits(dB,'MU');
     m = max([x;y]);
     plot([0 m],[0 m],'k')
     scatter(x,y,'k')
-    scatter(x(idA&~idB),y(idA&~idB),'k','MarkerFaceColor','k')
-    scatter(x(idA&idB),y(idA&idB),'k','MarkerFaceColor','b')
+    sPlt(1) = scatter(x(idA&~idB),y(idA&~idB),'k','MarkerFaceColor','k');
+    sPlt(2) = scatter(x(idA&idB),y(idA&idB),'k','MarkerFaceColor','b');
     axis tight
     axis square
+    box on
     title([animals{ani} '; P' num2str(ages(ani))])
     xlabel('control')
     ylabel('cool V1')
+    if ag == length(ageGroups) && ani == sortIdx(end)
+        legend(sPlt,{'V1 dependent','V1 independent'},'Location','best')
+    end
 end
 
 %% Calculate Metrics
