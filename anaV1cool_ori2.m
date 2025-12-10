@@ -5,9 +5,9 @@ close all
 anaMode = 'MU';
 proj = 'V1cool_ori';
 area = 'PSS';
-dataFold = 'Y:\Brandon\data';
+% dataFold = 'Y:\Brandon\data';
 % dataFold = '/Volumes/NielsenHome2/Brandon/data';
-% dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
+dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
 ageGroups = {[28 32],[33 40],[41 80],[81 120]};
 
 %% Generate Project Table
@@ -104,8 +104,8 @@ figure;
 ag = 1;
 count = 0;
 [~,sortIdx] = sort(ages);
-xAG{length(ageGroups)} = [];
-yAG{length(ageGroups)} = [];
+datAG.cntrl{length(ageGroups)} = [];
+datAG.cool{length(ageGroups)} = [];
 for ani = sortIdx
 
     dA =  dat.cntrl{ani,1};
@@ -119,14 +119,14 @@ for ani = sortIdx
     else
         count = count+1;
     end
+    datAG.cntrl{ag} = [datAG.cntrl{ag};dA];
+    datAG.cool{ag} = [datAG.cool{ag};dB];
     subplot(length(ageGroups),nC,(nC*(ag-1))+count); hold on
     x = dA.rPref;
-    xAG{ag} = [xAG{ag};x];
     y = dB.rPref;
-    yAG{ag} = [yAG{ag};y];
-    idA = screenUnits(dA,'MU');
-    idB = screenUnits(dB,'MU');
     m = max([x;y]);
+    idA = screenUnits(dA,anaMode);
+    idB = screenUnits(dB,anaMode);
     plot([0 m],[0 m],'k')
     scatter(x,y,'k')
     sPlt(1) = scatter(x(idA&~idB),y(idA&~idB),'k','MarkerFaceColor','k');
@@ -141,6 +141,29 @@ for ani = sortIdx
         legend(sPlt,{'V1 dependent','V1 independent'},'Location','best')
     end
 end
+
+figure
+for ag = 1:length(ageGroups)
+    
+    dA = datAG.cntrl{ag};
+    dB = datAG.cool{ag};
+    idA = screenUnits(dA,anaMode);
+    idB = screenUnits(dB,anaMode);
+    
+    subplot(1,length(ageGroups),ag);hold on
+    x = dA.ldr;
+    y = dB.ldr;
+    m = max([x;y]);
+    plot([0 m],[0 m],'k')
+    scatter(x,y,'k')
+    scatter(x(idA&~idB),y(idA&~idB),'k','MarkerFaceColor','k')
+    scatter(x(idA&idB),y(idA&idB),'k','MarkerFaceColor','b')
+    axis square
+    axis tight
+    box on
+
+end 
+
 
 %% Calculate Metrics
 

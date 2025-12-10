@@ -1,10 +1,10 @@
 %anaV1cool_ori_merge
 clear all
-% close all
+close all
 
 proj = 'V1cool_ori';
-% dataFold = '/Volumes/NielsenHome2/Brandon/data';
-dataFold = 'Y:\Brandon\data';
+dataFold = '/Volumes/NielsenHome2/Brandon/data';
+% dataFold = 'Y:\Brandon\data';
 % dataFold = 'C:\Users\brand\Documents\data';
 % dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
 anaMode = 'SU';
@@ -84,7 +84,7 @@ dat{3} = dat{3}(keepIdx,:);
 nU = height(dat{1});
 uAge = nan(nU,1);
 ldr = nan(nU,3);
-dsi = nan(nU,3);
+% dsi = nan(nU,3);
 bw = nan(nU,3);
 bwS = nan(nU,3);
 late = nan(nU,3);
@@ -110,14 +110,14 @@ for e = 1:3
             mV = meanvec(conds,rMat(rep,:));
             LDR(u,e,rep) = mV.ldr;
             ANG_DIR(u,e,rep) = mV.angDir;
-            [DSI(u,e,rep),R_PREF(u,e,rep),C_PREF(u,e,rep)] = compute_dsi(conds,rMat(rep,:));
+            [dsi(u,e),~,~,DSI(u,e,:),R_PREF(u,e,:),C_PREF(u,e,:),dsi_s(u,e),~,~,DSI_sRep(u,e,:)] = compute_dsi(conds,rMat,0);
         end
-        
+
         dirDat = getDirTuning(rMat,conds,0);
         rPref(u,e) = dirDat.prefResp;
         rNull(u,e) = dirDat.nullResp;
         ldr(u,e) = dirDat.Ldir;
-        dsi(u,e) = dirDat.DSI_S;
+%         dsi(u,e) = dirDat.DSI;
         bw(u,e) = dirDat.BW;
         bwS(u,e) = dirDat.BWSmooth;
 
@@ -166,6 +166,11 @@ mDSI = mean(DSI,3,'omitnan');
 semDSI = std(DSI,[],3)./sqrt(size(DSI,3));
 for u = 1:size(DSI,1)
     pvalDSI(u,1) = ranksum(squeeze(DSI(u,1,:)),squeeze(DSI(u,2,:)));
+end
+mDSI_sRep = mean(DSI_sRep,3,'omitnan');
+semDSI_sRep = std(DSI_sRep,[],3)./sqrt(size(DSI_sRep,3));
+for u = 1:size(DSI_sRep,1)
+    pvalDSI_sRep(u,1) = ranksum(squeeze(DSI_sRep(u,1,:)),squeeze(DSI_sRep(u,2,:)));
 end
 
 %Are pref and null scaled the same during cooling?
@@ -251,10 +256,10 @@ figure; hold on
 x = ldr(:,1);
 y = ldr(:,2);
 for ag = unique(uAG)
-    plot(x(uAG==ag),y(uAG==ag),['r' agShapes{ag}],'MarkerSize',mSize,'LineWidth',1);
+    plot(x(uAG==ag),y(uAG==ag),['b' agShapes{ag}],'MarkerSize',mSize,'MarkerFaceColor','b');
 %     lbl{ag} = ['P' num2str(ageGroups{ag}(1)) '-P' num2str(ageGroups{ag}(2)) '; n=' num2str(sum(uAG==ag))];
 end
-plot([x,mLDR(:,1)]',[y,mLDR(:,2)]','r')
+% plot([x,mLDR(:,1)]',[y,mLDR(:,2)]','r')
 x = mLDR(:,1);
 errX = semLDR(:,1);
 y = mLDR(:,2);
@@ -269,36 +274,62 @@ plot(x(exUs(2)),y(exUs(2)),'o','MarkerSize',mSize,'Color',exUclrs{2},'LineWidth'
 plot([0 1],[0 1],'k--')
 xlabel('mean vector length, pre-cooling')
 ylabel('mean vector length, cooling')
-title('LDR')
-legend(p,{'p < 0.05','p > 0.05'})
+title('L_D_i_r')
+legend(p,{'p < 0.05','p > 0.05'},'Location','southeast')
 box on
 axis square
 
+
+
 figure; hold on
-% subplot(3,3,5); hold on
+% % subplot(3,3,5); hold on
+
+clr = 'b';
 x = dsi(:,1);
 y = dsi(:,2);
-for ag = 1:length(ageGroups)
-    plot(x(uAG==ag),y(uAG==ag),['r' agShapes{ag}],'MarkerSize',mSize,'LineWidth',1)
-end
-plot([x,mDSI(:,1)]',[y,mDSI(:,2)]','r')
-x = mDSI(:,1);
-errX = semDSI(:,1);
-y = mDSI(:,2);
-errY = semDSI(:,2);
-sigIdx = pvalDSI<0.05;
-p(1) = errorbar(x(sigIdx),y(sigIdx),errY(sigIdx),errY(sigIdx),errX(sigIdx),errX(sigIdx),'ko','MarkerFaceColor','k','CapSize',0);
-p(1).DataTipTemplate.DataTipRows(end+1) = dataTipTextRow('unit',find(sigIdx));
-p(2) = errorbar(x(~sigIdx),y(~sigIdx),errY(~sigIdx),errY(~sigIdx),errX(~sigIdx),errX(~sigIdx),'ko','MarkerFaceColor','w','CapSize',0);
-p(2).DataTipTemplate.DataTipRows(end+1) = dataTipTextRow('unit',find(~sigIdx));
-plot(x(exUs(1)),y(exUs(1)),'o','MarkerSize',mSize,'Color',exUclrs{1},'LineWidth',1)
-plot(x(exUs(2)),y(exUs(2)),'o','MarkerSize',mSize,'Color',exUclrs{2},'LineWidth',1)
+plot(x,y,[clr 'o'],'MarkerSize',mSize,'MarkerFaceColor',clr)
+
+% clr = 'm';
+% x = dsi_s(:,1);
+% y = dsi_s(:,2);
+% plot(x,y,[clr 'o'],'MarkerSize',mSize,'MarkerFaceColor',clr)
+
+% clr = 'm';
+% x = mDSI_sRep(:,1);
+% errX = semDSI_sRep(:,1);
+% y = mDSI_sRep(:,2);
+% errY = semDSI_sRep(:,2);
+% sigIdx = pvalDSI_sRep<0.05;
+% p(1) = errorbar(x(sigIdx),y(sigIdx),errY(sigIdx),errY(sigIdx),errX(sigIdx),errX(sigIdx),[clr 'o'],'MarkerFaceColor',clr,'CapSize',0);
+% p(1).DataTipTemplate.DataTipRows(end+1) = dataTipTextRow('unit',find(sigIdx));
+% p(2) = errorbar(x(~sigIdx),y(~sigIdx),errY(~sigIdx),errY(~sigIdx),errX(~sigIdx),errX(~sigIdx),[clr 'o'],'MarkerFaceColor','w','CapSize',0);
+% p(2).DataTipTemplate.DataTipRows(end+1) = dataTipTextRow('unit',find(~sigIdx));
+
+% clr = 'k';
+% x = mDSI(:,1);
+% errX = semDSI(:,1);
+% y = mDSI(:,2);
+% errY = semDSI(:,2);
+% sigIdx = pvalDSI<0.05;
+% p(1) = errorbar(x(sigIdx),y(sigIdx),errY(sigIdx),errY(sigIdx),errX(sigIdx),errX(sigIdx),[clr 'o'],'MarkerFaceColor',clr,'CapSize',0);
+% p(1).DataTipTemplate.DataTipRows(end+1) = dataTipTextRow('unit',find(sigIdx));
+% p(2) = errorbar(x(~sigIdx),y(~sigIdx),errY(~sigIdx),errY(~sigIdx),errX(~sigIdx),errX(~sigIdx),[clr 'o'],'MarkerFaceColor','w','CapSize',0);
+% p(2).DataTipTemplate.DataTipRows(end+1) = dataTipTextRow('unit',find(~sigIdx));
+
+% plot(x(exUs(1)),y(exUs(1)),'o','MarkerSize',mSize,'Color',exUclrs{1},'LineWidth',1)
+% plot(x(exUs(2)),y(exUs(2)),'o','MarkerSize',mSize,'Color',exUclrs{2},'LineWidth',1)
+
+% plot([dsi(u,1),dsi_s(u,1)]',[dsi(u,2),dsi_s(u,2)]','r:','LineWidth',2)
 plot([0 1],[0 1],'k--')
+xlim([0 1]);ylim([0 1])
 xlabel('DSI, pre-cooling')
 ylabel('DSI, cooling')
 title('DSI')
+legend(p,{'p < 0.05','p > 0.05'},'Location','southeast')
 box on
 axis square
+
+
 
 % subplot(3,3,6); hold on
 figure; hold on
