@@ -284,10 +284,29 @@ axis square
 figure; hold on
 % % subplot(3,3,5); hold on
 
+x = [dsi_s(:,1),mDSI_sRep(:,1)]';
+y = [dsi_s(:,2),mDSI_sRep(:,2)]';
+% plot(x,y,'o:','LineWidth',2)
+dX = x(1,:)-x(2,:);
+dY = y(1,:)-y(2,:);
+dDSI = sqrt((dX.^2)+(dY.^2));
+% cdfplot(dDSI)
+
 clr = 'b';
 x = dsi(:,1);
 y = dsi(:,2);
 plot(x,y,[clr 'o'],'MarkerSize',mSize,'MarkerFaceColor',clr)
+
+clr = 'c';
+x = mDSI(:,1);
+errX = semDSI(:,1);
+y = mDSI(:,2);
+errY = semDSI(:,2);
+sigIdx = pvalDSI<0.05;
+p(1) = errorbar(x(sigIdx),y(sigIdx),errY(sigIdx),errY(sigIdx),errX(sigIdx),errX(sigIdx),[clr 'o'],'MarkerFaceColor',clr,'CapSize',0);
+p(1).DataTipTemplate.DataTipRows(end+1) = dataTipTextRow('unit',find(sigIdx));
+p(2) = errorbar(x(~sigIdx),y(~sigIdx),errY(~sigIdx),errY(~sigIdx),errX(~sigIdx),errX(~sigIdx),[clr 'o'],'MarkerFaceColor','w','CapSize',0);
+p(2).DataTipTemplate.DataTipRows(end+1) = dataTipTextRow('unit',find(~sigIdx));
 
 % clr = 'm';
 % x = dsi_s(:,1);
@@ -305,21 +324,9 @@ plot(x,y,[clr 'o'],'MarkerSize',mSize,'MarkerFaceColor',clr)
 % p(2) = errorbar(x(~sigIdx),y(~sigIdx),errY(~sigIdx),errY(~sigIdx),errX(~sigIdx),errX(~sigIdx),[clr 'o'],'MarkerFaceColor','w','CapSize',0);
 % p(2).DataTipTemplate.DataTipRows(end+1) = dataTipTextRow('unit',find(~sigIdx));
 
-% clr = 'k';
-% x = mDSI(:,1);
-% errX = semDSI(:,1);
-% y = mDSI(:,2);
-% errY = semDSI(:,2);
-% sigIdx = pvalDSI<0.05;
-% p(1) = errorbar(x(sigIdx),y(sigIdx),errY(sigIdx),errY(sigIdx),errX(sigIdx),errX(sigIdx),[clr 'o'],'MarkerFaceColor',clr,'CapSize',0);
-% p(1).DataTipTemplate.DataTipRows(end+1) = dataTipTextRow('unit',find(sigIdx));
-% p(2) = errorbar(x(~sigIdx),y(~sigIdx),errY(~sigIdx),errY(~sigIdx),errX(~sigIdx),errX(~sigIdx),[clr 'o'],'MarkerFaceColor','w','CapSize',0);
-% p(2).DataTipTemplate.DataTipRows(end+1) = dataTipTextRow('unit',find(~sigIdx));
-
 % plot(x(exUs(1)),y(exUs(1)),'o','MarkerSize',mSize,'Color',exUclrs{1},'LineWidth',1)
 % plot(x(exUs(2)),y(exUs(2)),'o','MarkerSize',mSize,'Color',exUclrs{2},'LineWidth',1)
 
-% plot([dsi(u,1),dsi_s(u,1)]',[dsi(u,2),dsi_s(u,2)]','r:','LineWidth',2)
 plot([0 1],[0 1],'k--')
 xlim([0 1]);ylim([0 1])
 xlabel('DSI, pre-cooling')
