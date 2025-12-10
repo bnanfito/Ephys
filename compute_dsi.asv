@@ -1,0 +1,38 @@
+%compute direction selectivity index (dsi) given vector of responses and
+%directions
+
+%inputs:
+%   c = vector of direction (deg) corresponding to each column in rMat
+%   rMat = NxC matrix of response rate for each trial (N = number of reps, C = number of conditions)
+
+function [dsi,dsiReps] = compute_dsi(c,rMat)
+
+        rMean = mean(rMat,'omitnan');
+        %determine the maximum mean response to any condition
+        rPref = max(rMean);
+        %determine the condition that elicited the max response
+        %if the max response happened for more than one condition,
+        %determine using smoothened rMean
+        if sum(rMean==rPref)>1 
+            rIn = rMean;
+            pks = rIn == rPref;
+            rConv = rIn([end 1:end 1]);
+            rConv = conv(rConv,ones(1,3)*(1/3),'same');
+            rConv = rConv(1+1:end-1);
+            rConv(~pks) = 0;
+            cPref = c(find(rConv==max(rConv),1,'first'));
+            clear rIn pks rConv 
+        else
+            cPref = c(rMean==rPref);
+        end
+        cNull = mod(cPref+180,360);
+        rNull = rMean(c==cNull);
+        dsi = 1-(rNull/rPref);
+
+        for rep = 1:size(rMat,1)
+
+            dsiReps(rep) = 
+
+        end
+
+end

@@ -281,7 +281,7 @@ y = dsi(:,2);
 for ag = 1:length(ageGroups)
     plot(x(uAG==ag),y(uAG==ag),['r' agShapes{ag}],'MarkerSize',mSize,'LineWidth',1)
 end
-plot([x,mDSI(:,1)]',[y,mDSI(:,2)]','r')
+plot([x,mDSI(:,1)]',[]','r')
 x = mDSI(:,1);
 errX = semDSI(:,1);
 y = mDSI(:,2);
