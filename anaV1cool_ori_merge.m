@@ -3,8 +3,8 @@ clear all
 close all
 
 proj = 'V1cool_ori';
-% dataFold = '/Volumes/NielsenHome2/Brandon/data';
-dataFold = 'Y:\Brandon\data';
+dataFold = '/Volumes/NielsenHome2/Brandon/data';
+% dataFold = 'Y:\Brandon\data';
 % dataFold = 'C:\Users\brand\Documents\data';
 % dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
 anaMode = 'SU';
@@ -239,102 +239,154 @@ d.ori = c(:);
 mSize = 7;
 
 count = 0;
-exUs = [4 48];
+exUs = [4 25];
 exUclrs = {[0.8500 0.3250 0.0980],[0.4660 0.6740 0.1880]};
 agShapes = {'+','square','diamond','^'};
-for u = exUs
+for u = 1:55
 %     subplot(3,4,1+(count*2)); hold on
-    figure; hold on
-    errorbar(conds,tc(u,:,1),tc_sem(u,:,1),'k','LineWidth',1)
-    errorbar(conds,tc(u,:,2),tc_sem(u,:,2),'c','LineWidth',1)
-    % errorbar(conds,tc(u,:,3),tc_sem(u,:,3),'b')
-    plot(conds,tc(u,:,2)*(rPref(u,1)/rPref(u,2)),'c--','LineWidth',1)
-    % legend('cntrl','cool','scaled cool')
-    xticks([0 90 180 270])
-    xlim([0 360])
-    xlabel('dir of motion (deg)')
-    ylabel('firing rate')
-    box on
-    axis square
-    
-%     subplot(3,4,2+(count*2)); hold on
-    figure; hold on
-    countTrials = 0;
-    for i = 1:3
-        if i==1
-            clr = 'k';
-        elseif i==2
-            clr = 'c';
-        elseif i==3
-            clr = 'k';
-        end
-        x = dat{i}.spkTimes{u}(1,:);
-        y = dat{i}.spkTimes{u}(2,:);
-        y = y+countTrials;
-        plot(x,y,[clr '.'],'MarkerSize',4)
-        countTrials = countTrials+max(dat{i}.fr(u).trialNum,[],'all');
+    figure
+    hold on
+    x = conds;
+    y1 = tc(u,:,1);
+    sem1 = tc_sem(u,:,1);
+    y2 = tc(u,:,2);
+    sem2 = tc_sem(u,:,2);
+%     errorbar(x,y1,sem1,'k','LineWidth',1)
+%     errorbar(x,y2,sem2,'c','LineWidth',1)
+%     plot(conds,y2*(rPref(u,1)/rPref(u,2)),'c--','LineWidth',1)
+%     % legend('cntrl','cool','scaled cool')
+%     xticks([0 90 180 270])
+%     xlim([0 360])
+%     xlabel('dir of motion (deg)')
+%     ylabel('firing rate')
+
+    rtic = 0;
+    while rtic<max([y1,y2])
+        rtic = rtic+5;
+        [axT,axR] = pol2cart(deg2rad(0:360),ones(1,361)*rtic);
+        plot(axT,axR,'k-')
+        rticMax = rtic;
     end
-    xlim([-1 2])
-    xlabel('time (sec)')
-    ylim([0 countTrials+1])
-    ylabel('trial number')
-    patch([0 1 1 0],[0 0 countTrials+1 countTrials+1],'k','EdgeColor','none','FaceAlpha',0.2)
+%     rtic = 0;
+%     while rtic<rticMax
+%         rtic = rtic+1;
+%         [axT,axR] = pol2cart(deg2rad(0:360),ones(1,361)*rtic);
+%         plot(axT,axR,'k:')
+%     end
+%     ttic = 0;
+%     while ttic<360
+%         [axT,axR] = pol2cart(deg2rad([ttic ttic]),[0 rticMax]);
+%         plot(axT,axR,'k:')
+%         ttic = ttic+22.5;
+%     end
+    ttic = 0;
+    while ttic<360
+        [axT,axR] = pol2cart(deg2rad([ttic ttic]),[0 rticMax]);
+        plot(axT,axR,'k-')
+        ttic = ttic+45;
+    end
+    
+    mv1 = meanvec(x,y1);
+    mv2 = meanvec(x,y2);
+    [mv1_x,mv1_y] = pol2cart(repmat(deg2rad(mv1.angDir),1,2),[0 rticMax*mv1.ldr]);
+    [mv2_x,mv2_y] = pol2cart(repmat(deg2rad(mv2.angDir),1,2),[0 rticMax*mv2.ldr]);
+    [semX1,semY1] = pol2cart(deg2rad([x x(1) x(1) fliplr(x)]),[y1+sem1 y1(1)+sem1(1) y1(1)-sem1(1) fliplr(y1-sem1)]);
+    [semX2,semY2] = pol2cart(deg2rad([x x(1) x(1) fliplr(x)]),[y2+sem1 y2(1)+sem2(1) y2(1)-sem2(1) fliplr(y2-sem2)]);
+    patch(semX1,semY1,'k','EdgeColor','none','FaceAlpha',0.2)
+    patch(semX2,semY2,'c','EdgeColor','none','FaceAlpha',0.2)
+    [x2_scl,y2_scl] = pol2cart(deg2rad([x x(1)]),[y2 y2(1)]*(rPref(u,1)/rPref(u,2)));
+    [x1,y1] = pol2cart(deg2rad([x x(1)]),[y1 y1(1)]);
+    [x2,y2] = pol2cart(deg2rad([x x(1)]),[y2 y2(1)]);
+    plot(x1,y1,'k','LineWidth',2)
+    plot(x2,y2,'c','LineWidth',2)
+    plot(x2_scl,y2_scl,'c--','LineWidth',2)
+    plot(mv1_x,mv1_y,'k','LineWidth',3);
+    plot(mv2_x,mv2_y,'c','LineWidth',3);
+
     box on
     axis square
+
+    
+% %     subplot(3,4,2+(count*2)); hold on
+%     figure; hold on
+%     countTrials = 0;
+%     for i = 1:3
+%         if i==1
+%             clr = 'k';
+%         elseif i==2
+%             clr = 'c';
+%         elseif i==3
+%             clr = 'k';
+%         end
+%         x = dat{i}.spkTimes{u}(1,:);
+%         y = dat{i}.spkTimes{u}(2,:);
+%         y = y+countTrials;
+%         plot(x,y,[clr '.'],'MarkerSize',4)
+%         countTrials = countTrials+max(dat{i}.fr(u).trialNum,[],'all');
+%     end
+%     xlim([-1 2])
+%     xlabel('time (sec)')
+%     ylim([0 countTrials+1])
+%     ylabel('trial number')
+%     patch([0 1 1 0],[0 0 countTrials+1 countTrials+1],'k','EdgeColor','none','FaceAlpha',0.2)
+%     box on
+%     axis square
     
     count = count+1;
 end
 
 figure; hold on
 % subplot(3,3,4); hold on
+colors = {[0 0.4470 0.7410],[0.8500 0.3250 0.0980],[0.9290 0.6940 0.1250],[0.4940 0.1840 0.5560],[0.4660 0.6740 0.1880],[0.3010 0.7450 0.9330],[0.6350 0.0780 0.1840]};
 
 x = [ldr(:,1),mLDR(:,1)]';
 y = [ldr(:,2),mLDR(:,2)]';
 dLDR(1,:) = sqrt(sum([diff(x).^2;diff(y).^2]));
-% plot(x,y,'g','LineWidth',2)
+plot(x,y,'-','Color',colors{1},'LineWidth',2)
 
 x = [ldr_s(:,1),mLDR_s(:,1)]';
 y = [ldr_s(:,2),mLDR_s(:,2)]';
 dLDR(2,:) = sqrt(sum([diff(x).^2;diff(y).^2]));
-% plot(x,y,'g--','LineWidth',2)
+plot(x,y,'--','Color',colors{2},'LineWidth',2)
 
 x = [mLDR_s(:,1),mLDR(:,1)]';
 y = [mLDR_s(:,2),mLDR(:,2)]';
 dLDR(3,:) = sqrt(sum([diff(x).^2;diff(y).^2]));
-% plot(x,y,'g-.','LineWidth',2)
+plot(x,y,'-.','Color',colors{3},'LineWidth',2)
 
 x = [ldr(:,1),ldr_s(:,1)]';
 y = [ldr(:,2),ldr_s(:,2)]';
 dLDR(4,:) = sqrt(sum([diff(x).^2;diff(y).^2]));
-% plot(x,y,'g:','LineWidth',2)
+plot(x,y,':','Color',colors{4},'LineWidth',2)
 
 % cdfP = cdfplot(dLDR(1,:));
 % cdfP.LineStyle = '-';
-% cdfP.Color = 'g';
-% cdfP.LineWidth = 2;
+% % cdfP.Color = 'k';
+% cdfP.LineWidth = 3;
 % cdfP = cdfplot(dLDR(2,:));
 % cdfP.LineStyle = '--';
-% cdfP.Color = 'g';
-% cdfP.LineWidth = 2;
+% % cdfP.Color = 'k';
+% cdfP.LineWidth = 3;
 % cdfP = cdfplot(dLDR(3,:));
 % cdfP.LineStyle = '-.';
-% cdfP.Color = 'g';
-% cdfP.LineWidth = 2;
+% % cdfP.Color = 'k';
+% cdfP.LineWidth = 3;
 % cdfP = cdfplot(dLDR(4,:));
 % cdfP.LineStyle = ':';
-% cdfP.Color = 'g';
-% cdfP.LineWidth = 2;
+% % cdfP.Color = 'k';
+% cdfP.LineWidth = 3;
 % axis square
 % box on
-% xlabel('dL_D_i_r')
+% xlabel('dL_D_i_r (euc. dist.)')
+% xlim([0 0.2])
 % ylabel('percentile')
 
-% clr = 'k';
+% clr = 'b';
 % x = ldr(:,1);
 % y = ldr(:,2);
 % plot(x,y,[clr 'o'],'MarkerSize',mSize,'MarkerFaceColor',clr);
-
-% clr = 'k';
+% 
+% clr = 'c';
 % x = mLDR(:,1);
 % errX = semLDR(:,1);
 % y = mLDR(:,2);
@@ -344,22 +396,22 @@ dLDR(4,:) = sqrt(sum([diff(x).^2;diff(y).^2]));
 % p(1).DataTipTemplate.DataTipRows(end+1) = dataTipTextRow('unit',find(sigIdx));
 % p(2) = errorbar(x(~sigIdx),y(~sigIdx),errY(~sigIdx),errY(~sigIdx),errX(~sigIdx),errX(~sigIdx),[clr 'o'],'MarkerFaceColor','w','CapSize',0);
 % p(2).DataTipTemplate.DataTipRows(end+1) = dataTipTextRow('unit',find(~sigIdx));
-
-% clr = 'k';
+% 
+% clr = 'r';
 % x = ldr_s(:,1);
 % y = ldr_s(:,2);
 % plot(x,y,[clr 'o'],'MarkerSize',mSize,'MarkerFaceColor',clr);
-
-clr = 'k';
-x = mLDR_s(:,1);
-errX = semLDR_s(:,1);
-y = mLDR_s(:,2);
-errY = semLDR_s(:,2);
-sigIdx = pvalLDR_s<0.05;
-p(1) = errorbar(x(sigIdx),y(sigIdx),errY(sigIdx),errY(sigIdx),errX(sigIdx),errX(sigIdx),[clr 'o'],'MarkerFaceColor',clr,'CapSize',0);
-p(1).DataTipTemplate.DataTipRows(end+1) = dataTipTextRow('unit',find(sigIdx));
-p(2) = errorbar(x(~sigIdx),y(~sigIdx),errY(~sigIdx),errY(~sigIdx),errX(~sigIdx),errX(~sigIdx),[clr 'o'],'MarkerFaceColor','w','CapSize',0);
-p(2).DataTipTemplate.DataTipRows(end+1) = dataTipTextRow('unit',find(~sigIdx));
+% 
+% clr = 'm';
+% x = mLDR_s(:,1);
+% errX = semLDR_s(:,1);
+% y = mLDR_s(:,2);
+% errY = semLDR_s(:,2);
+% sigIdx = pvalLDR_s<0.05;
+% p(1) = errorbar(x(sigIdx),y(sigIdx),errY(sigIdx),errY(sigIdx),errX(sigIdx),errX(sigIdx),[clr 'o'],'MarkerFaceColor',clr,'CapSize',0);
+% p(1).DataTipTemplate.DataTipRows(end+1) = dataTipTextRow('unit',find(sigIdx));
+% p(2) = errorbar(x(~sigIdx),y(~sigIdx),errY(~sigIdx),errY(~sigIdx),errX(~sigIdx),errX(~sigIdx),[clr 'o'],'MarkerFaceColor','w','CapSize',0);
+% p(2).DataTipTemplate.DataTipRows(end+1) = dataTipTextRow('unit',find(~sigIdx));
 
 % plot(x(exUs(1)),y(exUs(1)),'o','MarkerSize',mSize,'Color',exUclrs{1},'LineWidth',1)
 % plot(x(exUs(2)),y(exUs(2)),'o','MarkerSize',mSize,'Color',exUclrs{2},'LineWidth',1)
@@ -368,7 +420,7 @@ plot([0 1],[0 1],'k--')
 xlabel('mean vector length, pre-cooling')
 ylabel('mean vector length, cooling')
 title('L_D_i_r')
-legend(p,{'p < 0.05','p > 0.05'},'Location','southeast')
+% legend(p,{'p < 0.05','p > 0.05'},'Location','southeast')
 box on
 axis square
 
@@ -380,50 +432,50 @@ figure; hold on
 x = [dsi(:,1),mDSI(:,1)]';
 y = [dsi(:,2),mDSI(:,2)]';
 dDSI(1,:) = sqrt(sum([diff(x).^2;diff(y).^2]));
-% plot(x,y,'g','LineWidth',2)
+plot(x,y,'-','Color',colors{1},'LineWidth',2)
 
 x = [dsi_s(:,1),mDSI_sRep(:,1)]';
 y = [dsi_s(:,2),mDSI_sRep(:,2)]';
 dDSI(2,:) = sqrt(sum([diff(x).^2;diff(y).^2]));
-% plot(x,y,'g--','LineWidth',2)
+plot(x,y,'--','Color',colors{2},'LineWidth',2)
 
 x = [mDSI_sRep(:,1),mDSI(:,1)]';
 y = [mDSI_sRep(:,2),mDSI(:,2)]';
 dDSI(3,:) = sqrt(sum([diff(x).^2;diff(y).^2]));
-% plot(x,y,'g-.','LineWidth',2)
+plot(x,y,'-.','Color',colors{3},'LineWidth',2)
 
 x = [dsi(:,1),dsi_s(:,1)]';
 y = [dsi(:,2),dsi_s(:,2)]';
 dDSI(4,:) = sqrt(sum([diff(x).^2;diff(y).^2]));
-% plot(x,y,'g:','LineWidth',2)
+plot(x,y,':','Color',colors{4},'LineWidth',2)
 
 % cdfP = cdfplot(dDSI(1,:));
 % cdfP.LineStyle = '-';
-% cdfP.Color = 'g';
-% cdfP.LineWidth = 2;
+% % cdfP.Color = 'k';
+% cdfP.LineWidth = 3;
 % cdfP = cdfplot(dDSI(2,:));
 % cdfP.LineStyle = '--';
-% cdfP.Color = 'g';
-% cdfP.LineWidth = 2;
+% % cdfP.Color = 'k';
+% cdfP.LineWidth = 3;
 % cdfP = cdfplot(dDSI(3,:));
 % cdfP.LineStyle = '-.';
-% cdfP.Color = 'g';
-% cdfP.LineWidth = 2;
+% % cdfP.Color = 'k';
+% cdfP.LineWidth = 3;
 % cdfP = cdfplot(dDSI(4,:));
 % cdfP.LineStyle = ':';
-% cdfP.Color = 'g';
-% cdfP.LineWidth = 2;
+% % cdfP.Color = 'k';
+% cdfP.LineWidth = 3;
 % axis square
 % box on
-% xlabel('dDSI')
+% xlabel('dDSI (euc. dist.)')
 % ylabel('percentile')
 
-% clr = 'k';
+% clr = 'b';
 % x = dsi(:,1);
 % y = dsi(:,2);
 % plot(x,y,[clr 'o'],'MarkerSize',mSize,'MarkerFaceColor',clr)
-
-% clr = 'k';
+% 
+% clr = 'c';
 % x = mDSI(:,1);
 % errX = semDSI(:,1);
 % y = mDSI(:,2);
@@ -433,22 +485,22 @@ dDSI(4,:) = sqrt(sum([diff(x).^2;diff(y).^2]));
 % p(1).DataTipTemplate.DataTipRows(end+1) = dataTipTextRow('unit',find(sigIdx));
 % p(2) = errorbar(x(~sigIdx),y(~sigIdx),errY(~sigIdx),errY(~sigIdx),errX(~sigIdx),errX(~sigIdx),[clr 'o'],'MarkerFaceColor','w','CapSize',0);
 % p(2).DataTipTemplate.DataTipRows(end+1) = dataTipTextRow('unit',find(~sigIdx));
-
-% clr = 'k';
+% 
+% clr = 'r';
 % x = dsi_s(:,1);
 % y = dsi_s(:,2);
 % plot(x,y,[clr 'o'],'MarkerSize',mSize,'MarkerFaceColor',clr)
-
-clr = 'k';
-x = mDSI_sRep(:,1);
-errX = semDSI_sRep(:,1);
-y = mDSI_sRep(:,2);
-errY = semDSI_sRep(:,2);
-sigIdx = pvalDSI_sRep<0.05;
-p(1) = errorbar(x(sigIdx),y(sigIdx),errY(sigIdx),errY(sigIdx),errX(sigIdx),errX(sigIdx),[clr 'o'],'MarkerFaceColor',clr,'CapSize',0);
-p(1).DataTipTemplate.DataTipRows(end+1) = dataTipTextRow('unit',find(sigIdx));
-p(2) = errorbar(x(~sigIdx),y(~sigIdx),errY(~sigIdx),errY(~sigIdx),errX(~sigIdx),errX(~sigIdx),[clr 'o'],'MarkerFaceColor','w','CapSize',0);
-p(2).DataTipTemplate.DataTipRows(end+1) = dataTipTextRow('unit',find(~sigIdx));
+% 
+% clr = 'm';
+% x = mDSI_sRep(:,1);
+% errX = semDSI_sRep(:,1);
+% y = mDSI_sRep(:,2);
+% errY = semDSI_sRep(:,2);
+% sigIdx = pvalDSI_sRep<0.05;
+% p(1) = errorbar(x(sigIdx),y(sigIdx),errY(sigIdx),errY(sigIdx),errX(sigIdx),errX(sigIdx),[clr 'o'],'MarkerFaceColor',clr,'CapSize',0);
+% p(1).DataTipTemplate.DataTipRows(end+1) = dataTipTextRow('unit',find(sigIdx));
+% p(2) = errorbar(x(~sigIdx),y(~sigIdx),errY(~sigIdx),errY(~sigIdx),errX(~sigIdx),errX(~sigIdx),[clr 'o'],'MarkerFaceColor','w','CapSize',0);
+% p(2).DataTipTemplate.DataTipRows(end+1) = dataTipTextRow('unit',find(~sigIdx));
 
 % plot(x(exUs(1)),y(exUs(1)),'o','MarkerSize',mSize,'Color',exUclrs{1},'LineWidth',1)
 % plot(x(exUs(2)),y(exUs(2)),'o','MarkerSize',mSize,'Color',exUclrs{2},'LineWidth',1)
@@ -458,7 +510,7 @@ xlim([0 1]);ylim([0 1])
 xlabel('DSI, pre-cooling')
 ylabel('DSI, cooling')
 title('DSI')
-legend(p,{'p < 0.05','p > 0.05'},'Location','southeast')
+% legend(p,{'p < 0.05','p > 0.05'},'Location','southeast')
 box on
 axis square
 
@@ -508,12 +560,12 @@ box on
 
 % subplot(3,2,6); hold on
 figure; hold on
-boxchart(categorical(d.ori),d.si,'notch','on')
+boxchart(categorical(d.ori),d.si,'notch','on','BoxFaceColor','k')
 ylabel('SI')
 % boxchart(categorical(d.ori),d.siL,'notch','on')
 % ylabel('SI (log)')
 yline(0,'k--')
-xlabel('Angular disparity (relative to pref)')
+xlabel('Angle (deg. relative to preferred)')
 box on
 
 
