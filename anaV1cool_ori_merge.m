@@ -107,6 +107,8 @@ for e = 1:3
         rMat(rMat<0) = 0;
         conds = dat{e}.condition{u}(strcmp(dat{e}.paramKey{u},'ori'),:);
         
+        pvalANOVA(u,e) = anova1(rMat,[],"off");
+
         %tuning curve
         rMean = mean(rMat,1,'omitnan');
         rSem = std(rMat,[],1,'omitnan')/sqrt(size(rMat,1));
@@ -127,6 +129,8 @@ for e = 1:3
         nReps = 5;
         for rep = 1:nReps
             rRep = rMat(rep,:);
+            
+            [~,BW(u,e,rep)] = compute_bw(conds,rRep);
 
             wHan=hanning(3);
             wHan=wHan/sum(wHan);
@@ -186,54 +190,57 @@ for e = 1:3
 end
 
 mLDR = mean(LDR,3,'omitnan');
-semLDR = std(LDR,[],3)./sqrt(size(LDR,3));
+semLDR = std(LDR,[],3)/sqrt(nReps);
 for u = 1:size(LDR,1)
     pvalLDR(u,1) = ranksum(squeeze(LDR(u,1,:)),squeeze(LDR(u,2,:)));
 
     mV = meanvec(squeeze(ANG_DIR(u,1,:)),ones(size(ANG_DIR,3),1));
+    mV_s = meanvec(squeeze(ANG_DIR_s(u,1,:)),ones(size(ANG_DIR_s,3),1));
     mANG_DIR(u,1) = mV.angDir;
+    mANG_DIR_s(u,1) = mV_s.angDir;
     dDir = abs(squeeze(ANG_DIR(u,1,:)) - mANG_DIR(u,1)); dDir(dDir>180) = 360-dDir(dDir>180);
     semANG_DIR(u,1) = sqrt(sum(dDir.^2)/(nReps-1))/sqrt(nReps);
 
     mV = meanvec(squeeze(ANG_DIR(u,2,:)),ones(size(ANG_DIR,3),1));
+    mV_s = meanvec(squeeze(ANG_DIR_s(u,2,:)),ones(size(ANG_DIR_s,3),1));
     mANG_DIR(u,2) = mV.angDir;
+    mANG_DIR_s(u,2) = mV_s.angDir;
     dDir = abs(squeeze(ANG_DIR(u,2,:)) - mANG_DIR(u,2)); dDir(dDir>180) = 360-dDir(dDir>180);
     semANG_DIR(u,2) = sqrt(sum(dDir.^2)/(nReps-1))/sqrt(nReps);
 end
-% mANG_DIR = mean(ANG_DIR,3,'omitnan');
-% semANG_DIR = std(ANG_DIR,[],3)./sqrt(size(ANG_DIR,3));
 
 mLDR_s = mean(LDR_s,3,'omitnan');
-semLDR_s = std(LDR_s,[],3)./sqrt(size(LDR_s,3));
+semLDR_s = std(LDR_s,[],3)/sqrt(nReps);
 for u = 1:size(LDR_s,1)
     pvalLDR_s(u,1) = ranksum(squeeze(LDR_s(u,1,:)),squeeze(LDR_s(u,2,:)));
 end
-% mANG_DIR_s = mean(ANG_DIR_s,3,'omitnan');
-% semANG_DIR_s = std(ANG_DIR_s,[],3)./sqrt(size(ANG_DIR_s,3));
 
 mLOR = mean(LOR,3,'omitnan');
-semLOR = std(LOR,[],3)./sqrt(size(LOR,3));
+semLOR = std(LOR,[],3)./sqrt(nReps);
 for u = 1:size(LOR,1)
     pvalLOR(u,1) = ranksum(squeeze(LOR(u,1,:)),squeeze(LOR(u,2,:)));
 end
-% mANG_ORI = mean(ANG_ORI,3,'omitnan');
-% semANG_ORI = std(ANG_ORI,[],3)./sqrt(size(ANG_ORI,3));
 
 mLOR_s = mean(LOR_s,3,'omitnan');
-semLOR_s = std(LOR_s,[],3)./sqrt(size(LOR_s,3));
+semLOR_s = std(LOR_s,[],3)/sqrt(nReps);
 for u = 1:size(LOR_s,1)
     pvalLOR_s(u,1) = ranksum(squeeze(LOR_s(u,1,:)),squeeze(LOR_s(u,2,:)));
 end
-% mANG_ORI_s = mean();
+
+mBW = mean(BW,3,'omitnan');
+semBW = std(BW,[],3)/sqrt(nReps);
+for u = 1:size(BW,1)
+    pvalBW(u,1) = ranksum(squeeze(BW(u,1,:)),squeeze(BW(u,2,:)));
+end
 
 mDSI = mean(DSI,3,'omitnan');
-semDSI = std(DSI,[],3)./sqrt(size(DSI,3));
+semDSI = std(DSI,[],3)./sqrt(nReps);
 for u = 1:size(DSI,1)
     pvalDSI(u,1) = ranksum(squeeze(DSI(u,1,:)),squeeze(DSI(u,2,:)));
 end
 
-mDSI_sRep = mean(DSI_sRep,3,'omitnan');
-semDSI_sRep = std(DSI_sRep,[],3)./sqrt(size(DSI_sRep,3));
+mDSI_s = mean(DSI_sRep,3,'omitnan');
+semDSI_sRep = std(DSI_sRep,[],3)./sqrt(nReps);
 for u = 1:size(DSI_sRep,1)
     pvalDSI_sRep(u,1) = ranksum(squeeze(DSI_sRep(u,1,:)),squeeze(DSI_sRep(u,2,:)));
 end
@@ -271,7 +278,7 @@ agShapes = {'+','square','diamond','^'};
 
 exUs = [4 25];
 exUclrs = {[0.8500 0.3250 0.0980],[0.4660 0.6740 0.1880]};
-for u = 10
+for u = [5 8]
 
     %Tuning Curve
     x = conds;
@@ -280,15 +287,17 @@ for u = 10
     y2 = tc(u,:,2);
     sem2 = tc_sem(u,:,2);
 
-%     figure; hold on
-%     errorbar(x,y1,sem1,'k','LineWidth',1)
-%     errorbar(x,y2,sem2,'c','LineWidth',1)
-%     plot(conds,y2*(rPref(u,1)/rPref(u,2)),'c--','LineWidth',1)
-%     % legend('cntrl','cool','scaled cool')
-%     xticks([0 90 180 270])
-%     xlim([0 360])
-%     xlabel('dir of motion (deg)')
-%     ylabel('firing rate')
+    figure; hold on
+    errorbar([x x(1)+360],[y1 y1(1)],[sem1 sem1(1)],'k','LineWidth',1)
+    errorbar([x x(1)+360],[y2 y2(1)],[sem2 sem2(1)],'c','LineWidth',1)
+    plot([x x(1)+360],[y2 y2(1)]*(rPref(u,1)/rPref(u,2)),'c--','LineWidth',1)
+    % legend('cntrl','cool','scaled cool')
+    xticks([0 90 180 270])
+    xlim([0 360])
+    xlabel('dir of motion (deg)')
+    ylabel('firing rate')
+    box on
+    axis square
 
     %polar TC
     figure;hold on
@@ -319,10 +328,12 @@ for u = 10
         ttic = ttic+45;
     end
 
-    mv1 = meanvec(x,y1);
-    mv2 = meanvec(x,y2);
-    [mv1_x,mv1_y] = pol2cart(repmat(deg2rad(mv1.angDir),1,2),[0 rticMax*mv1.ldr]);
-    [mv2_x,mv2_y] = pol2cart(repmat(deg2rad(mv2.angDir),1,2),[0 rticMax*mv2.ldr]);
+%     mv1 = meanvec(x,y1);
+%     mv2 = meanvec(x,y2);
+%     [mv1_x,mv1_y] = pol2cart(repmat(deg2rad(mv1.angDir),1,2),[0 rticMax*mv1.ldr]);
+%     [mv2_x,mv2_y] = pol2cart(repmat(deg2rad(mv2.angDir),1,2),[0 rticMax*mv2.ldr]);
+    [mv1_x,mv1_y] = pol2cart(repmat(deg2rad(mANG_DIR(u,1)),1,2),[0 rticMax*mLDR(u,1)]);
+    [mv2_x,mv2_y] = pol2cart(repmat(deg2rad(mANG_DIR(u,2)),1,2),[0 rticMax*mLDR(u,2)]);
     
     y1 = [y1 y1(1)]; sem1 = [sem1 sem1(1)]; y2 = [y2 y2(1)];sem2 = [sem2 sem2(1)] ; x = [x x(1)];
     tmp1 = [y1+sem1 fliplr(y1-sem1)];tmp1(tmp1<0) = 0;
@@ -425,33 +436,33 @@ colors = {[0 0.4470 0.7410],[0.8500 0.3250 0.0980],[0.9290 0.6940 0.1250],[0.494
 % x = ldr(:,1);
 % y = ldr(:,2);
 % plot(x,y,[clr 'o'],'MarkerSize',mSize,'MarkerFaceColor',clr);
-% 
-% clr = 'c';
-% x = mLDR(:,1);
-% errX = semLDR(:,1);
-% y = mLDR(:,2);
-% errY = semLDR(:,2);
-% sigIdx = pvalLDR<0.05;
-% p(1) = errorbar(x(sigIdx),y(sigIdx),errY(sigIdx),errY(sigIdx),errX(sigIdx),errX(sigIdx),[clr 'o'],'MarkerFaceColor',clr,'CapSize',0);
-% p(1).DataTipTemplate.DataTipRows(end+1) = dataTipTextRow('unit',find(sigIdx));
-% p(2) = errorbar(x(~sigIdx),y(~sigIdx),errY(~sigIdx),errY(~sigIdx),errX(~sigIdx),errX(~sigIdx),[clr 'o'],'MarkerFaceColor','w','CapSize',0);
-% p(2).DataTipTemplate.DataTipRows(end+1) = dataTipTextRow('unit',find(~sigIdx));
-% 
+
+clr = 'k';
+x = mLDR(:,1);
+errX = semLDR(:,1);
+y = mLDR(:,2);
+errY = semLDR(:,2);
+sigIdx = pvalLDR<0.05;
+p(2) = errorbar(x(~sigIdx),y(~sigIdx),errY(~sigIdx),errY(~sigIdx),errX(~sigIdx),errX(~sigIdx),[clr 'o'],'MarkerFaceColor','w','CapSize',0);
+p(2).DataTipTemplate.DataTipRows(end+1) = dataTipTextRow('unit',find(~sigIdx));
+p(1) = errorbar(x(sigIdx),y(sigIdx),errY(sigIdx),errY(sigIdx),errX(sigIdx),errX(sigIdx),[clr 'o'],'MarkerFaceColor',clr,'CapSize',0);
+p(1).DataTipTemplate.DataTipRows(end+1) = dataTipTextRow('unit',find(sigIdx));
+
 % clr = 'r';
 % x = ldr_s(:,1);
 % y = ldr_s(:,2);
 % plot(x,y,[clr 'o'],'MarkerSize',mSize,'MarkerFaceColor',clr);
 
-clr = 'k';
-x = mLDR_s(:,1);
-errX = semLDR_s(:,1);
-y = mLDR_s(:,2);
-errY = semLDR_s(:,2);
-sigIdx = pvalLDR_s<0.05;
-p(1) = errorbar(x(sigIdx),y(sigIdx),errY(sigIdx),errY(sigIdx),errX(sigIdx),errX(sigIdx),[clr 'o'],'MarkerFaceColor',clr,'CapSize',0);
-p(1).DataTipTemplate.DataTipRows(end+1) = dataTipTextRow('unit',find(sigIdx));
-p(2) = errorbar(x(~sigIdx),y(~sigIdx),errY(~sigIdx),errY(~sigIdx),errX(~sigIdx),errX(~sigIdx),[clr 'o'],'MarkerFaceColor','w','CapSize',0);
-p(2).DataTipTemplate.DataTipRows(end+1) = dataTipTextRow('unit',find(~sigIdx));
+% clr = 'k';
+% x = mLDR_s(:,1);
+% errX = semLDR_s(:,1);
+% y = mLDR_s(:,2);
+% errY = semLDR_s(:,2);
+% sigIdx = pvalLDR_s<0.05;
+% p(2) = errorbar(x(~sigIdx),y(~sigIdx),errY(~sigIdx),errY(~sigIdx),errX(~sigIdx),errX(~sigIdx),[clr 'o'],'MarkerFaceColor','w','CapSize',0);
+% p(2).DataTipTemplate.DataTipRows(end+1) = dataTipTextRow('unit',find(~sigIdx));
+% p(1) = errorbar(x(sigIdx),y(sigIdx),errY(sigIdx),errY(sigIdx),errX(sigIdx),errX(sigIdx),[clr 'o'],'MarkerFaceColor',clr,'CapSize',0);
+% p(1).DataTipTemplate.DataTipRows(end+1) = dataTipTextRow('unit',find(sigIdx));
 
 % plot(x(exUs(1)),y(exUs(1)),'o','MarkerSize',mSize,'Color',exUclrs{1},'LineWidth',1)
 % plot(x(exUs(2)),y(exUs(2)),'o','MarkerSize',mSize,'Color',exUclrs{2},'LineWidth',1)
@@ -460,7 +471,7 @@ plot([0 1],[0 1],'k--')
 xlabel('mean vector length, pre-cooling')
 ylabel('mean vector length, cooling')
 title('L_D_i_r')
-% legend(p,{'p < 0.05','p > 0.05'},'Location','southeast')
+legend(p,{'p < 0.05','p > 0.05'},'Location','southeast')
 box on
 axis square
 
@@ -474,13 +485,13 @@ y = [dsi(:,2),mDSI(:,2)]';
 dDSI(1,:) = sqrt(sum([diff(x).^2;diff(y).^2]));
 % plot(x,y,'-','Color',colors{1},'LineWidth',2)
 
-x = [dsi_s(:,1),mDSI_sRep(:,1)]';
-y = [dsi_s(:,2),mDSI_sRep(:,2)]';
+x = [dsi_s(:,1),mDSI_s(:,1)]';
+y = [dsi_s(:,2),mDSI_s(:,2)]';
 dDSI(2,:) = sqrt(sum([diff(x).^2;diff(y).^2]));
 % plot(x,y,'--','Color',colors{2},'LineWidth',2)
 
-x = [mDSI_sRep(:,1),mDSI(:,1)]';
-y = [mDSI_sRep(:,2),mDSI(:,2)]';
+x = [mDSI_s(:,1),mDSI(:,1)]';
+y = [mDSI_s(:,2),mDSI(:,2)]';
 dDSI(3,:) = sqrt(sum([diff(x).^2;diff(y).^2]));
 % plot(x,y,'-.','Color',colors{3},'LineWidth',2)
 
@@ -532,15 +543,15 @@ dDSI(4,:) = sqrt(sum([diff(x).^2;diff(y).^2]));
 % plot(x,y,[clr 'o'],'MarkerSize',mSize,'MarkerFaceColor',clr)
 
 clr = 'k';
-x = mDSI_sRep(:,1);
+x = mDSI_s(:,1);
 errX = semDSI_sRep(:,1);
-y = mDSI_sRep(:,2);
+y = mDSI_s(:,2);
 errY = semDSI_sRep(:,2);
 sigIdx = pvalDSI_sRep<0.05;
-p(1) = errorbar(x(sigIdx),y(sigIdx),errY(sigIdx),errY(sigIdx),errX(sigIdx),errX(sigIdx),[clr 'o'],'MarkerFaceColor',clr,'CapSize',0);
-p(1).DataTipTemplate.DataTipRows(end+1) = dataTipTextRow('unit',find(sigIdx));
 p(2) = errorbar(x(~sigIdx),y(~sigIdx),errY(~sigIdx),errY(~sigIdx),errX(~sigIdx),errX(~sigIdx),[clr 'o'],'MarkerFaceColor','w','CapSize',0);
 p(2).DataTipTemplate.DataTipRows(end+1) = dataTipTextRow('unit',find(~sigIdx));
+p(1) = errorbar(x(sigIdx),y(sigIdx),errY(sigIdx),errY(sigIdx),errX(sigIdx),errX(sigIdx),[clr 'o'],'MarkerFaceColor',clr,'CapSize',0);
+p(1).DataTipTemplate.DataTipRows(end+1) = dataTipTextRow('unit',find(sigIdx));
 
 % plot(x(exUs(1)),y(exUs(1)),'o','MarkerSize',mSize,'Color',exUclrs{1},'LineWidth',1)
 % plot(x(exUs(2)),y(exUs(2)),'o','MarkerSize',mSize,'Color',exUclrs{2},'LineWidth',1)
@@ -554,6 +565,70 @@ title('DSI')
 box on
 axis square
 
+clr = 'k';
+figure; hold on
+plot([0 360],[0 360],'k--')
+x = mANG_DIR(:,1);
+errX = semANG_DIR(:,1);
+y = mANG_DIR(:,2);
+errY = semANG_DIR(:,2);
+errorbar(x,y,errY,errY,errX,errX,[clr 'o'],'MarkerFaceColor',clr,'CapSize',0);
+% sigIdx = pvalBW<0.05;
+% p(2) = errorbar(x(~sigIdx),y(~sigIdx),errY(~sigIdx),errY(~sigIdx),errX(~sigIdx),errX(~sigIdx),[clr 'o'],'MarkerFaceColor','w','CapSize',0);
+% p(2).DataTipTemplate.DataTipRows(end+1) = dataTipTextRow('unit',find(~sigIdx));
+% p(1) = errorbar(x(sigIdx),y(sigIdx),errY(sigIdx),errY(sigIdx),errX(sigIdx),errX(sigIdx),[clr 'o'],'MarkerFaceColor',clr,'CapSize',0);
+% p(1).DataTipTemplate.DataTipRows(end+1) = dataTipTextRow('unit',find(sigIdx));
+xlabel('BW, pre-cooling')
+xlim([0 360]);ylim([0 360])
+ylabel('BW, cooling')
+title('Bandwidth')
+% legend(p,{'p < 0.05','p > 0.05'},'Location','southeast')
+box on
+axis square
+
+figure;
+dDir = mANG_DIR(:,1)-mANG_DIR(:,2);
+dDir(dDir>180) = dDir(dDir>180)-360;
+dDir(dDir<-180) = dDir(dDir<-180)+360;
+sigIdx = pvalANOVA(:,1)<0.05 & pvalANOVA(:,2)<0.05;
+% histogram(dDir,-180:10:180)
+% xticks([-180:90:180])
+% box on
+% axis square
+binW = 22.5;
+bins = -binW/2:binW:360-(binW/2);
+polarhistogram(deg2rad(dDir),deg2rad(bins));hold on
+p(2) = polarscatter(deg2rad(dDir(~sigIdx)),ones(size(dDir(~sigIdx)))*25,'ko','MarkerFaceColor','w');
+p(2).DataTipTemplate.DataTipRows(end+1) = dataTipTextRow('unit',find(~sigIdx));
+p(1) = polarscatter(deg2rad(dDir(sigIdx)),ones(size(dDir(sigIdx)))*25,'ko','MarkerFaceColor','k');
+p(1).DataTipTemplate.DataTipRows(end+1) = dataTipTextRow('unit',find(sigIdx));
+ax = gca;
+ax.ThetaZeroLocation = 'top';
+ax.ThetaDir = 'clockwise';
+ax.ThetaTick = bins;
+ax.RTick = [0:5:25];
+% ax.ThetaTickLabel = {'0','45','90','135','+/-180','-135','-90','-45'};
+ax.GridAlpha = 1;
+title('Difference in preferred direction')
+
+clr = 'k';
+figure; hold on
+plot([0 100],[0 100],'k--')
+x = mBW(:,1);
+errX = semBW(:,1);
+y = mBW(:,2);
+errY = semBW(:,2);
+sigIdx = pvalBW<0.05;
+p(2) = errorbar(x(~sigIdx),y(~sigIdx),errY(~sigIdx),errY(~sigIdx),errX(~sigIdx),errX(~sigIdx),[clr 'o'],'MarkerFaceColor','w','CapSize',0);
+p(2).DataTipTemplate.DataTipRows(end+1) = dataTipTextRow('unit',find(~sigIdx));
+p(1) = errorbar(x(sigIdx),y(sigIdx),errY(sigIdx),errY(sigIdx),errX(sigIdx),errX(sigIdx),[clr 'o'],'MarkerFaceColor',clr,'CapSize',0);
+p(1).DataTipTemplate.DataTipRows(end+1) = dataTipTextRow('unit',find(sigIdx));
+xlabel('BW, pre-cooling')
+ylabel('BW, cooling')
+title('Bandwidth')
+legend(p,{'p < 0.05','p > 0.05'},'Location','southeast')
+box on
+axis square
 
 
 % subplot(3,3,6); hold on
