@@ -126,8 +126,8 @@ xlabel('number of PCs')
 clear lbl
 
 
-D = distDat{2,3}; R = D.rTrial_norm; 
-% R = R./max(R); 
+D = distDat{2,3}; R = D.rTrial; 
+R = R./max(R); 
 C_dir = D.cTrial; dirs = unique(C_dir);
 C_ori = mod(C_dir,180); oris = unique(C_ori);
 [coeff,score] = pca(R);
@@ -141,7 +141,7 @@ mdl_ori3 = fitcdiscr(score(:,[pcA pcB pcC]),C_ori);
 eval = 90;
 a = find(dirs==eval);
 b = find(dirs~=eval)';
-sym(a) = 'o'; sym(b) = 'o';
+sym(a) = '^'; sym(b) = 'o';
 clrs = hsv(length(dirs));
 
 figure;hold on
@@ -156,11 +156,8 @@ for i = 1:length(dirs)
 end
 % gs = gscatter(score(:,pcA),score(:,pcB),C_dir,[],sym);
 xlabel(['PC' num2str(pcA)]);ylabel(['PC' num2str(pcB)])
-legend(p1,lbl)
-xlim([-2 2])
-ylim([-2 2])
-axis square
 box on
+legend(p1,lbl)
 
 figure;hold on
 for i = b(1)
@@ -173,10 +170,11 @@ for i = 1:length(dirs)
 end
 xlabel(['PC' num2str(pcA)]);ylabel(['PC' num2str(pcB)]);zlabel(['PC' num2str(pcC)])
 legend(p2,lbl)
-view([62,8.2])
+view([60.1975,10.5950])
 xlim([-2 2])
-ylim([-1.5 1.5])
-zlim([-1.5 1.5])
+ylim([-2 2])
+zlim([-2 2])
+view([a e])
 axis square
 box on
 
@@ -185,7 +183,7 @@ clear sym lbl
 eval = mod(eval,180);
 a = find(oris==eval);
 b = find(oris~=eval)';
-sym(a) = 'o'; sym(b) = 'o';
+sym(a) = '^'; sym(b) = 'o';
 clrs = hsv(length(oris));
 
 figure;hold on
@@ -199,10 +197,8 @@ for i = 1:length(oris)
     lbl{i} = num2str(oris(i));
 end
 % gs = gscatter(score(:,pcA),score(:,pcB),C_ori,[],sym);
-xlabel(['PC' num2str(pcA)]);ylabel(['PC' num2str(pcB)])
+xlabel(['PC' num2str(pcA)]);ylabel(['PC3' num2str(pcB)])
 legend(p3,lbl)
-xlim([-2 2])
-ylim([-2 2])
 axis square
 box on
 
@@ -217,10 +213,11 @@ for i = 1:length(oris)
 end
 xlabel(['PC' num2str(pcA)]);ylabel(['PC' num2str(pcB)]);zlabel(['PC' num2str(pcC)])
 legend(p4,lbl)
-view([62,8.2])
+view([60.1975,10.5950])
 xlim([-2 2])
-ylim([-1.5 1.5])
-zlim([-1.5 1.5])
+ylim([-2 2])
+zlim([-2 2])
+view([a e])
 axis square
 box on
 
