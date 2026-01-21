@@ -3,8 +3,8 @@ clear all
 close all
 
 proj = 'V1cool_ori';
-% dataFold = '/Volumes/NielsenHome2/Brandon/data';
-dataFold = 'Y:\Brandon\data';
+dataFold = '/Volumes/NielsenHome2/Brandon/data';
+% dataFold = 'Y:\Brandon\data';
 % dataFold = 'C:\Users\brand\Documents\data';
 % dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
 anaMode = 'SU';
@@ -112,8 +112,9 @@ for e = 1:3
         %tuning curve
         rMean = mean(rMat,1,'omitnan');
         rSem = std(rMat,[],1,'omitnan')/sqrt(size(rMat,1));
+        pvalTUNE(u,e) = anova1(rMat,[],'off');
 
-        wHan=hanning(3);
+        wHan=hann(3);
         wHan=wHan/sum(wHan);
         rWrap = [rMean rMean rMean];
         rSmooth = conv(rWrap,wHan,'same');
@@ -132,7 +133,10 @@ for e = 1:3
             
             [~,BW(u,e,rep)] = compute_bw(conds,rRep);
 
-            wHan=hanning(3);
+            [BW(u,e,rep),BW_s(u,e,rep)] = compute_bw(conds,rRep);
+
+
+            wHan=hann(3);
             wHan=wHan/sum(wHan);
             rWrap_rep = [rRep rRep rRep];
             rSmooth_rep = conv(rWrap_rep,wHan,'same');
@@ -359,6 +363,7 @@ for u = [5 8]
 %     saveas(gcf,fullfile(dataFold,'Figures',proj,'matchedSU',['su' num2str(u)]),'fig')
 %     saveas(gcf,fullfile(dataFold,'Figures',proj,'matchedSU',['su' num2str(u)]),'svg')
 
+
     
 %     figure; hold on
 %     countTrials = 0;
@@ -480,10 +485,46 @@ axis square
 figure; hold on
 % % subplot(3,3,5); hold on
 
-x = [dsi(:,1),mDSI(:,1)]';
-y = [dsi(:,2),mDSI(:,2)]';
-dDSI(1,:) = sqrt(sum([diff(x).^2;diff(y).^2]));
-% plot(x,y,'-','Color',colors{1},'LineWidth',2)
+% x = [dsi(:,1),mDSI(:,1)]';
+% y = [dsi(:,2),mDSI(:,2)]';
+% dDSI(1,:) = sqrt(sum([diff(x).^2;diff(y).^2]));
+% % plot(x,y,'-','Color',colors{1},'LineWidth',2)
+% 
+% x = [dsi_s(:,1),mDSI_sRep(:,1)]';
+% y = [dsi_s(:,2),mDSI_sRep(:,2)]';
+% dDSI(2,:) = sqrt(sum([diff(x).^2;diff(y).^2]));
+% % plot(x,y,'--','Color',colors{2},'LineWidth',2)
+% 
+% x = [mDSI_sRep(:,1),mDSI(:,1)]';
+% y = [mDSI_sRep(:,2),mDSI(:,2)]';
+% dDSI(3,:) = sqrt(sum([diff(x).^2;diff(y).^2]));
+% % plot(x,y,'-.','Color',colors{3},'LineWidth',2)
+% 
+% x = [dsi(:,1),dsi_s(:,1)]';
+% y = [dsi(:,2),dsi_s(:,2)]';
+% dDSI(4,:) = sqrt(sum([diff(x).^2;diff(y).^2]));
+% % plot(x,y,':','Color',colors{4},'LineWidth',2)
+% 
+% % cdfP = cdfplot(dDSI(1,:));
+% % cdfP.LineStyle = '-';
+% % % cdfP.Color = 'k';
+% % cdfP.LineWidth = 3;
+% % cdfP = cdfplot(dDSI(2,:));
+% % cdfP.LineStyle = '--';
+% % % cdfP.Color = 'k';
+% % cdfP.LineWidth = 3;
+% % cdfP = cdfplot(dDSI(3,:));
+% % cdfP.LineStyle = '-.';
+% % % cdfP.Color = 'k';
+% % cdfP.LineWidth = 3;
+% % cdfP = cdfplot(dDSI(4,:));
+% % cdfP.LineStyle = ':';
+% % % cdfP.Color = 'k';
+% % cdfP.LineWidth = 3;
+% % axis square
+% % box on
+% % xlabel('dDSI (euc. dist.)')
+% % ylabel('percentile')
 
 x = [dsi_s(:,1),mDSI_s(:,1)]';
 y = [dsi_s(:,2),mDSI_s(:,2)]';

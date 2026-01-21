@@ -1,13 +1,13 @@
 %anaV1cool_ori2
 clear
-close all
+% close all
 
 anaMode = 'MU';
 proj = 'V1cool_ori';
 area = 'PSS';
 % dataFold = 'Y:\Brandon\data';
-% dataFold = '/Volumes/NielsenHome2/Brandon/data';
-dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
+dataFold = '/Volumes/NielsenHome2/Brandon/data';
+% dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
 ageGroups = {[28 32],[33 40],[41 80],[81 120]};
 
 %% Generate Project Table
@@ -173,18 +173,21 @@ for a = 1:length(animals)
         i = goodIdCntrl{a,1};
 
         r1 = dat.cntrl{a,1}.rPref(i);
+        r1L = log10(r1+1);
         rPref.cntrl.dist{a} = r1;
         rPref.cntrl.ave(a) = mean(r1,'omitnan');
         rPref.cntrl.sem(a) = std(r1,'omitnan')/sqrt(length(r1));
         rPref.cntrl.n(a) = length(r1);
 
         r2 = dat.cool{a,1}.rPref(i);
+        r2L = log10(r2+1);
         rPref.cool.dist{a} = r2;
         rPref.cool.ave(a) = mean(r2,'omitnan');
         rPref.cool.sem(a) = std(r2,'omitnan')/sqrt(length(r2));
         rPref.cool.n(a) = length(r2);
 
         si.dist{a} = (r2-r1)./(r2+r1);
+        % si.dist{a} = (r2L-r1L)./(r2L+r1L);
         si.ave(a) = mean(si.dist{a},'omitnan');
         si.sem(a) = std(si.dist{a},'omitnan')/sqrt(length(si.dist{a}));
         si.n(a) = length(si.dist{a});
@@ -794,10 +797,10 @@ unitData = unitData(unitData.good,:);
 %% split distribution
 
 D = unitDataCntrl;
-idx1 = unitDataCntrl.good & ~isnan(unitDataCntrl.latency);
-idx2 = unitDataCool.good & ~isnan(unitDataCool.latency);
-idx3 = idx1&idx2;
-idx4 = idx1&(~idx2);
+idx1 = unitDataCntrl.good & ~isnan(unitDataCntrl.latency); %pass during control
+idx2 = unitDataCool.good & ~isnan(unitDataCool.latency); %pass during cooling
+idx3 = idx1&idx2; %V1 independent
+idx4 = idx1&(~idx2); %V1 dependent
 idx5 = (~idx1)&idx2;
 
 Y = D.latency;
