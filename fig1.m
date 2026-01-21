@@ -306,17 +306,16 @@ x = cntrlStats.rPref;
 y1 = rCold;
 y2 = rWarm;
 x = x+1; y1 = y1+1; y2 = y2+1;
-for i = find(goodIdx)'%1:height(sumStats)
-    % scatter(x(i),y1(i),'c','Marker',shapes{shaftIdx(i)},'MarkerFaceColor','c','MarkerFaceAlpha',1-(sumStats.zPos(i)/max(sumStats.zPos)))
-    scatter(x(i),y1(i),'co','MarkerFaceColor','c')
-end
-scatter(x(chs),y1(chs),'go')
-
-for i = find(goodIdx)'%1:height(sumStats)
-    % scatter(x(i),y2(i),'k','Marker',shapes{shaftIdx(i)},'MarkerFaceColor','k','MarkerFaceAlpha',1-(sumStats.zPos(i)/max(sumStats.zPos)))
-    scatter(x(i),y2(i),'ko','MarkerFaceColor','k')
-end
-scatter(x(chs),y2(chs),'go')
+scatter(x,y1,'co','MarkerFaceColor','c')
+scatter(x,y2,'ko','MarkerFaceColor','k')
+% for i = find(goodIdx)'%1:height(sumStats)
+%     scatter(x(i),y1(i),'c','Marker',shapes{shaftIdx(i)},'MarkerFaceColor','c','MarkerFaceAlpha',1-(sumStats.zPos(i)/max(sumStats.zPos)))
+% end
+% scatter(x(chs),y1(chs),'go')
+% for i = find(goodIdx)'%1:height(sumStats)
+%     scatter(x(i),y2(i),'k','Marker',shapes{shaftIdx(i)},'MarkerFaceColor','k','MarkerFaceAlpha',1-(sumStats.zPos(i)/max(sumStats.zPos)))
+% end
+% scatter(x(chs),y2(chs),'go')
 xlabel('pre-cooling firing rate (Hz)')
 ylabel('firing rate (Hz)')
 set(gca, 'YScale', 'log')

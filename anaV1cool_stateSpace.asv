@@ -17,7 +17,7 @@ for e = 1:2
         uAge{e}(u) = ages(strcmp(animals,data{e}.exptName{u}(1:5)));
     end
     goodId{e} = screenUnits(data{e},'SU');
-    idx = goodId{e} & uAge{e}(:)>=37 & uAge{e}(:)<=52;
+    idx = goodId{e} & uAge{e}(:)>=33 & uAge{e}(:)<=40;
     dist{e} = anaPCA(data{e}(idx,:));
     rMat{e} = compute_rMat(data{e}(idx,:));
 
@@ -37,10 +37,8 @@ for e = 1:2
         plot3(score(i,1),score(i,2),score(i,3),'o','MarkerEdgeColor','none','MarkerFaceColor',clrs(i,:))
     end
     plot3(score(:,1),score(:,2),score(:,3),'k')
-    title(['n = ' num2str(size(rMat{e}.rMean_norm,2))])
     view(3)
-    axis square
-    box on
+    title(['n = ' num2str(size(rMat{e}.rMean_norm,2))])
 
     subplot(2,nCol,2+(nCol*(e-1)));hold on
     [coeff,score,~,~,~] = pca(rMat{e}.rTrial_norm);
@@ -54,8 +52,6 @@ for e = 1:2
     % end
     % plot3(score(:,1),score(:,2),score(:,3),'k')
     view(3)
-    axis square
-    box on
 
 
     subplot(2,nCol,3+(nCol*(e-1)));hold on
@@ -69,12 +65,8 @@ for e = 1:2
     if e==2
     legend(lbl)
     end
-    axis square
-    box on
 
     subplot(2,nCol,8);hold on
     stem(explained)
-    axis square
-    box on
 
 end
