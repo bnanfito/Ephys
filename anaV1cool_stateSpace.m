@@ -1,0 +1,65 @@
+clear all
+close all
+
+load('/Volumes/NielsenHome2/Brandon/data/dataSets/cooling/V1cool_ori/SU/V1cool_ori_SUdataSet.mat')
+
+a = 6;
+
+data{1} = vertcat(dat.cntrl{:,1});
+lbl{1} = 'control';
+data{2} = vertcat(dat.cool{:,1});
+lbl{2} = 'cool V1';
+
+for e = 1:2
+    for u = 1:height(data{e})
+        uAge(u,e) = ages(strcmp(animals,data{e}.exptName{u}(1:5)));
+    end
+    goodId = screenUnits(data{e},'SU');
+    idx = goodId & uAge(:,e)>33 & uAge(:,e)<40;
+    dist{e} = anaPCA(data{e}(idx,:));
+    rMat{e} = compute_rMat(data{e}(idx,:));
+
+    [acc(e),acc_sem(e)] = lda_bn(rMat{e}.rTrial_norm,rMat{e}.cTrial);
+end
+
+figure;
+nCol = 4;
+for e = 1:2
+
+    subplot(2,nCol,1+(nCol*(e-1)));hold on
+    [coeff,score,~,~,explained] = pca(rMat{e}.rMean_norm);
+    nC = size(rMat{e}.rMean_norm,1);
+    clrs = hsv(nC);
+    for i = 1:nC
+        plot3(score(i,1),score(i,2),score(i,3),'o','MarkerEdgeColor','none','MarkerFaceColor',clrs(i,:))
+    end
+    plot3(score(:,1),score(:,2),score(:,3),'k')
+    view(3)
+
+    subplot(2,nCol,2+(nCol*(e-1)));hold on
+    [coeff,score,~,~,~] = pca(rMat{e}.rTrial_norm);
+    for i = 1:nC
+       idx = rMat{e}.cTrial == rMat{e}.cMean(i);
+       plot3(score(idx,1),score(idx,2),score(idx,3),'o','MarkerEdgeColor','none','MarkerFaceColor',clrs(i,:))
+    end
+    % [score] = tsne(dist{e}.rMean_norm,'NumDimensions',3);
+    % for i = 1:nC
+    %     plot3(score(i,1),score(i,2),score(i,3),'o','MarkerEdgeColor','none','MarkerFaceColor',clrs(i,:))
+    % end
+    % plot3(score(:,1),score(:,2),score(:,3),'k')
+    view(3)
+
+
+    subplot(2,nCol,3+(nCol*(e-1)));hold on
+    rdm = squareform(pdist(rMat{e}.rMean_norm,'spearman'));
+    imagesc(rdm)
+    axis square tight
+    box on
+
+    subplot(2,nCol,4);hold on
+    stem(explained)
+    if e==2
+    legend(lbl)
+    end
+
+end

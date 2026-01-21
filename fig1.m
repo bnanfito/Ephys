@@ -7,9 +7,10 @@ expt = '007';
 probe = 1;
 anaMode = 'MU';
 % dataFold = 'F:\Brandon\data';
-dataFold = 'Y:\Brandon\data';
+% dataFold = 'Y:\Brandon\data';
 % dataFold = 'C:\Users\brand\Documents\data';
 % dataFold = '/Volumes/Lab drive/Brandon/data';
+dataFold = '/Volumes/NielsenHome2/Brandon/data';
 % dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
 exptName = [animal '_u' unit '_' expt];
 
@@ -121,7 +122,9 @@ for u = 1:nU
     rCold(u) = mean(fr_pref(u,coldTrialIdx),'omitnan');
     nColdTrials(u) = sum(coldTrialIdx);
 end
+siL = (log10(rCold+1)-log10(rWarm+1))./(log10(rCold+1)+log10(rWarm+1));
 si = (rCold-rWarm)./(rCold+rWarm);
+
 
 %% plot
 
@@ -304,12 +307,14 @@ y1 = rCold;
 y2 = rWarm;
 x = x+1; y1 = y1+1; y2 = y2+1;
 for i = find(goodIdx)'%1:height(sumStats)
-    scatter(x(i),y1(i),'c','Marker',shapes{shaftIdx(i)},'MarkerFaceColor','c','MarkerFaceAlpha',1-(sumStats.zPos(i)/max(sumStats.zPos)))
+    % scatter(x(i),y1(i),'c','Marker',shapes{shaftIdx(i)},'MarkerFaceColor','c','MarkerFaceAlpha',1-(sumStats.zPos(i)/max(sumStats.zPos)))
+    scatter(x(i),y1(i),'co','MarkerFaceColor','c')
 end
 scatter(x(chs),y1(chs),'go')
 
 for i = find(goodIdx)'%1:height(sumStats)
-    scatter(x(i),y2(i),'k','Marker',shapes{shaftIdx(i)},'MarkerFaceColor','k','MarkerFaceAlpha',1-(sumStats.zPos(i)/max(sumStats.zPos)))
+    % scatter(x(i),y2(i),'k','Marker',shapes{shaftIdx(i)},'MarkerFaceColor','k','MarkerFaceAlpha',1-(sumStats.zPos(i)/max(sumStats.zPos)))
+    scatter(x(i),y2(i),'ko','MarkerFaceColor','k')
 end
 scatter(x(chs),y2(chs),'go')
 xlabel('pre-cooling firing rate (Hz)')
@@ -325,14 +330,16 @@ d = sqrt((sumStats.xPos.^2)+(sumStats.zPos.^2));
 figure;hold on
 for sh = 1:nShaft
     idx = shaftIdx==sh & goodIdx;
-    scatter(d(idx),si(idx),shapes{sh})
+    scatter(d(idx),si(idx),shapes{sh},'MarkerFaceColor','flat','MarkerEdgeColor','none')
 end
 bins = 0:200:1400;
 countBin = 0;
+binIdx = zeros(1,length(si));
 for b = 2:length(bins)
     countBin = countBin+1;
     curBin = [bins(b-1),bins(b)];
     idx = d>=curBin(1) & d<curBin(2) & goodIdx;
+    binIdx(idx) = countBin;
     binD = si(idx);
     binX(countBin) = mean(curBin);
     binY(countBin) = mean(binD);
@@ -341,7 +348,10 @@ for b = 2:length(bins)
 end
 errorbar(binX,binY,binSem,'k-','LineWidth',2)
 scatter(binX(binP<0.01),binY(binP<0.01),'r*')
-
+xlabel('distance from cryoloop')
+ylabel('SI')
+axis square
+box on
 
 
 % % for febq5_u001_007: plot disinhibited channels on shaft 1

@@ -7,9 +7,9 @@ anaMode = 'SU';
 
 % dataFold = '/Volumes/Lab drive/Brandon/data/dataSets/DSdev';
 % dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/DSdev';
-% dataFold = '/Volumes/NielsenHome2/Brandon/data/dataSets/DSdev';
+dataFold = '/Volumes/NielsenHome2/Brandon/data/dataSets/DSdev';
 % dataFold = 'F:\Brandon\data\dataSets\DSdev';
-dataFold = 'Y:\Brandon\data\dataSets\DSdev';
+% dataFold = 'Y:\Brandon\data\dataSets\DSdev';
 load(fullfile(dataFold,['DSdev_' anaMode 'dataSet.mat']))
 dir = load(fullfile(dataFold,'anaRSA_dir.mat'));
 ori = load(fullfile(dataFold,'anaRSA_ori.mat'));
@@ -28,8 +28,10 @@ binSpacing = 0.05;
 bins = -1:binSpacing:2;
 binOverlap = 0.025;
 binSize = binSpacing+(2*binOverlap);
-binRight = bins+(binSize/2);
-binLeft = bins-(binSize/2);
+% binRight = bins+(binSize/2);
+% binLeft = bins-(binSize/2);
+binRight = bins+binSize;
+binLeft = bins;
 nBins = length(bins);
 for ar = 1:nAR
 for ag = 1:nAG
@@ -65,6 +67,7 @@ for ag = 1:nAG
         posIdx = contains(dat{ar,ag}.paramKey{u},'pos');
         hasSize = sum(sizeIdx|posIdx)>0;
         if hasSize
+            test=1;
             cndInclude = find(dat{ar,ag}.cndKey{u}(:,(sizeIdx|posIdx))>100);
         else
             cndInclude = 1:size(dat{ar,ag}.cndKey{u},1);
@@ -133,11 +136,11 @@ for ag = 1:nAG
 end
 end
 
-ar = 1; ag = 2;
+ar = 1; ag = 3;
 
 
 figure;hold on
-x = zscore(Rtrial{ar,ag});
+x = Rtrial{ar,ag};
 y = Cdir;
 uY = unique(y);
 imagesc(x)
@@ -161,6 +164,25 @@ axis square
 box on
 clear score
 title([areas{ar} ' P' num2str(ageGroups{ag}(1)) ' - ' num2str(ageGroups{ag}(2))])
+
+
+figure;hold on
+x = zscore(RmeanDir{ar,ag});
+y = dirs;
+uY = unique(y);
+[coeff,score] = pca(x);
+clrs = hsv(length(uY));
+for c = 1:length(uY)
+    idx = y==uY(c);
+    plot3(score(idx,1),score(idx,2),score(idx,3),'o','MarkerFaceColor',clrs(c,:))
+end
+plot3([score(:,1);score(1,1)],[score(:,2);score(1,2)],[score(:,3);score(1,3)],'k-o')
+xlabel('PC1');ylabel('PC2');zlabel('PC3')
+axis square
+box on
+clear score
+title([areas{ar} ' P' num2str(ageGroups{ag}(1)) ' - ' num2str(ageGroups{ag}(2))])
+
 
 figure('Position',[100 100 1000 600])
 for ar = 1:nAR
@@ -186,22 +208,6 @@ for ar = 1:nAR
     end
 end
 
-figure;hold on
-x = zscore(RmeanDir{ar,ag});
-y = dirs;
-uY = unique(y);
-[coeff,score] = pca(x);
-clrs = hsv(length(uY));
-for c = 1:length(uY)
-    idx = y==uY(c);
-    plot3(score(idx,1),score(idx,2),score(idx,3),'o','MarkerFaceColor',clrs(c,:))
-end
-plot3([score(:,1);score(1,1)],[score(:,2);score(1,2)],[score(:,3);score(1,3)],'k-o')
-xlabel('PC1');ylabel('PC2');zlabel('PC3')
-axis square
-box on
-clear score
-title([areas{ar} ' P' num2str(ageGroups{ag}(1)) ' - ' num2str(ageGroups{ag}(2))])
 
 figure('Position',[100 100 1000 600])
 for ar = 1:nAR
