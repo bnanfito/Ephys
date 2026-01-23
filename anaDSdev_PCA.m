@@ -39,7 +39,15 @@ for ag = 1:nAG
 
     [distDat{ar,ag}] = anaPCA(dat{ar,ag});
 
-%     [~,guess{ar,ag},truth{ar,ag},confusion{ar,ag}] = popDecode(distDat{ar,ag}.rTrial,distDat{ar,ag}.cTrial);
+    %tuning metrics
+    ldr(ar,ag) = mean(D.ldr);
+    ldr_sem(ar,ag) = sem(D.ldr);
+    dsi(ar,ag) = mean(D.dsi);
+    dsi_sem(ar,ag) = sem(D.dsi);
+    lor(ar,ag) = mean(D.lor);
+    lor_sem(ar,ag) = sem(D.lor);
+    osi(ar,ag) = mean(D.osi);
+    osi_sem(ar,ag) = sem(D.osi);
 
 end
 end
@@ -85,144 +93,174 @@ end
 
 %% LDA
 
-figure; hold on
-count = 0;
-linStyl = {'-','--'};
-curAG = 3;
-for ar = 1:nAR
-    if strcmp(areas{ar},'V1')
-        clr = 'b';
-        lblArea = 'V1';
-    elseif strcmp(areas{ar},'PSS')
-        clr = 'r';
-        lblArea = 'PSS';
+for ar = 1:length(areas)
+    for ag = 1:length(ageGroups)
+        rMat = compute_rMat(dat{ar,ag});
+        for b = 1:100
+%                 uIdx = randperm(nU(ar,ag),nSmpl(nS));
+            uIdx = randi(nU(ar,ag),1,min(nU,[],'all'));
+
+            r = rMat.rTrial_norm(:,uIdx);
+            cDir = rMat.cTrial;
+            cOri = mod(cDir,180);
+            nObs = length(cDir);
+
+            [ldaAcc_dir_boot(ar,ag,b),ldaAccSem_dir_boot(ar,ag,b)] = lda_bn(r,cDir);
+            [ldaAcc_ori_boot(ar,ag,b),ldaAccSem_ori_boot(ar,ag,b)] = lda_bn(r,cOri);
+            
+            [ldaAcc_dir_bootShuff(ar,ag,b),ldaAccSem_dir_bootShuff(ar,ag,b)] = lda_bn(r,cDir(randperm(nObs,nObs)));
+            [ldaAcc_ori_bootShuff(ar,ag,b),ldaAccSem_ori_bootShuff(ar,ag,b)] = lda_bn(r,cOri(randperm(nObs,nObs)));
+        end
+        ldaAcc_dir(ar,ag) = mean(ldaAcc_dir_boot(ar,ag,:));
+        ldaAccSem_dir(ar,ag) = mean(ldaAccSem_dir_boot(ar,ag,:));
+        ldaAcc_ori(ar,ag) = mean(ldaAcc_ori_boot(ar,ag,:));
+        ldaAccSem_ori(ar,ag) = mean(ldaAccSem_ori_boot(ar,ag,:));
+
+        ldaAcc_dir_shuff(ar,ag) = mean(ldaAcc_dir_bootShuff(ar,ag,:));
+        ldaAccSem_dir_shuff(ar,ag) = mean(ldaAccSem_dir_bootShuff(ar,ag,:));
+        ldaAcc_ori_shuff(ar,ag) = mean(ldaAcc_ori_bootShuff(ar,ag,:));
+        ldaAccSem_ori_shuff(ar,ag) = mean(ldaAccSem_ori_bootShuff(ar,ag,:));
     end
-for ag = curAG
-
-
-    D = distDat{ar,ag}; R = D.rTrial_norm; 
-%     R = R-mean(R); R = R./max(R);
-%     R = zscore(R);
-    C_dir = D.cTrial; dirs = unique(C_dir);
-    C_ori = mod(C_dir,180); oris = unique(C_ori);
-    [coeff,score] = pca(R);
-
-    for pc = 1:size(score,2)
-        [acc{ar,ag,1}(pc)] = lda_bn(score(:,1:pc),C_dir);
-        [acc{ar,ag,2}(pc)] = lda_bn(score(:,1:pc),C_ori);
-    end
-    count = count+1;
-    p(count) = plot(acc{ar,ag,1},[clr linStyl{1}],'LineWidth',2);
-    lbl{count} = [lblArea ' dir'];
-    count = count+1;
-    p(count) = plot(acc{ar,ag,2},[clr linStyl{2}],'LineWidth',2);
-    lbl{count} = [lblArea ' ori'];
 end
-end
-title(['P' num2str(ageGroups{curAG}(1)) ' - ' num2str(ageGroups{curAG}(2))])
-legend(p,lbl,'Location','southeast')
-ylabel('accuracy')
-xlabel('number of PCs')
-clear lbl
 
-
-D = distDat{2,3}; R = D.rTrial_norm; 
-% R = R./max(R); 
-C_dir = D.cTrial; dirs = unique(C_dir);
-C_ori = mod(C_dir,180); oris = unique(C_ori);
-[coeff,score] = pca(R);
-% score = D.score;
-pcA = 1;pcB = 2;pcC = 3;
-mdl_dir2 = fitcdiscr(score(:,[pcA pcB]),C_dir);
-mdl_dir3 = fitcdiscr(score(:,[pcA pcB pcC]),C_dir);
-mdl_ori2 = fitcdiscr(score(:,[pcA pcB]),C_ori);
-mdl_ori3 = fitcdiscr(score(:,[pcA pcB pcC]),C_ori);
-
-eval = 90;
-a = find(dirs==eval);
-b = find(dirs~=eval)';
-sym(a) = 'o'; sym(b) = 'o';
-clrs = hsv(length(dirs));
-
-figure;hold on
-for i = b
-K = mdl_dir2.Coeffs(a,i).Const; L = mdl_dir2.Coeffs(a,i).Linear; f = @(x1,x2) K + L(1)*x1+L(2)*x2;
-h2 = fimplicit(f); h2.LineWidth = 2; h2.Color = clrs(i,:); h2.DisplayName = ['boundary between ' num2str(dirs(a)) '&' num2str(dirs(i))];
-end
-for i = 1:length(dirs)
-    idx = C_dir==dirs(i);
-    p1(i) = plot(score(idx,pcA),score(idx,pcB),sym(i),'MarkerEdgeColor','k','MarkerFaceColor',clrs(i,:));
-    lbl{i} = num2str(dirs(i));
-end
-% gs = gscatter(score(:,pcA),score(:,pcB),C_dir,[],sym);
-xlabel(['PC' num2str(pcA)]);ylabel(['PC' num2str(pcB)])
-legend(p1,lbl)
-xlim([-2 2])
-ylim([-2 2])
-axis square
-box on
-
-figure;hold on
-for i = b(1)
-K = mdl_dir3.Coeffs(a,i).Const; L = mdl_dir3.Coeffs(a,i).Linear; f = @(x1,x2,x3) K + L(1)*x1+L(2)*x2+L(3)*x3;
-h2 = fimplicit3(f); h2.EdgeColor = 'none'; h2.FaceColor = clrs(i,:); h2.FaceAlpha = 0.3; h2.DisplayName = ['boundary between ' num2str(dirs(a)) '&' num2str(dirs(i))];
-end
-for i = 1:length(dirs)
-    idx = C_dir==dirs(i);
-    p2(i) = plot3(score(idx,pcA),score(idx,pcB),score(idx,pcC),sym(i),'MarkerEdgeColor','k','MarkerFaceColor',clrs(i,:));
-end
-xlabel(['PC' num2str(pcA)]);ylabel(['PC' num2str(pcB)]);zlabel(['PC' num2str(pcC)])
-legend(p2,lbl)
-view([62,8.2])
-xlim([-2 2])
-ylim([-1.5 1.5])
-zlim([-1.5 1.5])
-axis square
-box on
-
-clear sym lbl
-
-eval = mod(eval,180);
-a = find(oris==eval);
-b = find(oris~=eval)';
-sym(a) = 'o'; sym(b) = 'o';
-clrs = hsv(length(oris));
-
-figure;hold on
-for i = b
-    K = mdl_ori2.Coeffs(a,i).Const; L = mdl_ori2.Coeffs(a,i).Linear; f = @(x1,x2) K + L(1)*x1+L(2)*x2;
-    h2 = fimplicit(f); h2.LineWidth = 2; h2.Color = clrs(i,:); h2.DisplayName = ['boundary between ' num2str(oris(a)) '&' num2str(oris(i))];
-end
-for i = 1:length(oris)
-    idx = C_ori==oris(i);
-    p3(i) = plot(score(idx,pcA),score(idx,pcB),sym(i),'MarkerEdgeColor','k','MarkerFaceColor',clrs(i,:));
-    lbl{i} = num2str(oris(i));
-end
-% gs = gscatter(score(:,pcA),score(:,pcB),C_ori,[],sym);
-xlabel(['PC' num2str(pcA)]);ylabel(['PC' num2str(pcB)])
-legend(p3,lbl)
-xlim([-2 2])
-ylim([-2 2])
-axis square
-box on
-
-figure;hold on
-for i = b(1)
-K = mdl_ori3.Coeffs(a,i).Const; L = mdl_ori3.Coeffs(a,i).Linear; f = @(x1,x2,x3) K + L(1)*x1+L(2)*x2+L(3)*x3;
-h2 = fimplicit3(f); h2.EdgeColor = 'none'; h2.FaceColor = clrs(i,:); h2.FaceAlpha = 0.3; h2.DisplayName = ['boundary between ' num2str(oris(a)) '&' num2str(oris(i))];
-end
-for i = 1:length(oris)
-    idx = C_ori==oris(i);
-    p4(i) = plot3(score(idx,pcA),score(idx,pcB),score(idx,pcC),sym(i),'MarkerEdgeColor','k','MarkerFaceColor',clrs(i,:));
-end
-xlabel(['PC' num2str(pcA)]);ylabel(['PC' num2str(pcB)]);zlabel(['PC' num2str(pcC)])
-legend(p4,lbl)
-view([62,8.2])
-xlim([-2 2])
-ylim([-1.5 1.5])
-zlim([-1.5 1.5])
-axis square
-box on
+% figure; hold on
+% count = 0;
+% linStyl = {'-','--'};
+% curAG = 3;
+% for ar = 1:nAR
+%     if strcmp(areas{ar},'V1')
+%         clr = 'b';
+%         lblArea = 'V1';
+%     elseif strcmp(areas{ar},'PSS')
+%         clr = 'r';
+%         lblArea = 'PSS';
+%     end
+% for ag = curAG
+% 
+% 
+%     D = distDat{ar,ag}; R = D.rTrial_norm; 
+% %     R = R-mean(R); R = R./max(R);
+% %     R = zscore(R);
+%     C_dir = D.cTrial; dirs = unique(C_dir);
+%     C_ori = mod(C_dir,180); oris = unique(C_ori);
+%     [coeff,score] = pca(R);
+% 
+%     for pc = 1:size(score,2)
+%         [acc{ar,ag,1}(pc)] = lda_bn(score(:,1:pc),C_dir);
+%         [acc{ar,ag,2}(pc)] = lda_bn(score(:,1:pc),C_ori);
+%     end
+%     count = count+1;
+%     p(count) = plot(acc{ar,ag,1},[clr linStyl{1}],'LineWidth',2);
+%     lbl{count} = [lblArea ' dir'];
+%     count = count+1;
+%     p(count) = plot(acc{ar,ag,2},[clr linStyl{2}],'LineWidth',2);
+%     lbl{count} = [lblArea ' ori'];
+% end
+% end
+% title(['P' num2str(ageGroups{curAG}(1)) ' - ' num2str(ageGroups{curAG}(2))])
+% legend(p,lbl,'Location','southeast')
+% ylabel('accuracy')
+% xlabel('number of PCs')
+% clear lbl
+% 
+% 
+% D = distDat{2,3}; R = D.rTrial_norm; 
+% % R = R./max(R); 
+% C_dir = D.cTrial; dirs = unique(C_dir);
+% C_ori = mod(C_dir,180); oris = unique(C_ori);
+% [coeff,score] = pca(R);
+% % score = D.score;
+% pcA = 1;pcB = 2;pcC = 3;
+% mdl_dir2 = fitcdiscr(score(:,[pcA pcB]),C_dir);
+% mdl_dir3 = fitcdiscr(score(:,[pcA pcB pcC]),C_dir);
+% mdl_ori2 = fitcdiscr(score(:,[pcA pcB]),C_ori);
+% mdl_ori3 = fitcdiscr(score(:,[pcA pcB pcC]),C_ori);
+% 
+% eval = 90;
+% a = find(dirs==eval);
+% b = find(dirs~=eval)';
+% sym(a) = 'o'; sym(b) = 'o';
+% clrs = hsv(length(dirs));
+% 
+% figure;hold on
+% for i = b
+% K = mdl_dir2.Coeffs(a,i).Const; L = mdl_dir2.Coeffs(a,i).Linear; f = @(x1,x2) K + L(1)*x1+L(2)*x2;
+% h2 = fimplicit(f); h2.LineWidth = 2; h2.Color = clrs(i,:); h2.DisplayName = ['boundary between ' num2str(dirs(a)) '&' num2str(dirs(i))];
+% end
+% for i = 1:length(dirs)
+%     idx = C_dir==dirs(i);
+%     p1(i) = plot(score(idx,pcA),score(idx,pcB),sym(i),'MarkerEdgeColor','k','MarkerFaceColor',clrs(i,:));
+%     lbl{i} = num2str(dirs(i));
+% end
+% % gs = gscatter(score(:,pcA),score(:,pcB),C_dir,[],sym);
+% xlabel(['PC' num2str(pcA)]);ylabel(['PC' num2str(pcB)])
+% legend(p1,lbl)
+% xlim([-2 2])
+% ylim([-2 2])
+% axis square
+% box on
+% 
+% figure;hold on
+% for i = b(1)
+% K = mdl_dir3.Coeffs(a,i).Const; L = mdl_dir3.Coeffs(a,i).Linear; f = @(x1,x2,x3) K + L(1)*x1+L(2)*x2+L(3)*x3;
+% h2 = fimplicit3(f); h2.EdgeColor = 'none'; h2.FaceColor = clrs(i,:); h2.FaceAlpha = 0.3; h2.DisplayName = ['boundary between ' num2str(dirs(a)) '&' num2str(dirs(i))];
+% end
+% for i = 1:length(dirs)
+%     idx = C_dir==dirs(i);
+%     p2(i) = plot3(score(idx,pcA),score(idx,pcB),score(idx,pcC),sym(i),'MarkerEdgeColor','k','MarkerFaceColor',clrs(i,:));
+% end
+% xlabel(['PC' num2str(pcA)]);ylabel(['PC' num2str(pcB)]);zlabel(['PC' num2str(pcC)])
+% legend(p2,lbl)
+% view([62,8.2])
+% xlim([-2 2])
+% ylim([-1.5 1.5])
+% zlim([-1.5 1.5])
+% axis square
+% box on
+% 
+% clear sym lbl
+% 
+% eval = mod(eval,180);
+% a = find(oris==eval);
+% b = find(oris~=eval)';
+% sym(a) = 'o'; sym(b) = 'o';
+% clrs = hsv(length(oris));
+% 
+% figure;hold on
+% for i = b
+%     K = mdl_ori2.Coeffs(a,i).Const; L = mdl_ori2.Coeffs(a,i).Linear; f = @(x1,x2) K + L(1)*x1+L(2)*x2;
+%     h2 = fimplicit(f); h2.LineWidth = 2; h2.Color = clrs(i,:); h2.DisplayName = ['boundary between ' num2str(oris(a)) '&' num2str(oris(i))];
+% end
+% for i = 1:length(oris)
+%     idx = C_ori==oris(i);
+%     p3(i) = plot(score(idx,pcA),score(idx,pcB),sym(i),'MarkerEdgeColor','k','MarkerFaceColor',clrs(i,:));
+%     lbl{i} = num2str(oris(i));
+% end
+% % gs = gscatter(score(:,pcA),score(:,pcB),C_ori,[],sym);
+% xlabel(['PC' num2str(pcA)]);ylabel(['PC' num2str(pcB)])
+% legend(p3,lbl)
+% xlim([-2 2])
+% ylim([-2 2])
+% axis square
+% box on
+% 
+% figure;hold on
+% for i = b(1)
+% K = mdl_ori3.Coeffs(a,i).Const; L = mdl_ori3.Coeffs(a,i).Linear; f = @(x1,x2,x3) K + L(1)*x1+L(2)*x2+L(3)*x3;
+% h2 = fimplicit3(f); h2.EdgeColor = 'none'; h2.FaceColor = clrs(i,:); h2.FaceAlpha = 0.3; h2.DisplayName = ['boundary between ' num2str(oris(a)) '&' num2str(oris(i))];
+% end
+% for i = 1:length(oris)
+%     idx = C_ori==oris(i);
+%     p4(i) = plot3(score(idx,pcA),score(idx,pcB),score(idx,pcC),sym(i),'MarkerEdgeColor','k','MarkerFaceColor',clrs(i,:));
+% end
+% xlabel(['PC' num2str(pcA)]);ylabel(['PC' num2str(pcB)]);zlabel(['PC' num2str(pcC)])
+% legend(p4,lbl)
+% view([62,8.2])
+% xlim([-2 2])
+% ylim([-1.5 1.5])
+% zlim([-1.5 1.5])
+% axis square
+% box on
 
 %% Plot
 
@@ -574,14 +612,6 @@ for ar = 1:length(areas)
     end
     for ag = 1:length(ageGroups)
         D = dat{ar,ag};
-        ldr(ar,ag) = mean(D.ldr);
-        ldr_sem(ar,ag) = sem(D.ldr);
-        dsi(ar,ag) = mean(D.dsi);
-        dsi_sem(ar,ag) = sem(D.dsi);
-        lor(ar,ag) = mean(D.lor);
-        lor_sem(ar,ag) = sem(D.lor);
-        osi(ar,ag) = mean(D.osi);
-        osi_sem(ar,ag) = sem(D.osi);
     end
     
     subplot(2,2,1);hold on
@@ -615,61 +645,27 @@ end
 subplot(2,2,1);hold on
 legend(p(1:2),areas,'Location','southeast')
 
-for ar = 1:length(areas)
-    for ag = 1:length(ageGroups)
-        rMat = create_rMat(dat{ar,ag});
-        nSmpl = [5,10,30,nU(ar,ag)];
-        for nS = 1:length(nSmpl)
-            for b = 1:100
-%                 uIdx = randperm(nU(ar,ag),nSmpl(nS));
-                uIdx = randi(nU(ar,ag),1,min(nU,[],'all'));
 
-                r = rMat.trialNorm(:,uIdx);
-                cDir = rMat.trialConds;
-                cOri = mod(cDir,180);
-                nObs = length(cDir);
-
-                [ldaAcc_dir_boot(ar,ag,b),ldaAccSem_dir_boot(ar,ag,b)] = lda_bn(r,cDir);
-                [ldaAcc_ori_boot(ar,ag,b),ldaAccSem_ori_boot(ar,ag,b)] = lda_bn(r,cOri);
-                
-                [ldaAcc_dir_bootShuff(ar,ag,b),ldaAccSem_dir_bootShuff(ar,ag,b)] = lda_bn(r,cDir(randperm(nObs,nObs)));
-                [ldaAcc_ori_bootShuff(ar,ag,b),ldaAccSem_ori_bootShuff(ar,ag,b)] = lda_bn(r,cOri(randperm(nObs,nObs)));
-            end
-            ldaAcc_dir(ar,ag,nS) = mean(ldaAcc_dir_boot(ar,ag,:));
-            ldaAccSem_dir(ar,ag,nS) = mean(ldaAccSem_dir_boot(ar,ag,:));
-            ldaAcc_ori(ar,ag,nS) = mean(ldaAcc_ori_boot(ar,ag,:));
-            ldaAccSem_ori(ar,ag,nS) = mean(ldaAccSem_ori_boot(ar,ag,:));
-
-            ldaAcc_dir_shuff(ar,ag,nS) = mean(ldaAcc_dir_bootShuff(ar,ag,:));
-            ldaAccSem_dir_shuff(ar,ag,nS) = mean(ldaAccSem_dir_bootShuff(ar,ag,:));
-            ldaAcc_ori_shuff(ar,ag,nS) = mean(ldaAcc_ori_bootShuff(ar,ag,:));
-            ldaAccSem_ori_shuff(ar,ag,nS) = mean(ldaAccSem_ori_bootShuff(ar,ag,:));
-        end
-    end
-
-end
 figure
-for nS = 1:length(nSmpl)
-    subplot(1,length(nSmpl),nS);hold on
-    plot([0 1],[0 1],'k--')
-    xline(1/12,'k:')
-    yline(1/6,'k:')
-    for ar = 1:length(areas)
-        switch areas{ar}
-            case 'V1'
-                clr = 'b';
-            case 'PSS'
-                clr = 'r';
-        end
-        errorbar(ldaAcc_dir(ar,:,nS),ldaAcc_ori(ar,:,nS),ldaAccSem_ori(ar,:,nS),ldaAccSem_ori(ar,:,nS),ldaAccSem_dir(ar,:,nS),ldaAccSem_dir(ar,:,nS),clr)
-        errorbar(ldaAcc_dir_shuff(ar,:,nS),ldaAcc_ori_shuff(ar,:,nS),ldaAccSem_ori_shuff(ar,:,nS),ldaAccSem_ori_shuff(ar,:,nS),ldaAccSem_dir_shuff(ar,:,nS),ldaAccSem_dir_shuff(ar,:,nS),[clr '--'])
+plot([0 1],[0 1],'k--')
+xline(1/12,'k:')
+yline(1/6,'k:')
+for ar = 1:length(areas)
+    switch areas{ar}
+        case 'V1'
+            clr = 'b';
+        case 'PSS'
+            clr = 'r';
     end
-    axis square
-    box on
-    xlabel('LDA acc. on dir.')
-    xlim([0 1])
-    ylabel('LDA acc. on ori.')
-    ylim([0 1])
+    errorbar(ldaAcc_dir(ar,:),ldaAcc_ori(ar,:),ldaAccSem_ori(ar,:),ldaAccSem_ori(ar,:),ldaAccSem_dir(ar,:),ldaAccSem_dir(ar,:),clr)
+    errorbar(ldaAcc_dir_shuff(ar,:),ldaAcc_ori_shuff(ar,:),ldaAccSem_ori_shuff(ar,:),ldaAccSem_ori_shuff(ar,:),ldaAccSem_dir_shuff(ar,:),ldaAccSem_dir_shuff(ar,:),[clr '--'])
 end
+axis square
+box on
+xlabel('LDA acc. on dir.')
+xlim([0 1])
+ylabel('LDA acc. on ori.')
+ylim([0 1])
+
 
 
