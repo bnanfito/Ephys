@@ -5,10 +5,10 @@ function [out] = sem(x)
     % if x is a matrix, each row is treated as an observation and each
     % column as a variable
     if size(x,1)>1 && size(x,2)>1
-        sig = std(x,[],1);
+        sig = std(x,[],1,'omitnan');
         n = size(x,1);
     else
-        sig = std(x);
+        sig = std(x,'omitnan');
         n = length(x);
     end
     out = sig/sqrt(n);

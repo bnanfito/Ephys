@@ -2,10 +2,16 @@
 
 function [R] = compute_rMat(data)
 
+    nU = height(data);
+
+    % %shuffle preferences
+    % for u = 1:nU
+    %     k = randi(size(data.response{u},2),1);
+    %     data.response{u} = circshift(data.response{u},k,2);
+    % end
+
     [~,oriPrefIdx] = sort(data.oriPref);
     data = data(oriPrefIdx,:); %sort units by their pref dir of motion
-    
-    nU = height(data);
     
     % keepIdx = [];
     % for u = 1:nU

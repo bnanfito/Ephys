@@ -1,0 +1,267 @@
+clear all
+close all
+
+dataFold = '/Volumes/NielsenHome2/Brandon/data';
+anaMode = 'MU';
+ageRange = [0 1000];
+epochs = {'baseline','early stim','late stim','early post','late post'};
+epochRanges = {[-2 0],[0 0.1],[0.1 1],[1 2],[2 4]};
+
+%% Load data
+
+load(fullfile(dataFold,'dataSets','cooling','V1cool_ori',anaMode,['V1cool_ori_' anaMode 'dataSet.mat']))
+
+%% Format data
+if strcmp(anaMode,'SU')
+    data{1} = vertcat(dat.cntrl{:,1});
+    data{2} = vertcat(dat.cool{:,1});
+elseif strcmp(anaMode,'MU')
+    for a = 1:size(dat.cntrl,1)
+        aEmpty(a,1) = isempty(dat.cntrl{a});
+        aEmpty(a,2) = isempty(dat.cool{a});
+    end
+    aIdx = ~aEmpty(:,1) & ~aEmpty(:,2);
+    data{1} = vertcat(dat.cntrl{aIdx,1});
+    data{2} = vertcat(dat.cool{aIdx,1});
+elseif strcmp(anaMode,'matchedSU')
+    data{1} = dat{1};
+    data{2} = dat{2};
+end
+
+for e = 1:length(data)
+
+    for u = 1:height(data{e})
+        uAge{e}(u) = ages(strcmp(animals,data{e}.exptName{u}(1:5)));
+        baseFR{e}(u) = mean(data{e}.rBlank{u},'omitnan');
+    end
+
+    if strcmp(anaMode,'matchedSU')
+        goodId = screenUnits(data{1},'SU') & screenUnits(data{2},'SU');
+    elseif strcmp(anaMode,'MU')
+        goodId = screenUnits(data{1},'MU') & screenUnits(data{2},'MU');
+    else
+        goodId = screenUnits(data{e},anaMode);
+    end
+    keepIdx{e} = goodId' & uAge{e}>=ageRange(1) & uAge{e}<=ageRange(2) & baseFR{e}>2;
+    data{e}.age = uAge{e}';
+    data{e}.goodId = goodId;
+
+end
+
+for e = 1:length(data)
+    data{e} = data{e}(keepIdx{e},:);
+end
+
+%% Compute Fano Factor
+
+figure; hold on
+
+varNames = {'uID','cooling','age','epoch','rPref','rNull','FF'};
+uDatTbl = table();
+countU = 0;
+for e = 1:2
+    nU = height(data{e});
+    if e == 1
+    linStyl = '-';
+    elseif e == 2
+    linStyl = '--';
+    end
+for u = 1:nU
+    newRow.uID = data{e}.uID(u);
+        newRow.cooling = e;
+        newRow.age = data{e}.age(u);
+        newRow.epoch = epochs{p};
+        newRow.rPref = mean(data{e}.rPref{u}, 'omitnan');
+        newRow.rNull = mean(data{e}.rNull{u}, 'omitnan');
+        uDatTbl = [uDatTbl; newRow];
+for p = 1:length(epochs)
+    pRange = epochRanges{p};
+    switch epochs{p}
+        case 'baseline' 
+            clr = 'k';
+        case 'early stim'
+            clr = 'm';
+        case 'late stim'
+            clr = 'r';
+        case 'early post'
+            clr = 'c';
+        case 'late post'
+            clr = 'b';
+    end
+
+spks = data{e}.spkTimes{u};
+trialKey = data{e}.fr(u).trialNum; 
+nReps = size(trialKey,1);
+nConds = size(trialKey,2);
+repKey = repmat((1:nReps)',1,nConds);
+condKey = repmat(1:nConds,nReps,1);
+spks = spks(:,spks(1,:)>pRange(1)&spks(1,:)<=pRange(2));
+trialId = spks(2,:);
+nTrials = numel(trialKey);
+for t = 1:nTrials
+
+        tSpks{t} = spks(1,trialId==t);
+    
+        spkTs{t,p} = tSpks{t}(tSpks{t}>pRange(1)&tSpks{t}<=pRange(2));
+        isi{t,p} = diff(spkTs{t,p});
+
+end
+ISI{u,e,p} = [isi{:,p}];
+ISImean{e,p}(u) = mean(ISI{u,e,p},'omitnan');
+CV{e,p}(u) = std(ISI{u,e,p})/ISImean{e,p}(u);
+
+clear isi 
+
+% Ws = [0.001 0.01 0.1 1 2 ];% time bin width for fano factor calculation
+Ws = [0.01:0.01:0.1 , 0.2:0.1:2 ];
+for i = 1:length(Ws)
+    w = Ws(i);
+    % ffBins{p,i} = pRange(1):w:pRange(2);
+    ffBins{p,i} = [pRange(1) pRange(1)+w];
+    ffBinCounts{p,i} = [];
+    for j = 1:nTrials
+        if ~(w>abs(diff(pRange)))
+            ffBinCounts{p,i} = [ffBinCounts{p,i} histcounts(spkTs{j,p},ffBins{p,i})];
+        end
+    end
+    mSpkCount{u,e,p}(i) = mean(ffBinCounts{p,i});
+    ffVar{u,e,p}(i) = var(ffBinCounts{p,i});
+    fano{u,e,p}(i) = var(ffBinCounts{p,i})/mean(ffBinCounts{p,i});
+end
+
+clear spkTs tSpks
+
+if u==5
+
+    if e == 1
+        subplot(4,2,1);hold on
+        title('Raster Plot');
+        ylabel('control trials')
+    elseif e == 2
+        subplot(4,2,3);hold on
+        xlabel('Time (s)');
+        ylabel('cool trials')
+    end
+    spkId = spks(1,:)>pRange(1)&spks(1,:)<=pRange(2);
+    x = spks(1,:);
+    y = spks(2,:);
+    x = x(spkId);
+    y = y(spkId);
+    scatter(x,y,[clr '.'])
+    ylim([0 nTrials+1])
+    % for t = 1:nTrials
+    %     xT = x(y==t);
+    %     if isempty(xT)
+    %         continue
+    %     end
+    %     c = unique(condKey(trialKey==t));
+    %     r = unique(repKey(trialKey==t));
+    %     yT = c-((1/nReps)*(r-1));
+    %     plot(xT,yT, '.','Color',clr)
+    % end
+    % ylim([0 nConds])
+        
+    if e == 1 
+        subplot(4,2,2);hold on
+        title('Stimulus ISI Histogram');
+        legLcn = 'NorthEast';
+    elseif e == 2 
+        subplot(4,2,4);hold on
+        set(gca,"YDir","reverse")
+        xlabel('Inter-Spike Interval (s)');
+        legLcn = 'SouthEast';
+    end
+    bins = 0:0.001:0.100;
+    h1 = histogram(ISI{u,e,p},bins,'EdgeColor',clr,'Normalization','probability','DisplayStyle','stairs'); 
+    % legend({['prestim; CV=' num2str(CV{e,p}(u)) '; mean ISI=' num2str(ISImean{e,p}(u))],['stim; CV=' num2str(sCV{e}(u)) '; mean ISI=' num2str(sISImean{e}(u))],['poststim; CV=' num2str(pCV{e}(u)) '; mean ISI=' num2str(pISImean{e}(u))]},'Location',legLcn)
+    ylabel('Count');
+    
+    subplot(2,2,3);hold on
+    plot(Ws,fano{u,e,p},[clr linStyl],'LineWidth',1)
+    % plot(Ws,mSpkCount{u,e,p},[clr '--'])
+    % plot(Ws,ffVar{u,e,p},[clr ':'])
+    set(gca,'XScale','log')
+
+
+end
+
+end
+
+newRow = table();
+
+end
+
+end
+
+
+
+% figure;
+for p = 1:length(epochs)
+    pRange = epochRanges{p};
+    switch epochs{p}
+        case 'baseline' 
+            clr = 'k';
+        case 'early stim'
+            clr = 'm';
+        case 'late stim'
+            clr = 'r';
+        case 'early post'
+            clr = 'c';
+        case 'late post'
+            clr = 'b';
+    end
+
+subplot(2,2,4);hold on
+FF_cntrl = vertcat(fano{:,1,p}); FF_cntrl = FF_cntrl(:, Ws<=abs(diff(pRange)) );
+FF_cool = vertcat(fano{:,2,p});FF_cool = FF_cool(:, Ws<=abs(diff(pRange)) );
+% plot(Ws(1:size(FF_cntrl,2)),FF_cntrl',clr)
+% errorbar(Ws(1:size(FF_cntrl,2)),mean(FF_cntrl,'omitnan'),sem(FF_cntrl),clr,'LineWidth',2)
+% errorbar(Ws(1:size(FF_cool,2)),mean(FF_cool,'omitnan'),sem(FF_cool),[clr '--'],'LineWidth',2)
+plot(Ws(1:size(FF_cntrl,2)),mean(FF_cntrl,'omitnan'),clr,'LineWidth',2)
+plot(Ws(1:size(FF_cool,2)),mean(FF_cool,'omitnan'),[clr '--'],'LineWidth',2)
+patch([Ws(1:size(FF_cntrl,2)) fliplr(Ws(1:size(FF_cntrl,2)))],[mean(FF_cntrl,'omitnan')+sem(FF_cntrl) fliplr(mean(FF_cntrl,'omitnan')-sem(FF_cntrl))],clr,'FaceAlpha',.2,'EdgeColor','none')
+patch([Ws(1:size(FF_cool,2)) fliplr(Ws(1:size(FF_cool,2)))],[mean(FF_cool,'omitnan')+sem(FF_cool) fliplr(mean(FF_cool,'omitnan')-sem(FF_cool))],clr,'FaceAlpha',.2,'EdgeColor','none')
+set(gca,'XScale','log')
+set(gca,'YScale','log')
+end
+
+figure
+for p = 1:length(epochs)
+    pRange = epochRanges{p};
+    switch epochs{p}
+        case 'baseline' 
+            clr = 'k';
+        case 'early stim'
+            clr = 'm';
+        case 'late stim'
+            clr = 'r';
+        case 'early post'
+            clr = 'c';
+        case 'late post'
+            clr = 'b';
+    end
+
+subplot(1,length(epochs),p); hold on
+y = CV{1,p}(:);
+x = ISImean{1,p}(:);
+scatter(x,y,'k.')
+scatter(mean(x,'omitnan'),0,'k^','filled')
+xline(mean(x,'omitnan'),'k--')
+scatter(0,mean(y,'omitnan'),'k>','filled')
+yline(mean(y,'omitnan'),'k--')
+y = CV{2,p}(:);
+x = ISImean{2,p}(:);
+scatter(x,y,'c.')
+scatter(mean(x,'omitnan'),0,'c^','filled')
+xline(mean(x,'omitnan'),'c--')
+scatter(0,mean(y,'omitnan'),'c>','filled')
+yline(mean(y,'omitnan'),'c--')
+set(gca,'XScale','log')
+xlabel('mean ISI')
+ylabel('CV')
+
+xlim([0 .5])
+% ylim([0 5])
+
+end
+

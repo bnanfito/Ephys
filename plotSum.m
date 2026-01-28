@@ -1,6 +1,6 @@
 
 function plotSum(dat)
-plr = 0;
+plr = 1;
 alignTC = 0;
 svePlt = 0;
 

@@ -1,9 +1,9 @@
 clear all
 close all
 
-% dataFold = '/Volumes/NielsenHome2/Brandon/data';
-dataFold = 'Y:\Brandon\data';
-ageRange = [37 52];
+dataFold = '/Volumes/NielsenHome2/Brandon/data';
+% dataFold = 'Y:\Brandon\data';
+ageRange = [33 36];
 
 anaMode = 'MU';
 
@@ -13,7 +13,7 @@ case 'SU'
     data{1} = vertcat(dat.cntrl{:,1});
     data{2} = vertcat(dat.cool{:,1});
 case 'MU'
-    load(fullfile(dataFold,'dataSets','cooling','V1cool_ori',anaMode,['V1cool_ori_' anaMode 'dataSet.mat']))
+    load(fullfile(dataFold,'dataSets','cooling','V1cool_ori',anaMode,['V1cool_ori_' anaMode 'dataSet3.mat']))
     data{1} = vertcat(dat.cntrl{:,1});
     data{2} = vertcat(dat.cool{:,1});
 case 'matchedSU'
