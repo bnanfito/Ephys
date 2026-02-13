@@ -5,8 +5,8 @@ clear
 anaMode = 'MU';
 proj = 'V1cool_ori';
 area = 'PSS';
-% dataFold = 'Y:\Brandon\data';
-dataFold = '/Volumes/NielsenHome2/Brandon/data';
+dataFold = 'Y:\Brandon\data';
+% dataFold = '/Volumes/NielsenHome2/Brandon/data';
 % dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
 ageGroups = {[28 32],[33 40],[41 80],[81 120]};
 
@@ -273,9 +273,9 @@ end
 figure('Position',[100 100 1000 700])
 
 a = 4; 
-ag = 1;
+sp = 1;
 for u = [42 52 54]
-subplot(3,3,ag); hold on
+subplot(3,3,sp); hold on
 d1 = dat.cntrl{a}.spkTimes{u}(1,:);
 d2 = dat.cool{a}.spkTimes{u}(1,:);
 nTrials1 = max(dat.cntrl{a}.fr(u).trialNum,[],'all');
@@ -299,11 +299,11 @@ end
 xlim([-1 2])
 xlabel('time (sec)')
 ylim([0 maxH])
-if ag == 1
+if sp == 1
     ylabel('firing rate')
 end
 box on
-ag = ag+1;
+sp = sp+1;
 end
 
 x = ages;

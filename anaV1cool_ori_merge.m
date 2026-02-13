@@ -3,8 +3,8 @@ clear all
 close all
 
 proj = 'V1cool_ori';
-dataFold = '/Volumes/NielsenHome2/Brandon/data';
-% dataFold = 'Y:\Brandon\data';
+% dataFold = '/Volumes/NielsenHome2/Brandon/data';
+dataFold = 'Y:\Brandon\data';
 % dataFold = 'C:\Users\brand\Documents\data';
 % dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
 anaMode = 'SU';
@@ -20,9 +20,9 @@ ageGroups = {[28 32],[33 40],[41 80],[81 120]};
 % animals = unique(projTbl.experimentId);
 % sumStats = [];
 % for a = 1:length(animals)
-% %     if ~strcmp(animals{a},'febn2')
-% %         continue
-% %     end
+%     if ~strcmp(animals{a},'febh5')
+%         continue
+%     end
 %     aniIdx = strcmp(projTbl.experimentId,animals{a});
 %     ages(a) = unique(projTbl.age(aniIdx));
 %     cd(fullfile(dataFold,'Ephys',animals{a}))
@@ -41,7 +41,7 @@ ageGroups = {[28 32],[33 40],[41 80],[81 120]};
 %         probeId = find(strcmp({id.probes.area},'PSS'));
 %         disp(['generating sumStats for ' mergeName{a,fId}])
 %     
-% %         splitIntan(fullfile(dataFold,'Ephys'),animals{a},mergeId,probeId,'BRN')
+%         splitIntan(fullfile(dataFold,'Ephys'),animals{a},mergeId,probeId,'BRN')
 %         %Load merge info
 %         load(fullfile(dataFold,'Ephys',animals{a},mergeName{a,fId},[mergeName{a,fId} '_mergeInfo.mat']))
 %         nFiles = length(mergeInfo.files);
@@ -281,8 +281,10 @@ mSize = 7;
 agShapes = {'+','square','diamond','^'};
 
 exUs = [4 25];
+% exUs = [5 8];
+% exUs = 1:nU;
 exUclrs = {[0.8500 0.3250 0.0980],[0.4660 0.6740 0.1880]};
-for u = [5 8]
+for u = exUs
 
     %Tuning Curve
     x = conds;

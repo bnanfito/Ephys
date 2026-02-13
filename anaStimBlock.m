@@ -53,6 +53,9 @@ for b = blocks'
     for i = 1:height(d{b})
     
         nTrials = numel(d{b}.fr(i).trialNum);
+%         sdf = compute_sdf(d{b}(i,:));
+%         sdfY{b}(i,:) = sdf.mean;
+%         sdfErr{b}(i,:) = sdf.sem;
         spks = d{b}.spkTimes{i}(1,:);
         psth{b}(i,:) = histcounts(spks,bins)/(nTrials*binSize);
         psth{b}(i,:) = psth{b}(i,:)-mean(psth{b}(i,bins(2:end)<0));
@@ -80,12 +83,13 @@ plot(bins(2:end),mean(meanPsth))
 
 figure
 subplot(2,2,1);hold on%figure; hold on
+clrs = [(1/8:1/8:1)' zeros(8,1) zeros(8,1)];
 for hr = 1:8
     blks = [2*hr-1,2*hr];
     psth_hr{hr} = vertcat(psth{blks});
     meanPsth_hr(hr,:) = mean(psth_hr{hr});
 %     plot3(bins(2:end),repmat(hr,1,length(bins)-1),meanPsth_hr(hr,:))
-    plot(bins(2:end),meanPsth_hr(hr,:)+((hr-1)*10))
+    plot(bins(2:end),meanPsth_hr(hr,:)+((hr-1)*10),'Color',clrs(hr,:))
     lbl_hr{hr} = ['hour #' num2str(hr) '; n=' num2str(size(psth_hr{hr},1))];
 end
 fill3([0 5 5 0],[0 0 8 8],[0 0 0 0],'k','EdgeColor','k','FaceAlpha',0)
@@ -109,6 +113,8 @@ xlabel('time (s)')
 ylabel('hour')
 axis tight
 
+binsTrain = bins;
+meanTrainPsth = meanPsth;
 clear projectTbl proj blocks b d n psth meanPsth lbl
 load([dataFold,'/dataSets/training/Train_V1Cool/MU/threshold5/ranksum/Train_V1Cool_MUdataSet.mat'])
 
@@ -122,11 +128,11 @@ subplot(2,2,3);hold on;%figure; hold on
 for b = 1:2
     if b == 1 && strcmp(area,'V1')
         d = data.v1bf;
-        linStyl = 'b--';
+        linStyl = 'k-';
         lbl{b} = 'V1 before';
     elseif b == 1 && strcmp(area,'PSS')
         d = data.pssbf;
-        linStyl = 'r--';
+        linStyl = 'k-';
         lbl{b} = 'PSS before';
     elseif b == 2 && strcmp(area,'V1')
         d = data.v1af;
@@ -154,6 +160,7 @@ for b = 1:2
     plot(bins(2:end),meanPsth(b,:),linStyl)
     lbl{b} = [lbl{b} '; n=' num2str(height(d))];
 end
+plot(binsTrain(2:end),mean(meanTrainPsth),'-','Color',[0.5 0 0])
 patch([0 1 1 0],[0 0 10 10],'k','EdgeColor','none','FaceAlpha',0.2)
 legend(lbl)
 xlabel('time (s)')

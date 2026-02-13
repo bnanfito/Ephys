@@ -7,10 +7,10 @@ expt = '007';
 probe = 1;
 anaMode = 'MU';
 % dataFold = 'F:\Brandon\data';
-% dataFold = 'Y:\Brandon\data';
+dataFold = 'Y:\Brandon\data';
 % dataFold = 'C:\Users\brand\Documents\data';
 % dataFold = '/Volumes/Lab drive/Brandon/data';
-dataFold = '/Volumes/NielsenHome2/Brandon/data';
+% dataFold = '/Volumes/NielsenHome2/Brandon/data';
 % dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
 exptName = [animal '_u' unit '_' expt];
 
@@ -302,9 +302,9 @@ box on
 % axis square
 
 figure; hold on
-x = cntrlStats.rPref;
-y1 = rCold;
-y2 = rWarm;
+x = cntrlStats.rPref(goodIdx);
+y1 = rCold(goodIdx);
+y2 = rWarm(goodIdx);
 x = x+1; y1 = y1+1; y2 = y2+1;
 scatter(x,y1,'co','MarkerFaceColor','c')
 scatter(x,y2,'ko','MarkerFaceColor','k')
