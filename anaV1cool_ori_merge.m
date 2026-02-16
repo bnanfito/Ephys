@@ -3,8 +3,8 @@ clear all
 close all
 
 proj = 'V1cool_ori';
-% dataFold = '/Volumes/NielsenHome2/Brandon/data';
-dataFold = 'Y:\Brandon\data';
+dataFold = '/Volumes/NielsenHome2/Brandon/data';
+% dataFold = 'Y:\Brandon\data';
 % dataFold = 'C:\Users\brand\Documents\data';
 % dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
 anaMode = 'SU';
@@ -102,6 +102,10 @@ for e = 1:3
 %     rPref(:,e) = dat{e}.rPref;
     for u = 1:nU
 
+        if e == 1 && u == 8
+            dat{e}.oriPref
+        end
+
         %response matrix
         rMat = dat{e}.response{u};
         rMat(rMat<0) = 0;
@@ -133,7 +137,7 @@ for e = 1:3
             
             [~,BW(u,e,rep)] = compute_bw(conds,rRep);
 
-            [BW(u,e,rep),BW_s(u,e,rep)] = compute_bw(conds,rRep);
+            % [BW(u,e,rep),BW_s(u,e,rep)] = compute_bw(conds,rRep);
 
 
             wHan=hann(3);
@@ -164,7 +168,7 @@ for e = 1:3
         bwS(u,e) = dirDat.BWSmooth;
         
 %         if e == 1
-            [c_aligned,tc_aligned(u,:,e),alignIdx(u,:)] = alignDirTuning(conds,rMean);
+            [c_aligned,tc_aligned(u,:,e),alignIdx(u,:,e)] = alignDirTuning(conds,rMean);
 %         else
 %             tc_aligned = tc_temp(alignIdx(u,:));
 %         end
@@ -280,8 +284,8 @@ d.ori = c(:);
 mSize = 7;
 agShapes = {'+','square','diamond','^'};
 
-exUs = [4 25];
-% exUs = [5 8];
+exUs = [4 10 5 23];
+% exUs = [10 47];
 % exUs = 1:nU;
 exUclrs = {[0.8500 0.3250 0.0980],[0.4660 0.6740 0.1880]};
 for u = exUs
@@ -722,252 +726,41 @@ boxchart(categorical(d.ori),d.si,'notch','on','BoxFaceColor','k')
 ylabel('SI')
 % boxchart(categorical(d.ori),d.siL,'notch','on')
 % ylabel('SI (log)')
+for u = exUs 
+    plot((r2(u,:)-r1(u,:))./(r2(u,:)+r1(u,:)),'-o');
+end
 yline(0,'k--')
 xlabel('Angle (deg. relative to preferred)')
 box on
 
 
 
+r1 = tc(:,:,1);
+r2 = tc(:,:,2);
+si = (r2-r1)./(r2+r1);
+for u = 1:size(si,1)
+    if ismember(u,find(pvalANOVA(:,1)<0.05))
+        [cAl,~,idx] = alignDirTuning(conds,r1(u,:));
+        siAL(u,:) = si(u,idx);
+        r1AL(u,:) = r1(u,idx);
+        r2AL(u,:) = r2(u,idx);
+    elseif ismember(u,find(pvalANOVA(:,2)<0.05))
+        [cAl,~,idx] = alignDirTuning(conds,r2(u,:));
+        siAL(u,:) = si(u,idx);
+        r1AL(u,:) = r1(u,idx);
+        r2AL(u,:) = r2(u,idx);
+    else
+        siAL(u,:) = nan(1,size(si,2)+1);
+        r1AL(u,:) = nan(1,size(si,2)+1);
+        r2AL(u,:) = nan(1,size(si,2)+1);
+    end
+end
 
-
-% close all
-% clear dirTuning
-% e = 1;
-% for u = 1:height(dat{e})
-% fr = dat{e}.response{u}; fr(fr<0) = 0;
-% dirTuning(u) = getDirTuning(fr,conds,1);
-% sgtitle([dat{e}.exptName{u} ' ' dat{e}.uInfo{u} num2str(dat{e}.uID(u))])
-% saveas(gcf,[dat{e}.uInfo{u} num2str(u)])
-% end
-% save('dirTuning','dirTuning')
-
-
-
-% u = 25;
-% figure; tiledlayout('flow')
-% nexttile; hold on
-% errorbar(conds,tc(u,:,1),tc_sem(u,:,1),'k','LineWidth',2)
-% errorbar(conds,tc(u,:,2),tc_sem(u,:,2),'c','LineWidth',2)
-% % errorbar(conds,tc(u,:,3),tc_sem(u,:,3),'b')
-% plot(conds,tc(u,:,2)*(rPref(u,1)/rPref(u,2)),'c--','LineWidth',2)
-% % legend('cntrl','cool','scaled cool')
-% xticks([0 90 180 270])
-% xlim([0 360])
-% xlabel('dir of motion (deg)')
-% ylabel('firing rate')
-% box on
-% axis square
-% nexttile; hold on
-% countTrials = 0;
-% for i = 1:3
-%     if i==1
-%         clr = 'k';
-%     elseif i==2
-%         clr = 'c';
-%     elseif i==3
-%         clr = 'k';
-%     end
-%     x = dat{i}.spkTimes{u}(1,:);
-%     y = dat{i}.spkTimes{u}(2,:);
-%     y = y+countTrials;
-%     scatter(x,y,[clr '.'])
-%     countTrials = countTrials+max(dat{i}.fr(u).trialNum,[],'all');
-% end
-% xlim([-1 2])
-% ylim([0 countTrials+1])
-% patch([0 1 1 0],[0 0 countTrials+1 countTrials+1],'k','EdgeColor','none','FaceAlpha',0.2)
-% box on
-% axis square
-% sgtitle(['example unit: ' dat{1}.exptName{u} ' ' dat{1}.uInfo{u} num2str(dat{1}.uID(u))])
-
-% nexttile; hold on
-% plot(c_aligned,tc_norm(u,:,1),'k')
-% plot(c_aligned,tc_norm(u,:,2),'c')
-% %     plot(c_aligned,tc_norm(u,:,3),'b')
-% xticks([-180 -90 0 90 180])
-% xlabel('dir rel to pref')
-% ylabel('normalized response')
-% title('normalized example unit')
-% box on
-% axis square
-% nexttile; hold on
-% y = mean(tc_norm(:,:,1),'omitnan');
-% sem = std(tc_norm(:,:,1),'omitnan')/sqrt(size(tc_norm,1));
-% errorbar(c_aligned,y,sem,'k')
-% y = mean(tc_norm(:,:,2),'omitnan');
-% sem = std(tc_norm(:,:,2),'omitnan')/sqrt(size(tc_norm,1));
-% errorbar(c_aligned,y,sem,'c')
-% xticks([-180 -90 0 90 180])
-% xlabel('dir rel to pref')
-% ylabel('normalized response')
-% title('normalized population')
-% box on
-% axis square
-% nexttile; hold on
-% plot(bins(2:end),psth(u,:,1),'k')
-% plot(bins(2:end),psth(u,:,2),'c')
-% %     plot(bins(2:end),psth(u,:,3),'b')
-% xlabel('time (sec)')
-% ylabel('firing rate')
-% box on
-% axis square
-% nexttile; hold on
-% plot(tc_norm(u,:,1),tc_norm(u,:,2),'ko-')
-% plot([0 1],[0 1],'k--')
-% xlabel('control norm response')
-% ylabel('v1 cooled norm response')
-% box on
-% axis square
-% nexttile;hold on
-% plot(mean(tc_norm(:,:,1),'omitnan'),mean(tc_norm(:,:,2),'omitnan'),'k-o')
-% plot([0 1],[0 1],'k--')
-% xlabel('control response')
-% ylabel('V1 cooled response')
-% box on
-% axis square
-
-% figure;tiledlayout(2,2)
-% nexttile;hold on
-% x = bw(:,2);
-% y = bw(:,1);
-% scatter(x,y,'k.')
-% plot([0 max(bw,[],'all')],[0 max(bw,[],'all')],'k--')
-% xlabel('cool')
-% ylabel('cntrl')
-% title('bandwidth')
-% box on
-% axis square
-% nexttile;hold on
-% x = bwS(:,2);
-% y = bwS(:,1);
-% scatter(x,y,'k.')
-% plot([0 max(bwS,[],'all')],[0 max(bwS,[],'all')],'k--')
-% xlabel('cool')
-% ylabel('cntrl')
-% title('bandwidth (smooth)')
-% box on
-% axis square
-% nexttile;hold on
-% x = ldr(:,2);
-% y = ldr(:,1);
-% scatter(x,y,'k.')
-% plot([0 1],[0 1],'k--')
-% xlabel('cool')
-% ylabel('cntrl')
-% title('LDR')
-% box on
-% axis square
-% nexttile;hold on
-% x = dsi(:,2);
-% y = dsi(:,1);
-% scatter(x,y,'k.')
-% plot([0 1],[0 1],'k--')
-% xlabel('cool')
-% ylabel('cntrl')
-% title('DSI')
-% sgtitle('tuning metrics')
-% box on
-% axis square
-
-% figure;tiledlayout(2,2)
-% nexttile;hold on
-% x = rPref(:,1);
-% y = rPref(:,2);
-% scatter(x,y,'k.')
-% plot([0 max([x y],[],'all')],[0 max([x y],[],'all')],'k--')
-% title('rPref')
-% xlabel('cntrl')
-% ylabel('cool')
-% box on
-% axis square
-% nexttile;hold on
-% x = rNull(:,1);
-% y = rNull(:,2);
-% scatter(x,y,'k.')
-% plot([0 max([x y],[],'all')],[0 max([x y],[],'all')],'k--')
-% title('rNull')
-% xlabel('cntrl')
-% ylabel('cool')
-% box on
-% axis square
-% nexttile;hold on
-% cdf = cdfplot(rPref(:,1));
-% cdf.Color = 'k';
-% cdf = cdfplot(rPref(:,2));
-% cdf.Color = 'c';
-% xlabel('rPref')
-% ylabel('proportion')
-% yticks([0 0.5 1])
-% yline(0.5,'k--')
-% grid off
-% box on
-% axis square
-% nexttile;hold on
-% cdf = cdfplot(rNull(:,1));
-% cdf.Color = 'k';
-% cdf = cdfplot(rNull(:,2));
-% cdf.Color = 'c';
-% xlabel('rNull')
-% ylabel('proportion')
-% yticks([0 0.5 1])
-% yline(0.5,'k--')
-% grid off
-% box on
-% axis square
-
-% figure; tiledlayout(2,2)
-% nexttile; hold on
-% x = rNull(:,2);
-% y = scldNull;
-% dRnull_scl = x-y;
-% scatter(x,y,'k.')
-% plot([0 max([x y],[],'all')],[0 max([x y],[],'all')],'k--')
-% title('rNull')
-% xlabel('cool')
-% ylabel('scaled')
-% box on
-% axis square
-% nexttile; hold on
-% idx = c_aligned==180;
-% x = tc_norm(:,idx,2);
-% y = tc_norm(:,idx,1);
-% dRnull_norm = x-y;
-% scatter(x,y,'k.')
-% plot([0 1],[0 1],'k--')
-% title('normalized null')
-% xlabel('cool')
-% ylabel('cntrl')
-% box on
-% axis square
-% nexttile; hold on
-% histogram(dRnull_scl)
-% [p,h] = signrank(dRnull_scl);
-% xline(mean(dRnull_scl,'omitnan'),'r')
-% xline(median(dRnull_scl,'omitnan'),'g')
-% ylabel('count')
-% xlabel('cool null - scaled null')
-% title(['signrank: p=' num2str(p)])
-% box on
-% axis square
-% nexttile; hold on
-% histogram(dRnull_norm)
-% [p,h] = signrank(dRnull_norm);
-% xline(mean(dRnull_norm,'omitnan'),'r')
-% xline(median(dRnull_norm,'omitnan'),'g')
-% ylabel('count')
-% xlabel('delta norm. rNull (cool-cntrl)')
-% title(['signrank: p=' num2str(p)])
-% box on
-% axis square
-
-% figure;hold on
-% x = scl;
-% y = scl_null;
-% sc = scatter(x,y,'k.');
-% dt = dataTipTextRow('uID',dat{1}.uID);
-% sc.DataTipTemplate.DataTipRows(end+1) = dt;
-% plot([0 2],[0 2],'k--')
-% xline(1,'k--')
-% yline(1,'k--')
-% xlabel('scale pref')
-% ylabel('scale null')
+figure;hold on
+colororder({'r'})
+u = 8;
+plot(r1AL(u,:),'k','LineWidth',2)
+plot(r2AL(u,:),'c','LineWidth',2)
+yyaxis right
+plot(siAL(u,:),'r','LineWidth',2)
+yline(0,'r--')

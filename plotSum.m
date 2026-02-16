@@ -115,8 +115,8 @@ for u = uInd
             polarplot(deg2rad([x x(1)]),mean([y y(:,1)],'omitnan')+[sem sem(1)],[clr ':'],'LineWidth',1)
             polarplot(deg2rad([x x(1)]),mean([y y(:,1)],'omitnan')-[sem sem(1)],[clr ':'],'LineWidth',1)
     %         polarplot(repmat(deg2rad(x),2,1),mean(y,'omitnan')+([1;-1]*sem),clr,'LineWidth',2)
-    %         polarplot(deg2rad(dat.oriPref(u)),dat.rPref(u),'r*')
-    %         polarplot(deg2rad([0 dat.meanVec{u}.angDir]),[0 dat.meanVec{u}.magDir],clr,'LineWidth',2)
+            polarplot(deg2rad(dat.oriPref(u)),dat.rPref(u),'k*')
+            polarplot(deg2rad([0 dat.meanVec{u}.angDir]),[0 dat.meanVec{u}.magDir],clr,'LineWidth',2)
             polarplot(deg2rad([0 dat.meanVec{u}.angDir]),[0 dat.meanVec{u}.magDir*dat.ldr(u)],'g','LineWidth',2)
         else
             subplot(nr,nc,2); hold on; box on
