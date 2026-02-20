@@ -59,25 +59,24 @@ ageGroups = {[28 32],[33 40],[41 80],[81 120]};
 %     end
 %     sumStats = vertcat(sumStats,out);
 % end
+% % compile sumStat tables by phase of experiment (1:cntrl, 2:cool, 3:post)
+% dat{1} = vertcat(sumStats{:,1});
+% dat{2} = vertcat(sumStats{:,2});
+% dat{3} = vertcat(sumStats{:,3});
 
-load(fullfile(dataFold,'dataSets','cooling',proj,'matchedSU',[proj '_matchedSUdataSet.mat']))
+load(fullfile(dataFold,'dataSets','cooling',proj,'matchedSU',[proj '_matched' anaMode 'dataSet.mat']))
 
 %% Organize Data
 
-% compile sumStat tables by phase of experiment (1:cntrl, 2:cool, 3:post)
-dat{1} = vertcat(sumStats{:,1});
-dat{2} = vertcat(sumStats{:,2});
-dat{3} = vertcat(sumStats{:,3});
-
 % determine which units pass inclusion criteria for each phase of the expt
-goodId(:,1) = screenUnits(dat{1},'SU');
-goodId(:,2) = screenUnits(dat{2},'SU');
-goodId(:,3) = screenUnits(dat{3},'SU');
+goodId(:,1) = screenUnits(dat{1},anaMode);
+goodId(:,2) = screenUnits(dat{2},anaMode);
+% goodId(:,3) = screenUnits(dat{3},anaMode);
 
 keepIdx = goodId(:,1)&goodId(:,2);
 dat{1} = dat{1}(keepIdx,:);
 dat{2} = dat{2}(keepIdx,:);
-dat{3} = dat{3}(keepIdx,:);
+% dat{3} = dat{3}(keepIdx,:);
 
 % for each phase, extract basic information like age, tuning metrics, etc
 % and store that info in vectors
@@ -96,7 +95,7 @@ end
 for ag = 1:length(ageGroups)
     uAG(uAge>=ageGroups{ag}(1) & uAge<=ageGroups{ag}(2)) = ag;
 end
-for e = 1:3
+for e = 1:2
 %     ldr(:,e) = dat{e}.ldr;
     late(:,e) = dat{e}.latency;
 %     rPref(:,e) = dat{e}.rPref;
@@ -283,7 +282,7 @@ colors = {[0 0.4470 0.7410],[0.8500 0.3250 0.0980],[0.9290 0.6940 0.1250],[0.494
 
 % plot example neurons
 plr=1;
-exUs = [4 10 5 23];
+exUs = [4 10 5 39 25 26 48];
 % exUs = [10 47];
 % exUs = 1:nU;
 for u = exUs
@@ -480,34 +479,57 @@ box on
 
 r1 = tc(:,:,1);
 r2 = tc(:,:,2);
-si = (r2-r1)./(r2+r1);
-for u = 1:size(si,1)
-    if ismember(u,find(pvalANOVA(:,1)<0.05))
-        [cAl,~,idx] = alignDirTuning(conds,r1(u,:));
-        siAl(u,:) = si(u,idx);
-        r1Al(u,:) = r1(u,idx);
-        r2Al(u,:) = r2(u,idx);
-%     elseif ismember(u,find(pvalANOVA(:,2)<0.05))
-%         [cAl,~,idx] = alignDirTuning(conds,r2(u,:));
-%         siAl(u,:) = si(u,idx);
-%         r1Al(u,:) = r1(u,idx);
-%         r2Al(u,:) = r2(u,idx);
+sigIdx = pvalANOVA(:,1)<0.05 | pvalANOVA(:,2)<0.05;
+for u = 1:size(r1,1)
+    if sigIdx(u)==1
+        [cAl,~,idx1] = alignDirTuning(conds,r1(u,:));
+        [~,~,idx2] = alignDirTuning(conds,r2(u,:));
+        ad = unique(abs(cAl));
+        if mLDR(u,1)>0.2
+            r1Al(u,:) = r1(u,idx1);
+            r2Al(u,:) = r2(u,idx1);
+            for c = 1:length(ad)
+                r1AlH(u,c) = mean(r1Al(u,abs(cAl)==ad(c)),'omitnan');
+                r2AlH(u,c) = mean(r2Al(u,abs(cAl)==ad(c)),'omitnan');
+            end
+        elseif mLDR(u,2)>0.2
+            r1Al(u,:) = r1(u,idx2);
+            r2Al(u,:) = r2(u,idx2);
+            for c = 1:length(ad)
+                r1AlH(u,c) = mean(r1Al(u,abs(cAl)==ad(c)),'omitnan');
+                r2AlH(u,c) = mean(r2Al(u,abs(cAl)==ad(c)),'omitnan');
+            end
+        else
+            r1Al(u,:) = nan(1,size(r1,2)+1);
+            r2Al(u,:) = nan(1,size(r2,2)+1);
+            r1AlH(u,:) = nan(1,length(ad));
+            r2AlH(u,:) = nan(1,length(ad));
+        end
     else
-        siAl(u,:) = nan(1,size(si,2)+1);
-        r1Al(u,:) = nan(1,size(si,2)+1);
-        r2Al(u,:) = nan(1,size(si,2)+1);
+        r1Al(u,:) = nan(1,size(r1,2)+1);
+        r2Al(u,:) = nan(1,size(r2,2)+1);
+        r1AlH(u,:) = nan(1,length(ad));
+        r2AlH(u,:) = nan(1,length(ad));
     end
-
-    ad = unique(abs(cAl));
-    for c = 1:length(ad)
-        siAlH(u,c) = mean(siAl(u,abs(cAl)==ad(c)),'omitnan');
-    end
-
-
 end
+si = (r2AlH-r1AlH)./(r2AlH+r1AlH);
 
 figure; hold on
-boxchart(siAlH)
+boxchart(si,'notch','on','BoxFaceColor','k')
+% for u = exUs 
+%     plot(si(u,:),'-o');
+% end
+yline(0,'k--')
+xlabel('Angle (deg. relative to preferred)')
+box on
+
+rPlus = rPref(:,1)-rPref(:,2)<0;
+rMinus = rPref(:,1)-rPref(:,2)>0;
+angId = repmat(ad,size(si,1),1);
+rMinusId = repmat(rMinus,1,size(si,2));
+figure; hold on
+boxchart(categorical(angId(:)),si(:),'GroupByColor',rMinusId(:),'notch','on')
+
 
 % figure;hold on
 % colororder({'r'})

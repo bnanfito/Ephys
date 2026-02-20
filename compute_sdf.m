@@ -34,7 +34,7 @@ for t = 1:nTrials
 %         sdf(:,tId) = sum(g{tId}/max(g{tId},[],'all'),2)/(w);
         sdf(:,tId) = sum(g{tId},2)/dt;
     else
-        sdf(:,tId) = nan(size(time));
+        sdf(:,tId) = zeros(size(time));
     end
 end
 for c = cndsInclude
