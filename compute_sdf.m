@@ -7,9 +7,12 @@ cNull = find( conds == data.oriNull(1) );
 cOrth1 = find( conds == mod(conds(cPref)+90,360) );
 cOrth2 = find( conds == mod(conds(cPref)-90,360) );
 nConds = length(conds);
-if unique(data.fr(1).bc(:,1:nConds) == data.response{1})==1
+rA = data.response{1}; rA = rA(~isnan(rA));
+rB = data.fr(1).bc(:,1:nConds); rB= rB(~isnan(rB));
+rC = data.fr(1).bc(:,(1:nConds)+nConds); rC = rC(~isnan(rC));
+if unique(rB == rA)==1
     cndsInclude = 1:nConds;
-elseif unique(data.fr(1).bc(:,(1:nConds)+nConds) == data.response{1})==1
+elseif unique(rC == rA)==1
     cndsInclude = (1:nConds)+nConds;
 end
 trialKey = data.fr(1).trialNum(:,cndsInclude);
@@ -23,7 +26,7 @@ spkT = spkTimes(1,:);
 trialId = spkTimes(2,:);
 dt = 0.001;
 time = -1:dt:2;
-w = 0.05;
+w = 0.010;
 for t = 1:nTrials
     tId = trialInclude(t);
     if ismember(tId,trialId)
@@ -64,7 +67,7 @@ if ~isempty(varargin) && varargin{1}==1
     
     subplot(2,2,2);hold on
     for c = 1:nConds
-        patch([min(time) max(time) max(time) min(time)],[0 0 1 1]+(c-1),clrs(c,:),'EdgeColor','none','FaceAlpha',0.2)
+        patch([0 1 1 0],[0 0 1 1]+(c-1),clrs(c,:),'EdgeColor','none','FaceAlpha',0.2)
     end
     for t = 1:nTrials
         tId = trialInclude(t);
@@ -77,6 +80,7 @@ if ~isempty(varargin) && varargin{1}==1
         yT = c-((1/nReps)*(r-1));
         plot(xT,yT, 'k.')
     end
+    xlim([min(SDF.time) max(SDF.time)])
     ylim([0 nConds])
     
     subplot(2,2,3);hold on

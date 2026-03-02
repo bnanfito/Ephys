@@ -314,15 +314,15 @@ for ar = 1:2
         r = rMat{ar,ag};
         tDir = r.cTrial;
         tOri = mod(tDir,180);
-        % tDir = [cos(tDir), sin(tDir)];
-        % tOri = [cos(tOri), sin(tOri)];
+        tDir = [cos(tDir), sin(tDir)];
+        tOri = [cos(tOri), sin(tOri)];
 
         miDO = mi_cont_cont(tDir,tOri,4);
 
         [coeff,score] = pca(r.rTrial_norm);
         for pc = 1:size(score,2) 
-            miD = mi_cont_cont(score(:,pc),tDir,k);
-            miO = mi_cont_cont(score(:,pc),tOri,k);
+            miD = MI_bn(score(:,pc),tDir,k);
+            miO = MI_bn(score(:,1:pc),tOri,k);
             miDir{ar,ag}(pc) = miD;
             miOri{ar,ag}(pc) = miO;
         end
@@ -331,49 +331,6 @@ for ar = 1:2
         plot(miDir{ar,ag})
         plot(miOri{ar,ag})
     end
-end
-
-%% regression 
-
-Kfold = 5;
-cv = cvpartition(length(theta1),'KFold',Kfold);
-
-maxPC = 10;
-
-for m = 1:maxPC
-    
-    Zm = score(:,1:m);
-    
-    err1 = zeros(Kfold,1);
-    err2 = zeros(Kfold,1);
-    
-    for kfold = 1:Kfold
-        
-        trainIdx = training(cv,kfold);
-        testIdx  = test(cv,kfold);
-        
-        % Train linear model
-        B1 = Zm(trainIdx,:) \ S1(trainIdx,:);
-        B2 = Zm(trainIdx,:) \ S2(trainIdx,:);
-        
-        % Predict
-        S1_pred = Zm(testIdx,:) * B1;
-        S2_pred = Zm(testIdx,:) * B2;
-        
-        % Recover predicted angle
-        theta1_pred = atan2(S1_pred(:,2), S1_pred(:,1));
-        theta2_pred = atan2(S2_pred(:,2), S2_pred(:,1));
-        
-        % Circular error
-        d1 = angle(exp(1i*(theta1(testIdx) - theta1_pred)));
-        d2 = angle(exp(1i*(theta2(testIdx) - theta2_pred)));
-        
-        err1(kfold) = mean(d1.^2);
-        err2(kfold) = mean(d2.^2);
-    end
-    
-    mse1(m) = mean(err1);
-    mse2(m) = mean(err2);
 end
 
 
