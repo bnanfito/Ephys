@@ -22,7 +22,7 @@ maxPC = 10;
 for ar = 1:nAR
     for ag = 1:nAG
 
-        for boot = 1:100
+        for boot = 1:1000
             disp(boot)
             r = rMat{ar,ag}.rTrial_norm;
             r = r(:,randperm(size(rMat{ar,ag}.rTrial_norm,2),30));
@@ -91,24 +91,18 @@ colororder({'k','g'})
 for ag = 1:nAG
     subplot(2,3,nAG+ag);hold on
     yyaxis left
-    p(1) = plot(mean(mseDir{1,ag}),'k--');
+    plot(mean(mseDir{1,ag}),'k--')
     errY = confInt(mseDir{1,ag});
-    patch([1:maxPC fliplr(1:maxPC)],[errY(1,:) fliplr(errY(2,:))],'k','EdgeColor','none','FaceAlpha',0.2)
-    p(2) = plot(mean(mseDir{2,ag}),'k-');
-    errY = confInt(mseDir{2,ag});
-    patch([1:maxPC fliplr(1:maxPC)],[errY(1,:) fliplr(errY(2,:))],'k','EdgeColor','none','FaceAlpha',0.2)
+    patch([1:maxPC fliplr(1:maxPC)],[errY(1,:) fliplr(errY)],'k','EdgeColor','none','FaceAlpha',0.2)
+    plot(mean(mseDir{2,ag}),'k-')
     ylabel('direction error (mod 360)')
     ylim([0 180])
     yyaxis right
-    p(3) = plot(mean(mseOri{1,ag}),'g--');
-    errY = confInt(mseOri{1,ag});
-    patch([1:maxPC fliplr(1:maxPC)],[errY(1,:) fliplr(errY(2,:))],'g','EdgeColor','none','FaceAlpha',0.2)
-    p(4) = plot(mean(mseOri{2,ag}),'g-');
-    errY = confInt(mseOri{2,ag});
-    patch([1:maxPC fliplr(1:maxPC)],[errY(1,:) fliplr(errY(2,:))],'g','EdgeColor','none','FaceAlpha',0.2)
+    plot(mean(mseOri{1,ag}),'g--')
+    plot(mean(mseOri{2,ag}),'g-')
     ylabel('orientation error (mod 180)')
     ylim([0 90])
     if ag == 1
-        legend(p,{'V1 dir','PMLS dir','V1 ori','PMLS ori'})
+        legend({'V1 dir','PMLS dir','V1 ori','PMLS ori'})
     end
 end
