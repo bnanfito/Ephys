@@ -74,20 +74,20 @@ for ar = 1:nAR
                 if nPC == exPC && ag==exAG && ar==exAR && boot==1
                     subplot(2,2,1);hold on
                     plot(tD(:,1),tD(:,2),'o')
-                    plot(tD_pred(:,1),tD_pred(:,2),'r*')
+%                     plot(tD_pred(:,1),tD_pred(:,2),'r*')
                     plot(tD(testIdx,1),tD(testIdx,2),'g*')
-                    plot([tD(testIdx,1) tD_pred(:,1)]',[tD(testIdx,2) tD_pred(:,2)]','k')
-                    [x,y] = pol2cart(repmat(deg2rad(tDir_pred),1,2)',[zeros(length(tDir_pred),1) ones(length(tDir_pred),1)]');
-                    plot(x,y,'r')
+%                     plot([tD(testIdx,1) tD_pred(:,1)]',[tD(testIdx,2) tD_pred(:,2)]','k')
+                    [x,y] = pol2cart(deg2rad(tDir_pred),ones(length(tDir_pred),1));
+                    plot(x,y,'r*')
                     axis square
                     title('direction')
                     subplot(2,2,2);hold on
                     plot(tO(:,1),tO(:,2),'o')
-                    plot(tO_pred(:,1),tO_pred(:,2),'r*')
+%                     plot(tO_pred(:,1),tO_pred(:,2),'r*')
                     plot(tO(testIdx,1),tO(testIdx,2),'g*')
-                    plot([tO(testIdx,1) tO_pred(:,1)]',[tO(testIdx,2) tO_pred(:,2)]','k')
-                    [x,y] = pol2cart(repmat(deg2rad(tOri_pred),1,2)',[zeros(length(tOri_pred),1) ones(length(tOri_pred),1)]');
-                    plot(x,y,'r')
+%                     plot([tO(testIdx,1) tO_pred(:,1)]',[tO(testIdx,2) tO_pred(:,2)]','k')
+                    [x,y] = pol2cart(repmat(deg2rad(tOri_pred),1,2)',[ones(length(tOri_pred),1) ones(length(tOri_pred),1)]');
+                    plot(x,y,'r*')
                     axis square
                     title('orientation')
                     colororder({'k','g'})
