@@ -3,7 +3,7 @@ close all
 
 %% Load data
 
-anaMode = 'SU';
+anaMode = 'MU';
 
 % dataFold = '/Volumes/Lab drive/Brandon/data/dataSets/DSdev';
 % dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/DSdev';
@@ -18,14 +18,17 @@ ageGroups = {[29 32],[33 36],[37 max(projTbl.age)]};
 nAG = length(ageGroups);
 nAR = length(areas);
 
+
+figure;
+
 maxPC = 10;
-for ar = 1:nAR
+for ar = [2,1]
     for ag = 1:nAG
 
         for boot = 1:100
             disp(boot)
             r = rMat{ar,ag}.rTrial_norm;
-            r = r(:,randperm(size(rMat{ar,ag}.rTrial_norm,2),30));
+            r = r(:,randperm(size(rMat{ar,ag}.rTrial_norm,2),300));
             tDir = rMat{ar,ag}.cTrial;
             tOri = mod(tDir,180);
             tD = [cos(deg2rad(tDir)) sin(deg2rad(tDir))];
@@ -41,11 +44,11 @@ for ar = 1:nAR
                 
                     trainIdx = training(cv,fold);
                     testIdx  = test(cv,fold);
-                    cDir = score(trainIdx,1:nPC) \ tD(trainIdx,:); % learn mapping coeffs
-                    cOri = score(trainIdx,1:nPC) \ tO(trainIdx,:);
-                    tD_pred = score(testIdx,1:nPC)*cDir; % project PCs into 2D embedding
+                    cDir = score(trainIdx,nPC) \ tD(trainIdx,:); % learn mapping coeffs
+                    cOri = score(trainIdx,nPC) \ tO(trainIdx,:);
+                    tD_pred = score(testIdx,nPC)*cDir; % project PCs into 2D embedding
                     tDir_pred = rad2deg(mod(atan2(tD_pred(:,2),tD_pred(:,1)),2*pi));
-                    tO_pred = score(testIdx,1:nPC)*cOri;
+                    tO_pred = score(testIdx,nPC)*cOri;
                     tOri_pred = rad2deg(mod(atan2(tO_pred(:,2),tO_pred(:,1)),2*pi)); %this is still in a modulo 360 circle, must be divided by two later
                     
                     % diffDir = diff([tDir(testIdx) tDir_pred]');
@@ -60,6 +63,28 @@ for ar = 1:nAR
                 
                 mseDir{ar,ag}(boot,nPC) = mean(errDir);
                 mseOri{ar,ag}(boot,nPC) = mean(errOri);
+
+                if nPC == 1 && ag==3 && ar==1 && boot==1
+                    subplot(2,2,1);hold on
+                    plot(tD(:,1),tD(:,2),'o')
+                    plot(tD_pred(:,1),tD_pred(:,2),'r*')
+                    plot(tD(testIdx,1),tD(testIdx,2),'g*')
+                    plot([tD(testIdx,1) tD_pred(:,1)]',[tD(testIdx,2) tD_pred(:,2)]','k')
+                    [x,y] = pol2cart(repmat(deg2rad(tDir_pred),1,2)',[zeros(length(tDir_pred),1) ones(length(tDir_pred),1)]');
+                    plot(x,y,'r')
+                    axis square
+                    title('direction')
+                    subplot(2,2,2);hold on
+                    plot(tO(:,1),tO(:,2),'o')
+                    plot(tO_pred(:,1),tO_pred(:,2),'r*')
+                    plot(tO(testIdx,1),tO(testIdx,2),'g*')
+                    plot([tO(testIdx,1) tO_pred(:,1)]',[tO(testIdx,2) tO_pred(:,2)]','k')
+                    [x,y] = pol2cart(repmat(deg2rad(tOri_pred),1,2)',[zeros(length(tOri_pred),1) ones(length(tOri_pred),1)]');
+                    plot(x,y,'r')
+                    axis square
+                    title('orientation')
+                    colororder({'k','g'})
+                end
             
             end
         end
@@ -67,27 +92,6 @@ for ar = 1:nAR
     end
 end
 
-
-figure;
-subplot(2,2,1);hold on
-plot(tD(:,1),tD(:,2),'o')
-plot(tD_pred(:,1),tD_pred(:,2),'r*')
-plot(tD(testIdx,1),tD(testIdx,2),'g*')
-plot([tD(testIdx,1) tD_pred(:,1)]',[tD(testIdx,2) tD_pred(:,2)]','k')
-[x,y] = pol2cart(repmat(deg2rad(tDir_pred),1,2)',[zeros(length(tDir_pred),1) ones(length(tDir_pred),1)]');
-plot(x,y,'r')
-axis square
-title('direction')
-subplot(2,2,2);hold on
-plot(tO(:,1),tO(:,2),'o')
-plot(tO_pred(:,1),tO_pred(:,2),'r*')
-plot(tO(testIdx,1),tO(testIdx,2),'g*')
-plot([tO(testIdx,1) tO_pred(:,1)]',[tO(testIdx,2) tO_pred(:,2)]','k')
-[x,y] = pol2cart(repmat(deg2rad(tOri_pred),1,2)',[zeros(length(tOri_pred),1) ones(length(tOri_pred),1)]');
-plot(x,y,'r')
-axis square
-title('orientation')
-colororder({'k','g'})
 for ag = 1:nAG
     subplot(2,3,nAG+ag);hold on
     yyaxis left
