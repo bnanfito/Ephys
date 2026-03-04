@@ -7,9 +7,9 @@ anaMode = 'SU';
 
 % dataFold = '/Volumes/Lab drive/Brandon/data/dataSets/DSdev';
 % dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/DSdev';
-% dataFold = '/Volumes/NielsenHome2/Brandon/data/dataSets/DSdev';
+dataFold = '/Volumes/NielsenHome2/Brandon/data/dataSets/DSdev';
 % dataFold = 'F:\Brandon\data\dataSets\DSdev';
-dataFold = 'Y:\Brandon\data\dataSets\DSdev';
+% dataFold = 'Y:\Brandon\data\dataSets\DSdev';
 load(fullfile(dataFold,['DSdev_' anaMode 'dataSet.mat']))
 
 areas = {'V1','PSS'};
@@ -20,7 +20,7 @@ nAR = length(areas);
 
 
 figure;
-cum = 1;
+cum = 0;
 exAR = 1;
 exAG = 3;
 maxPC = 10;
@@ -33,7 +33,7 @@ end
 for ar = 1:nAR
     for ag = 1:nAG
 
-        for boot = 1:100
+        for boot = 1:1000
             disp(boot)
             r = rMat{ar,ag}.rTrial_norm;
             r = r(:,randperm(size(rMat{ar,ag}.rTrial_norm,2),nU));
@@ -100,23 +100,25 @@ for ar = 1:nAR
                 if nPC == exPC && ag==exAG && ar==exAR && boot==1
                     subplot(2,2,1);hold on
                     plot(tD(:,1),tD(:,2),'o')
-                    plot(tD(testIdx,1),tD(testIdx,2),'g*')
+                    plot([zeros(sum(testIdx),1) tD(testIdx,1)]',[zeros(sum(testIdx),1) tD(testIdx,2)]','g','LineWidth',1)
 %                     plot(tD_pred(:,1),tD_pred(:,2),'r*')
 %                     plot([tD(testIdx,1) tD_pred(:,1)]',[tD(testIdx,2) tD_pred(:,2)]','k')
                     [x,y] = pol2cart(repmat(deg2rad(tDir_pred),1,2)',[zeros(length(tDir_pred),1) ones(length(tDir_pred),1)]');
-                    plot(x,y,'r')
-                    plot([x(2,:);tD(testIdx,1)'], [y(2,:);tD(testIdx,2)'],'k')
+                    plot(x,y,'r','LineWidth',1)
+                    plot([x(2,:);tD(testIdx,1)'], [y(2,:);tD(testIdx,2)'],'k','LineWidth',1)
                     axis square
+                    box on
                     title('direction')
                     subplot(2,2,2);hold on
                     plot(tO(:,1),tO(:,2),'o')
-                    plot(tO(testIdx,1),tO(testIdx,2),'g*')
+                    plot([zeros(sum(testIdx),1) tO(testIdx,1)]',[zeros(sum(testIdx),1) tO(testIdx,2)]','g','LineWidth',1)
 %                     plot(tO_pred(:,1),tO_pred(:,2),'r*')
 %                     plot([tO(testIdx,1) tO_pred(:,1)]',[tO(testIdx,2) tO_pred(:,2)]','k')
                     [x,y] = pol2cart(repmat(deg2rad(tOri_pred),1,2)',[zeros(length(tOri_pred),1) ones(length(tOri_pred),1)]');
-                    plot(x,y,'r')
-                    plot([x(2,:);tO(testIdx,1)'], [y(2,:);tO(testIdx,2)'],'k')
+                    plot(x,y,'r','LineWidth',1)
+                    plot([x(2,:);tO(testIdx,1)'], [y(2,:);tO(testIdx,2)'],'k','LineWidth',1)
                     axis square
+                    box on
                     title('orientation')
                     colororder({'k','g'})
                 end
@@ -130,27 +132,35 @@ end
 for ag = 1:nAG
     subplot(2,3,nAG+ag);hold on
     yyaxis left
-    p(1) = plot(mean(mseDir{1,ag}),'k--','LineWidth',2);
+    p(1) = plot(mean(mseDir{1,ag}),'ko--','LineWidth',1);
     errY = confInt(mseDir{1,ag});
     patch([1:maxPC fliplr(1:maxPC)],[errY(1,:) fliplr(errY(2,:))],'k','EdgeColor','none','FaceAlpha',0.2)
-    p(2) = plot(mean(mseDir{2,ag}),'k-','LineWidth',2);
+    p(2) = plot(mean(mseDir{2,ag}),'ko-','LineWidth',1);
     errY = confInt(mseDir{2,ag});
     patch([1:maxPC fliplr(1:maxPC)],[errY(1,:) fliplr(errY(2,:))],'k','EdgeColor','none','FaceAlpha',0.2)
     plot(mean(mseDirShuff{1,ag}),'r--')
+    errY = confInt(mseDirShuff{1,ag});
+    patch([1:maxPC fliplr(1:maxPC)],[errY(1,:) fliplr(errY(2,:))],'r','EdgeColor','none','FaceAlpha',0.2)
     plot(mean(mseDirShuff{2,ag}),'r-')
+    errY = confInt(mseDirShuff{2,ag});
+    patch([1:maxPC fliplr(1:maxPC)],[errY(1,:) fliplr(errY(2,:))],'r','EdgeColor','none','FaceAlpha',0.2)
     if ag == 1
         ylabel('direction error (mod 360)')
     end
     ylim([yLb 120])
     yyaxis right
-    p(3) = plot(mean(mseOri{1,ag}),'g--','LineWidth',2);
+    p(3) = plot(mean(mseOri{1,ag}),'go--','LineWidth',1);
     errY = confInt(mseOri{1,ag});
     patch([1:maxPC fliplr(1:maxPC)],[errY(1,:) fliplr(errY(2,:))],'g','EdgeColor','none','FaceAlpha',0.2)
-    p(4) = plot(mean(mseOri{2,ag}),'g-','LineWidth',2);
+    p(4) = plot(mean(mseOri{2,ag}),'go-','LineWidth',1);
     errY = confInt(mseOri{2,ag});
     patch([1:maxPC fliplr(1:maxPC)],[errY(1,:) fliplr(errY(2,:))],'g','EdgeColor','none','FaceAlpha',0.2)
     p(5) = plot(mean(mseOriShuff{1,ag}),'r--');
+    errY = confInt(mseOriShuff{1,ag});
+    patch([1:maxPC fliplr(1:maxPC)],[errY(1,:) fliplr(errY(2,:))],'r','EdgeColor','none','FaceAlpha',0.2)
     plot(mean(mseOriShuff{2,ag}),'r-')
+    errY = confInt(mseOriShuff{2,ag});
+    patch([1:maxPC fliplr(1:maxPC)],[errY(1,:) fliplr(errY(2,:))],'r','EdgeColor','none','FaceAlpha',0.2)
     ylim([yLb/2 60])
     if ag == 3
         ylabel('orientation error (mod 180)')
@@ -161,5 +171,6 @@ for ag = 1:nAG
         xlabel('number of PCs')
     end
     title(['AG' num2str(ag)])
+    box on
 end
 sgtitle([areas{exAR} ' AG' num2str(exAG) ' ' anaMode ' circular regression example fold (PC#1-' num2str(exPC) ')'])
