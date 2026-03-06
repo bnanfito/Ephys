@@ -1,4 +1,6 @@
-function [thetaFine,Rfit] = fit_vonMises(r,t)
+function [vm] = fit_vonMises(r,t)
+t = deg2rad(t);
+plr=0;
 
 % Initial parameter guesses
 R0_init     = min(r);
@@ -19,14 +21,27 @@ ub = [Inf, Inf, Inf, 100, 100, pi];
 options = optimoptions('lsqcurvefit','Display','off');
 params_fit = lsqcurvefit(@doubleVonMises, params0, t, r, lb, ub, options);
 
-thetaFine = linspace(0, 2*pi, 500);
+thetaFine = linspace(0, 2*pi, 360);
 
 Rfit = doubleVonMises(params_fit, thetaFine);
 
+vm.rho = Rfit;
+vm.theta = rad2deg(thetaFine);
+vm.params = params_fit;
+vm.Rp = vm.params(1) + vm.params(2)*exp(vm.params(4)) + vm.params(3)*exp(-vm.params(5));
+vm.Rn = vm.params(1) + vm.params(3)*exp(vm.params(5)) + vm.params(2)*exp(-vm.params(4));
+vm.Tp = rad2deg(params_fit(end));
+
 % figure
+% if plr == 1
 % polarplot(t, r, 'ko','MarkerFaceColor','k')
 % hold on
-% polarplot(thetaFine, Rfit, 'r','LineWidth',2)
+% polarplot(deg2rad(vm.theta), vm.rho, 'r','LineWidth',2)
+% else
+% plot(t, r, 'ko','MarkerFaceColor','k')
+% hold on
+% plot(deg2rad(vm.theta), vm.rho, 'r','LineWidth',2)
+% end
 % title('Double von Mises Fit')
 
 end
