@@ -7,9 +7,9 @@ anaMode = 'SU';
 
 % dataFold = '/Volumes/Lab drive/Brandon/data/dataSets/DSdev';
 % dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/DSdev';
-% dataFold = '/Volumes/NielsenHome2/Brandon/data/dataSets/DSdev';
+dataFold = '/Volumes/NielsenHome2/Brandon/data/dataSets/DSdev';
 % dataFold = 'F:\Brandon\data\dataSets\DSdev';
-dataFold = 'Y:\Brandon\data\dataSets\DSdev';
+% dataFold = 'Y:\Brandon\data\dataSets\DSdev';
 load(fullfile(dataFold,['DSdev_' anaMode 'dataSet.mat']))
 dir = load(fullfile(dataFold,'anaRSA_dir.mat'));
 ori = load(fullfile(dataFold,'anaRSA_ori.mat'));
@@ -110,17 +110,18 @@ for ag = 1:nAG
         end
 
         %trial wise time resolved
-        for t = 1:nTrials
-            tId = trialIds(t);
-%             psth = histcounts(spks(spkTrial==tId),bins);
-%             psth = psth/binSize;
-            for b = 1:nBins
-                psth(b) = sum(spks(spkTrial==tId)>binLeft(b)&spks(spkTrial==tId)<=binRight(b))/binSize;
-            end
-            Rtime{ar,ag}(t,u,:) = psth;
-            clear psth
-        end
+%         for t = 1:nTrials
+%             tId = trialIds(t);
+% %             psth = histcounts(spks(spkTrial==tId),bins);
+% %             psth = psth/binSize;
+%             for b = 1:nBins
+%                 psth(b) = sum(spks(spkTrial==tId)>binLeft(b)&spks(spkTrial==tId)<=binRight(b))/binSize;
+%             end
+%             Rtime{ar,ag}(t,u,:) = psth;
+%             clear psth
+%         end
         sdf{ar,ag}(u) = compute_sdf(dat{ar,ag}(u,:));
+        Rtime{ar,ag}(:,u,:) = sdf{ar,ag}(u).trial;
 
         for d = 1:length(unique(dirs))
             Rtime_meanDir{ar,ag}(d,u,:) = mean( squeeze(Rtime{ar,ag}(Cdir==dirs(d),u,:)) );
@@ -138,6 +139,53 @@ end
 end
 
 ar = 1; ag = 3;
+R = RmeanDir{ar,ag}./max(RmeanDir{ar,ag});
+Rt = Rtime_meanDir{ar,ag}./max(RmeanDir{ar,ag});
+[coeff,S] = pca(R);
+nFrames = size(Rt,3);
+for f = 1:nFrames
+St(:,:,f) = Rt(:,:,f)*coeff;
+end
+
+close all
+h = figure;
+ax = gca;
+ax.NextPlot = 'replaceChildren';
+clrs = hsv(length(conds));
+M(nFrames) = struct('cdata',[],'colormap',[]);
+h.Visible = 'off';
+for f = 1:nFrames
+    disp(['frame number ' num2str(f)])
+    plot(St(:,1,f),St(:,2,f),'ko-')
+    % for c = 1:length(conds)
+    % idx = Cdir==conds(c);
+    % plot3(St(idx,1,f),St(idx,2,f),St(idx,3,f),'o','MarkerFaceColor',clrs(c,:));hold on
+    % end
+    drawnow
+    M(f) = getframe;
+end
+h.Visible = 'on';
+movie(M);
+
+
+h = figure;
+Z = peaks;
+surf(Z)
+axis tight manual
+ax = gca;
+ax.NextPlot = 'replaceChildren';
+loops = 40;
+M(loops) = struct('cdata',[],'colormap',[]);
+h.Visible = 'off';
+for j = 1:loops
+    X = sin(j*pi/10)*Z;
+    surf(X,Z)
+    drawnow
+    M(j) = getframe;
+end
+h.Visible = 'on';
+movie(M);
+
 
 
 figure;hold on
