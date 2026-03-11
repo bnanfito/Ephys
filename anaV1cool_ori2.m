@@ -5,8 +5,8 @@ clear
 anaMode = 'MU';
 proj = 'V1cool_ori';
 area = 'PSS';
-dataFold = 'Y:\Brandon\data';
-% dataFold = '/Volumes/NielsenHome2/Brandon/data';
+% dataFold = 'Y:\Brandon\data';
+dataFold = '/Volumes/NielsenHome2/Brandon/data';
 % dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
 ageGroups = {[28 32],[33 40],[41 80],[81 120]};
 
@@ -276,18 +276,28 @@ a = 4;
 sp = 1;
 for u = [42 52 54]
 subplot(3,3,sp); hold on
-d1 = dat.cntrl{a}.spkTimes{u}(1,:);
-d2 = dat.cool{a}.spkTimes{u}(1,:);
+d1 = dat.cntrl{a};
+d2 = dat.cool{a};
 nTrials1 = max(dat.cntrl{a}.fr(u).trialNum,[],'all');
 nTrials2 = max(dat.cool{a}.fr(u).trialNum,[],'all');
 bw = 0.01;
 bins = -1:bw:2;
-h1 = histcounts(d1,bins)/(nTrials1*bw);
-h2 = histcounts(d2,bins)/(nTrials2*bw);
-maxH = 60;%max([h1 h2],[],'all')+1;
+h1 = histcounts(d1.spkTimes{u}(1,:),bins)/(nTrials1*bw);
+s1 = compute_sdf(d1(u,:));
+h2 = histcounts(d2.spkTimes{u}(1,:),bins)/(nTrials2*bw);
+s2 = compute_sdf(d2(u,:));
+maxH = max([s1.ci95 s2.ci95],[],'all')+1;
 patch([0 1 1 0],[0 0 maxH maxH],'k','EdgeColor','none','FaceAlpha',0.2)
-plot(bins(2:end),h1,'k')
-plot(bins(2:end),h2,'c')
+% plot(bins(2:end),h1,'k')
+% plot(bins(2:end),h2,'c')
+plot(s1.time,s1.mean,'k','LineWidth',1)
+patch([s1.time fliplr(s1.time)],[s1.ci95(1,:) fliplr(s1.ci95(2,:))],'k','EdgeColor','none','FaceAlpha',0.2)
+plot(s2.time,s2.mean,'c','LineWidth',1)
+patch([s2.time fliplr(s2.time)],[s2.ci95(1,:) fliplr(s2.ci95(2,:))],'c','EdgeColor','none','FaceAlpha',0.2)
+% plot(s1.time,s1.cMean(s1.cPref,:),'k','LineWidth',1)
+% patch([s1.time fliplr(s1.time)],[s1.cMean(s1.cPref,:)+s1.cSem(s1.cPref,:) fliplr(s1.cMean(s1.cPref,:)-s1.cSem(s1.cPref,:))],'k','EdgeColor','none','FaceAlpha',0.2)
+% plot(s2.time,s2.cMean(s2.cPref,:),'c','LineWidth',1)
+% patch([s2.time fliplr(s2.time)],[s2.cMean(s2.cPref,:)+s2.cSem(s2.cPref,:) fliplr(s2.cMean(s2.cPref,:)-s2.cSem(s2.cPref,:))],'c','EdgeColor','none','FaceAlpha',0.2)
 l1 = dat.cntrl{a}.latency(u);
 l2 = dat.cool{a}.latency(u);
 if ~isnan(l1)
