@@ -1,17 +1,21 @@
 % anaRSA
 clear all
-close all
+% close all
 
 %% generate tuning curves
 
 x = 0:30:330;
-mu = 180;
-std = 30;
-mu2 = mod(mu+180,360);
-tc1 = normpdf(x,mu,std);
-shift = find(x == mod(mu+180,360))-find(x==180);
-tc2 = circshift(tc1,shift);
-tc = tc1;
+a1 = 1;
+mu1 = 180;
+std1 = 10;
+tc1 = normpdf(x,mu1,std1);
+mu2 = mu1;
+std2 = std1;
+shift = find(x == mod(mu1+180,360))-find(x==180);
+tc2 = normpdf(x,mu2,std2);
+tc2 = circshift(tc2,shift);
+tc2 = tc1+tc2;
+tc = tc2;
 tc = repmat(tc,100,1);
 for i = 2:size(tc,1)
     tc(i,:) = circshift(tc(i,:),randi(size(tc,2)));
