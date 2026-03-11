@@ -6,10 +6,10 @@ close all
 anaMode = 'SU';
 
 % dataFold = '/Volumes/Lab drive/Brandon/data/dataSets/DSdev';
-% dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/DSdev';
+dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/DSdev';
 % dataFold = '/Volumes/NielsenHome2/Brandon/data/dataSets/DSdev';
 % dataFold = 'F:\Brandon\data\dataSets\DSdev';
-dataFold = 'Y:\Brandon\data\dataSets\DSdev';
+% dataFold = 'Y:\Brandon\data\dataSets\DSdev';
 load(fullfile(dataFold,['DSdev_' anaMode 'dataSet.mat']))
 
 areas = {'V1','PSS'};
@@ -20,23 +20,23 @@ nAR = length(areas);
 
 
 figure;
-cum = 1;
+cum = 0;
 exAR = 1;
-exAG = 3;
+exAG = 2;
 maxPC = 10;
-exPC = 10;
+exPC = 1;
 if strcmp(anaMode,'SU')
-    nU = 30;
+    nU = 34;
 elseif strcmp(anaMode,'MU')
     nU = 300;
 end
 for ar = 1:nAR
     for ag = 1:nAG
 
-        for boot = 1:10
+        for boot = 1:100
             disp(boot)
             r = rMat{ar,ag}.rTrial_norm;
-            r = r(:,randperm(size(rMat{ar,ag}.rTrial_norm,2),nU));
+            r = r(:,randperm(size(r,2),nU));
             tDir = rMat{ar,ag}.cTrial;
             tDirShuff = tDir(randperm(length(tDir),length(tDir)));
             tOri = mod(tDir,180);
