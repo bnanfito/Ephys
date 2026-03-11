@@ -7,15 +7,19 @@ cNull = find( conds == data.oriNull(1) );
 cOrth1 = find( conds == mod(conds(cPref)+90,360) );
 cOrth2 = find( conds == mod(conds(cPref)-90,360) );
 nConds = length(conds);
-rA = data.response{1}; rA = rA(~isnan(rA));
-rB = data.fr(1).bc(:,1:nConds); rB= rB(~isnan(rB));
-rC = data.fr(1).bc(:,(1:nConds)+nConds); rC = rC(~isnan(rC));
-if unique(rB == rA)==1
+if length(data.paramKey{1})>1
+    rA = data.response{1}; rA = rA(~isnan(rA));
+    rB = data.fr(1).bc(:,1:nConds); rB= rB(~isnan(rB));
+    rC = data.fr(1).bc(:,(1:nConds)+nConds); rC = rC(~isnan(rC));
+    if unique(rB == rA)==1
+        cndsInclude = 1:nConds;
+    elseif unique(rC == rA)==1
+        cndsInclude = (1:nConds)+nConds;
+    end
+else
     cndsInclude = 1:nConds;
-elseif unique(rC == rA)==1
-    cndsInclude = (1:nConds)+nConds;
 end
-trialKey = data.fr(1).trialNum(:,cndsInclude);
+trialKey = data.fr(1).trialNum(1:5,cndsInclude);
 trialInclude = sort(trialKey(:));
 nTrials = numel(trialKey);
 nReps = size(trialKey,1);
@@ -26,18 +30,18 @@ spkT = spkTimes(1,:);
 trialId = spkTimes(2,:);
 dt = 0.001;
 time = -1:dt:2;
-w = 0.010;
+w = 0.020;
 for t = 1:nTrials
     tId = trialInclude(t);
     if ismember(tId,trialId)
         xT = spkT(trialId==tId);
         for s = 1:length(xT)
-            g{tId}(:,s) = normpdf(time,xT(s),w)*dt;
+            g{t}(:,s) = normpdf(time,xT(s),w)*dt;
         end
 %         sdf(:,tId) = sum(g{tId}/max(g{tId},[],'all'),2)/(w);
-        sdf(:,tId) = sum(g{tId},2)/dt;
+        sdf(:,t) = sum(g{t},2)/dt;
     else
-        sdf(:,tId) = zeros(size(time));
+        sdf(:,t) = zeros(size(time));
     end
 end
 for c = cndsInclude
@@ -49,6 +53,7 @@ SDF.time = time;
 SDF.trial = sdf';
 SDF.mean = mean(SDF.trial,'omitnan');
 SDF.sem = sem(SDF.trial);
+SDF.ci95 = confInt(SDF.trial);
 SDF.cMean = sdf_cMean;
 SDF.cSem = sdf_cSem;
 SDF.cPref = cPref;
