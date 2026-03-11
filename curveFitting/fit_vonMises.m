@@ -1,6 +1,6 @@
-function [vm] = fit_vonMises(r,t)
+function [vm] = fit_vonMises(r,t,varargin)
 t = deg2rad(t);
-plr=0;
+plr=1;
 
 % Initial parameter guesses
 R0_init     = min(r);
@@ -32,16 +32,18 @@ vm.Rp = vm.params(1) + vm.params(2)*exp(vm.params(4)) + vm.params(3)*exp(-vm.par
 vm.Rn = vm.params(1) + vm.params(3)*exp(vm.params(5)) + vm.params(2)*exp(-vm.params(4));
 vm.Tp = rad2deg(params_fit(end));
 
-% figure
-% if plr == 1
-% polarplot(t, r, 'ko','MarkerFaceColor','k')
-% hold on
-% polarplot(deg2rad(vm.theta), vm.rho, 'r','LineWidth',2)
-% else
-% plot(t, r, 'ko','MarkerFaceColor','k')
-% hold on
-% plot(deg2rad(vm.theta), vm.rho, 'r','LineWidth',2)
-% end
-% title('Double von Mises Fit')
+if ~isempty(varargin) && varargin{1}==1
+    figure
+    if plr == 1
+        polarplot(deg2rad(vm.theta), vm.rho, 'r','LineWidth',2)
+        hold on
+        polarplot(t, r, 'k.')
+    else
+        plot(deg2rad(vm.theta), vm.rho, 'r','LineWidth',2)
+        hold on
+        plot(t, r, 'k.')
+    end
+    title('Double von Mises Fit')
+end
 
 end
