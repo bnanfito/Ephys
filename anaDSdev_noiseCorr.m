@@ -2,8 +2,8 @@
 clear all
 close all
 
-anaMode = 'MU';
-load(['Y:\Brandon\data\dataSets\DSdev\DSdev_' anaMode 'dataSet.mat'])
+anaMode = 'SU';
+load(['/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/DSDev/DSdev_' anaMode 'dataSet.mat'])
 
 sC = [];
 nC = [];

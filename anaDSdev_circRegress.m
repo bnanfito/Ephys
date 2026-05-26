@@ -176,3 +176,43 @@ for ag = 1:nAG
     box on
 end
 sgtitle([areas{exAR} ' AG' num2str(exAG) ' ' anaMode ' circular regression example fold (PC#1-' num2str(exPC) ')'])
+
+
+figure;
+for ar = 1:nAR
+    if strcmp(areas{ar},'V1')
+        clrDir = 'b';
+        clrOri = 'c';
+    elseif strcmp(areas{ar},'PSS')
+        clrDir = 'r';
+        clrOri = 'm';
+    end
+    colororder = {clrDir clrOri};
+    subplot(1,2,ar);hold on
+    box on
+    for ag = 1:nAG
+        if ag == 1
+            linStyl = ':';
+            mrkr = 'o';
+        elseif ag == 2
+            linStyl = '--';
+            mrkr = '^';
+        elseif ag == 3
+            linStyl = '-';
+            mrkr = 'square';
+        end
+        yyaxis left
+        plot(mean(mseDir{ar,ag}),[clrDir linStyl mrkr],'LineWidth',1);
+        errY = confInt(mseDir{ar,ag});
+        patch([1:maxPC fliplr(1:maxPC)],[errY(1,:) fliplr(errY(2,:))],clrDir,'EdgeColor','none','FaceAlpha',0.2)
+        ylim([yLb 120])
+        yyaxis right
+        plot(mean(mseOri{ar,ag}),[clrOri linStyl mrkr],'LineWidth',1);
+        errY = confInt(mseOri{ar,ag});
+        patch([1:maxPC fliplr(1:maxPC)],[errY(1,:) fliplr(errY(2,:))],clrOri,'EdgeColor','none','FaceAlpha',0.2)
+        ylim([yLb/2 60])
+    end
+
+
+
+end

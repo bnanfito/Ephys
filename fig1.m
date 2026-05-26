@@ -7,10 +7,10 @@ expt = '007';
 probe = 1;
 anaMode = 'MU';
 % dataFold = 'F:\Brandon\data';
-dataFold = 'Y:\Brandon\data';
+% dataFold = 'Y:\Brandon\data';
 % dataFold = 'C:\Users\brand\Documents\data';
 % dataFold = '/Volumes/Lab drive/Brandon/data';
-% dataFold = '/Volumes/NielsenHome2/Brandon/data';
+dataFold = '/Volumes/NielsenHome2/Brandon/data';
 % dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
 exptName = [animal '_u' unit '_' expt];
 
@@ -302,12 +302,15 @@ box on
 % axis square
 
 figure; hold on
-x = cntrlStats.rPref(goodIdx);
-y1 = rCold(goodIdx);
-y2 = rWarm(goodIdx);
-x = x+1; y1 = y1+1; y2 = y2+1;
-scatter(x,y1,'co','MarkerFaceColor','c')
-scatter(x,y2,'ko','MarkerFaceColor','k')
+x = cntrlStats.rPref;
+y1 = rCold;
+y2 = rWarm;
+c = 0.1;
+x = x+c; y1 = y1+c; y2 = y2+c;
+scatter(x(~goodIdx),y1(~goodIdx),'co')
+scatter(x(~goodIdx),y2(~goodIdx),'ko')
+scatter(x(goodIdx),y1(goodIdx),'co','MarkerFaceColor','c')
+scatter(x(goodIdx),y2(goodIdx),'ko','MarkerFaceColor','k')
 % for i = find(goodIdx)'%1:height(sumStats)
 %     scatter(x(i),y1(i),'c','Marker',shapes{shaftIdx(i)},'MarkerFaceColor','c','MarkerFaceAlpha',1-(sumStats.zPos(i)/max(sumStats.zPos)))
 % end
@@ -322,7 +325,7 @@ set(gca, 'YScale', 'log')
 set(gca, 'XScale', 'log')
 box on
 axis square
-plot([1 100],[1 100],'k--')
+plot([.1 100],[.1 100],'k--')
 
 
 d = sqrt((sumStats.xPos.^2)+(sumStats.zPos.^2));

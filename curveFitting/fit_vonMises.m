@@ -41,7 +41,8 @@ if ~isempty(varargin) && varargin{1}==1
     else
         plot(deg2rad(vm.theta), vm.rho, 'r','LineWidth',2)
         hold on
-        plot(t, r, 'k.')
+        plot(t, r, 'ko','MarkerFaceColor','k')
+        axis tight
     end
     title('Double von Mises Fit')
 end

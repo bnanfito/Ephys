@@ -4,9 +4,9 @@ close all
 
 proj = 'V1cool_ori';
 % dataFold = '/Volumes/NielsenHome2/Brandon/data';
-dataFold = 'Y:\Brandon\data';
+% dataFold = 'Y:\Brandon\data';
 % dataFold = 'C:\Users\brand\Documents\data';
-% dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
+dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
 anaMode = 'SU';
 ageGroups = {[28 32],[33 40],[41 80],[81 120]};
 

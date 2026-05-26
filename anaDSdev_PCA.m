@@ -56,29 +56,13 @@ for ag = 1:nAG
     osi_mean(ar,ag) = mean(D.osi);
     osi_sem(ar,ag) = sem(D.osi);
 
-end
-end
-
-%% RSA
-
-% for ar = 1
-%     for ag = 1
-% 
-%         d = rMat{ar,ag};
-%         r = d.rMean_norm;
-%         cDir = d.cMean;
-%         cOri = mod(d.cMean,180);
-% 
-%         %compute correlation between template RDMs and empirical RDMs
-%         dirCorr()
-% 
-% 
-%     end
-% end
-
-for ar = 1:nAR
-for ag = 1:nAG
-
+    rdm = [];
+    for b = 1:1000
+        uIdx = randi(height(dat{ar,ag}),1,min(nU,[],'all')); %bootstrap sample with replacement
+        rdm(:,:,b) = squareform(pdist(rMat{ar,ag}.rMean_norm(:,uIdx),'spearman'));
+    end
+    RDM{ar,ag} = mean(rdm,3);
+    
     %compute the spearman correlation between pairwise distance vectors for
     %template and empirical data
     dir_Corr(ar,ag) = corr(dir.diss',distDat{ar,ag}.diss','type','Spearman');
@@ -109,6 +93,60 @@ for ag = 1:nAG
     dirStd_Corr(ar,ag) = std(dirBoots_Corr);
     oriStd_Corr(ar,ag) = std(oriBoots_Corr);
     clear dirBoots_pCorr oriBoots_pCorr dirBoots_Corr oriBoots_Corr
+
+end
+end
+
+%% RSA
+
+% for ar = 1
+%     for ag = 1
+% 
+%         d = rMat{ar,ag};
+%         r = d.rMean_norm;
+%         cDir = d.cMean;
+%         cOri = mod(d.cMean,180);
+% 
+%         %compute correlation between template RDMs and empirical RDMs
+%         dirCorr()
+% 
+% 
+%     end
+% end
+
+figure
+for ar = 1:nAR
+for ag = 1:nAG
+
+    subplot(nAR,nAG,ag+(nAG*(ar-1))); hold on
+    histogram(dirNull_1{ar,ag})
+    xline(dir_Corr(ar,ag),'r')
+    pval = 1-(sum(dir_Corr(ar,ag)>dirNull_1{ar,ag})/length(dirNull_1{ar,ag}));
+    title(num2str(pval))
+    box on
+    axis square
+    xlabel('corr(dir)')
+    ylabel('count')
+
+end
+end
+
+figure
+for ar = 1:nAR
+for ag = 1:nAG
+
+    
+
+    subplot(nAR,nAG,ag+(nAG*(ar-1))); hold on
+    histogram(oriNull_1{ar,ag})
+    xline(ori_Corr(ar,ag),'r')
+    pval = 1-(sum(ori_Corr(ar,ag)>oriNull_1{ar,ag})/length(oriNull_1{ar,ag}));
+    title(num2str(pval))
+    box on
+    axis square
+    xlabel('corr(ori)')
+    ylabel('count')
+   
 
 end
 end
@@ -417,12 +455,12 @@ for ag = 1:length(ageGroups)
     
     figure(2);
     subplot(nAR,nAG,ag+(nAG*(ar-1)));
-    rdm = [];
-    for b = 1:100
-        uIdx = randi(height(dat{ar,ag}),1,min(nU,[],'all')); %bootstrap sample with replacement
-        rdm(:,:,b) = squareform(pdist(R(:,uIdx),'spearman'));
-    end
-    imagesc(mean(rdm,3));
+    % rdm = [];
+    % for b = 1:100
+    %     uIdx = randi(height(dat{ar,ag}),1,min(nU,[],'all')); %bootstrap sample with replacement
+    %     rdm(:,:,b) = squareform(pdist(R(:,uIdx),'spearman'));
+    % end
+    imagesc(RDM{ar,ag});
     colormap gray
     axis square
     box on

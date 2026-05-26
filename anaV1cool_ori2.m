@@ -6,8 +6,8 @@ anaMode = 'MU';
 proj = 'V1cool_ori';
 area = 'PSS';
 % dataFold = 'Y:\Brandon\data';
-dataFold = '/Volumes/NielsenHome2/Brandon/data';
-% dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
+% dataFold = '/Volumes/NielsenHome2/Brandon/data';
+dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
 ageGroups = {[28 32],[33 40],[41 80],[81 120]};
 
 %% Generate Project Table
@@ -274,7 +274,7 @@ figure('Position',[100 100 1000 700])
 
 a = 4; 
 sp = 1;
-for u = [42 52 54]
+for u = [42 52 51]
 subplot(3,3,sp); hold on
 d1 = dat.cntrl{a};
 d2 = dat.cool{a};
@@ -803,6 +803,26 @@ clear id uAge uAG manip g
 
 unitData = vertcat(unitDataCntrl,unitDataCool);
 unitData = unitData(unitData.good,:);
+
+%% plot groups
+
+figure;
+colororder({'k','c'})
+D = vertcat(unitDataCntrl,unitDataCool);
+idx = repmat(unitDataCntrl.good,2,1);
+D = D(idx,:);
+boxchart(D.AG,log10(D.rPref+0.1),'GroupByColor',D.manip,'Notch','on')
+box on
+% set(gca,'YScale','log')
+anovan(log10(D.rPref+0.1),{D.AG D.manip},'model','interaction','varnames',{'ageGroup','manip'})
+
+figure;
+D = vertcat(unitDataCntrl,unitDataCool);
+idx = [unitDataCntrl.good;unitDataCool.good];
+D = D(idx,:);
+boxchart(D.AG,D.latency,'GroupByColor',D.manip)
+% anovan(D.latency,{D.AG D.manip},'model','interaction','varnames',{'ageGroup','manip'})
+
 
 %% split distribution
 
