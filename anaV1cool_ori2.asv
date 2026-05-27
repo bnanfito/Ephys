@@ -5,9 +5,9 @@ close all
 anaMode = 'MU';
 proj = 'V1cool_ori';
 area = 'PSS';
-% dataFold = 'Y:\Brandon\data';
+dataFold = 'Y:\Brandon\data';
 % dataFold = '/Volumes/NielsenHome2/Brandon/data';
-dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
+% dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
 ageGroups = {[28 32],[33 40],[41 80],[81 120]};
 
 %% Generate Project Table
@@ -93,6 +93,8 @@ for a = 1:length(animals)
 
 end
 
+%for each animal, compute the proportion of MU that are V1 dependent or
+%independent
 for a = 1:length(animals)
     if  isempty(goodIdCntrl{a,1})||isempty(goodIdCool{a,1})
         v1_ind{a,1} = [];
@@ -113,8 +115,56 @@ for a = 1:length(animals)
     v1_depProp(a) = sum(v1_dep{a})/length(v1_dep{a});
     v1_indProp(a) = sum(v1_ind{a})/length(v1_ind{a});
     badU_prop(a) = sum(badU{a})/length(badU{a});
+    disInh_prop(a) = sum(disInh{a})/length(disInh{a});
 
 end
+
+%sort according to age
+[sAge,sIdx] = sort(ages);
+
+%plot
+figure; bar([v1_indProp(sIdx)' v1_depProp(sIdx)' badU_prop(sIdx)' disInh_prop(sIdx)'],'stacked')
+xticks(1:length(sAge))
+xticklabels(sAge)
+legend({'V1 independent','V1 dependent','bad units','disinhibited units'})
+
+%latency as a function of si (for MU that pass before cooling)
+for a = 1:length(animals)
+    if isempty(dat.cntrl{a,1})||isempty(dat.cool{a,1})
+        r1{a} = [];
+        r2{a} = [];
+        lat1{a} = [];
+        SI{a} = [];
+        continue
+    end
+    r1{a} = dat.cntrl{a,1}(v1_ind{a}|v1_dep{a},:).rPref;
+    r2{a} = dat.cool{a,1}(v1_ind{a}|v1_dep{a},:).rPref;
+    lat1{a} = dat.cntrl{a,1}(v1_ind{a}|v1_dep{a},:).latency;
+    SI{a} = (r2{a}-r1{a})./(r2{a}+r1{a});
+end
+
+%plot
+figure;
+for ag = 1:4
+    subplot(2,2,ag)
+    scatter(vertcat(SI{agIdx==ag}),vertcat(lat1{agIdx==ag}))
+    title(['ag' num2str(ag)])
+    xlabel('latency')
+    ylabel('SI')
+end
+figure;hold on
+for ag = 1:4
+    scatter(vertcat(SI{agIdx==ag}),vertcat(lat1{agIdx==ag}))
+    lbl{ag} = ['ag' num2str(ag) ' n=' num2str(length(vertcat(lat1{agIdx==ag})))];
+    
+end
+legend(lbl)
+clear lbl
+figure;hold on
+for ag = 1:4
+    cdfplot(vertcat(lat1{agIdx==ag}))
+end
+legend({'ag1','ag2','ag3','ag4'})
 
 %% supp fig 1: per animal scatter - control v cool
 
