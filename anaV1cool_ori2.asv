@@ -113,17 +113,8 @@ for a = 1:length(animals)
     v1_depProp(a) = sum(v1_dep{a})/length(v1_dep{a});
     v1_indProp(a) = sum(v1_ind{a})/length(v1_ind{a});
     badU_prop(a) = sum(badU{a})/length(badU{a});
-    disInh_prop(a) = sum(disInh{a})/length(disInh{a});
 
 end
-
-[~,sIdx] = sort(ages);
-v1_depProp = v1_depProp(sIdx);
-v1_indProp = v1_indProp(sIdx);
-badU_prop = badU_prop(sIdx);
-disInh_prop = disInh_prop(sIdx);
-
-figure; bar([v1_indProp' v1_depProp' badU_prop' disInh_prop'],'stacked')
 
 %% supp fig 1: per animal scatter - control v cool
 
