@@ -93,171 +93,25 @@ for a = 1:length(animals)
 
 end
 
-%for each animal, compute the proportion of MU that are V1 dependent or
-%independent
-for a = 1:length(animals)
-    if  isempty(goodIdCntrl{a,1})||isempty(goodIdCool{a,1})
-        v1_ind{a,1} = [];
-        v1_dep{a,1} = [];
-        badU{a,1} = [];
-        disInh{a,1} = [];
-
-        v1_depProp(a) = nan;
-        v1_indProp(a) = nan;
-        badU_prop(a) = nan;
-        continue
-    end
-    v1_ind{a,1} = goodIdCntrl{a,1}&goodIdCool{a,1};
-    v1_dep{a,1} = goodIdCntrl{a,1}&~goodIdCool{a,1};
-    badU{a,1} = ~goodIdCntrl{a,1}&~goodIdCool{a,1};
-    disInh{a,1} = ~goodIdCntrl{a,1}&goodIdCool{a,1};
-
-    v1_depProp(a) = sum(v1_dep{a})/length(v1_dep{a});
-    v1_indProp(a) = sum(v1_ind{a})/length(v1_ind{a});
-    badU_prop(a) = sum(badU{a})/length(badU{a});
-    disInh_prop(a) = sum(disInh{a})/length(disInh{a});
-
-end
-
-%sort according to age
-[sAge,sIdx] = sort(ages);
-
-%plot
-figure; bar([v1_indProp(sIdx)' v1_depProp(sIdx)' badU_prop(sIdx)' disInh_prop(sIdx)'],'stacked')
-xticks(1:length(sAge))
-xticklabels(sAge)
-legend({'V1 independent','V1 dependent','bad units','disinhibited units'})
-
-%latency as a function of si (for MU that pass before cooling)
-for a = 1:length(animals)
-    if isempty(dat.cntrl{a,1})||isempty(dat.cool{a,1})
-        r1{a} = [];
-        r2{a} = [];
-        lat1{a} = [];
-        SI{a} = [];
-        continue
-    end
-    r1{a} = dat.cntrl{a,1}(v1_ind{a}|v1_dep{a},:).rPref;
-    r2{a} = dat.cool{a,1}(v1_ind{a}|v1_dep{a},:).rPref;
-    lat1{a} = dat.cntrl{a,1}(v1_ind{a}|v1_dep{a},:).latency;
-    SI{a} = (r2{a}-r1{a})./(r2{a}+r1{a});
-end
-
-%plot
-figure;
-for ag = 1:4
-    subplot(2,2,ag)
-    scatter(vertcat(SI{agIdx==ag}),vertcat(lat1{agIdx==ag}))
-    title(['ag' num2str(ag)])
-    xlabel('latency')
-    ylabel('SI')
-end
-figure;hold on
-for ag = 1:4
-    scatter(vertcat(SI{agIdx==ag}),vertcat(lat1{agIdx==ag}))
-    lbl{ag} = ['ag' num2str(ag) ' n=' num2str(length(vertcat(lat1{agIdx==ag})))];
-    
-end
-legend(lbl)
-clear lbl
-figure;hold on
-for ag = 1:4
-    cdfplot(vertcat(lat1{agIdx==ag}))
-end
-legend({'ag1','ag2','ag3','ag4'})
-
-%% supp fig 1: per animal scatter - control v cool
-
-% for ag = 1:length(ageGroups)
-%     nAni(ag) = sum(ages>=ageGroups{ag}(1) & ages<=ageGroups{ag}(2));
-% end
-% nC = max(nAni);
-nC = 8;
-figure;
-ag = 1;
-count = 0;
-[~,sortIdx] = sort(ages);
-datAG.cntrl{length(ageGroups)} = [];
-datAG.cool{length(ageGroups)} = [];
-for ani = sortIdx
-
-    dA =  dat.cntrl{ani,1};
-    dB = dat.cool{ani,1};
-    if isempty(dA)|isempty(dB)
-        continue
-    end
-    if ages(ani)>ageGroups{ag}(2)
-        ag = ag+1;
-        count = 1;
-    else
-        count = count+1;
-    end
-    datAG.cntrl{ag} = [datAG.cntrl{ag};dA];
-    datAG.cool{ag} = [datAG.cool{ag};dB];
-    subplot(length(ageGroups),nC,(nC*(ag-1))+count); hold on
-    x = dA.rPref;
-    y = dB.rPref;
-    m = max([x;y]);
-    idA = screenUnits(dA,anaMode);
-    idB = screenUnits(dB,anaMode);
-    plot([0 m],[0 m],'k')
-    scatter(x,y,'k')
-    sPlt(1) = scatter(x(idA&~idB),y(idA&~idB),'k','MarkerFaceColor','k');
-    sPlt(2) = scatter(x(idA&idB),y(idA&idB),'k','MarkerFaceColor','b');
-    axis tight
-    axis square
-    box on
-    title([animals{ani} '; P' num2str(ages(ani))])
-    xlabel('control')
-    ylabel('cool V1')
-    if ag == length(ageGroups) && ani == sortIdx(end)
-        legend(sPlt,{'V1 dependent','V1 independent'},'Location','best')
-    end
-end
-
-figure
-for ag = 1:length(ageGroups)
-    
-    dA = datAG.cntrl{ag};
-    dB = datAG.cool{ag};
-    idA = screenUnits(dA,anaMode);
-    idB = screenUnits(dB,anaMode);
-    
-    subplot(1,length(ageGroups),ag);hold on
-    x = dA.ldr;
-    y = dB.ldr;
-    m = max([x;y]);
-    plot([0 m],[0 m],'k')
-    scatter(x,y,'k')
-    scatter(x(idA&~idB),y(idA&~idB),'k','MarkerFaceColor','k')
-    scatter(x(idA&idB),y(idA&idB),'k','MarkerFaceColor','b')
-    axis square
-    axis tight
-    box on
-
-end 
-
-
 %% Calculate Animal Metrics
-
-
 
 for a = 1:length(animals)
     if ~(isempty(dat.cntrl{a,1}) || isempty(dat.cool{a,1}))
 
         % For metrics of response magnitude, include all MU that pass
         % criteria before cooling
-        i = goodIdCntrl{a,1};
+        i = goodIdCntrl{a,1}; %index MU to include
+        c = 0.1; %add a constant offset to log transformed response mag.
 
         r1 = dat.cntrl{a,1}.rPref(i);
-        r1L = log10(r1+1);
+        r1L = log10(r1+c);
         rPref.cntrl.dist{a} = r1;
         rPref.cntrl.ave(a) = mean(r1,'omitnan');
         rPref.cntrl.sem(a) = std(r1,'omitnan')/sqrt(length(r1));
         rPref.cntrl.n(a) = length(r1);
 
         r2 = dat.cool{a,1}.rPref(i);
-        r2L = log10(r2+1);
+        r2L = log10(r2+c);
         rPref.cool.dist{a} = r2;
         rPref.cool.ave(a) = mean(r2,'omitnan');
         rPref.cool.sem(a) = std(r2,'omitnan')/sqrt(length(r2));
@@ -277,9 +131,37 @@ for a = 1:length(animals)
             si.stats.sRank.p(a) = nan;
         end
 
+        d = dat.cntrl{a,1}.ldr(i);
+        ldr.cntrl.dist{a} = d;
+        ldr.cntrl.ave(a) = mean(d,'omitnan');
+        ldr.cntrl.sem(a) = sem(d);
+        ldr.cntrl.n(a) = length(d);
+
+        d = dat.cntrl{a,1}.lor(i);
+        lor.cntrl.dist{a} = d;
+        lor.cntrl.ave(a) = mean(d,'omitnan');
+        lor.cntrl.sem(a) = sem(d);
+        lor.cntrl.n(a) = length(d);
+
+        % Also get tuning metrics for cooled condition
+        i = goodIdCool{a,1}; %index MU to include
+        
+        d = dat.cool{a,1}.ldr(i);
+        ldr.cool.dist{a} = d;
+        ldr.cool.ave(a) = mean(d,'omitnan');
+        ldr.cool.sem(a) = sem(d);
+        ldr.cool.n(a) = length(d);
+
+        d = dat.cool{a,1}.lor(i);
+        lor.cool.dist{a} = d;
+        lor.cool.ave(a) = mean(d,'omitnan');
+        lor.cool.sem(a) = sem(d);
+        lor.cool.n(a) = length(d);
+
         % For metrics of response latency, the MU included must pass
         % criteria before and during cooling, and exclude nan values
-        i = (goodIdCntrl{a,1}&goodIdCool{a,1}) & ~(isnan(dat.cntrl{a,1}.latency)|isnan(dat.cool{a,1}.latency));
+        i = (goodIdCntrl{a,1}&goodIdCool{a,1}) & ... %index MU to include
+            ~(isnan(dat.cntrl{a,1}.latency)|isnan(dat.cool{a,1}.latency));
         
         l1 = dat.cntrl{a,1}.latency(i);
         late.cntrl.dist{a} = l1;
@@ -345,143 +227,6 @@ for a = 1:length(animals)
 
     end
 end
-
-
-%% Plot
-
-figure('Position',[100 100 1000 700])
-
-a = 4; 
-sp = 1;
-for u = [42 52 51]
-subplot(3,3,sp); hold on
-d1 = dat.cntrl{a};
-d2 = dat.cool{a};
-nTrials1 = max(dat.cntrl{a}.fr(u).trialNum,[],'all');
-nTrials2 = max(dat.cool{a}.fr(u).trialNum,[],'all');
-bw = 0.01;
-bins = -1:bw:2;
-h1 = histcounts(d1.spkTimes{u}(1,:),bins)/(nTrials1*bw);
-s1 = compute_sdf(d1(u,:));
-h2 = histcounts(d2.spkTimes{u}(1,:),bins)/(nTrials2*bw);
-s2 = compute_sdf(d2(u,:));
-maxH = max([s1.ci95 s2.ci95],[],'all')+1;
-patch([0 1 1 0],[0 0 maxH maxH],'k','EdgeColor','none','FaceAlpha',0.2)
-% plot(bins(2:end),h1,'k')
-% plot(bins(2:end),h2,'c')
-plot(s1.time,s1.mean,'k','LineWidth',1)
-patch([s1.time fliplr(s1.time)],[s1.ci95(1,:) fliplr(s1.ci95(2,:))],'k','EdgeColor','none','FaceAlpha',0.2)
-plot(s2.time,s2.mean,'c','LineWidth',1)
-patch([s2.time fliplr(s2.time)],[s2.ci95(1,:) fliplr(s2.ci95(2,:))],'c','EdgeColor','none','FaceAlpha',0.2)
-% plot(s1.time,s1.cMean(s1.cPref,:),'k','LineWidth',1)
-% patch([s1.time fliplr(s1.time)],[s1.cMean(s1.cPref,:)+s1.cSem(s1.cPref,:) fliplr(s1.cMean(s1.cPref,:)-s1.cSem(s1.cPref,:))],'k','EdgeColor','none','FaceAlpha',0.2)
-% plot(s2.time,s2.cMean(s2.cPref,:),'c','LineWidth',1)
-% patch([s2.time fliplr(s2.time)],[s2.cMean(s2.cPref,:)+s2.cSem(s2.cPref,:) fliplr(s2.cMean(s2.cPref,:)-s2.cSem(s2.cPref,:))],'c','EdgeColor','none','FaceAlpha',0.2)
-l1 = dat.cntrl{a}.latency(u);
-l2 = dat.cool{a}.latency(u);
-if ~isnan(l1)
-    xline(l1,'k--')
-end
-if ~isnan(l2)
-    xline(l2,'c--')
-end
-xlim([-1 2])
-xlabel('time (sec)')
-ylim([0 maxH])
-if sp == 1
-    ylabel('firing rate')
-end
-box on
-sp = sp+1;
-end
-
-x = ages;
-% x = agesJit;
-% i = find(agIdx==3|agIdx==4);
-% xA = [x(i);i];
-% [~,sIdx] = sort(xA(1,:));
-% xA = xA(:,sIdx);
-% xA(1,:) = (0:5/(size(xA,2)-1):5)+ageGroups{3}(1);
-% x(xA(2,:)) = xA(1,:);
-
-minN = 20;
-xL = [26 48];
-xT = [25,30,35,40];
-xTlbl = {'25','30','35','40+'};
-
-subplot(3,2,3);hold on
-sclSem = 100;
-pVal = rPref.stats.sRank.p<0.01;
-y1 = rPref.cntrl.ave;
-sem1 = rPref.cntrl.sem;
-n1 = rPref.cntrl.n;
-scatter(x(n1>=minN&pVal),y1(n1>=minN&pVal),sem1(n1>=minN&pVal)*sclSem,'ko','MarkerFaceColor','flat','MarkerFaceAlpha',0.2,'LineWidth',1)
-scatter(x(n1>=minN&~pVal),y1(n1>=minN&~pVal),sem1(n1>=minN&~pVal)*sclSem,'ko','MarkerFaceColor','none','MarkerFaceAlpha',0.2,'LineWidth',1)
-y2 = rPref.cool.ave;
-sem2 = rPref.cool.sem;
-n2 = rPref.cool.n;
-scatter(x(n2>=minN&pVal),y2(n2>=minN&pVal),sem2(n2>=minN&pVal)*sclSem,'co','MarkerFaceColor','flat','MarkerFaceAlpha',0.2,'LineWidth',1)
-scatter(x(n2>=minN&~pVal),y2(n2>=minN&~pVal),sem2(n2>=minN&~pVal)*sclSem,'co','MarkerFaceColor','none','MarkerFaceAlpha',0.2,'LineWidth',1)
-plot([x(n1>=minN);x(n2>=minN)],[y1(n1>=minN);y2(n2>=minN)],'k')
-xlim(xL)
-xticks(xT)
-xticklabels(xTlbl)
-ylabel('firing rate')
-box on
-
-subplot(3,2,4);hold on
-sclSem = 5000;
-pVal = si.stats.sRank.p<0.01;
-y3 = si.ave;
-sem3 = si.sem;
-n3 = si.n;
-yline(0,'k--')
-scatter(x(n3>=minN&pVal),y3(n3>=minN&pVal),sem3(n3>=minN&pVal)*sclSem,'ko','MarkerFaceColor','flat','MarkerFaceAlpha',0.2,'LineWidth',1)
-scatter(x(n3>=minN&~pVal),y3(n3>=minN&~pVal),sem3(n3>=minN&~pVal)*sclSem,'ko','MarkerFaceColor','none','MarkerFaceAlpha',0.2,'LineWidth',1)
-ylim([-1,0.1])
-xlim(xL)
-xticks(xT)
-xticklabels(xTlbl)
-ylabel('SI')
-box on
-
-subplot(3,2,5);hold on
-sclSem = 5000;
-pVal = late.stats.sRank.p<0.01;
-y4 = late.cntrl.ave;
-sem4 = late.cntrl.sem;
-n4 = late.cntrl.n;
-scatter(x(n4>=minN&pVal),y4(n4>=minN&pVal),sem4(n4>=minN&pVal)*sclSem,'ko','MarkerFaceColor','flat','MarkerFaceAlpha',0.2,'LineWidth',1)
-scatter(x(n4>=minN&~pVal),y4(n4>=minN&~pVal),sem4(n4>=minN&~pVal)*sclSem,'ko','MarkerFaceColor','none','MarkerFaceAlpha',0.2,'LineWidth',1)
-y5 = late.cool.ave;
-sem5 = late.cool.sem;
-n5 = late.cool.n;
-scatter(x(n5>=minN&pVal),y5(n5>=minN&pVal),sem5(n5>=minN&pVal)*sclSem,'co','MarkerFaceColor','flat','MarkerFaceAlpha',0.2,'LineWidth',1)
-scatter(x(n5>=minN&~pVal),y5(n5>=minN&~pVal),sem5(n5>=minN&~pVal)*sclSem,'co','MarkerFaceColor','none','MarkerFaceAlpha',0.2,'LineWidth',1)
-i = n4>=minN & n5>=minN;
-plot([x(i);x(i)],[y4(i);y5(i)],'k')
-xlim(xL)
-xticks(xT)
-xticklabels(xTlbl)
-xlabel('age (postnatal day)')
-ylabel('response latency (sec)')
-box on
-
-subplot(3,2,6);hold on
-sclSem = 2000;
-pVal = dLate.stats.sRank.p<0.01;
-y6 = dLate.ave;
-sem6 = dLate.sem;
-n6 = dLate.n;
-yline(0,'k--')
-scatter(x(n6>=minN&pVal),y6(n6>=minN&pVal),sem6(n6>=minN&pVal)*sclSem,'ko','MarkerFaceColor','flat','MarkerFaceAlpha',0.2,'LineWidth',1)
-scatter(x(n6>=minN&~pVal),y6(n6>=minN&~pVal),sem6(n6>=minN&~pVal)*sclSem,'ko','MarkerFaceColor','none','MarkerFaceAlpha',0.2,'LineWidth',1)
-xlim(xL)
-xticks(xT)
-xticklabels(xTlbl)
-xlabel('age (postnatal day)')
-ylabel('delta response latency')
-box on
 
 %% Make data table
 
@@ -623,6 +368,292 @@ clear id uAge uAG manip g
 
 unitData = vertcat(unitDataCntrl,unitDataCool);
 unitData = unitData(unitData.good,:);
+
+%% V1 dependent vs independent
+
+%for each animal, compute the proportion of MU that are V1 dependent or
+%independent
+for a = 1:length(animals)
+    if  isempty(goodIdCntrl{a,1})||isempty(goodIdCool{a,1})
+        v1_ind{a,1} = [];
+        v1_dep{a,1} = [];
+        badU{a,1} = [];
+        disInh{a,1} = [];
+
+        v1_depProp(a) = nan;
+        v1_indProp(a) = nan;
+        badU_prop(a) = nan;
+        continue
+    end
+    v1_ind{a,1} = goodIdCntrl{a,1}&goodIdCool{a,1};
+    v1_dep{a,1} = goodIdCntrl{a,1}&~goodIdCool{a,1};
+    badU{a,1} = ~goodIdCntrl{a,1}&~goodIdCool{a,1};
+    disInh{a,1} = ~goodIdCntrl{a,1}&goodIdCool{a,1};
+
+    v1_depProp(a) = sum(v1_dep{a})/length(v1_dep{a});
+    v1_indProp(a) = sum(v1_ind{a})/length(v1_ind{a});
+    badU_prop(a) = sum(badU{a})/length(badU{a});
+    disInh_prop(a) = sum(disInh{a})/length(disInh{a});
+
+end
+
+%sort according to age
+[sAge,sIdx] = sort(ages);
+
+%plot
+figure; bar([v1_indProp(sIdx)' v1_depProp(sIdx)' badU_prop(sIdx)' disInh_prop(sIdx)'],'stacked')
+xticks(1:length(sAge))
+xticklabels(sAge)
+legend({'V1 independent','V1 dependent','bad units','disinhibited units'})
+
+%latency as a function of si (for MU that pass before cooling)
+clear r1 r2
+for a = 1:length(animals)
+    if isempty(dat.cntrl{a,1})||isempty(dat.cool{a,1})
+        r1{a} = [];
+        r2{a} = [];
+        lat1{a} = [];
+        SI{a} = [];
+        continue
+    end
+    r1{a} = dat.cntrl{a,1}(v1_ind{a}|v1_dep{a},:).rPref;
+    r2{a} = dat.cool{a,1}(v1_ind{a}|v1_dep{a},:).rPref;
+    lat1{a} = dat.cntrl{a,1}(v1_ind{a}|v1_dep{a},:).latency;
+    SI{a} = (r2{a}-r1{a})./(r2{a}+r1{a});
+end
+
+%plot
+figure;
+for ag = 1:4
+    subplot(2,2,ag)
+    scatter(vertcat(SI{agIdx==ag}),vertcat(lat1{agIdx==ag}))
+    title(['ag' num2str(ag)])
+    xlabel('latency')
+    ylabel('SI')
+end
+figure;hold on
+for ag = 1:4
+    scatter(vertcat(SI{agIdx==ag}),vertcat(lat1{agIdx==ag}))
+    lbl{ag} = ['ag' num2str(ag) ' n=' num2str(length(vertcat(lat1{agIdx==ag})))];
+    
+end
+legend(lbl)
+clear lbl
+figure;hold on
+for ag = 1:4
+    cdfplot(vertcat(lat1{agIdx==ag}))
+end
+legend({'ag1','ag2','ag3','ag4'})
+
+%% supp fig 1: per animal scatter - control v cool
+
+% for ag = 1:length(ageGroups)
+%     nAni(ag) = sum(ages>=ageGroups{ag}(1) & ages<=ageGroups{ag}(2));
+% end
+% nC = max(nAni);
+nC = 8;
+figure;
+ag = 1;
+count = 0;
+[~,sortIdx] = sort(ages);
+datAG.cntrl{length(ageGroups)} = [];
+datAG.cool{length(ageGroups)} = [];
+for ani = sortIdx
+
+    dA =  dat.cntrl{ani,1};
+    dB = dat.cool{ani,1};
+    if isempty(dA)|isempty(dB)
+        continue
+    end
+    if ages(ani)>ageGroups{ag}(2)
+        ag = ag+1;
+        count = 1;
+    else
+        count = count+1;
+    end
+    datAG.cntrl{ag} = [datAG.cntrl{ag};dA];
+    datAG.cool{ag} = [datAG.cool{ag};dB];
+    subplot(length(ageGroups),nC,(nC*(ag-1))+count); hold on
+    x = dA.rPref;
+    y = dB.rPref;
+    m = max([x;y]);
+    idA = screenUnits(dA,anaMode);
+    idB = screenUnits(dB,anaMode);
+    plot([0 m],[0 m],'k')
+    scatter(x,y,'k')
+    sPlt(1) = scatter(x(idA&~idB),y(idA&~idB),'k','MarkerFaceColor','k');
+    sPlt(2) = scatter(x(idA&idB),y(idA&idB),'k','MarkerFaceColor','b');
+    axis tight
+    axis square
+    box on
+    title([animals{ani} '; P' num2str(ages(ani))])
+    xlabel('control')
+    ylabel('cool V1')
+    if ag == length(ageGroups) && ani == sortIdx(end)
+        legend(sPlt,{'V1 dependent','V1 independent'},'Location','best')
+    end
+end
+
+figure
+for ag = 1:length(ageGroups)
+    
+    dA = datAG.cntrl{ag};
+    dB = datAG.cool{ag};
+    idA = screenUnits(dA,anaMode);
+    idB = screenUnits(dB,anaMode);
+    
+    subplot(1,length(ageGroups),ag);hold on
+    x = dA.ldr;
+    y = dB.ldr;
+    m = max([x;y]);
+    plot([0 m],[0 m],'k')
+    scatter(x,y,'k')
+    scatter(x(idA&~idB),y(idA&~idB),'k','MarkerFaceColor','k')
+    scatter(x(idA&idB),y(idA&idB),'k','MarkerFaceColor','b')
+    xlabel('pre-cooling Ldir')
+    ylabel('v1 cooled Ldir')
+    axis square
+    axis tight
+    box on
+
+end 
+
+
+%% Plot
+
+figure('Position',[100 100 1000 700])
+
+a = 4; 
+sp = 1;
+for u = [42 52 51]
+subplot(3,3,sp); hold on
+d1 = dat.cntrl{a};
+d2 = dat.cool{a};
+nTrials1 = max(dat.cntrl{a}.fr(u).trialNum,[],'all');
+nTrials2 = max(dat.cool{a}.fr(u).trialNum,[],'all');
+bw = 0.01;
+bins = -1:bw:2;
+h1 = histcounts(d1.spkTimes{u}(1,:),bins)/(nTrials1*bw);
+s1 = compute_sdf(d1(u,:));
+h2 = histcounts(d2.spkTimes{u}(1,:),bins)/(nTrials2*bw);
+s2 = compute_sdf(d2(u,:));
+maxH = max([s1.ci95 s2.ci95],[],'all')+1;
+patch([0 1 1 0],[0 0 maxH maxH],'k','EdgeColor','none','FaceAlpha',0.2)
+% plot(bins(2:end),h1,'k')
+% plot(bins(2:end),h2,'c')
+plot(s1.time,s1.mean,'k','LineWidth',1)
+patch([s1.time fliplr(s1.time)],[s1.ci95(1,:) fliplr(s1.ci95(2,:))],'k','EdgeColor','none','FaceAlpha',0.2)
+plot(s2.time,s2.mean,'c','LineWidth',1)
+patch([s2.time fliplr(s2.time)],[s2.ci95(1,:) fliplr(s2.ci95(2,:))],'c','EdgeColor','none','FaceAlpha',0.2)
+% plot(s1.time,s1.cMean(s1.cPref,:),'k','LineWidth',1)
+% patch([s1.time fliplr(s1.time)],[s1.cMean(s1.cPref,:)+s1.cSem(s1.cPref,:) fliplr(s1.cMean(s1.cPref,:)-s1.cSem(s1.cPref,:))],'k','EdgeColor','none','FaceAlpha',0.2)
+% plot(s2.time,s2.cMean(s2.cPref,:),'c','LineWidth',1)
+% patch([s2.time fliplr(s2.time)],[s2.cMean(s2.cPref,:)+s2.cSem(s2.cPref,:) fliplr(s2.cMean(s2.cPref,:)-s2.cSem(s2.cPref,:))],'c','EdgeColor','none','FaceAlpha',0.2)
+l1 = dat.cntrl{a}.latency(u);
+l2 = dat.cool{a}.latency(u);
+if ~isnan(l1)
+    xline(l1,'k--')
+end
+if ~isnan(l2)
+    xline(l2,'c--')
+end
+xlim([-1 2])
+xlabel('time (sec)')
+ylim([0 maxH])
+if sp == 1
+    ylabel('firing rate')
+end
+box on
+sp = sp+1;
+end
+
+x = ages;
+% x = agesJit;
+% i = find(agIdx==3|agIdx==4);
+% xA = [x(i);i];
+% [~,sIdx] = sort(xA(1,:));
+% xA = xA(:,sIdx);
+% xA(1,:) = (0:5/(size(xA,2)-1):5)+ageGroups{3}(1);
+% x(xA(2,:)) = xA(1,:);
+
+minN = 20;
+xL = [26 48];
+xT = [25,30,35,40];
+xTlbl = {'25','30','35','40+'};
+
+subplot(3,2,3);hold on
+sclSem = 100;
+pVal = rPref.stats.sRank.p<0.01;
+y1 = rPref.cntrl.ave;
+sem1 = rPref.cntrl.sem;
+n1 = rPref.cntrl.n;
+scatter(x(n1>=minN&pVal),y1(n1>=minN&pVal),sem1(n1>=minN&pVal)*sclSem,'ko','MarkerFaceColor','flat','MarkerFaceAlpha',0.2,'LineWidth',1)
+scatter(x(n1>=minN&~pVal),y1(n1>=minN&~pVal),sem1(n1>=minN&~pVal)*sclSem,'ko','MarkerFaceColor','none','MarkerFaceAlpha',0.2,'LineWidth',1)
+y2 = rPref.cool.ave;
+sem2 = rPref.cool.sem;
+n2 = rPref.cool.n;
+scatter(x(n2>=minN&pVal),y2(n2>=minN&pVal),sem2(n2>=minN&pVal)*sclSem,'co','MarkerFaceColor','flat','MarkerFaceAlpha',0.2,'LineWidth',1)
+scatter(x(n2>=minN&~pVal),y2(n2>=minN&~pVal),sem2(n2>=minN&~pVal)*sclSem,'co','MarkerFaceColor','none','MarkerFaceAlpha',0.2,'LineWidth',1)
+plot([x(n1>=minN);x(n2>=minN)],[y1(n1>=minN);y2(n2>=minN)],'k')
+xlim(xL)
+xticks(xT)
+xticklabels(xTlbl)
+ylabel('firing rate')
+box on
+
+subplot(3,2,4);hold on
+sclSem = 5000;
+pVal = si.stats.sRank.p<0.01;
+y3 = si.ave;
+sem3 = si.sem;
+n3 = si.n;
+yline(0,'k--')
+scatter(x(n3>=minN&pVal),y3(n3>=minN&pVal),sem3(n3>=minN&pVal)*sclSem,'ko','MarkerFaceColor','flat','MarkerFaceAlpha',0.2,'LineWidth',1)
+scatter(x(n3>=minN&~pVal),y3(n3>=minN&~pVal),sem3(n3>=minN&~pVal)*sclSem,'ko','MarkerFaceColor','none','MarkerFaceAlpha',0.2,'LineWidth',1)
+ylim([-1,0.1])
+xlim(xL)
+xticks(xT)
+xticklabels(xTlbl)
+ylabel('SI')
+box on
+
+subplot(3,2,5);hold on
+sclSem = 5000;
+pVal = late.stats.sRank.p<0.01;
+y4 = late.cntrl.ave;
+sem4 = late.cntrl.sem;
+n4 = late.cntrl.n;
+scatter(x(n4>=minN&pVal),y4(n4>=minN&pVal),sem4(n4>=minN&pVal)*sclSem,'ko','MarkerFaceColor','flat','MarkerFaceAlpha',0.2,'LineWidth',1)
+scatter(x(n4>=minN&~pVal),y4(n4>=minN&~pVal),sem4(n4>=minN&~pVal)*sclSem,'ko','MarkerFaceColor','none','MarkerFaceAlpha',0.2,'LineWidth',1)
+y5 = late.cool.ave;
+sem5 = late.cool.sem;
+n5 = late.cool.n;
+scatter(x(n5>=minN&pVal),y5(n5>=minN&pVal),sem5(n5>=minN&pVal)*sclSem,'co','MarkerFaceColor','flat','MarkerFaceAlpha',0.2,'LineWidth',1)
+scatter(x(n5>=minN&~pVal),y5(n5>=minN&~pVal),sem5(n5>=minN&~pVal)*sclSem,'co','MarkerFaceColor','none','MarkerFaceAlpha',0.2,'LineWidth',1)
+i = n4>=minN & n5>=minN;
+plot([x(i);x(i)],[y4(i);y5(i)],'k')
+xlim(xL)
+xticks(xT)
+xticklabels(xTlbl)
+xlabel('age (postnatal day)')
+ylabel('response latency (sec)')
+box on
+
+subplot(3,2,6);hold on
+sclSem = 2000;
+pVal = dLate.stats.sRank.p<0.01;
+y6 = dLate.ave;
+sem6 = dLate.sem;
+n6 = dLate.n;
+yline(0,'k--')
+scatter(x(n6>=minN&pVal),y6(n6>=minN&pVal),sem6(n6>=minN&pVal)*sclSem,'ko','MarkerFaceColor','flat','MarkerFaceAlpha',0.2,'LineWidth',1)
+scatter(x(n6>=minN&~pVal),y6(n6>=minN&~pVal),sem6(n6>=minN&~pVal)*sclSem,'ko','MarkerFaceColor','none','MarkerFaceAlpha',0.2,'LineWidth',1)
+xlim(xL)
+xticks(xT)
+xticklabels(xTlbl)
+xlabel('age (postnatal day)')
+ylabel('delta response latency')
+box on
 
 %% plot groups
 
