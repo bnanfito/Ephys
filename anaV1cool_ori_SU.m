@@ -1,5 +1,4 @@
 %anaV1cool_ori_SU
-
 clear
 close all
 
@@ -101,7 +100,7 @@ for a = 1:length(animals)
 
         % For metrics of response magnitude, include all MU that pass
         % criteria before cooling
-        i = goodIdCntrl{a,1}; %index MU to include
+        i = goodIdCntrl{a,1}; %index SU to include
         c = 0.1; %add a constant offset to log transformed response mag.
 
         r1 = dat.cntrl{a,1}.rPref(i);
@@ -130,7 +129,7 @@ for a = 1:length(animals)
         late.cntrl.n(a) = length(l1);
 
         % Also get tuning metrics for cooled condition
-        i = goodIdCool{a,1}; %index MU to include
+        i = goodIdCool{a,1}; %index SU to include
 
         r2 = dat.cool{a,1}.rPref(i);
         r2L = log10(r2+c);
@@ -138,20 +137,6 @@ for a = 1:length(animals)
         rPref.cool.ave(a) = mean(r2,'omitnan');
         rPref.cool.sem(a) = std(r2,'omitnan')/sqrt(length(r2));
         rPref.cool.n(a) = length(r2);
-
-%         si.dist{a} = (r2-r1)./(r2+r1);
-%         % si.dist{a} = (r2L-r1L)./(r2L+r1L);
-%         si.ave(a) = mean(si.dist{a},'omitnan');
-%         si.sem(a) = std(si.dist{a},'omitnan')/sqrt(length(si.dist{a}));
-%         si.n(a) = length(si.dist{a});
-% 
-%         if ~(isempty(r1)||isempty(r2))
-%             rPref.stats.sRank.p(a) = signrank(r1-r2);
-%             si.stats.sRank.p(a) = signrank(si.dist{a});
-%         else
-%             rPref.stats.sRank.p(a) = nan;
-%             si.stats.sRank.p(a) = nan;
-%         end
         
         d = dat.cool{a,1}.ldr(i);
         ldr.cool.dist{a} = d;
@@ -171,117 +156,96 @@ for a = 1:length(animals)
         late.cool.sem(a) = std(l2,'omitnan')/sqrt(length(l2));
         late.cool.n(a) = length(l2);
 
-%         % For metrics of response latency, the MU included must pass
-%         % criteria before and during cooling, and exclude nan values
-%         i = (goodIdCntrl{a,1}&goodIdCool{a,1}) & ... %index MU to include
-%             ~(isnan(dat.cntrl{a,1}.latency)|isnan(dat.cool{a,1}.latency));
-% 
-%         dLate.dist{a} = l2-l1;
-%         dLate.ave(a) = mean(dLate.dist{a},'omitnan');
-%         dLate.sem(a) = std(dLate.dist{a},'omitnan')/sqrt(length(dLate.dist{a}));
-%         dLate.n(a) = length(dLate.dist{a});
-% 
-%         if ~(isempty(l1)||isempty(l2))
-%             late.stats.sRank.p(a) = signrank(l1-l2);
-%             dLate.stats.sRank.p(a) = signrank(dLate.dist{a});
-%         else
-%             late.stats.sRank.p(a) = nan;
-%             dLate.stats.sRank.p(a) = nan;
-%         end
-
     else
         rPref.cntrl.dist{a} = [];
         rPref.cntrl.ave(a) = nan;
         rPref.cntrl.sem(a) = nan;
         rPref.cntrl.n(a) = nan;
 
-        rPref.cool.dist{a} = [];
-        rPref.cool.ave(a) = nan;
-        rPref.cool.sem(a) = nan;
-        rPref.cool.n(a) = nan;
-
-%         si.dist{a} = [];
-%         si.ave(a) = nan;
-%         si.sem(a) = nan;
-%         si.n(a) = nan;
-% 
-%         rPref.stats.sRank.p(a) = nan;
-%         si.stats.sRank.p(a) = nan;
-
         late.cntrl.dist{a} = [];
         late.cntrl.ave(a) = nan;
         late.cntrl.sem(a) = nan;
         late.cntrl.n(a) = nan;
+
+        ldr.cntrl.dist{a} = [];
+        ldr.cntrl.ave(a) = nan;
+        ldr.cntrl.sem(a) = nan;
+        ldr.cntrl.n(a) = nan;
+
+        lor.cntrl.dist{a} = [];
+        lor.cntrl.ave(a) = nan;
+        lor.cntrl.sem(a) = nan;
+        lor.cntrl.n(a) = nan;
+
+        rPref.cool.dist{a} = [];
+        rPref.cool.ave(a) = nan;
+        rPref.cool.sem(a) = nan;
+        rPref.cool.n(a) = nan;
 
         late.cool.dist{a} = [];
         late.cool.ave(a) = nan;
         late.cool.sem(a) = nan;
         late.cool.n(a) = nan;
 
-%         dLate.dist{a} = [];
-%         dLate.ave(a) = nan;
-%         dLate.sem(a) = nan;
-%         dLate.n(a) = nan;
-% 
-%         late.stats.sRank.p(a) = nan;
-%         dLate.stats.sRank.p(a) = nan;
+        ldr.cool.dist{a} = [];
+        ldr.cool.ave(a) = nan;
+        ldr.cool.sem(a) = nan;
+        ldr.cool.n(a) = nan;
+
+        lor.cool.dist{a} = [];
+        lor.cool.ave(a) = nan;
+        lor.cool.sem(a) = nan;
+        lor.cool.n(a) = nan;
 
     end
 end
 
 %% Make data table
 
-animalData1 = table();
-animalData1.id = repmat(animals,2,1);
-animalData1.age = repmat(ages',2,1);
-animalData1.ageJit = repmat(agesJit',2,1);
-animalData1.manip = [zeros(length(animals),1);ones(length(animals),1)];
-animalData1.R_mean = [rPref.cntrl.ave';rPref.cool.ave'];
-animalData1.R_sem = [rPref.cntrl.sem';rPref.cool.sem'];
-animalData1.R_n = [rPref.cntrl.n';rPref.cool.n'];
-animalData1.L_mean = [late.cntrl.ave';late.cool.ave'];
-animalData1.L_sem = [late.cntrl.sem';late.cool.sem'];
-animalData1.L_n = [late.cntrl.n';late.cool.n'];
-
-animalData2 = table();
-animalData2.id = animals;
-animalData2.age = ages';
-animalData2.ageJit = agesJit';
-% animalData2.SI_mean = si.ave';
-% animalData2.SI_sem = si.sem';
-% animalData2.SI_n = si.n';
-% animalData2.dL_mean = dLate.ave';
-% animalData2.dL_sem = dLate.sem';
-% animalData2.dL_n = dLate.n';
-
 animalData = table();
 animalData.id = animals;
 animalData.age = ages';
 animalData.ageJit = agesJit';
+
 animalData.Rcntrl_mean = rPref.cntrl.ave';
 animalData.Rcntrl_sem = rPref.cntrl.sem';
 animalData.Rcntrl_n = rPref.cntrl.n';
 animalData.Rcntrl_dist = rPref.cntrl.dist';
+
 animalData.Rcool_mean = rPref.cool.ave';
 animalData.Rcool_sem = rPref.cool.sem';
 animalData.Rcool_n = rPref.cool.n';
 animalData.Rcool_dist = rPref.cool.dist';
-% animalData.SI_mean = si.ave';
-% animalData.SI_sem = si.sem';
-% animalData.SI_n = si.n';
-% animalData.SI_dist = si.dist';
+
+animalData.LDRcntrl_mean = ldr.cntrl.ave';
+animalData.LDRcntrl_sem = ldr.cntrl.sem';
+animalData.LDRcntrl_n = ldr.cntrl.n';
+animalData.LDRcntrl_dist = ldr.cntrl.dist';
+
+animalData.LDRcool_mean = ldr.cool.ave';
+animalData.LDRcool_sem = ldr.cool.sem';
+animalData.LDRcool_n = ldr.cool.n';
+animalData.LDRcool_dist = ldr.cool.dist';
+
+animalData.LORcntrl_mean = lor.cntrl.ave';
+animalData.LORcntrl_sem = lor.cntrl.sem';
+animalData.LORcntrl_n = lor.cntrl.n';
+animalData.LORcntrl_dist = lor.cntrl.dist';
+
+animalData.LORcool_mean = lor.cool.ave';
+animalData.LORcool_sem = lor.cool.sem';
+animalData.LORcool_n = lor.cool.n';
+animalData.LORcool_dist = lor.cool.dist';
+
 animalData.Lcntrl_mean = late.cntrl.ave';
 animalData.Lcntrl_sem = late.cntrl.sem';
 animalData.Lcntrl_n = late.cntrl.n';
 animalData.Lcntrl_dist = late.cntrl.dist';
+
 animalData.Lcool_mean = late.cool.ave';
 animalData.Lcool_sem = late.cool.sem';
 animalData.Lcool_n = late.cool.n';
 animalData.Lcool_dist = late.cool.dist';
-% animalData.dL_mean = dLate.ave';
-% animalData.dL_sem = dLate.sem';
-% animalData.dL_n = dLate.n';
-% animalData.dL_dist = dLate.dist';
 
 % [~,sIdx] = sort(animalData.ageJit);
 % animalData = animalData(sIdx,:);
@@ -324,7 +288,7 @@ unitDataCntrl.dsi = cntrl.dsi;
 unitDataCntrl.ldr = cntrl.ldr;
 unitDataCntrl.osi = cntrl.osi;
 unitDataCntrl.lor = cntrl.lor;
-unitDataCntrl.good = screenUnits(cntrl,'MU');
+unitDataCntrl.good = screenUnits(cntrl,anaMode);
 clear id uAge uAG manip g
 
 unitDataCool = table();
@@ -364,8 +328,52 @@ unitDataCool.dsi = cool.dsi;
 unitDataCool.ldr = cool.ldr;
 unitDataCool.osi = cool.osi;
 unitDataCool.lor = cool.lor;
-unitDataCool.good = screenUnits(cool,'MU');
+unitDataCool.good = screenUnits(cool,anaMode);
 clear id uAge uAG manip g
 
 unitData = vertcat(unitDataCntrl,unitDataCool);
 unitData = unitData(unitData.good,:);
+
+%% Plot
+
+figure;
+tiledlayout(1,2)
+nexttile;hold on
+ageIdx = animalData.age<40;
+idx = animalData.LDRcntrl_n>=5;
+errorbar(animalData.ageJit(idx&ageIdx),animalData.LDRcntrl_mean(idx&ageIdx),animalData.LDRcntrl_sem(idx&ageIdx),'ko','MarkerFaceColor','k')
+errorbar(animalData.ageJit(~idx&ageIdx),animalData.LDRcntrl_mean(~idx&ageIdx),animalData.LDRcntrl_sem(~idx&ageIdx),'ko')
+idx = animalData.LDRcool_n>=5;
+errorbar(animalData.ageJit(idx&ageIdx),animalData.LDRcool_mean(idx&ageIdx),animalData.LDRcool_sem(idx&ageIdx),'co','MarkerFaceColor','c')
+errorbar(animalData.ageJit(~idx&ageIdx),animalData.LDRcool_mean(~idx&ageIdx),animalData.LDRcool_sem(~idx&ageIdx),'co')
+nexttile;hold on
+ageIdx = animalData.age>40;
+idx = animalData.LDRcntrl_n>=5;
+errorbar(animalData.ageJit(idx&ageIdx),animalData.LDRcntrl_mean(idx&ageIdx),animalData.LDRcntrl_sem(idx&ageIdx),'ko','MarkerFaceColor','k')
+errorbar(animalData.ageJit(~idx&ageIdx),animalData.LDRcntrl_mean(~idx&ageIdx),animalData.LDRcntrl_sem(~idx&ageIdx),'ko')
+idx = animalData.LDRcool_n>=5;
+errorbar(animalData.ageJit(idx&ageIdx),animalData.LDRcool_mean(idx&ageIdx),animalData.LDRcool_sem(idx&ageIdx),'co','MarkerFaceColor','c')
+errorbar(animalData.ageJit(~idx&ageIdx),animalData.LDRcool_mean(~idx&ageIdx),animalData.LDRcool_sem(~idx&ageIdx),'co')
+
+figure;
+tiledlayout(1,2)
+nexttile;hold on
+ageIdx = animalData.age<40;
+idx = animalData.LORcntrl_n>=5;
+errorbar(animalData.ageJit(idx&ageIdx),animalData.LORcntrl_mean(idx&ageIdx),animalData.LORcntrl_sem(idx&ageIdx),'ko','MarkerFaceColor','k')
+errorbar(animalData.ageJit(~idx&ageIdx),animalData.LORcntrl_mean(~idx&ageIdx),animalData.LORcntrl_sem(~idx&ageIdx),'ko')
+idx = animalData.LORcool_n>=5;
+errorbar(animalData.ageJit(idx&ageIdx),animalData.LORcool_mean(idx&ageIdx),animalData.LORcool_sem(idx&ageIdx),'co','MarkerFaceColor','c')
+errorbar(animalData.ageJit(~idx&ageIdx),animalData.LORcool_mean(~idx&ageIdx),animalData.LORcool_sem(~idx&ageIdx),'co')
+nexttile;hold on
+ageIdx = animalData.age>40;
+idx = animalData.LORcntrl_n>=5;
+errorbar(animalData.ageJit(idx&ageIdx),animalData.LORcntrl_mean(idx&ageIdx),animalData.LORcntrl_sem(idx&ageIdx),'ko','MarkerFaceColor','k')
+errorbar(animalData.ageJit(~idx&ageIdx),animalData.LORcntrl_mean(~idx&ageIdx),animalData.LORcntrl_sem(~idx&ageIdx),'ko')
+idx = animalData.LORcool_n>=5;
+errorbar(animalData.ageJit(idx&ageIdx),animalData.LORcool_mean(idx&ageIdx),animalData.LORcool_sem(idx&ageIdx),'co','MarkerFaceColor','c')
+errorbar(animalData.ageJit(~idx&ageIdx),animalData.LORcool_mean(~idx&ageIdx),animalData.LORcool_sem(~idx&ageIdx),'co')
+
+figure;hold on
+plot(unitDataCntrl.age(unitDataCntrl.good),unitDataCntrl.ldr(unitDataCntrl.good),'o')
+plot(unitDataCool.age(unitDataCool.good),unitDataCool.ldr(unitDataCool.good),'o')

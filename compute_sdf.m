@@ -32,9 +32,9 @@ dt = 0.001;
 time = -1:dt:2;
 w = 0.020;
 for t = 1:nTrials
-    tId = trialInclude(t);
-    if ismember(tId,trialId)
-        xT = spkT(trialId==tId);
+    tIdx = trialInclude(t);
+    if ismember(tIdx,trialId)
+        xT = spkT(trialId==tIdx);
         for s = 1:length(xT)
             g{t}(:,s) = normpdf(time,xT(s),w)*dt;
         end
@@ -63,42 +63,43 @@ SDF.cPref = cPref;
 if ~isempty(varargin) && varargin{1}==1
 
     figure;
+    tiledlayout(2,2)
     clrs = hsv(nConds);
     
-    subplot(2,2,1);hold on
+    ax(1) = nexttile;hold on
     plot(spkT,trialId,'.')
     xlim([min(SDF.time) max(SDF.time)])
     ylim([0 nTrials])
     
-    subplot(2,2,2);hold on
+    ax(2) = nexttile;hold on
     for c = 1:nConds
         patch([0 1 1 0],[0 0 1 1]+(c-1),clrs(c,:),'EdgeColor','none','FaceAlpha',0.2)
     end
     for t = 1:nTrials
-        tId = trialInclude(t);
-        xT = spkT(trialId==tId);
+        tIdx = trialInclude(t);
+        xT = spkT(trialId==tIdx);
         if isempty(xT)
             continue
         end
-        c = unique(condKey(trialKey==tId));
-        r = unique(repKey(trialKey==tId));
+        c = unique(condKey(trialKey==tIdx));
+        r = unique(repKey(trialKey==tIdx));
         yT = c-((1/nReps)*(r-1));
         plot(xT,yT, 'k.')
     end
     xlim([min(SDF.time) max(SDF.time)])
     ylim([0 nConds])
     
-    subplot(2,2,3);hold on
+    ax(3) = nexttile;hold on
     % plot(nT,[g{:}]/max([g{:}],[],'all'))
     plot(SDF.time,SDF.mean,'k','LineWidth',2)
     patch([SDF.time fliplr(SDF.time)],[SDF.mean+SDF.sem fliplr(SDF.mean-SDF.sem)],'k','EdgeColor','none','FaceAlpha',0.2)
     
-    subplot(2,2,4);hold on
+    ax(4) = nexttile;hold on
     for c = [cPref,cNull]
         plot(SDF.time,SDF.cMean(c,:),'Color',clrs(c,:),'LineWidth',1)
         patch([SDF.time fliplr(SDF.time)],[SDF.cMean(c,:)+SDF.cSem(c,:) fliplr(SDF.cMean(c,:)-SDF.cSem(c,:))],clrs(c,:),'EdgeColor','none','FaceAlpha',0.2)
     end
-
+    linkaxes(ax,'x')
 end
 
 end
