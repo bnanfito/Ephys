@@ -250,63 +250,65 @@ end
 % Make animal data table
 animalData = table();
 animalData.id = animals;
-animalData.age = ages';
+% animalData.age = ages';
 animalData.ageJit = agesJit';
 
 animalData.Rcntrl_mean = rPref.cntrl.ave';
 animalData.Rcntrl_sem = rPref.cntrl.sem';
 animalData.Rcntrl_n = rPref.cntrl.n';
-animalData.Rcntrl_dist = rPref.cntrl.dist';
+% animalData.Rcntrl_dist = rPref.cntrl.dist';
 
 animalData.Rcool_mean = rPref.cool.ave';
 animalData.Rcool_sem = rPref.cool.sem';
 animalData.Rcool_n = rPref.cool.n';
-animalData.Rcool_dist = rPref.cool.dist';
+% animalData.Rcool_dist = rPref.cool.dist';
 
 animalData.SI_mean = si.ave';
 animalData.SI_sem = si.sem';
 animalData.SI_n = si.n';
-animalData.SI_dist = si.dist';
+% animalData.SI_dist = si.dist';
 
 animalData.LDRcntrl_mean = ldr.cntrl.ave';
 animalData.LDRcntrl_sem = ldr.cntrl.sem';
 animalData.LDRcntrl_n = ldr.cntrl.n';
-animalData.LDRcntrl_dist = ldr.cntrl.dist';
+% animalData.LDRcntrl_dist = ldr.cntrl.dist';
 
 animalData.LDRcool_mean = ldr.cool.ave';
 animalData.LDRcool_sem = ldr.cool.sem';
 animalData.LDRcool_n = ldr.cool.n';
-animalData.LDRcool_dist = ldr.cool.dist';
+% animalData.LDRcool_dist = ldr.cool.dist';
 
 animalData.LORcntrl_mean = lor.cntrl.ave';
 animalData.LORcntrl_sem = lor.cntrl.sem';
 animalData.LORcntrl_n = lor.cntrl.n';
-animalData.LORcntrl_dist = lor.cntrl.dist';
+% animalData.LORcntrl_dist = lor.cntrl.dist';
 
 animalData.LORcool_mean = lor.cool.ave';
 animalData.LORcool_sem = lor.cool.sem';
 animalData.LORcool_n = lor.cool.n';
-animalData.LORcool_dist = lor.cool.dist';
+% animalData.LORcool_dist = lor.cool.dist';
 
 animalData.Lcntrl_mean = late.cntrl.ave';
 animalData.Lcntrl_sem = late.cntrl.sem';
 animalData.Lcntrl_n = late.cntrl.n';
-animalData.Lcntrl_dist = late.cntrl.dist';
+% animalData.Lcntrl_dist = late.cntrl.dist';
 
 animalData.Lcool_mean = late.cool.ave';
 animalData.Lcool_sem = late.cool.sem';
 animalData.Lcool_n = late.cool.n';
-animalData.Lcool_dist = late.cool.dist';
+% animalData.Lcool_dist = late.cool.dist';
 
 animalData.dL_mean = dLate.ave';
 animalData.dL_sem = dLate.sem';
 animalData.dL_n = dLate.n';
-animalData.dL_dist = dLate.dist';
+% animalData.dL_dist = dLate.dist';
 
-% [~,sIdx] = sort(animalData.ageJit);
-% animalData = animalData(sIdx,:);
+[~,sIdx] = sort(animalData.ageJit);
+animalData = animalData(sIdx,:);
 
 % Make unit data table
+% this will be a table of all units in order to analyze the distribution of
+% each metric across individual observations (MU)
 unitDataCntrl = table();
 cntrl = vertcat(dat.cntrl{~ismember(1:length(animals),[3,11,13]),1});
 for u = 1:height(cntrl)
@@ -387,8 +389,21 @@ unitDataCool.lor = cool.lor;
 unitDataCool.good = screenUnits(cool,'MU');
 clear id uAge uAG manip g
 
-unitData = vertcat(unitDataCntrl,unitDataCool);
-unitData = unitData(unitData.good,:);
+unitData = vertcat(unitDataCntrl,unitDataCool); %combine control and cool data into one table
+unitData = unitData(unitData.good,:); %only keep units that pass inclusion criteria
+
+AG1control_rPref = unitData.rPref(unitData.g==1);
+AG1cool_rPref = unitData.rPref(unitData.g==2);
+
+AG1control_ldr = unitData.ldr(unitData.g==1);
+AG1cool_ldr = unitData.ldr(unitData.g==2);
+
+AG1control_lor = unitData.lor(unitData.g==1);
+AG1cool_lor = unitData.lor(unitData.g==2);
+
+AG1control_late = unitData.latency(unitData.g==1);
+AG1control_dsi = unitData.dsi(unitData.g==1);
+AG1control_osi = unitData.osi(unitData.g==1);
 
 %% V1 dependent vs independent
 
