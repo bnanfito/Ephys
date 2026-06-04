@@ -204,51 +204,51 @@ end
 
 animalData = table();
 animalData.id = animals;
-animalData.age = ages';
+% animalData.age = ages';
 animalData.ageJit = agesJit';
 
 animalData.Rcntrl_mean = rPref.cntrl.ave';
 animalData.Rcntrl_sem = rPref.cntrl.sem';
 animalData.Rcntrl_n = rPref.cntrl.n';
-animalData.Rcntrl_dist = rPref.cntrl.dist';
+% animalData.Rcntrl_dist = rPref.cntrl.dist';
 
 animalData.Rcool_mean = rPref.cool.ave';
 animalData.Rcool_sem = rPref.cool.sem';
 animalData.Rcool_n = rPref.cool.n';
-animalData.Rcool_dist = rPref.cool.dist';
+% animalData.Rcool_dist = rPref.cool.dist';
 
 animalData.LDRcntrl_mean = ldr.cntrl.ave';
 animalData.LDRcntrl_sem = ldr.cntrl.sem';
 animalData.LDRcntrl_n = ldr.cntrl.n';
-animalData.LDRcntrl_dist = ldr.cntrl.dist';
+% animalData.LDRcntrl_dist = ldr.cntrl.dist';
 
 animalData.LDRcool_mean = ldr.cool.ave';
 animalData.LDRcool_sem = ldr.cool.sem';
 animalData.LDRcool_n = ldr.cool.n';
-animalData.LDRcool_dist = ldr.cool.dist';
+% animalData.LDRcool_dist = ldr.cool.dist';
 
 animalData.LORcntrl_mean = lor.cntrl.ave';
 animalData.LORcntrl_sem = lor.cntrl.sem';
 animalData.LORcntrl_n = lor.cntrl.n';
-animalData.LORcntrl_dist = lor.cntrl.dist';
+% animalData.LORcntrl_dist = lor.cntrl.dist';
 
 animalData.LORcool_mean = lor.cool.ave';
 animalData.LORcool_sem = lor.cool.sem';
 animalData.LORcool_n = lor.cool.n';
-animalData.LORcool_dist = lor.cool.dist';
+% animalData.LORcool_dist = lor.cool.dist';
 
 animalData.Lcntrl_mean = late.cntrl.ave';
 animalData.Lcntrl_sem = late.cntrl.sem';
 animalData.Lcntrl_n = late.cntrl.n';
-animalData.Lcntrl_dist = late.cntrl.dist';
+% animalData.Lcntrl_dist = late.cntrl.dist';
 
 animalData.Lcool_mean = late.cool.ave';
 animalData.Lcool_sem = late.cool.sem';
 animalData.Lcool_n = late.cool.n';
-animalData.Lcool_dist = late.cool.dist';
+% animalData.Lcool_dist = late.cool.dist';
 
-% [~,sIdx] = sort(animalData.ageJit);
-% animalData = animalData(sIdx,:);
+[~,sIdx] = sort(animalData.ageJit);
+animalData = animalData(sIdx,:);
 
 
 unitDataCntrl = table();

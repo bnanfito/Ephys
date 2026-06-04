@@ -142,6 +142,12 @@ for a = 1:length(animals)
         lor.cntrl.sem(a) = sem(d);
         lor.cntrl.n(a) = length(d);
 
+        l1 = dat.cntrl{a,1}.latency(i);
+        late.cntrl.dist{a} = l1;
+        late.cntrl.ave(a) = mean(l1,'omitnan');
+        late.cntrl.sem(a) = std(l1,'omitnan')/sqrt(length(l1));
+        late.cntrl.n(a) = length(l1);
+
         % Also get tuning metrics for cooled condition
         i = goodIdCool{a,1}; %index MU to include
         
@@ -157,35 +163,29 @@ for a = 1:length(animals)
         lor.cool.sem(a) = sem(d);
         lor.cool.n(a) = length(d);
 
-        % For metrics of response latency, the MU included must pass
-        % criteria before and during cooling, and exclude nan values
-        i = (goodIdCntrl{a,1}&goodIdCool{a,1}) & ... %index MU to include
-            ~(isnan(dat.cntrl{a,1}.latency)|isnan(dat.cool{a,1}.latency));
-        
-        l1 = dat.cntrl{a,1}.latency(i);
-        late.cntrl.dist{a} = l1;
-        late.cntrl.ave(a) = mean(l1,'omitnan');
-        late.cntrl.sem(a) = std(l1,'omitnan')/sqrt(length(l1));
-        late.cntrl.n(a) = length(l1);
-
         l2 = dat.cool{a,1}.latency(i);
         late.cool.dist{a} = l2;
         late.cool.ave(a) = mean(l2,'omitnan');
         late.cool.sem(a) = std(l2,'omitnan')/sqrt(length(l2));
         late.cool.n(a) = length(l2);
 
-        dLate.dist{a} = l2-l1;
-        dLate.ave(a) = mean(dLate.dist{a},'omitnan');
-        dLate.sem(a) = std(dLate.dist{a},'omitnan')/sqrt(length(dLate.dist{a}));
-        dLate.n(a) = length(dLate.dist{a});
-
-        if ~(isempty(l1)||isempty(l2))
-            late.stats.sRank.p(a) = signrank(l1-l2);
-            dLate.stats.sRank.p(a) = signrank(dLate.dist{a});
-        else
-            late.stats.sRank.p(a) = nan;
-            dLate.stats.sRank.p(a) = nan;
-        end
+%         % For metrics of response latency, the MU included must pass
+%         % criteria before and during cooling, and exclude nan values
+%         i = (goodIdCntrl{a,1}&goodIdCool{a,1}) & ... %index MU to include
+%             ~(isnan(dat.cntrl{a,1}.latency)|isnan(dat.cool{a,1}.latency));
+% 
+%         dLate.dist{a} = l2-l1;
+%         dLate.ave(a) = mean(dLate.dist{a},'omitnan');
+%         dLate.sem(a) = std(dLate.dist{a},'omitnan')/sqrt(length(dLate.dist{a}));
+%         dLate.n(a) = length(dLate.dist{a});
+% 
+%         if ~(isempty(l1)||isempty(l2))
+%             late.stats.sRank.p(a) = signrank(l1-l2);
+%             dLate.stats.sRank.p(a) = signrank(dLate.dist{a});
+%         else
+%             late.stats.sRank.p(a) = nan;
+%             dLate.stats.sRank.p(a) = nan;
+%         end
 
     else
         rPref.cntrl.dist{a} = [];
@@ -236,13 +236,13 @@ for a = 1:length(animals)
         late.cool.sem(a) = nan;
         late.cool.n(a) = nan;
 
-        dLate.dist{a} = [];
-        dLate.ave(a) = nan;
-        dLate.sem(a) = nan;
-        dLate.n(a) = nan;
+%         dLate.dist{a} = [];
+%         dLate.ave(a) = nan;
+%         dLate.sem(a) = nan;
+%         dLate.n(a) = nan;
 
         late.stats.sRank.p(a) = nan;
-        dLate.stats.sRank.p(a) = nan;
+%         dLate.stats.sRank.p(a) = nan;
 
     end
 end
@@ -298,10 +298,10 @@ animalData.Lcool_sem = late.cool.sem';
 animalData.Lcool_n = late.cool.n';
 % animalData.Lcool_dist = late.cool.dist';
 
-animalData.dL_mean = dLate.ave';
-animalData.dL_sem = dLate.sem';
-animalData.dL_n = dLate.n';
-% animalData.dL_dist = dLate.dist';
+% animalData.dL_mean = dLate.ave';
+% animalData.dL_sem = dLate.sem';
+% animalData.dL_n = dLate.n';
+% % animalData.dL_dist = dLate.dist';
 
 [~,sIdx] = sort(animalData.ageJit);
 animalData = animalData(sIdx,:);
@@ -392,18 +392,67 @@ clear id uAge uAG manip g
 unitData = vertcat(unitDataCntrl,unitDataCool); %combine control and cool data into one table
 unitData = unitData(unitData.good,:); %only keep units that pass inclusion criteria
 
-AG1control_rPref = unitData.rPref(unitData.g==1);
-AG1cool_rPref = unitData.rPref(unitData.g==2);
+%format tables in a way that prism can group easily, do not assume rows are
+%paired observations
+for g = 1:8
+    nU(g) = sum(unitData.g==g)';
+end
+uIdx = 1:max(nU);
 
-AG1control_ldr = unitData.ldr(unitData.g==1);
-AG1cool_ldr = unitData.ldr(unitData.g==2);
+AG1control_rPref = unitData.rPref(unitData.g==1); AG1control_rPref(end+1:max(nU)) = nan;
+AG1cool_rPref = unitData.rPref(unitData.g==2); AG1cool_rPref(end+1:max(nU)) = nan;
+AG2control_rPref = unitData.rPref(unitData.g==3); AG2control_rPref(end+1:max(nU)) = nan;
+AG2cool_rPref = unitData.rPref(unitData.g==4); AG2cool_rPref(end+1:max(nU)) = nan;
+AG3control_rPref = unitData.rPref(unitData.g==5); AG3control_rPref(end+1:max(nU)) = nan;
+AG3cool_rPref = unitData.rPref(unitData.g==6); AG3cool_rPref(end+1:max(nU)) = nan;
+AG4control_rPref = unitData.rPref(unitData.g==7); AG4control_rPref(end+1:max(nU)) = nan;
+AG4cool_rPref = unitData.rPref(unitData.g==8); AG4cool_rPref(end+1:max(nU)) = nan;
+RPREF = table(AG1control_rPref,AG1cool_rPref,AG2control_rPref,AG2cool_rPref,AG3control_rPref,AG3cool_rPref,AG4control_rPref,AG4cool_rPref);
+
+AG1control_ldr = unitData.ldr(unitData.g==1); AG1control_ldr(end+1:max(nU)) = nan;
+AG1cool_ldr = unitData.ldr(unitData.g==2); AG1cool_ldr(end+1:max(nU)) = nan;
+AG2control_ldr = unitData.ldr(unitData.g==3); AG2control_ldr(end+1:max(nU)) = nan;
+AG2cool_ldr = unitData.ldr(unitData.g==4); AG2cool_ldr(end+1:max(nU)) = nan;
+AG3control_ldr = unitData.ldr(unitData.g==5); AG3control_ldr(end+1:max(nU)) = nan;
+AG3cool_ldr = unitData.ldr(unitData.g==6); AG3cool_ldr(end+1:max(nU)) = nan;
+AG4control_ldr = unitData.ldr(unitData.g==7); AG4control_ldr(end+1:max(nU)) = nan;
+AG4cool_ldr = unitData.ldr(unitData.g==8); AG4cool_ldr(end+1:max(nU)) = nan;
 
 AG1control_lor = unitData.lor(unitData.g==1);
 AG1cool_lor = unitData.lor(unitData.g==2);
+AG2control_lor = unitData.lor(unitData.g==3);
+AG2cool_lor = unitData.lor(unitData.g==4);
+AG3control_lor = unitData.lor(unitData.g==5);
+AG3cool_lor = unitData.lor(unitData.g==6);
+AG4control_lor = unitData.lor(unitData.g==7);
+AG4cool_lor = unitData.lor(unitData.g==8);
 
 AG1control_late = unitData.latency(unitData.g==1);
+AG1cool_late = unitData.latency(unitData.g==2);
+AG2control_late = unitData.latency(unitData.g==3);
+AG2cool_late = unitData.latency(unitData.g==4);
+AG3control_late = unitData.latency(unitData.g==5);
+AG3cool_late = unitData.latency(unitData.g==6);
+AG4control_late = unitData.latency(unitData.g==7);
+AG4cool_late = unitData.latency(unitData.g==8);
+
 AG1control_dsi = unitData.dsi(unitData.g==1);
+AG1cool_dsi = unitData.dsi(unitData.g==2);
+AG2control_dsi = unitData.dsi(unitData.g==3);
+AG2cool_dsi = unitData.dsi(unitData.g==4);
+AG3control_dsi = unitData.dsi(unitData.g==5);
+AG3cool_dsi = unitData.dsi(unitData.g==6);
+AG4control_dsi = unitData.dsi(unitData.g==7);
+AG4cool_dsi = unitData.dsi(unitData.g==8);
+
 AG1control_osi = unitData.osi(unitData.g==1);
+AG1cool_osi = unitData.osi(unitData.g==2);
+AG2control_osi = unitData.osi(unitData.g==3);
+AG2cool_osi = unitData.osi(unitData.g==4);
+AG3control_osi = unitData.osi(unitData.g==5);
+AG3cool_osi = unitData.osi(unitData.g==6);
+AG4control_osi = unitData.osi(unitData.g==7);
+AG4cool_osi = unitData.osi(unitData.g==8);
 
 %% V1 dependent vs independent
 
@@ -711,7 +760,7 @@ D = D(idx,:);
 boxchart(D.AG,log10(D.rPref+0.1),'GroupByColor',D.manip,'Notch','on')
 box on
 % set(gca,'YScale','log')
-anovan(log10(D.rPref+0.1),{D.AG D.manip},'model','interaction','varnames',{'ageGroup','manip'})
+% anovan(log10(D.rPref+0.1),{D.AG D.manip},'model','interaction','varnames',{'ageGroup','manip'})
 
 figure;
 D = vertcat(unitDataCntrl,unitDataCool);
