@@ -5,8 +5,11 @@
 %anaTrain_lmm
 clear all
 close all
-dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/training/Train_V1Cool/MU';
-load(fullfile(dataFold,'Train_V1Cool_MUdataSet.mat'))
+
+type='V1cool';
+
+dataFold = ['/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/training/Train_' type '/MU'];
+load(fullfile(dataFold,['Train_' type '_MUdataSet.mat']))
 
 d1 = data.v1bf; d1 = d1(screenUnits(d1,'MU'),:); 
 d2 = data.v1af; d2 = d2(screenUnits(d2,'MU'),:);
@@ -15,7 +18,7 @@ d4 = data.pssaf; d4 = d4(screenUnits(d4,'MU'),:);
 D = vertcat(d1,d2,d3,d4);
 priorFlag = [zeros(height(d1),1);ones(height(d2),1);zeros(height(d3),1);ones(height(d4),1)];
 recSite = [repmat({'V1'},height(d1),1);repmat({'V1'},height(d2),1);repmat({'PSS'},height(d3),1);repmat({'PSS'},height(d4),1)];
-trainType = repmat({'V1Cool'},height(D),1);
+trainType = repmat({type},height(D),1);
 
 aniId = [];
 for i = 1:height(D)
@@ -42,8 +45,9 @@ muTraining = table(D.animal,D.recSite,D.trainType,D.priorFlag,D.ldr,D.lor,D.age,
 % muTraining.priorFlag=categorical(muTraining.priorFlag);
 % muTraining.animal=categorical(muTraining.animal);
 
-trType={'V1Cool'};
+trType={type};
 recSite={'V1';'PSS'};
+curSite = 2;
 
 % %% add age for each animal
 % trAnim=unique(muTraining.animal);
@@ -63,7 +67,7 @@ trainLMMLdir=table;
 
 
 for t=1:length(trType)
-    for r=1
+    for r=curSite
 
         idx=find(strcmp(muTraining.recSite,recSite{r}) & strcmp(muTraining.trainType,trType{t}));
         Nanim=length(unique(muTraining.animal(idx)));
@@ -74,7 +78,7 @@ for t=1:length(trType)
 
         Tdata=muTraining(idx,[1 4 5]);
         lme_2ML=fitlme(Tdata,'Ldir ~ 1+ priorFlag + (1+priorFlag|animal)','FitMethod','ML');
-        
+
         %general slope
         lmmInter=lme_2ML.Coefficients.Estimate(1); %mean for all animals before training
         lmmSlope=lme_2ML.Coefficients.Estimate(2); %slope for all animals
@@ -84,7 +88,7 @@ for t=1:length(trType)
 
         %values per animal
         [LMMval,LMMinfo,LMMstats]=randomEffects(lme_2ML);
-                
+
         %animal slopes
         idx2=strcmp([LMMinfo.Name],'priorFlag');
         infoAnimal.Names=LMMinfo.Level(idx2);
@@ -94,11 +98,11 @@ for t=1:length(trType)
         %animal intercept
         idx2=strcmp([LMMinfo.Name],'(Intercept)');
         infoAnimal.animInterLdir=LMMval(idx2);  %animal specific pre-mean
-        
+
         %general info
         infoAnimal.trainType(:)=trType(t);
         infoAnimal.recSite(:)=recSite(r);
-        
+
         %age
         for i=1:Nanim
             idxA=find(strcmp(muTraining.animal,infoAnimal.Names{i}),1);
@@ -166,17 +170,19 @@ trainLMMLdir.animPostMeanLdir=trainLMMLdir.interLdir+trainLMMLdir.slopeLdir+...
 %% save
 
 save(fullfile(dataFold,'lmm.mat'),'trainLMMLdir','muTraining');
+% save(fullfile(dataFold,'lmm.mat'),'trainLMMLori','muTraining');
 
 %% plot
 
-trType={'V1Cool'};
-recSite={'V1';'PSS'};
+% trType={'V1Cool'};
+% recSite={'V1';'PSS'};
+% curSite = 1;
 
 offsetGroup=2; %offset between pre and post
 randWidth=0.5; %random shuffle width
 
 for t=1:length(trType)
-    for r=1:length(recSite)
+    for r=curSite
         figure
         trainingLMM = trainLMMLdir;
         %find relevant LMM data
@@ -236,14 +242,14 @@ end
 
 % %% same plots, but for Lori
 % 
-% trType={'V1Cool'};
-% recSite={'V1';'PSS'};
+% % trType={'V1Cool'};
+% % recSite={'V1';'PSS'};
 % 
 % offsetGroup=2; %offset between pre and post
 % randWidth=0.5; %random shuffle width
 % 
 % for t=1:length(trType)
-%     for r=1:length(recSite)
+%     for r=curSite
 %         figure
 %         trainingLMM = trainLMMLori;
 %         %find relevant LMM data

@@ -5,9 +5,9 @@ close all
 anaMode = 'MU';
 proj = 'V1cool_ori';
 area = 'PSS';
-dataFold = 'Y:\Brandon\data';
+% dataFold = 'Y:\Brandon\data';
 % dataFold = '/Volumes/NielsenHome2/Brandon/data';
-% dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
+dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
 ageGroups = {[28 32],[33 40],[41 80],[81 120]};
 
 %% Generate Project Table
