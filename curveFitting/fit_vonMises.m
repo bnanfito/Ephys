@@ -1,4 +1,9 @@
 function [vm] = fit_vonMises(r,t,varargin)
+
+%INPUTS
+% r = mean response magnitude to an individual direction of motion (column vector)
+% t = conditions (direction, in degrees) associated with each entry in r
+
 t = deg2rad(t);
 plr=1;
 
