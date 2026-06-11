@@ -2,7 +2,7 @@
 function plotSum(dat)
 plr = 0;
 alignTC = 0;
-svePlt = 1;
+svePlt = 0;
 
 % dat = dat(dat.goodUnit,:);
 nU = height(dat);
@@ -193,14 +193,14 @@ for u = uInd
     end
     
     sgtitle(ttl)
-    figName = [dat.exptName{u} '_' dat.area{u} '_' dat.uInfo{u} '_' num2str(dat.uID(u))];
+    figName = [dat.exptName{u} '_' dat.area{u} '_' dat.uInfo{u} num2str(dat.uID(u))];
     if svePlt == 1
         figFold = fullfile('Y:\Brandon\data\Figures',dat.exptName{u}(1:5),dat.exptName{u});
         if ~isfolder(figFold)
             mkdir(figFold)
         end
         saveas(gcf,fullfile(figFold,figName),'fig')
-%         saveas(gcf,fullfile(figFold,figName),'svg')
+        saveas(gcf,fullfile(figFold,figName),'tif')
     end
 
     if svePlt == 1

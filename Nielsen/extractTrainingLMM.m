@@ -7,9 +7,9 @@ clear all
 close all
 
 type='V1cool';
-
-dataFold = ['/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/training/Train_' type '/MU'];
-load(fullfile(dataFold,['Train_' type '_MUdataSet.mat']))
+% dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
+dataFold = 'Y:\Brandon\data';
+load(fullfile(dataFold,'dataSets','training',['Train_' type],'MU',['Train_' type '_MUdataSet.mat']))
 
 d1 = data.v1bf; d1 = d1(screenUnits(d1,'MU'),:); 
 d2 = data.v1af; d2 = d2(screenUnits(d2,'MU'),:);
