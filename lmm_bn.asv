@@ -39,12 +39,13 @@ end
 %% LMM
 
 for p = 1:length(proj)
-    for a = 1:length(area)
+    for ar = 1:length(area)
 %         trainData = d{p}(strcmp(d{p}.area,area{a}),[3,20,22,26:28]);
-        trainData = d{p}(strcmp(d{p}.area,area{a}),{'animal','age','area','manipulation','group','ldr','lor'});
-        mdl_ldr{p,a} = fitlme(trainData,'ldr ~ 1+ manipulation + (1+manipulation|animal)','FitMethod','ML');
-        [animVals_ldr,animInfo,animStats]=randomEffects(mdl_ldr{p,a});
-        mdl_lor{p,a} = fitlme(trainData,'lor ~ 1+ manipulation + (1+manipulation|animal)','FitMethod','ML');
+        trainData = d{p}(strcmp(d{p}.area,area{ar}),{'animal','age','area','manipulation','group','ldr','lor'});
+        mdl_ldr{p,ar} = fitlme(trainData,'ldr ~ 1+ manipulation + (1+manipulation|animal)','FitMethod','ML');
+        [animVals_ldr{p,ar},animInfo_ldr{p,ar},animStats_ldr{p,ar}]=randomEffects(mdl_ldr{p,ar});
+        mdl_lor{p,ar} = fitlme(trainData,'lor ~ 1+ manipulation + (1+manipulation|animal)','FitMethod','ML');
+        [animVals_lor{p,ar},animInfo_lor{p,ar},animStats_lor{p,ar}]=randomEffects(mdl_lor{p,ar});
     end
 end
 
@@ -94,10 +95,13 @@ for p = 1:length(proj)
             idx1 = idxAnim & idxArea & ~idxManip;
             idx2 = idxAnim & idxArea &  idxManip;
             x1 = repmat(anim,sum(idx1),1)+randi([-10 10],sum(idx1),1)/40;
+            y1Int = animVals_ldr{p,ar}( strcmp(animInfo_ldr{p,ar}.Levels,animals{anim}) & strcmp(animInfo_ldr{p,ar}.Names,'(Intercept)') );
             y1 = d{p}.ldr(idx1);
             x2 = repmat(anim+nAnim+1,sum(idx2),1)+randi([-10 10],sum(idx2),1)/40;
             y2 = d{p}.ldr(idx2);
+            y2Int = animVals_ldr{p,ar}( strcmp(animInfo_ldr{p,ar}.Levels,animals{anim}) & strcmp(animInfo_ldr{p,ar}.Names,'(Intercept)') );
             scatter(x1,y1,'o','MarkerEdgeColor','none','MarkerFaceColor',animClrs(anim,:),'MarkerFaceAlpha',0.5)
+            plot([0.5+(anim-1) 1.5+(anim-1)],[],'-','Color',[0.7 0.7 0.7])
             scatter(x2,y2,'o','MarkerEdgeColor','none','MarkerFaceColor',animClrs(anim,:),'MarkerFaceAlpha',0.5)
             xticks([1:nAnim,nAnim+2:nAnim+1+nAnim])
             xticklabels([animals;animals])
