@@ -1,9 +1,9 @@
 % linear mixed effects model - Brandon Nanfito
 clear
-close all
+% close all
 
-dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
-% dataFold = 'Y:\Brandon\data';
+% dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
+dataFold = 'Y:\Brandon\data';
 proj = {'Train_BiDir','Train_V1Cool','Train_Static'};
 projStyl = {'-','-','-'};
 projClr = {'r','g','b'};
@@ -26,7 +26,7 @@ for p = 1:length(proj)
     for u = 1:height(d{p})
         aniId{u} = d{p}.exptName{u}(1:5);
         uAge(u) = unique( projectTbl.age(strcmp(projectTbl.experimentId,aniId{u})) );
-        groupId{u} = [num2str(d{p}.manipulation(u)) d{p}.area{u}];
+        groupId{u} = [proj{p} num2str(d{p}.manipulation(u)) d{p}.area{u}];
     end
     d{p}.animal = aniId;
     d{p}.age = uAge;
@@ -52,7 +52,7 @@ end
 
 % cdf plot of tuning metrics
 % ldr
-figure
+figure('Position',[100 100 1200 500])
 tiledlayout(1,length(area))
 for ar = 1:length(area)
     nexttile; hold on
@@ -79,7 +79,7 @@ for ar = 1:length(area)
     title(area{ar})
 end
 
-figure
+figure('Position',[100 100 800 1200])
 tiledlayout(length(proj),length(area))
 for p = 1:length(proj)
     animals = unique(d{p}.animal);
@@ -106,12 +106,15 @@ for p = 1:length(proj)
         plot([0.5 nAnim+0.5]+nAnim+1,repmat(mdl_ldr{p,ar}.Coefficients.Estimate(1)+mdl_ldr{p,ar}.Coefficients.Estimate(2),1,2),'k-','LineWidth',2)
         title([proj{p}(7:end) '; ' area{ar} '; Effect: ' num2str(mdl_ldr{p,ar}.Coefficients.Estimate(2))])
         ylabel('Ldir')
+        ylim([0 1])
+        xlim([0 (2*nAnim)+2])
+        box on
     end
 end
 
 
 %lor
-figure
+figure('Position',[100 100 1200 500])
 tiledlayout(1,length(area))
 for ar = 1:length(area)
     nexttile; hold on
@@ -138,7 +141,7 @@ for ar = 1:length(area)
     title(area{ar})
 end
 
-figure
+figure('Position',[100 100 800 1200])
 tiledlayout(length(proj),length(area))
 for p = 1:length(proj)
     animals = unique(d{p}.animal);
@@ -165,6 +168,9 @@ for p = 1:length(proj)
         plot([0.5 nAnim+0.5]+nAnim+1,repmat(mdl_lor{p,ar}.Coefficients.Estimate(1)+mdl_lor{p,ar}.Coefficients.Estimate(2),1,2),'k-','LineWidth',2)
         title([proj{p}(7:end) '; ' area{ar} '; Effect: ' num2str(mdl_lor{p,ar}.Coefficients.Estimate(2))])
         ylabel('Lori')
+        ylim([0 1])
+        xlim([0 (2*nAnim)+2])
+        box on
     end
 end
 
