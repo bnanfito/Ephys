@@ -6,7 +6,6 @@ close all
 dataFold = 'Y:\Brandon\data';
 proj = {'Train_BiDir','Train_V1Cool','Train_Static'};
 projStyl = {'-','-','-'};
-projShap = {'o','v','square'};
 projClr = {'r','g','b'};
 anaMode = 'MU';
 area = {'V1','PSS'};
@@ -219,18 +218,15 @@ figure
 for p = 1:length(proj)
     for ar = 1:length(area)
         subplot( length(area),2,1+(length(area)*(ar-1)) ); hold on
-        scatter(anim_ldrInt{p,ar},anim_ldrSlope{p,ar},projShap{p})
-        yline(0,':')
+        scatter(anim_ldrInt{p,ar},anim_ldrSlope{p,ar})
         xlabel('Pretraining Ldir')
         ylabel('Change in Ldir')
 
         subplot( length(area),2,2+(length(area)*(ar-1)) ); hold on
-        scatter(anim_lorInt{p,ar},anim_lorSlope{p,ar},projShap{p})
-        yline(0,':')
+        scatter(anim_lorInt{p,ar},anim_lorSlope{p,ar})
         xlabel('Pretraining Lori')
-        ylabel('Change in Lori')
-
-        box on; axis square
+        
     end
 end
+
 
