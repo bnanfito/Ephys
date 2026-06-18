@@ -1,6 +1,6 @@
 function [out] = screenUnits(sumStats,anaMode,varargin)
  
-alpha = 0.01;
+alpha = 0.05;
 % if a statistical test for visual responsiveness is not specified in the
 % 3rd argin, ranksum will be used by default
 if isempty(varargin)
@@ -27,7 +27,7 @@ for u = 1:height(sumStats)
         out(u,1) = isVis & isAct & isSU;
 %         out(u,1) = isVis & isAct & (isSU | maybeSU);
     elseif strcmp(anaMode,'MU')
-        isAct = sumStats.rPref(u)>=2;
+        isAct = sumStats.rPref(u)>=0;
         out(u,1) = isVis & isAct;
     end
 

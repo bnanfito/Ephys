@@ -2,7 +2,7 @@
 
 function [projectTbl,stats,data] = anaTrain(proj)
 
-    anaMode = 'MU';
+    anaMode = 'SU';
     sve = 1;
     thresh = 'threshold4';
     visTest = 'ranksum';

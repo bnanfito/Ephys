@@ -10,7 +10,7 @@ projShap = {'o','v','square'};
 projClr = {'r','g','b'};
 anaMode = 'MU';
 area = {'V1','PSS'};
-exclude = {'febk7','febm6'};
+exclude = {};
 
 %% Organize data
 
@@ -50,7 +50,9 @@ for p = 1:length(proj)
         [~,~,anim_ldr]=randomEffects(mdl_ldr{p,ar});
         anim_ldrName{p,ar} = anim_ldr.Level(strcmp(anim_ldr.Name,'(Intercept)'));
         anim_ldrInt{p,ar} = anim_ldr.Estimate(strcmp(anim_ldr.Name,'(Intercept)'))+ldrInt(p,ar);
+        anim_ldrInt_sem{p,ar} = anim_ldr.SEPred(strcmp(anim_ldr.Name,'(Intercept)'));
         anim_ldrSlope{p,ar} = anim_ldr.Estimate(strcmp(anim_ldr.Name,'manipulation'))+ldrSlope(p,ar);
+        anim_ldrSlope_sem{p,ar} = anim_ldr.SEPred(strcmp(anim_ldr.Name,'manipulation'));
         anim_ldrPost{p,ar} = anim_ldrInt{p,ar}+anim_ldrSlope{p,ar};
 
         mdl_lor{p,ar} = fitlme(trainData,'lor ~ 1+ manipulation + (1+manipulation|animal)','FitMethod','ML');
@@ -59,7 +61,9 @@ for p = 1:length(proj)
         [~,~,anim_lor]=randomEffects(mdl_lor{p,ar});
         anim_lorName{p,ar} = anim_lor.Level(strcmp(anim_lor.Name,'(Intercept)'));
         anim_lorInt{p,ar} = anim_lor.Estimate(strcmp(anim_lor.Name,'(Intercept)'))+lorInt(p,ar);
+        anim_lorInt_sem{p,ar} = anim_lor.SEPred(strcmp(anim_lor.Name,'(Intercept)'));
         anim_lorSlope{p,ar} = anim_lor.Estimate(strcmp(anim_lor.Name,'manipulation'))+lorSlope(p,ar);
+        anim_lorSlope_sem{p,ar} = anim_lor.SEPred(strcmp(anim_lor.Name,'manipulation'));
         anim_lorPost{p,ar} = anim_lorInt{p,ar}+anim_lorSlope{p,ar};
 
     end
@@ -115,8 +119,8 @@ for p = 1:length(proj)
             y1 = d{p}.ldr(idx1);
             x2 = repmat(an+nAnim+1,sum(idx2),1)+randi([-10 10],sum(idx2),1)/40;
             y2 = d{p}.ldr(idx2);
-            scatter(x1,y1,'o','MarkerEdgeColor','none','MarkerFaceColor',animClrs(an,:),'MarkerFaceAlpha',0.5)
-            scatter(x2,y2,'o','MarkerEdgeColor','none','MarkerFaceColor',animClrs(an,:),'MarkerFaceAlpha',0.5)
+            scatter(x1,y1,'o','MarkerEdgeColor','none','MarkerFaceColor',animClrs(an,:),'MarkerFaceAlpha',0.35)
+            scatter(x2,y2,'o','MarkerEdgeColor','none','MarkerFaceColor',animClrs(an,:),'MarkerFaceAlpha',0.35)
             xticks([1:nAnim,nAnim+2:nAnim+1+nAnim])
             xticklabels([animals;animals])
         end
@@ -189,8 +193,8 @@ for p = 1:length(proj)
             y1 = d{p}.lor(idx1);
             x2 = repmat(an+nAnim+1,sum(idx2),1)+randi([-10 10],sum(idx2),1)/40;
             y2 = d{p}.lor(idx2);
-            scatter(x1,y1,'o','MarkerEdgeColor','none','MarkerFaceColor',animClrs(an,:),'MarkerFaceAlpha',0.5)
-            scatter(x2,y2,'o','MarkerEdgeColor','none','MarkerFaceColor',animClrs(an,:),'MarkerFaceAlpha',0.5)
+            scatter(x1,y1,'o','MarkerEdgeColor','none','MarkerFaceColor',animClrs(an,:),'MarkerFaceAlpha',0.35)
+            scatter(x2,y2,'o','MarkerEdgeColor','none','MarkerFaceColor',animClrs(an,:),'MarkerFaceAlpha',0.35)
             xticks([1:nAnim,nAnim+2:nAnim+1+nAnim])
             xticklabels([animals;animals])
         end
@@ -215,22 +219,53 @@ for p = 1:length(proj)
 end
 
 
-figure
+figure('Position',[0 100 700 1160])
 for p = 1:length(proj)
     for ar = 1:length(area)
-        subplot( length(area),2,1+(length(area)*(ar-1)) ); hold on
-        scatter(anim_ldrInt{p,ar},anim_ldrSlope{p,ar},projShap{p})
+        subplot( length(area)+1,2,1+(length(area)*(ar-1)) ); hold on
+        scatter(anim_ldrInt{p,ar},anim_ldrSlope{p,ar},projShap{p},'filled')
         yline(0,':')
         xlabel('Pretraining Ldir')
         ylabel('Change in Ldir')
+        box on; axis square
+        title(area{ar})
 
-        subplot( length(area),2,2+(length(area)*(ar-1)) ); hold on
-        scatter(anim_lorInt{p,ar},anim_lorSlope{p,ar},projShap{p})
+        subplot( length(area)+1,2,2+(length(area)*(ar-1)) ); hold on
+        scatter(anim_lorInt{p,ar},anim_lorSlope{p,ar},projShap{p},'filled')
         yline(0,':')
         xlabel('Pretraining Lori')
         ylabel('Change in Lori')
-
         box on; axis square
+        title(area{ar})
     end
+end
+
+% figure;hold on
+for p = 1:length(proj)
+    subplot(3,2,5); hold on
+    if p==1
+        xline(0,'k:')
+        yline(0,'k:')
+    end
+    errorbar(anim_ldrSlope{p,1},anim_ldrSlope{p,2},...
+        anim_ldrSlope_sem{p,2},anim_ldrSlope_sem{p,2},...
+        anim_ldrSlope_sem{p,1},anim_ldrSlope_sem{p,1},projShap{p},'LineStyle','none','MarkerFaceColor','auto')
+    xlabel(area{1})
+    ylabel(area{2})
+    title('Change in Ldir')
+    box on; axis square
+
+    subplot(3,2,6); hold on
+    if p==1
+        xline(0,'k:')
+        yline(0,'k:')
+    end
+    errorbar(anim_lorSlope{p,1},anim_lorSlope{p,2},...
+        anim_lorSlope_sem{p,2},anim_lorSlope_sem{p,2},...
+        anim_lorSlope_sem{p,1},anim_lorSlope_sem{p,1},projShap{p},'LineStyle','none','MarkerFaceColor','auto')
+    xlabel(area{1})
+    ylabel(area{2})
+    title('Change in Lori')
+    box on; axis square
 end
 

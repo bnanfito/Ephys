@@ -44,7 +44,9 @@ for u = uInd
     %SDF + Raster
     subplot(1,2,1);hold on
     xline(0,'k-');xline(stimTime,'k-');
-    xline(dat.latency(u),[clr '--'])
+    if ~isnan(dat.latency(u))
+        xline(dat.latency(u),[clr '--'])
+    end
     baseFR = mean(dat.fr(u).base,'all','omitnan');
     yline(baseFR,'k--')
     idx = x>-1 & x<2;
