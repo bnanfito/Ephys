@@ -10,6 +10,7 @@ projShap = {'o','v','square'};
 projClr = {'r','g','b'};
 anaMode = 'MU';
 area = {'V1','PSS'};
+areaClr = {'b','r'};
 exclude = {};
 
 %% Organize data
@@ -240,32 +241,87 @@ for p = 1:length(proj)
     end
 end
 
-% figure;hold on
-for p = 1:length(proj)
-    subplot(3,2,5); hold on
-    if p==1
-        xline(0,'k:')
-        yline(0,'k:')
-    end
-    errorbar(anim_ldrSlope{p,1},anim_ldrSlope{p,2},...
-        anim_ldrSlope_sem{p,2},anim_ldrSlope_sem{p,2},...
-        anim_ldrSlope_sem{p,1},anim_ldrSlope_sem{p,1},projShap{p},'LineStyle','none','MarkerFaceColor','auto')
-    xlabel(area{1})
-    ylabel(area{2})
-    title('Change in Ldir')
-    box on; axis square
+% % figure;hold on
+% for p = 1:length(proj)
+%     subplot(3,2,5); hold on
+%     if p==1
+%         xline(0,'k:')
+%         yline(0,'k:')
+%     end
+%     errorbar(anim_ldrSlope{p,1},anim_ldrSlope{p,2},...
+%         anim_ldrSlope_sem{p,2},anim_ldrSlope_sem{p,2},...
+%         anim_ldrSlope_sem{p,1},anim_ldrSlope_sem{p,1},projShap{p},'LineStyle','none','MarkerFaceColor','auto')
+%     xlabel(area{1})
+%     ylabel(area{2})
+%     title('Change in Ldir')
+%     box on; axis square
+% 
+%     subplot(3,2,6); hold on
+%     if p==1
+%         xline(0,'k:')
+%         yline(0,'k:')
+%     end
+%     errorbar(anim_lorSlope{p,1},anim_lorSlope{p,2},...
+%         anim_lorSlope_sem{p,2},anim_lorSlope_sem{p,2},...
+%         anim_lorSlope_sem{p,1},anim_lorSlope_sem{p,1},projShap{p},'LineStyle','none','MarkerFaceColor','auto')
+%     xlabel(area{1})
+%     ylabel(area{2})
+%     title('Change in Lori')
+%     box on; axis square
+% end
 
-    subplot(3,2,6); hold on
-    if p==1
-        xline(0,'k:')
-        yline(0,'k:')
+figure;hold on
+p = find(strcmp(proj,'Train_V1Cool'));
+count = 0;
+for ar = 1:length(area)
+    for m = 0:1
+        idx = d{p}.manipulation == m & strcmp(d{p}.area,area{ar});
+        count = count+1;
+        dist_ldr{count} = d{p}.ldr(idx);
+        groupId_ldr{count} = repmat(count,length(dist_ldr{count}),1);
+        cdfPlt = cdfplot(dist_ldr{count});
+        cdfPlt.Color = areaClr{ar};
+        plts(count) = cdfPlt;
+        if m == 0
+            cdfPlt.LineStyle = '--';
+            lbl{count} = [area{ar} ' before'];
+        elseif m == 1
+            cdfPlt.LineStyle = '-';
+            lbl{count} = [area{ar} ' after'];
+        end
     end
-    errorbar(anim_lorSlope{p,1},anim_lorSlope{p,2},...
-        anim_lorSlope_sem{p,2},anim_lorSlope_sem{p,2},...
-        anim_lorSlope_sem{p,1},anim_lorSlope_sem{p,1},projShap{p},'LineStyle','none','MarkerFaceColor','auto')
-    xlabel(area{1})
-    ylabel(area{2})
-    title('Change in Lori')
-    box on; axis square
 end
+xlabel('Ldir')
+xlim([0 0.5])
+ylabel('Proportion')
+box on; axis square
+legend(plts,lbl,'Location','best')
 
+
+
+figure;hold on
+p = find(strcmp(proj,'Train_V1Cool'));
+count = 0;
+for ar = 1:length(area)
+    for m = 0:1
+        idx = d{p}.manipulation == m & strcmp(d{p}.area,area{ar});
+        count = count+1;
+        dist_lor{count} = d{p}.lor(idx);
+        groupId_lor{count} = repmat(count,length(dist_lor{count}),1);
+        cdfPlt = cdfplot(dist_lor{count});
+        cdfPlt.Color = areaClr{ar};
+        plts(count) = cdfPlt;
+        if m == 0
+            cdfPlt.LineStyle = '--';
+            lbl{count} = [area{ar} ' before'];
+        elseif m == 1
+            cdfPlt.LineStyle = '-';
+            lbl{count} = [area{ar} ' after'];
+        end
+    end
+end
+xlabel('Lori')
+xlim([0 0.5])
+ylabel('Proportion')
+box on; axis square
+legend(plts,lbl,'Location','best')

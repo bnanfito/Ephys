@@ -4,9 +4,9 @@ close all
 
 proj = 'V1cool_ori';
 % dataFold = '/Volumes/NielsenHome2/Brandon/data';
-% dataFold = 'Y:\Brandon\data';
+dataFold = 'Y:\Brandon\data';
 % dataFold = 'C:\Users\brand\Documents\data';
-dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
+% dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
 anaMode = 'SU';
 ageGroups = {[28 32],[33 40],[41 80],[81 120]};
 
@@ -379,6 +379,28 @@ title('L_D_i_r')
 legend(p,{'p < 0.05','p > 0.05'},'Location','southeast')
 box on
 axis square
+
+
+% scatter plot - Lori
+figure; hold on
+clr = 'k';
+x = mLOR(:,1);
+errX = semLDR(:,1);
+y = mLOR(:,2);
+errY = semLDR(:,2);
+sigIdx = pvalLDR<0.05;
+p(2) = errorbar(x(~sigIdx),y(~sigIdx),errY(~sigIdx),errY(~sigIdx),errX(~sigIdx),errX(~sigIdx),[clr 'o'],'MarkerFaceColor','w','CapSize',0);
+p(2).DataTipTemplate.DataTipRows(end+1) = dataTipTextRow('unit',find(~sigIdx));
+p(1) = errorbar(x(sigIdx),y(sigIdx),errY(sigIdx),errY(sigIdx),errX(sigIdx),errX(sigIdx),[clr 'o'],'MarkerFaceColor',clr,'CapSize',0);
+p(1).DataTipTemplate.DataTipRows(end+1) = dataTipTextRow('unit',find(sigIdx));
+plot([0 1],[0 1],'k--')
+xlabel('mean vector length, pre-cooling')
+ylabel('mean vector length, cooling')
+title('L_O_r_i')
+legend(p,{'p < 0.05','p > 0.05'},'Location','southeast')
+box on
+axis square
+
 
 % scatter plot - DSI
 figure; hold on
