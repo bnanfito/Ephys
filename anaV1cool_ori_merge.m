@@ -388,12 +388,14 @@ x = mLOR(:,1);
 errX = semLDR(:,1);
 y = mLOR(:,2);
 errY = semLDR(:,2);
-sigIdx = pvalLDR<0.05;
+sigIdx = pvalLOR<0.05;
 p(2) = errorbar(x(~sigIdx),y(~sigIdx),errY(~sigIdx),errY(~sigIdx),errX(~sigIdx),errX(~sigIdx),[clr 'o'],'MarkerFaceColor','w','CapSize',0);
 p(2).DataTipTemplate.DataTipRows(end+1) = dataTipTextRow('unit',find(~sigIdx));
 p(1) = errorbar(x(sigIdx),y(sigIdx),errY(sigIdx),errY(sigIdx),errX(sigIdx),errX(sigIdx),[clr 'o'],'MarkerFaceColor',clr,'CapSize',0);
 p(1).DataTipTemplate.DataTipRows(end+1) = dataTipTextRow('unit',find(sigIdx));
 plot([0 1],[0 1],'k--')
+xlim([0 1])
+ylim([0 1])
 xlabel('mean vector length, pre-cooling')
 ylabel('mean vector length, cooling')
 title('L_O_r_i')
