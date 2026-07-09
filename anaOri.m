@@ -13,7 +13,7 @@ exptName = [animal '_u' unit '_' expt];
 
 plr = 1;
 alignBit = 0;
-ff = 0;
+ff = 1;
 
 %% Load Data
 
@@ -65,24 +65,28 @@ sizeInd = contains(trialInfo.dom,'size');
 posInd = strcmp(trialInfo.dom,'x_pos');
 if nDom==1 && sum(oriInd)==1 && sum(sizeInd)==0
     cndInclude = ~blank;
-elseif nDom == 2 && sum(sizeInd)==1 
-    sizes = unique(trialInfo.domval(:,sizeInd));
-    ffIdx = sizes>100;
-    hemiIdx =  sizes<100;
-    if ff == 1
-        cndInclude = trialInfo.domval(:,sizeInd) == sizes(ffIdx);
-    else
-        cndInclude = trialInfo.domval(:,sizeInd) == sizes(hemiIdx);
+elseif nDom == 2
+    
+    if sum(sizeInd)==1
+        sizes = unique(trialInfo.domval(:,sizeInd));
+        ffIdx = sizes>100;
+        hemiIdx =  sizes<100;
+        if ff == 1
+            cndInclude = ismember(trialInfo.domval(:,sizeInd),sizes(ffIdx));
+        else
+            cndInclude = ismember(trialInfo.domval(:,sizeInd),sizes(hemiIdx));
+        end
+    elseif sum(posInd)==1
+        pos = unique(trialInfo.domval(:,posInd));
+        ffIdx = pos==min(pos);
+        hemiIdx = pos==max(pos);
+        if ff == 1
+            cndInclude = ismember(trialInfo.domval(:,posInd),pos(ffIdx));
+        else
+            cndInclude = ismember(trialInfo.domval(:,posInd),pos(hemiIdx));
+        end
     end
-elseif nDom == 2 && sum(posInd)==1 
-    pos = unique(trialInfo.domval(:,posInd));
-    ffIdx = pos==min(pos);
-    hemiIdx = pos==max(pos);
-    if ff == 1
-        cndInclude = trialInfo.domval(:,sizeInd) == pos(ffIdx);
-    else
-        cndInclude = trialInfo.domval(:,sizeInd) == pos(hemiIdx);
-    end
+
 end
 trialInclude = ismember(trialInfo.triallist,find(cndInclude));
 
@@ -178,36 +182,33 @@ for u = 1:nU % u indexes a unit (column) in structure spks
 end
 
 varNames = {'exptName','probe','area','uInfo','uID','spkTimes','latency','fr','paramKey','cndKey','response','condition','rPref','oriPref','rNull','oriNull'};
-sumStats = table(exptID',probeID',areaID',{spks.info}',uID',{spks.stimCent}',vertcat(spks.late),vertcat(spks.fr),paramKey',cndKey',R',C',rPref',cPref',rNull',cNull','VariableNames',varNames);
-
-if exist('rBlank','var')
-    sumStats.rBlank = rBlank';
-end
-
-if exist('dpi','var')
-    sumStats.dpi = dpi;
+if sum(cndInclude)==0
+    sumStats = table([],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],'VariableNames',varNames);
 else
-    sumStats.meanVec = mv';
-    sumStats.dsi = dsi;
-    sumStats.ldr = ldr;
-    sumStats.osi = osi;
-    sumStats.lor = lor;
+    sumStats = table(exptID',probeID',areaID',{spks.info}',uID',{spks.stimCent}',vertcat(spks.late),vertcat(spks.fr),paramKey',cndKey',R',C',rPref',cPref',rNull',cNull','VariableNames',varNames);
+    if exist('rBlank','var')
+        sumStats.rBlank = rBlank';
+    end
+    if exist('dpi','var')
+        sumStats.dpi = dpi;
+    else
+        sumStats.meanVec = mv';
+        sumStats.dsi = dsi;
+        sumStats.ldr = ldr;
+        sumStats.osi = osi;
+        sumStats.lor = lor;
+    end
+    if exist('G','var')
+        sumStats.gauss = G';
+    end
+    [pVis] = visTest(sumStats);
+    sumStats.pVis = pVis;
+    goodUnit = screenUnits(sumStats,anaMode);
+    if strcmp(anaMode,'MU')
+        sumStats.xPos = vertcat(spks.xPos);
+        sumStats.zPos = vertcat(spks.zPos);
+        sumStats.shaft = vertcat(spks.shaft);
+    end
 end
-
-if exist('G','var')
-    sumStats.gauss = G';
-end
-
-[pVis] = visTest(sumStats);
-sumStats.pVis = pVis;
-goodUnit = screenUnits(sumStats,anaMode);
-
-if strcmp(anaMode,'MU')
-    sumStats.xPos = vertcat(spks.xPos);
-    sumStats.zPos = vertcat(spks.zPos);
-    sumStats.shaft = vertcat(spks.shaft);
-end
-
-
 
 end
