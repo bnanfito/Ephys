@@ -32,7 +32,11 @@ ageGroups = {[28 32],[33 40],[41 80],[81 120]};
 %     exptName = projTbl.fileBase{e};
 %     disp(['generating sumStats for ' exptName])
 %     [sumStats{e,1}] = anaOri(animal,unit,expt,probe,anaMode,dataFold,0,0);
-%     nGU(e,1) = sum(screenUnits(sumStats{e,1},anaMode));
+%     if isempty(sumStats{e,1})
+%         nGU(e,1) = 0;
+%     else
+%         nGU(e,1) = sum(screenUnits(sumStats{e,1},anaMode));
+%     end
 % end
 % projTbl.sumStats = sumStats;
 % projTbl.nGU = nGU;
@@ -417,15 +421,16 @@ AG3control_ldr = unitData.ldr(unitData.g==5); AG3control_ldr(end+1:max(nU)) = na
 AG3cool_ldr = unitData.ldr(unitData.g==6); AG3cool_ldr(end+1:max(nU)) = nan;
 AG4control_ldr = unitData.ldr(unitData.g==7); AG4control_ldr(end+1:max(nU)) = nan;
 AG4cool_ldr = unitData.ldr(unitData.g==8); AG4cool_ldr(end+1:max(nU)) = nan;
+LDR = table(AG1control_ldr,AG1cool_ldr,AG2control_ldr,AG2cool_ldr,AG3control_ldr,AG3cool_ldr,AG4control_ldr,AG4cool_ldr);
 
-AG1control_lor = unitData.lor(unitData.g==1);
-AG1cool_lor = unitData.lor(unitData.g==2);
-AG2control_lor = unitData.lor(unitData.g==3);
-AG2cool_lor = unitData.lor(unitData.g==4);
-AG3control_lor = unitData.lor(unitData.g==5);
-AG3cool_lor = unitData.lor(unitData.g==6);
-AG4control_lor = unitData.lor(unitData.g==7);
-AG4cool_lor = unitData.lor(unitData.g==8);
+AG1control_lor = unitData.lor(unitData.g==1); AG1control_lor(end+1:max(nU)) = nan;
+AG1cool_lor = unitData.lor(unitData.g==2); AG1cool_lor(end+1:max(nU)) = nan;
+AG2control_lor = unitData.lor(unitData.g==3); AG2control_lor(end+1:max(nU)) = nan;
+AG2cool_lor = unitData.lor(unitData.g==4); AG2cool_lor(end+1:max(nU)) = nan;
+AG3control_lor = unitData.lor(unitData.g==5); AG3control_lor(end+1:max(nU)) = nan;
+AG3cool_lor = unitData.lor(unitData.g==6); AG3cool_lor(end+1:max(nU)) = nan;
+AG4control_lor = unitData.lor(unitData.g==7); AG4control_lor(end+1:max(nU)) = nan;
+AG4cool_lor = unitData.lor(unitData.g==8); AG4cool_lor(end+1:max(nU)) = nan;
 
 AG1control_late = unitData.latency(unitData.g==1);
 AG1cool_late = unitData.latency(unitData.g==2);
