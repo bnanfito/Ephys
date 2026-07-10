@@ -580,9 +580,9 @@ for ani = sortIdx
     idA = screenUnits(dA,anaMode);
     idB = screenUnits(dB,anaMode);
     plot([0 m],[0 m],'k')
-    scatter(x,y,'k')
-    sPlt(1) = scatter(x(idA&~idB),y(idA&~idB),'k','MarkerFaceColor','k');
-    sPlt(2) = scatter(x(idA&idB),y(idA&idB),'k','MarkerFaceColor','b');
+%     scatter(x,y,'k')
+    sPlt(1) = scatter(x(idA&~idB),y(idA&~idB),'k','MarkerFaceColor','k','MarkerFaceAlpha',0.5,'MarkerEdgeColor','none');
+    sPlt(2) = scatter(x(idA&idB),y(idA&idB),'b','MarkerFaceColor','b','MarkerFaceAlpha',0.5,'MarkerEdgeColor','none');
     axis tight
     axis square
     box on
@@ -602,19 +602,23 @@ for ag = 1:length(ageGroups)
     idA = screenUnits(dA,anaMode);
     idB = screenUnits(dB,anaMode);
     
-    subplot(1,length(ageGroups),ag);hold on
-    x = dA.ldr;
-    y = dB.ldr;
+    subplot(2,length(ageGroups),ag);hold on
+    x = dA.rPref;
+    y = dB.rPref;
     m = max([x;y]);
     plot([0 m],[0 m],'k')
-    scatter(x,y,'k')
-    scatter(x(idA&~idB),y(idA&~idB),'k','MarkerFaceColor','k')
-    scatter(x(idA&idB),y(idA&idB),'k','MarkerFaceColor','b')
-    xlabel('pre-cooling Ldir')
-    ylabel('v1 cooled Ldir')
+%     scatter(x,y,'k')
+    scatter(x(idA&~idB),y(idA&~idB),'k','MarkerFaceColor','k','MarkerFaceAlpha',0.5,'MarkerEdgeColor','none')
+    scatter(x(idA&idB),y(idA&idB),'b','MarkerFaceColor','b','MarkerFaceAlpha',0.5,'MarkerEdgeColor','none')
+    xlabel('pre-cooling Rpref')
+    ylabel('v1 cooled Rpref')
     axis square
     axis tight
     box on
+
+    ind = sum(idA&idB) / (sum(idA&idB)+sum(idA&~idB));sum(idA&idB)
+    dep = sum(idA&~idB) / (sum(idA&idB)+sum(idA&~idB));sum(idA&~idB)
+    subplot(2,length(ageGroups),ag+(length(ageGroups)));pie([ind dep])
 
 end 
 
