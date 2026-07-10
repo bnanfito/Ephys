@@ -13,7 +13,7 @@ exptName = [animal '_u' unit '_' expt];
 
 plr = 1;
 alignBit = 0;
-ff = 1;
+ff = 0;
 
 %% Load Data
 
