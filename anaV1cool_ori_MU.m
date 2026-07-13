@@ -5,10 +5,11 @@ close all
 anaMode = 'MU';
 proj = 'V1cool_ori';
 area = 'PSS';
-dataFold = 'Y:\Brandon\data';
+% dataFold = 'Y:\Brandon\data';
 % dataFold = '/Volumes/NielsenHome2/Brandon/data';
-% dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
+dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
 ageGroups = {[28 32],[33 40],[41 80],[81 120]};
+agClrs = {'r','g','b','k'};
 
 %% Generate Project Table
 
@@ -599,8 +600,8 @@ for ag = 1:length(ageGroups)
     
     dA = datAG.cntrl{ag};
     dB = datAG.cool{ag};
-    idA = screenUnits(dA,anaMode);
-    idB = screenUnits(dB,anaMode);
+    idA = screenUnits(dA,anaMode)&~isnan(dA.latency);
+    idB = screenUnits(dB,anaMode)&~isnan(dB.latency);
     
     subplot(2,length(ageGroups),ag);hold on
     x = dA.rPref;
@@ -619,6 +620,26 @@ for ag = 1:length(ageGroups)
     ind = sum(idA&idB) / (sum(idA&idB)+sum(idA&~idB));sum(idA&idB)
     dep = sum(idA&~idB) / (sum(idA&idB)+sum(idA&~idB));sum(idA&~idB)
     subplot(2,length(ageGroups),ag+(length(ageGroups)));pie([ind dep])
+
+end 
+
+figure; hold on
+for ag = 1:length(ageGroups)
+    
+    dA = datAG.cntrl{ag};
+    dB = datAG.cool{ag};
+    idA = screenUnits(dA,anaMode)&~isnan(dA.latency);
+    idB = screenUnits(dB,anaMode)&~isnan(dB.latency);
+    
+    x = dA.latency;
+    y = dB.latency;
+    p1 = cdfplot(x(idA&idB));
+    p1.LineStyle = '-';
+    p1.Color = agClrs{ag};
+    p2 = cdfplot(x(idA&~idB));
+    p2.LineStyle = '-';
+    p2.Color = agClrs{ag};
+    
 
 end 
 
