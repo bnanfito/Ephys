@@ -6,10 +6,10 @@ close all
 anaMode = 'SU';
 
 % dataFold = '/Volumes/Lab drive/Brandon/data/dataSets/DSdev';
-dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/DSdev';
+% dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/DSdev';
 % dataFold = '/Volumes/NielsenHome2/Brandon/data/dataSets/DSdev';
 % dataFold = 'F:\Brandon\data\dataSets\DSdev';
-% dataFold = 'Y:\Brandon\data\dataSets\DSdev';
+dataFold = 'Y:\Brandon\data\dataSets\DSdev';
 load(fullfile(dataFold,['DSdev_' anaMode 'dataSet.mat']))
 dir = load(fullfile(dataFold,'anaRSA_dir.mat'));
 ori = load(fullfile(dataFold,'anaRSA_ori.mat'));
@@ -24,7 +24,7 @@ nAR = length(areas);
 
 for ar = 1:nAR
 for ag = 1:nAG
-
+    
     ageLims = ageGroups{ag};
     areaIdx = strcmp(projTbl.recSite,areas{ar});
     ageLimIdx = projTbl.age>=ageLims(1) & projTbl.age<=ageLims(2);
@@ -36,6 +36,13 @@ for ag = 1:nAG
     [~,sortIdx] = sort(dat{ar,ag}.oriPref);
     dat{ar,ag} = dat{ar,ag}(sortIdx,:);
     nU(ar,ag) = height(dat{ar,ag});
+
+end
+end
+
+for ar = 1:nAR
+for ag = 1:nAG
+
     D = dat{ar,ag};
 
     rMat{ar,ag} = compute_rMat(D);
@@ -150,6 +157,37 @@ for ag = 1:nAG
 
 end
 end
+
+%% Cross-validated projections
+
+ar = 2; ag = 3;
+R = rMat{ar,ag}.rTrial_norm;
+C = rMat{ar,ag}.cTrial;
+cv = cvpartition(60,KFold=5);
+trainIdx = training(cv,1);
+testIdx = test(cv,1);
+Rtrain = R(trainIdx,:);
+Ctrain = C(trainIdx,:);
+Rtest = R(testIdx,:);
+Ctest = C(testIdx,:);
+[cof,scr,lat] = pca(Rtrain);
+figure; tiledlayout(1,1)
+nexttile;hold on
+conds = unique(C);
+clrs = hsv(length(conds));
+for c = 1:length(conds)
+idx = Ctrain == conds(c);
+plot(scr(idx,1),scr(idx,2),'o','Color',clrs(c,:),'MarkerFaceColor',clrs(c,:))
+end
+P = Rtest*cof(:,1:2);
+for c = 1:length(conds)
+idx = Ctest == conds(c);
+plot(P(idx,1),P(idx,2),'*','Color',clrs(c,:))
+quiver(P(idx,1),P(idx,2),0.5*sin(deg2rad(Ctest(idx))),0.5*cos(deg2rad(Ctest(idx)))...
+    ,'LineWidth',1,'Color',clrs(c,:))
+end
+xline(0,'k--');yline(0,'k--')
+[Ctest P rad2deg(mod(atan2(P(:,1),P(:,2)),2*pi))]
 
 %% LDA
 
