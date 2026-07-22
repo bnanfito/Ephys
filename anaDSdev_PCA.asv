@@ -160,6 +160,8 @@ end
 
 %% Cross-validated projections
 
+for ii = 1:50
+
 ar = 2; ag = 3;
 R = rMat{ar,ag}.rTrial_norm;
 C = rMat{ar,ag}.cTrial;
@@ -192,6 +194,8 @@ end
 xline(0,'k--');yline(0,'k--')
 axis square; box on
 [Ctest P rad2deg(mod(atan2(P(:,2),P(:,1)),2*pi))]
+
+end
 
 %% LDA
 
@@ -480,15 +484,15 @@ ar = 2; ag = 3;
 R = rMat{ar,ag}.rTrial_norm;
 T1 = rMat{ar,ag}.cTrial;
 T2 = [cos(deg2rad(T1)) sin(deg2rad(T1))];
-[PC,S] = pca(R);
 cv = cvpartition(size(R,1),KFold = 5);
 fold = 1; trainIdx = training(cv,fold); testIdx = test(cv,fold);
     R_train = R(trainIdx,:); R_test = R(testIdx,:);
     T1_train = T1(trainIdx,:); T1_test = T1(testIdx,:);
     T2_train = T2(trainIdx,:); T2_test = T2(testIdx,:);
+[PC,S] = pca(R_train);
 B1 = R_train\T1_train;P1 = R_test*B1;
 B2 = R_train\T2_train;P2 = R_test*B2;
-[T1_test mod(P1,360)]
+[T1_test mod(P1,2*pi)]
 [rad2deg(mod(atan2(T2_test(:,2),T2_test(:,1)),2*pi)) rad2deg(mod(atan2(P2(:,2),P2(:,1)),2*pi))]
 
 %% Plot
