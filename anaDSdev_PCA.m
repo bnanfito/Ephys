@@ -6,10 +6,10 @@ close all
 anaMode = 'SU';
 
 % dataFold = '/Volumes/Lab drive/Brandon/data/dataSets/DSdev';
-% dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/DSdev';
+dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/DSdev';
 % dataFold = '/Volumes/NielsenHome2/Brandon/data/dataSets/DSdev';
 % dataFold = 'F:\Brandon\data\dataSets\DSdev';
-dataFold = 'Y:\Brandon\data\dataSets\DSdev';
+% dataFold = 'Y:\Brandon\data\dataSets\DSdev';
 load(fullfile(dataFold,['DSdev_' anaMode 'dataSet.mat']))
 dir = load(fullfile(dataFold,'anaRSA_dir.mat'));
 ori = load(fullfile(dataFold,'anaRSA_ori.mat'));
@@ -174,20 +174,24 @@ Ctest = C(testIdx,:);
 figure; tiledlayout(1,1)
 nexttile;hold on
 conds = unique(C);
-clrs = hsv(length(conds));
+% clrs = hsv(length(conds));
+clrs = repmat(hsv(length( unique(mod(conds,180)) )),2,1);
 for c = 1:length(conds)
 idx = Ctrain == conds(c);
 plot(scr(idx,1),scr(idx,2),'o','Color',clrs(c,:),'MarkerFaceColor',clrs(c,:))
+quiver(scr(idx,1),scr(idx,2),0.2*cos(deg2rad(Ctrain(idx))),0.2*sin(deg2rad(Ctrain(idx)))...
+    ,0,'LineWidth',1,'Color',clrs(c,:))
 end
 P = Rtest*cof(:,1:2);
 for c = 1:length(conds)
 idx = Ctest == conds(c);
-plot(P(idx,1),P(idx,2),'*','Color',clrs(c,:))
-quiver(P(idx,1),P(idx,2),0.5*sin(deg2rad(Ctest(idx))),0.5*cos(deg2rad(Ctest(idx)))...
-    ,'LineWidth',1,'Color',clrs(c,:))
+plot(P(idx,1),P(idx,2),'o','Color',clrs(c,:))
+quiver(P(idx,1),P(idx,2),0.2*cos(deg2rad(Ctest(idx))),0.2*sin(deg2rad(Ctest(idx)))...
+    ,0,'LineWidth',1,'Color',clrs(c,:))
 end
 xline(0,'k--');yline(0,'k--')
-[Ctest P rad2deg(mod(atan2(P(:,1),P(:,2)),2*pi))]
+axis square; box on
+[Ctest P rad2deg(mod(atan2(P(:,2),P(:,1)),2*pi))]
 
 %% LDA
 
