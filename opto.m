@@ -1,0 +1,66 @@
+clear all
+close all
+
+anaMode = 'MU';
+dataFold = 'F:\Brandon\data';
+animal = 'febs6'; unit = '000'; expt = '000'; probe = 1;
+baseName = [animal '_u' unit '_' expt];
+
+physDir = fullfile(dataFold,'Ephys',animal,baseName);
+load(fullfile(physDir,[baseName '_trialInfo.mat']))
+load(fullfile(physDir,[baseName '.analyzer']),'-mat','Analyzer')
+load(fullfile(physDir,[baseName '_id.mat']))
+
+predelay = getparam('predelay',Analyzer);
+stimTime = getparam('stim_time',Analyzer);
+postdelay = getparam('postdelay',Analyzer);
+stimStartID = 3;
+tLims = [1,stimTime];
+
+switch anaMode
+    case 'SU'
+SUTrialData(fullfile(dataFold,'Ephys'),animal,unit,expt,probe,'id',stimStartID,tLims(1),tLims(2),0)
+load(fullfile(physDir,[baseName '_p' num2str(probe) '_SUTrial.mat']),'SU','SUinfo')
+uDat = SU; uInfo = SUinfo;
+clear SU SUinfo
+    case 'MU'
+MUThreshTrialData(fullfile(dataFold,'Ephys'),animal,unit,expt,probe,'id',stimStartID,tLims(1),tLims(2),0)
+load(fullfile(physDir,[baseName '_p' num2str(probe) '_MUThreshTrial.mat']),'MUThresh','MUThreshInfo')
+uDat = MUThresh; uInfo = MUThreshInfo;
+clear MUThresh MUThreshInfo
+end
+
+nU = size(uDat,2);
+nConds = size(trialInfo.domval,1);
+clrs = [(0:1/(nConds-1):1)',zeros(nConds,1),fliplr(0:1/(nConds-1):1)'];
+nTrials = length(trialInfo.triallist);
+for u = 1:nU
+    figure
+    rasterX = [];
+    rasterY = [];
+    for t = 1:nTrials
+        curSpks = uDat(u).spktimes{t}/1000;
+        rasterX = [rasterX curSpks];
+        rasterY = [rasterY repmat(t,1,length(curSpks))];
+        [sdfY{u}(t,:),sdfX] = compute_sdf2(curSpks,0.001,[-tLims(1) tLims(2)]);
+    end
+
+    for c = 1:nConds
+        curTrials = find(trialInfo.triallist == c);
+        lbl{c} = [trialInfo.dom{1} ' ' num2str(trialInfo.domval(c))];
+
+        ax1 = subplot(2,1,1);hold on
+        idx = ismember(rasterY,curTrials);
+        plot(rasterX(idx),rasterY(idx),'.','Color',clrs(c,:))
+
+        ax2 = subplot(2,1,2);hold on
+        p(c) = plot(sdfX,mean(sdfY{u}(curTrials,:)+(c*100),'omitnan'),'LineWidth',2,'Color',clrs(c,:));
+        yline(c*100,'k')
+        yline((c*100)+25,'k:')
+        yline((c*100)+50,'k--')
+        yline((c*100)+75,'k:')
+    end
+    legend(p,lbl)
+    linkaxes([ax1 ax2],'x')
+
+end
