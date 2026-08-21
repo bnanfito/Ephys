@@ -62,5 +62,11 @@ for u = 1:nU
     end
     legend(p,lbl)
     linkaxes([ax1 ax2],'x')
-
+    figName = [baseName '_' anaMode num2str(u)];
+%     saveas(gcf,fullfile(physDir,figName),'fig')
+%     saveas(gcf,fullfile(physDir,figName),'svg')
+%     saveas(gcf,fullfile(physDir,figName),'tif')
 end
+
+figure;hold on
+cdfplot([uDat.avgRateCond])

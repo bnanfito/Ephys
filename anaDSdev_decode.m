@@ -48,7 +48,7 @@ for b = 1:nBoot
     T2_oriShuff = [cos(deg2rad(T1_oriShuff)) sin(deg2rad(T1_oriShuff))];
 
     for p = 1:nPC
-        pcs = 1:p;
+        pcs = p;
         mae_dir = nan(1,nFold);
         mae_dirShuff = nan(1,nFold);
         mae_ori = nan(1,nFold);

@@ -1,0 +1,68 @@
+clear all
+% close all
+
+%% Load data
+
+anaMode = 'SU';
+
+% dataFold = '/Volumes/Lab drive/Brandon/data/dataSets/DSdev';
+% dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data/dataSets/DSdev';
+% dataFold = '/Volumes/NielsenHome2/Brandon/data/dataSets/DSdev';
+% dataFold = 'F:\Brandon\data\dataSets\DSdev';
+dataFold = 'Y:\Brandon\data\dataSets\DSdev';
+load(fullfile(dataFold,['DSdev_' anaMode 'dataSet.mat']))
+
+areas = {'V1','PSS'};
+ageGroups = {[29 32],[33 36],[37 max(projTbl.age)]};
+% ageGroups = {[28 32],[29 33],[30 34],[31 35],[32 36],[33 37],[34 38],[35 39],[36 40],[37 41],[38 42],[39 43],[40 44],[41 300]};
+nAG = length(ageGroups);
+nAR = length(areas);
+
+for ar = 1:nAR
+for ag = 1:nAG
+    
+    ageLims = ageGroups{ag};
+    areaIdx = strcmp(projTbl.recSite,areas{ar});
+    ageLimIdx = projTbl.age>=ageLims(1) & projTbl.age<=ageLims(2);
+    dat{ar,ag} = vertcat(projTbl(areaIdx & ageLimIdx,:).sumStats{:});
+
+    %only take units that pass inclusion criteria (screenUnits)
+    dat{ar,ag} = dat{ar,ag}(screenUnits(dat{ar,ag},anaMode),:);
+    %sort units in data table by their preferred direction
+    [~,sortIdx] = sort(dat{ar,ag}.oriPref);
+    dat{ar,ag} = dat{ar,ag}(sortIdx,:);
+    nU(ar,ag) = height(dat{ar,ag});
+
+end
+end
+
+oris = 0:90:270;
+for ar = 2
+for ag = 2
+
+    for u = 1:nU(ar,ag)
+        
+        for o = 1:length(oris)
+            cndIdx = dat{ar,ag}.cndKey{u}(:,strcmp(dat{ar,ag}.paramKey{u},'ori'))==oris(o);
+            trials = dat{ar,ag}.fr(u).trialNum(:,cndIdx);
+            for t = 1:length(trials)
+                spks = dat{ar,ag}.spkTimes{u}(1,dat{ar,ag}.spkTimes{u}(2,:)==trials(t));
+                [sdfTrial(t,:),time] = compute_sdf2(spks,0.01,[-1 1]);
+            end
+            sdfMean(:,o,u) = mean(sdfTrial,'omitnan');
+            sdfSEM(:,o,u) = sem(sdfTrial);
+            clear sdfTrial
+        end
+        
+
+    end
+
+    R = reshape(sdfMean,length(oris)*length(time),nU(ar,ag));
+%     [c,~,~] = pca(rMat{ar,ag}.rMean_norm(:,~sum(R)==0));
+    R = R(:,~sum(R)==0);
+    R = R./max(R);
+%     s = R*c;
+    [~,s,~] = pca(R);
+    figure;plot3(s(:,4),s(:,2),s(:,3))
+end
+end
