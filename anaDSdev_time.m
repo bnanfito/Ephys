@@ -39,30 +39,34 @@ end
 oris = 0:90:270;
 for ar = 1
 for ag = 1
-
     for u = 1:nU(ar,ag)
-        
         for o = 1:length(oris)
             cndIdx = dat{ar,ag}.cndKey{u}(:,strcmp(dat{ar,ag}.paramKey{u},'ori'))==oris(o);
-            trials = dat{ar,ag}.fr(u).trialNum(:,cndIdx);
-            for t = 1:length(trials)
-                spks = dat{ar,ag}.spkTimes{u}(1,dat{ar,ag}.spkTimes{u}(2,:)==trials(t));
-                [sdfTrial(t,:),time] = compute_sdf2(spks,0.001,[-1 1]);
+            if length(dat{ar,ag}.paramKey{u})>1 && sum(contains(dat{ar,ag}.paramKey{u},'size'))>0
+                cndIdx = cndIdx & dat{ar,ag}.cndKey{u}(:,contains(dat{ar,ag}.paramKey{u},'size'))>100;
             end
+            trials = dat{ar,ag}.fr(u).trialNum(:,cndIdx); %index trials of this condition (direction)
+            for t = 1:length(trials) %for each trial of this condition...
+                spks = dat{ar,ag}.spkTimes{u}(1,dat{ar,ag}.spkTimes{u}(2,:)==trials(t)); %find the spikes times for that trial...
+                [sdfTrial(t,:),time] = compute_sdf2(spks,0.001,[-1 1]); %and make a spike density function from those spike times
+            end
+            oLbl_mean(:,o) = repmat(oris(o),length(time),1);
             sdfMean(:,o,u) = mean(sdfTrial,'omitnan');
             sdfSEM(:,o,u) = sem(sdfTrial);
             clear sdfTrial
         end
-        
-
     end
-
-    R = reshape(sdfMean,length(oris)*length(time),nU(ar,ag));
-%     [c,~,~] = pca(rMat{ar,ag}.rMean_norm(:,~sum(R)==0));
-    R = R(:,~sum(R)==0);
-    R = R./max(R);
-%     s = R*c;
-    [~,s,~] = pca(R);
-    figure;plot3(s(:,4),s(:,2),s(:,3))
+    
+    %create matrix R where each column is a unit and each row is an observation (point in time for a particular mean orientation sdf)
+    R = reshape(sdfMean,length(oris)*length(time),nU(ar,ag)); 
+    oLbl_mean = oLbl_mean(:);
+    R = R(:,~sum(R)==0); %remove units that do not spike for these oris
+    R = R./max(R); %normalize the response rate for each unit (between 0 & 1)
+    [c,s,~] = pca(R); %project data onto PCs
+    figure; hold on
+    for o = 1:length(oris)
+        oIdx = oLbl_mean==oris(o);
+        plot3(s(oIdx,4),s(oIdx,2),s(oIdx,3))
+    end
 end
 end
