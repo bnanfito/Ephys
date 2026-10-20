@@ -72,7 +72,11 @@ for u = uInd
     patch([sdf.time fliplr(sdf.time)],[sdf.mean-sdf.sem fliplr(sdf.mean+sdf.sem)],...
            clr,'EdgeColor','none','FaceAlpha',0.2)
     maxY = max(sdf.mean+sdf.sem);
-    plot(x(idx),((y(idx)/max(y(idx)))*(maxY/5))+ceil(maxY),'.','Color',[0.5 0.5 0.5],'MarkerSize',2)
+    rasterX = x(idx); rasterY = ((y(idx)/max(y(idx)))*(maxY/5))+ceil(maxY);
+    plot(rasterX,rasterY,'.','Color',[0.5 0.5 0.5],'MarkerSize',2)
+    yline(min(rasterY),'k')
+    yline(max(rasterY),'k')
+    ylim([0 max(rasterY)])
     box on; axis square
     title(['baseline: ' num2str(baseFR) 'Hz; latency: ' num2str(dat.latency(u)) 's'])
 
