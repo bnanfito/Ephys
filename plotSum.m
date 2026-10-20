@@ -1,6 +1,6 @@
 
 function plotSum(dat)
-plr = 0;
+plr = 1;
 alignTC = 0;
 svePlt = 0;
 
@@ -22,14 +22,29 @@ for u = uInd
             (length(dom)==2 & sum(strcmp(dom,'ori'))==1 & sum(contains(dom,'size'))==1 );
     isCon = (length(dom)==2 && sum(strcmp(dom,'ori'))==1 && sum(strcmp(dom,'contrast'))==1) ||...
             (length(dom)==3 && sum(strcmp(dom,'ori'))==1 && sum(strcmp(dom,'contrast'))==1 && sum(contains(dom,'size'))==1);
-
-    figure;hold on
-    nr = 2; nc = 2;
     predelay = 1;
     stimTime = 1;
     postdelay = 1;
     nTrials = max(dat.fr(u).trialNum(:));
-    nConds = size(dat.cndKey{u},1);
+    conds = dat.condition{1}(strcmp(dat.paramKey{1},'ori'),:);
+    nConds = length(conds);
+
+    if length(dat.paramKey{1})>1
+        rA = dat.response{1}; rA = rA(~isnan(rA));
+        rB = dat.fr(1).bc(:,1:nConds); rB= rB(~isnan(rB));
+        rC = dat.fr(1).bc(:,(1:nConds)+nConds); rC = rC(~isnan(rC));
+        if length(rB)==length(rA) && length(unique(rB==rA))==1 && unique(rB==rA)==1
+            cndsInclude = 1:nConds;
+        elseif length(rC)==length(rA) && length(unique(rC==rA))==1 && unique(rC==rA)==1
+            cndsInclude = (1:nConds)+nConds;
+        end
+    else
+        cndsInclude = 1:nConds;
+    end
+    trialsInclude = dat.fr(1).trialNum(:,cndsInclude);
+
+    figure;hold on
+    nr = 2; nc = 2;
     if strcmp(dat.area{u},'PSS')
         clr = 'r';
     elseif strcmp(dat.area{u},'V1')
@@ -40,6 +55,8 @@ for u = uInd
 
     x = dat.spkTimes{u}(1,:);
     y = dat.spkTimes{u}(2,:);
+    x = x(ismember(y,trialsInclude(:)));
+    y = y(ismember(y,trialsInclude(:)));
 
     %SDF + Raster
     subplot(1,2,1);hold on
@@ -47,7 +64,7 @@ for u = uInd
     if ~isnan(dat.latency(u))
         xline(dat.latency(u),[clr '--'])
     end
-    baseFR = mean(dat.fr(u).base,'all','omitnan');
+    baseFR = mean(dat.fr(u).base(:,cndsInclude),'all','omitnan');
     yline(baseFR,'k--')
     idx = x>-1 & x<2;
     sdf = compute_sdf(dat(u,:));
@@ -118,7 +135,6 @@ for u = uInd
     ttl = [dat.exptName{u} ' ' dat.area{u} ' ' dat.uInfo{u} ' ' num2str(dat.uID(u))];
 
     %TUNING CURVE
-    subplot(1,2,2);hold on; box on, axis square
     if isOri
         x = dat.condition{u}(strcmp(dom,'ori'),:);
         y = dat.response{u};
@@ -163,6 +179,7 @@ for u = uInd
             polarplot(deg2rad([0 dat.meanVec{u}.angDir]),[0 dat.meanVec{u}.magDir],clr,'LineWidth',2)
             polarplot(deg2rad([0 dat.meanVec{u}.angDir]),[0 dat.meanVec{u}.magDir*dat.ldr(u)],'g','LineWidth',2)
         else
+            subplot(1,2,2);hold on; box on, axis square
             if alignTC == 1
                 [x,meanY,i] = alignDirTuning(x,meanY);
                 sem = sem(i);
