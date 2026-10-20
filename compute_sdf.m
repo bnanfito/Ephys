@@ -7,15 +7,16 @@ if length(data.paramKey{1})>1
     rA = data.response{1}; rA = rA(~isnan(rA));
     rB = data.fr(1).bc(:,1:nConds); rB= rB(~isnan(rB));
     rC = data.fr(1).bc(:,(1:nConds)+nConds); rC = rC(~isnan(rC));
-    if length(rB)==length(rA) && unique(rB==rA)==1
+    if length(rB)==length(rA) && length(unique(rB==rA))==1 && unique(rB==rA)==1
         cndsInclude = 1:nConds;
-    elseif length(rC)==length(rA) && unique(rC==rA)==1
+    elseif length(rC)==length(rA) && length(unique(rC==rA))==1 && unique(rC==rA)==1
         cndsInclude = (1:nConds)+nConds;
     end
 else
     cndsInclude = 1:nConds;
 end
-nReps = 5;
+% nReps = 5;
+nReps = size(data.fr(1).trialNum,1);
 trialKey = data.fr(1).trialNum(1:nReps,cndsInclude); trialKey = trialKey(:);
 condKey = data.fr(1).trialCond(1:nReps,cndsInclude); condKey = condKey(:);
 repKey = repmat((1:nReps)',1,nConds); repKey = repKey(:);
