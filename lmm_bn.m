@@ -2,8 +2,8 @@
 clear
 close all
 
-% dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
-dataFold = 'Y:\Brandon\data';
+dataFold = '/Users/brandonnanfito/Documents/NielsenLab/data';
+% dataFold = 'Y:\Brandon\data';
 proj = {'Train_BiDir','Train_V1Cool','Train_Static'};
 projStyl = {'-','-','-'};
 projShap = {'o','v','square'};
@@ -34,7 +34,7 @@ for p = 1:length(proj)
     d{p}.age = uAge;
     d{p}.group = groupId;
     d{p} = d{p}(~ismember(d{p}.animal,exclude),:);
-    d{p} = d{p}(screenUnits(d{p},'MU'),:);
+    d{p} = d{p}(screenUnits(d{p},'MU','ranksum',0.05,0),:);
     clear data projectTbl aniId uAge manipFlag
 end
 
