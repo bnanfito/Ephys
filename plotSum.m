@@ -26,13 +26,13 @@ for u = uInd
     stimTime = 1;
     postdelay = 1;
     nTrials = max(dat.fr(u).trialNum(:));
-    conds = dat.condition{1}(strcmp(dat.paramKey{1},'ori'),:);
+    conds = dat.condition{u}(strcmp(dat.paramKey{u},'ori'),:);
     nConds = length(conds);
 
-    if length(dat.paramKey{1})>1
-        rA = dat.response{1}; rA = rA(~isnan(rA));
-        rB = dat.fr(1).bc(:,1:nConds); rB= rB(~isnan(rB));
-        rC = dat.fr(1).bc(:,(1:nConds)+nConds); rC = rC(~isnan(rC));
+    if length(dat.paramKey{u})>1
+        rA = dat.response{u}; rA = rA(~isnan(rA));
+        rB = dat.fr(u).bc(:,1:nConds); rB= rB(~isnan(rB));
+        rC = dat.fr(u).bc(:,(1:nConds)+nConds); rC = rC(~isnan(rC));
         if length(rB)==length(rA) && length(unique(rB==rA))==1 && unique(rB==rA)==1
             cndsInclude = 1:nConds;
         elseif length(rC)==length(rA) && length(unique(rC==rA))==1 && unique(rC==rA)==1
@@ -41,7 +41,7 @@ for u = uInd
     else
         cndsInclude = 1:nConds;
     end
-    trialsInclude = dat.fr(1).trialNum(:,cndsInclude);
+    trialsInclude = dat.fr(u).trialNum(:,cndsInclude);
 
     figure;hold on
     nr = 2; nc = 2;
@@ -143,54 +143,62 @@ for u = uInd
         x = dat.condition{u}(strcmp(dom,'ori'),:);
         y = dat.response{u};
         meanY = mean(y,'omitnan');
+        semY = sem(y);
         x_pref = dat.oriPref(u);
         y_pref = dat.rPref(u);
-        sem = std(y,'omitnan')/sqrt(size(y,1));
         if plr == 1
 
-%             %ticks
-%             maxR = max(meanY+sem);
-%             if maxR<=15
-%                 tickSpace = 5;
-%             elseif maxR>15
-%                 tickSpace = 10;
-%             end
-%             rTicks = 0:tickSpace:ceil(maxR/tickSpace)*tickSpace;
-%             tTicks = 0:1:360;
-%             for r = 1:length(rTicks)
-%                 [xT,yT] = pol2cart(deg2rad(tTicks),repmat(rTicks(r),1,length(tTicks)));
-%                 plot(xT,yT,'-','Color',[0.5 0.5 0.5])
-%             end
-%             tTicks = 0:45:315;
-%             for t = 1:length(tTicks)
-%                 [xT,yT] = pol2cart(deg2rad(tTicks(t)),max(rTicks));
-%                 plot([0 xT],[0 yT],'-','Color',[0.5 0.5 0.5])
-%             end
-% 
-%             [xM,yM] = pol2cart(deg2rad(x),meanY);
-%             plot([xM xM(1)],[yM yM(1)],'Color',clr)
-% 
-%             [xP,yP] = pol2cart(deg2rad(x),y);
-%             plot(xP,yP,'k.','MarkerFaceColor','k')
+            subplot(1,2,2);hold on
+            %ticks
+            maxR = max(y,[],'all');
+            if maxR<=15
+                tickSpace = 5;
+            elseif maxR>15
+                tickSpace = 20;
+            end
+            rTicks = 0:tickSpace:ceil(maxR/tickSpace)*tickSpace;
+            tTicks = 0:1:360;
+            for r = 1:length(rTicks)
+                [xT,yT] = pol2cart(deg2rad(tTicks),repmat(rTicks(r),1,length(tTicks)));
+                plot(xT,yT,'-','Color',[0.5 0.5 0.5])
+            end
+            tTicks = 0:45:315;
+            for t = 1:length(tTicks)
+                [xT,yT] = pol2cart(deg2rad(tTicks(t)),max(rTicks));
+                plot([0 xT],[0 yT],'-','Color',[0.5 0.5 0.5])
+            end
 
-            subplot(1,2,2,polaraxes);hold on
-            polarplot(deg2rad(x),y,'k.')
-            polarplot(deg2rad([x x(1)]),mean([y y(:,1)],'omitnan') ,[clr '-'],'LineWidth',2)
-            polarplot(deg2rad([x x(1)]),mean([y y(:,1)],'omitnan')+[sem sem(1)],[clr ':'],'LineWidth',1)
-            polarplot(deg2rad([x x(1)]),mean([y y(:,1)],'omitnan')-[sem sem(1)],[clr ':'],'LineWidth',1)
-    %         polarplot(repmat(deg2rad(x),2,1),mean(y,'omitnan')+([1;-1]*sem),clr,'LineWidth',2)
-            polarplot(deg2rad(dat.oriPref(u)),dat.rPref(u),'k*')
-            polarplot(deg2rad([0 dat.meanVec{u}.angDir]),[0 dat.meanVec{u}.magDir],clr,'LineWidth',2)
-            polarplot(deg2rad([0 dat.meanVec{u}.angDir]),[0 dat.meanVec{u}.magDir*dat.ldr(u)],'g','LineWidth',2)
+            [xE,yE] = pol2cart(deg2rad([[x x(1)] fliplr([x x(1)])]),[[meanY meanY(1)]+[semY semY(1)] fliplr([meanY meanY(1)]-[semY semY(1)])]);
+            patch(xE,yE,clr,'EdgeColor','none','FaceAlpha',0.2)
+
+            [xM,yM] = pol2cart(deg2rad(x),meanY);
+            plot([xM xM(1)],[yM yM(1)],'Color',clr)
+
+            [xP,yP] = pol2cart(deg2rad(x),y);
+            plot(xP,yP,'k.','MarkerFaceColor','k')
+            axis square
+            ax = gca;
+            ax.XAxisLocation = 'origin';
+            ax.YAxisLocation = 'origin';
+
+    %         subplot(1,2,2,polaraxes);hold on
+    %         polarplot(deg2rad(x),y,'k.')
+    %         polarplot(deg2rad([x x(1)]),mean([y y(:,1)],'omitnan') ,[clr '-'],'LineWidth',2)
+    %         polarplot(deg2rad([x x(1)]),mean([y y(:,1)],'omitnan')+[semY semY(1)],[clr ':'],'LineWidth',1)
+    %         polarplot(deg2rad([x x(1)]),mean([y y(:,1)],'omitnan')-[semY semY(1)],[clr ':'],'LineWidth',1)
+    % %         polarplot(repmat(deg2rad(x),2,1),mean(y,'omitnan')+([1;-1]*sem),clr,'LineWidth',2)
+    %         polarplot(deg2rad(dat.oriPref(u)),dat.rPref(u),'k*')
+    %         polarplot(deg2rad([0 dat.meanVec{u}.angDir]),[0 dat.meanVec{u}.magDir],clr,'LineWidth',2)
+    %         polarplot(deg2rad([0 dat.meanVec{u}.angDir]),[0 dat.meanVec{u}.magDir*dat.ldr(u)],'g','LineWidth',2)
         else
             subplot(1,2,2);hold on; box on, axis square
             if alignTC == 1
                 [x,meanY,i] = alignDirTuning(x,meanY);
-                sem = sem(i);
+                semY = semY(i);
                 y = y(:,i);
             end
             plot(x,meanY,[clr '-'],'Marker','square','MarkerSize',7,'MarkerFaceColor',clr,'LineWidth',2)
-            plot(repmat(x,2,1),meanY+([1;-1]*sem),clr,'LineWidth',2)
+            plot(repmat(x,2,1),meanY+([1;-1]*semY),clr,'LineWidth',2)
             plot(x,y,'k.')
             if alignTC == 1
                 xlim([-180 180])
@@ -210,9 +218,9 @@ for u = uInd
         x = dat.condition{u}(strcmp(dom,'contrast'),:,dat.oriPref(u));
         y = dat.response{u}(:,:,dat.oriPref(u));
         meanY = mean(y,'omitnan');
-        sem = std(y,'omitnan')/sqrt(size(y,1));
+        semY = std(y,'omitnan')/sqrt(size(y,1));
         plot(x,meanY,[clr '-'],'Marker','square','MarkerSize',7,'MarkerFaceColor',clr,'LineWidth',2)
-        plot(repmat(x,2,1),meanY+([1;-1]*sem),clr,'LineWidth',2)
+        plot(repmat(x,2,1),meanY+([1;-1]*semY),clr,'LineWidth',2)
     end
     
     sgtitle(ttl)
