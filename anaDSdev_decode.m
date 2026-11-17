@@ -60,45 +60,55 @@ for b = 1:nBoot
             trainIdx = training(cv,f);
             testIdx = test(cv,f);
             [cof,scr_train,~,~,~,mu] = pca(R(trainIdx,:));
-            scr_test = ((R(testIdx,:)-mu)*cof(:,pcs));
+            scr_test = ((R(testIdx,:)-mu)*cof);
 
             B_dir = scr_train(:,pcs)\T2_dir(trainIdx,:);
-            T2pred_dir = scr_test*B_dir;
+            T2pred_dir = scr_test(:,pcs)*B_dir;
             T1pred_dir = T2toT1(T2pred_dir);
             err_dir = calcErr(T1_dir(testIdx),T1pred_dir);
             mae_dir(f) = mean(abs(err_dir));
 
             B_dirShuff = scr_train(:,pcs)\T2_dirShuff(trainIdx,:);
-            T2pred_dirShuff = scr_test*B_dirShuff;
+            T2pred_dirShuff = scr_test(:,pcs)*B_dirShuff;
             T1pred_dirShuff = T2toT1(T2pred_dirShuff);
             err_dirShuff = calcErr(T1_dirShuff(testIdx),T1pred_dirShuff);
             mae_dirShuff(f) = mean(abs(err_dirShuff));
     
             B_ori = scr_train(:,pcs)\T2_ori(trainIdx,:);
-            T2pred_ori = scr_test*B_ori;
+            T2pred_ori = scr_test(:,pcs)*B_ori;
             T1pred_ori = T2toT1(T2pred_ori);
             err_ori = calcErr(2*T1_ori(testIdx),T1pred_ori)/2;
             mae_ori(f) = mean(abs(err_ori));
 
             B_oriShuff = scr_train(:,pcs)\T2_oriShuff(trainIdx,:);
-            T2pred_oriShuff = scr_test*B_oriShuff;
+            T2pred_oriShuff = scr_test(:,pcs)*B_oriShuff;
             T1pred_oriShuff = T2toT1(T2pred_oriShuff);
             err_oriShuff = calcErr(2*T1_oriShuff(testIdx),T1pred_oriShuff)/2;
             mae_oriShuff(f) = mean(abs(err_oriShuff));
         
-%             if b==1 && p==1 && f==1
-%                 figure
-%                 plot(T2_dir(:,2),T2_dir(:,1),'ko');hold on
-%                 plot([T2_dir(testIdx,2) T2pred_dir(:,2)]',[T2_dir(testIdx,1) T2pred_dir(:,1)]','r-')
-%                 plot(T2pred_dir(:,2),T2pred_dir(:,1),'r*')
-%                 axis square
-%                 
-%                 figure
-%                 plot(T2_ori(:,2),T2_ori(:,1),'ko');hold on
-%                 plot(T2pred_ori(:,2),T2pred_ori(:,1),'r*')
-%                 plot([T2_ori(testIdx,2) T2pred_ori(:,2)]',[T2_ori(testIdx,1) T2pred_ori(:,1)]','r-')
-%                 axis square
-%             end
+            if b==1 && p==1 && ar==2 && ag==3
+                
+                figure; hold on
+                plot3(scr_train(:,1),scr_train(:,2),scr_train(:,3),'ko')
+                plot3(scr_test(:,1),scr_test(:,2),scr_test(:,3),'ro')
+
+                plot()
+                
+                figure
+                plot(T2_dir(:,2),T2_dir(:,1),'ko');hold on
+                plot([T2_dir(testIdx,2) T2pred_dir(:,2)]',[T2_dir(testIdx,1) T2pred_dir(:,1)]','r-')
+                plot(T2pred_dir(:,2),T2pred_dir(:,1),'r*')
+                axis square
+                
+                figure
+                plot(T2_ori(:,2),T2_ori(:,1),'ko');hold on
+                plot(T2pred_ori(:,2),T2pred_ori(:,1),'r*')
+                plot([T2_ori(testIdx,2) T2pred_ori(:,2)]',[T2_ori(testIdx,1) T2pred_ori(:,1)]','r-')
+                axis square
+
+                figure
+                imagesc(cof)
+            end
 
         end
 
