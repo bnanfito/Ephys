@@ -42,6 +42,13 @@ for b = 1:nBoot
     T1_ori = mod(T1_dir,180);
     T1_oriShuff = T1_ori(randperm(length(T1_ori),length(T1_ori)));
 
+    dirs = unique(T1_dir);
+    oris = unique(T1_ori);
+    Tclrs_dir = hsv(length(dirs));
+    Tclrs_ori = repmat(hsv(length(oris)),2,1);
+%     [~,Tidx] = ismember(T1_dir,Ts);
+%     Tclrs = Tclrs(Tidx,:);
+
     T2_dir = [cos(deg2rad(T1_dir)) sin(deg2rad(T1_dir))]; %
     T2_dirShuff = [cos(deg2rad(T1_dirShuff)) sin(deg2rad(T1_dirShuff))];
     T2_ori = [cos(2*deg2rad(T1_ori)) sin(2*deg2rad(T1_ori))]; % multiply by 2 so that modulo 180 maps onto a unit circle instead of a semi-circle
@@ -86,13 +93,15 @@ for b = 1:nBoot
             err_oriShuff = calcErr(2*T1_oriShuff(testIdx),T1pred_oriShuff)/2;
             mae_oriShuff(f) = mean(abs(err_oriShuff));
         
-            if b==1 && p==1 && ar==2 && ag==3
+            if b==1 && p==1 && ar==1 && ag==1
                 
                 figure; hold on
-                plot3(scr_train(:,1),scr_train(:,2),scr_train(:,3),'ko')
-                plot3(scr_test(:,1),scr_test(:,2),scr_test(:,3),'ro')
-
-                plot()
+                for t = 1:length(dirs)
+                    idx = T1_dir(trainIdx)==dirs(t);
+                    plot3(scr_train(idx,1),scr_train(idx,2),scr_train(idx,3),'o','MarkerEdgeColor',Tclrs_ori(t,:),'MarkerFaceColor',Tclrs_ori(t,:))
+                    idx = T1_dir(testIdx) ==dirs(t);
+                    plot3(scr_test(idx,1),scr_test(idx,2),scr_test(idx,3),'o','MarkerEdgeColor',Tclrs_ori(t,:))
+                end
                 
                 figure
                 plot(T2_dir(:,2),T2_dir(:,1),'ko');hold on
