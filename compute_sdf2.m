@@ -1,7 +1,6 @@
-function [sdf,time] = compute_sdf2(spkTimes,dt,tLims)
+function [sdf,time] = compute_sdf2(spkTimes,dt,time)
 
-time = tLims(1):dt:tLims(2);
-w = 0.1;
+w = dt/10;
 g = zeros(1,length(time));
 for s = 1:length(spkTimes)
     g(s,:) = normpdf(time,spkTimes(s),w)*dt;
